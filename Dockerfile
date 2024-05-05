@@ -8,6 +8,8 @@ RUN apt-get update && \
         python3-dev \
         python3-setuptools \
         tesseract-ocr \
+        tesseract-ocr-eng \
+        tesseract-ocr-chi-tra \
         libgl1 \
         make \
         gcc \
