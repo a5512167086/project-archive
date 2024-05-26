@@ -25,12 +25,20 @@ def extract_text(page: int = Form(), file: UploadFile = File()):
             )
 
         # Remove all space and change fullwidth punctuation marks to halfwidth punctuation marks
-        current_article = answer[page - 1].replace("，", ",").replace(" ", "").replace(
-            "", "").replace("（", "(").replace("）", ")").replace("：", ":")
+        current_article = (
+            answer[page - 1]
+            .replace("，", ",")
+            .replace(" ", "")
+            .replace("", "")
+            .replace("（", "(")
+            .replace("）", ")")
+            .replace("：", ":")
+        )
 
         # Split to array by punctuation marks
         text_segments = re.split(
-            r'[;, ；, 。, \,, (, ), :, \s, 【, 】, /, ., 、]', current_article)
+            r"[;, ；, 。, \,, (, ), :, \s, 【, 】, /, ., 、]", current_article
+        )
         text_segments = list(filter(None, text_segments))
 
         # Remove all space
@@ -45,15 +53,37 @@ def extract_text(page: int = Form(), file: UploadFile = File()):
         for text_segment in text_segments:
             isMatch = text_segment in image_text
             if isMatch:
-                correct_time = correct_time+1
-            result.append({"text_segment": text_segment,
-                          "is_match_ocr_text": isMatch})
+                correct_time = correct_time + 1
+            result.append({"text_segment": text_segment, "is_match_ocr_text": isMatch})
 
         accuracy = 100 * (correct_time / len(text_segments))
 
-        return {"accuracy": "%.2f" % accuracy + "%", "result": result}
+        return {
+            "accuracy": "%.2f" % accuracy + "%",
+            "result": result,
+            "original_text": current_article,
+            "ocr_text": image_text,
+        }
     except Exception:
-        raise HTTPException(status_code=500, detail='Something went wrong')
+        raise HTTPException(status_code=500, detail="Something went wrong")
+    finally:
+        file.file.close()
+        image.close()
+
+
+@app.post("/only_extract_text")
+def extract_text(file: UploadFile = File()):
+    try:
+        image = Image.open(file.file)
+
+        # Remove all space
+        image_text = get_image_text(image).replace(" ", "")
+
+        return {
+            "ocr_text": image_text,
+        }
+    except Exception:
+        raise HTTPException(status_code=500, detail="Something went wrong")
     finally:
         file.file.close()
         image.close()
