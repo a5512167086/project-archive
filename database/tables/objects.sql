@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS objects (
     object_id SMALLINT GENERATED ALWAYS AS IDENTITY,
+    entity_id SMALLINT,
     chinese_name VARCHAR(512),
     chinese_description VARCHAR(4000),
     english_name VARCHAR(512),

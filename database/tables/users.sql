@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(100) NOT NULL,
     status SMALLINT,
     login_count INT DEFAULT 0 NOT NULL,
-    LastLoginDT TIMESTAMP,
+    last_login_datetime TIMESTAMP,
     login_error_count SMALLINT DEFAULT 0 NOT NULL,
     email_verify_code VARCHAR(300),
     class_id INT,

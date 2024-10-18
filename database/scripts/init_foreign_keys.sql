@@ -61,6 +61,15 @@ IF NOT EXISTS (
 ALTER TABLE objects
 ADD CONSTRAINT fk_objects_owner_id FOREIGN KEY (owner_id) REFERENCES users(user_id);
 END IF;
+-- Add fk_objects_owner_id if it doesn't exist
+IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'fk_objects_entity_id'
+) THEN
+ALTER TABLE objects
+ADD CONSTRAINT fk_objects_entity_id FOREIGN KEY (entity_id) REFERENCES entities(entity_id);
+END IF;
 -- Add fk_object_relations_first_object_id if it doesn't exist
 IF NOT EXISTS (
     SELECT 1

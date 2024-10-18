@@ -1,20 +1,17 @@
-CREATE
-OR REPLACE VIEW vs_SubClass AS
-SELECT
-    i.PCID AS CID,
-    i.Rank,
-    c.CID AS CCID,
-    c.Type,
-    c.CName,
-    c.CDes,
-    c.Since,
-    c.LastModifiedDT,
-    c.nObject,
-    c.nClick,
-    c.Keywords,
-    c.OwnerMID,
-    c.bHided,
-    c.bDel
-FROM
-    Inheritance i
-    JOIN Class c ON i.CCID = c.CID;
+CREATE OR REPLACE VIEW vs_sub_class AS
+SELECT i.parent_class_id AS class_id,
+    i.rank,
+    c.class_id AS child_class_id,
+    c.entity_id,
+    c.chinese_name,
+    c.chinese_description,
+    c.created_at,
+    c.updated_at,
+    c.subobject_count,
+    c.click_count,
+    c.keywords,
+    c.owner_id,
+    c.is_hided,
+    c.is_deleted
+FROM inheritances i
+    JOIN classes c ON i.child_class_id = c.class_id;
