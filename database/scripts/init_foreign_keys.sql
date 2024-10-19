@@ -32,7 +32,7 @@ IF NOT EXISTS (
     WHERE conname = 'fk_classes_entity_id'
 ) THEN
 ALTER TABLE classes
-ADD CONSTRAINT fk_classes_entity_id FOREIGN KEY (class_rank) REFERENCES entities(entity_id);
+ADD CONSTRAINT fk_classes_entity_id FOREIGN KEY (entity_id) REFERENCES entities(entity_id);
 END IF;
 -- Add fk_inheritances_child_class_id if it doesn't exist
 IF NOT EXISTS (

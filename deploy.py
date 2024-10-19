@@ -99,12 +99,32 @@ try:
         except Exception as e:
             print(f"Error occurred while executing {file}: {e}")
             sys.exit(1)  # 結束腳本，因為出錯了
-            
-     # 指定SQL檔案的目錄
+
+    # 指定SQL檔案的目錄
     store_procedures_folder = "./database/store_procedures/"
 
     # 使用 glob 來取得所有 SQL 檔案
     sql_files = glob.glob(f"{store_procedures_folder}*.sql")
+
+    # 執行每個 SQL 檔案
+    for file in sql_files:
+        print(f"Running SQL file: {file} ...")
+        try:
+            with open(file, "r", encoding="utf-8") as sql_file:
+                sql_commands = sql_file.read()
+                cursor.execute(sql.SQL(sql_commands))
+            print(f"Successfully executed {file}")
+        except Exception as e:
+            print(f"Error occurred while executing {file}: {e}")
+            sys.exit(1)  # 結束腳本，因為出錯了
+
+    print("All SQL files executed successfully.")
+
+    # 指定SQL檔案的目錄
+    tuples_folder = "./database/tuples/"
+
+    # 使用 glob 來取得所有 SQL 檔案
+    sql_files = glob.glob(f"{tuples_folder}*.sql")
 
     # 執行每個 SQL 檔案
     for file in sql_files:
