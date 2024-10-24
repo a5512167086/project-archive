@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS class_object_relations (
-    class_id INT NOT NULL,
-    object_id INT NOT NULL,
+    class_id SMALLINT NOT NULL,
+    object_id SMALLINT NOT NULL,
     rank SMALLINT,
     membership_grade SMALLINT,
     relation_description VARCHAR(900),

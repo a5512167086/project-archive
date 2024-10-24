@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS classes (
     hierarchy_level SMALLINT,
     click_count INT DEFAULT 0 NOT NULL,
     keywords VARCHAR(512) DEFAULT '',
-    owner_id INT DEFAULT NULL,
+    owner_id SMALLINT DEFAULT NULL,
     is_hided BOOLEAN DEFAULT FALSE,
     is_deleted BOOLEAN DEFAULT FALSE,
     PRIMARY KEY (class_id),

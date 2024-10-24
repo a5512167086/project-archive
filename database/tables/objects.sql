@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS objects (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     extra_datetime TIMESTAMP,
-    owner_id INT,
+    owner_id SMALLINT,
     click_count INT DEFAULT 0 NOT NULL,
     outlink_count INT,
     inlink_count INT,

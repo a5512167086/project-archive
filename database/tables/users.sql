@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS users (
-    user_id INT GENERATED ALWAYS AS IDENTITY,
+    user_id SMALLINT GENERATED ALWAYS AS IDENTITY,
     account VARCHAR(100) NOT NULL,
     password VARCHAR(300),
     is_valid BOOLEAN,
@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
     last_login_datetime TIMESTAMP,
     login_error_count SMALLINT DEFAULT 0 NOT NULL,
     email_verify_code VARCHAR(300),
-    class_id INT,
+    class_id SMALLINT,
     gender BOOLEAN,
     birthday TIMESTAMP,
     address VARCHAR(200),
