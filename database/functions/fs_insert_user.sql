@@ -11,29 +11,20 @@ DECLARE new_user_id INT;
 new_object_id INT;
 error_message TEXT;
 error_context TEXT;
-BEGIN -- Check if username already exists
-IF (
-    SELECT COUNT(*)
-    FROM users
-    WHERE TRIM(username) = TRIM(_username)
-) > 0 THEN RAISE EXCEPTION 'Error: Username已存在，不可再新增';
-END IF;
--- Check if email already exists
+BEGIN -- Check if email already exists
 IF (
     SELECT COUNT(*)
     FROM users
     WHERE TRIM(email) = TRIM(_email)
 ) > 0 THEN RAISE EXCEPTION 'Error: EMail已存在，不可再新增';
 END IF;
--- Insert new object into objects table (assuming the foreign key is linked to an objects table)
+-- Insert new object into objects table
 INSERT INTO objects (entity_id, chinese_name)
 VALUES (2, _username)
 RETURNING object_id INTO new_object_id;
 -- Insert new user and return the new user id
 INSERT INTO users (
         user_id,
-        -- Assuming user_id is a foreign key referencing objects table
-        username,
         password,
         is_valid,
         status,
@@ -45,8 +36,6 @@ INSERT INTO users (
     )
 VALUES (
         new_object_id,
-        -- Set the foreign key user_id to the new object id
-        _username,
         _password,
         TRUE,
         1,

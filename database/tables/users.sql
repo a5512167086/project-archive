@@ -1,6 +1,5 @@
 CREATE TABLE IF NOT EXISTS users (
     user_id SMALLINT,
-    username VARCHAR(100) NOT NULL,
     password VARCHAR(300),
     is_valid BOOLEAN,
     email VARCHAR(100) NOT NULL,
@@ -16,7 +15,6 @@ CREATE TABLE IF NOT EXISTS users (
     phone_number VARCHAR(25),
     is_send_email BOOLEAN,
     PRIMARY KEY (user_id),
-    CONSTRAINT uq_users_username UNIQUE (username),
     CONSTRAINT uq_users_email UNIQUE (EMail)
 );
-CREATE INDEX IF NOT EXISTS ix_users_username ON users (username);
+CREATE INDEX IF NOT EXISTS ix_users_email ON users (email);
