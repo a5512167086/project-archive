@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS classes (
-    class_id SMALLINT GENERATED ALWAYS AS IDENTITY,
-    entity_id SMALLINT,
+    class_id INT GENERATED ALWAYS AS IDENTITY,
+    entity_id INT,
     chinese_name VARCHAR(256) NOT NULL,
     chinese_description VARCHAR(4000),
     english_name VARCHAR(256),
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS classes (
     hierarchy_level SMALLINT,
     click_count INT DEFAULT 0 NOT NULL,
     keywords VARCHAR(512) DEFAULT '',
-    owner_id SMALLINT DEFAULT NULL,
+    owner_id INT DEFAULT NULL,
     is_hided BOOLEAN DEFAULT FALSE,
     is_deleted BOOLEAN DEFAULT FALSE,
     PRIMARY KEY (class_id),

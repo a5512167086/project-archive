@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS objects (
-    object_id SMALLINT GENERATED ALWAYS AS IDENTITY,
-    entity_id SMALLINT,
+    object_id INT GENERATED ALWAYS AS IDENTITY,
+    entity_id INT,
     chinese_name VARCHAR(512),
     chinese_description VARCHAR(4000),
     english_name VARCHAR(512),
@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS objects (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     extra_datetime TIMESTAMP,
-    owner_id SMALLINT,
+    owner_id INT,
     click_count INT DEFAULT 0 NOT NULL,
     outlink_count INT,
     inlink_count INT,
