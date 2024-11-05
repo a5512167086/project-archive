@@ -1,13 +1,9 @@
 CREATE OR REPLACE FUNCTION fs_insert_object(
         _class_id INT,
-        -- c.CID
         _entity_id INT,
-        -- e.EID
         _chinese_name TEXT,
-        -- o.CName
         _chinese_description TEXT,
-        -- o.CDes
-        _owner_id INT -- m.MID
+        _owner_id UUID
     ) RETURNS INT AS $$
 DECLARE new_oid INT;
 error_message TEXT;

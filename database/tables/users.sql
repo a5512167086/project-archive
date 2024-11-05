@@ -1,7 +1,9 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS users (
-    user_id INT,
+    user_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    username VARCHAR(100),
     password VARCHAR(300),
-    is_valid BOOLEAN,
+    is_valid BOOLEAN DEFAULT FALSE,
     email VARCHAR(100) NOT NULL,
     status SMALLINT,
     login_count INT DEFAULT 0 NOT NULL,
@@ -9,12 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
     login_error_count SMALLINT DEFAULT 0 NOT NULL,
     email_verify_code VARCHAR(300),
     class_id INT,
-    gender BOOLEAN,
-    birthday TIMESTAMP,
-    address VARCHAR(200),
-    phone_number VARCHAR(25),
-    is_send_email BOOLEAN,
-    PRIMARY KEY (user_id),
-    CONSTRAINT uq_users_email UNIQUE (EMail)
+    is_send_email BOOLEAN DEFAULT FALSE,
+    CONSTRAINT uq_users_email UNIQUE (email)
 );
 CREATE INDEX IF NOT EXISTS ix_users_email ON users (email);

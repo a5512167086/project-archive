@@ -3,7 +3,7 @@ CREATE OR REPLACE FUNCTION fs_insert_class(
         _entity_id INT,
         _chinese_name VARCHAR(256),
         _chinese_description VARCHAR(4000),
-        _owner_id INT -- classes.owner_id
+        _owner_id UUID
     ) RETURNS INT AS $$
 DECLARE new_class_id INT;
 parent_class_id_local INT;

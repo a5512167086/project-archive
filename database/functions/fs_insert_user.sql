@@ -1,14 +1,9 @@
 CREATE OR REPLACE FUNCTION fs_insert_user(
         _username TEXT,
-        _password TEXT,
         _email TEXT,
-        _gender BOOLEAN,
-        _birthday DATE,
-        _phone_number VARCHAR(100),
-        _address VARCHAR(256)
-    ) RETURNS INT AS $$
-DECLARE new_user_id INT;
-new_object_id INT;
+         _password TEXT
+    ) RETURNS UUID AS $$
+DECLARE new_user_id UUID;
 error_message TEXT;
 error_context TEXT;
 BEGIN -- Check if email already exists
@@ -18,32 +13,20 @@ IF (
     WHERE TRIM(email) = TRIM(_email)
 ) > 0 THEN RAISE EXCEPTION 'Error: EMail已存在，不可再新增';
 END IF;
--- Insert new object into objects table
-INSERT INTO objects (entity_id, chinese_name)
-VALUES (2, _username)
-RETURNING object_id INTO new_object_id;
--- Insert new user and return the new user id
+-- Insert new user and return the new user ID
 INSERT INTO users (
-        user_id,
+        username,
         password,
         is_valid,
         status,
-        email,
-        gender,
-        birthday,
-        address,
-        phone_number
+        email
     )
 VALUES (
-        new_object_id,
+        _username,
         _password,
         TRUE,
         1,
-        _email,
-        _gender,
-        _birthday,
-        _address,
-        _phone_number
+        _email
     )
 RETURNING user_id INTO new_user_id;
 -- Return the newly created user ID
