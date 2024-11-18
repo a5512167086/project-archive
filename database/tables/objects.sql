@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS objects (
+CREATE TABLE IF NOT EXISTS objects(
     object_id INT GENERATED ALWAYS AS IDENTITY,
     entity_id INT,
     chinese_name VARCHAR(512),
@@ -16,4 +16,6 @@ CREATE TABLE IF NOT EXISTS objects (
     is_deleted BOOLEAN DEFAULT FALSE,
     PRIMARY KEY (object_id)
 );
-CREATE INDEX IF NOT EXISTS ix_objects_chinese_name ON objects (chinese_name);
+
+CREATE INDEX IF NOT EXISTS ix_objects_chinese_name ON objects(chinese_name);
+

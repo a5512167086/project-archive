@@ -1,5 +1,6 @@
 CREATE OR REPLACE VIEW vs_sub_class AS
-SELECT i.parent_class_id AS class_id,
+SELECT
+    i.parent_class_id AS class_id,
     i.rank,
     c.class_id AS child_class_id,
     c.entity_id,
@@ -13,5 +14,7 @@ SELECT i.parent_class_id AS class_id,
     c.owner_id,
     c.is_hided,
     c.is_deleted
-FROM inheritances i
+FROM
+    inheritances i
     JOIN classes c ON i.child_class_id = c.class_id;
+

@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS classes (
+CREATE TABLE IF NOT EXISTS classes(
     class_id INT GENERATED ALWAYS AS IDENTITY,
     entity_id INT,
     chinese_name VARCHAR(256) NOT NULL,
@@ -22,3 +22,4 @@ CREATE TABLE IF NOT EXISTS classes (
     CONSTRAINT uq_classes_id_path UNIQUE (id_path),
     CONSTRAINT uq_classes_name_path UNIQUE (name_path)
 );
+

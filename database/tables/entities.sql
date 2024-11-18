@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS entities (
+CREATE TABLE IF NOT EXISTS entities(
     entity_id INT GENERATED ALWAYS AS IDENTITY,
     chinese_name VARCHAR(50) NOT NULL,
     english_name VARCHAR(50) NOT NULL,
@@ -7,3 +7,4 @@ CREATE TABLE IF NOT EXISTS entities (
     is_deletable BOOLEAN DEFAULT FALSE,
     PRIMARY KEY (entity_id)
 );
+

@@ -1,8 +1,8 @@
-CREATE OR REPLACE PROCEDURE sp_insert_bot(IN _bot_name varchar(50), IN _channel_id varchar(100), IN _channel_access_token varchar(100), IN _channel_secret varchar(100), IN _owner_id uuid)
+CREATE OR REPLACE PROCEDURE sp_insert_bot(IN _bot_name VARCHAR(50), IN _channel_id VARCHAR(100), IN _channel_access_token VARCHAR(100), IN _channel_secret VARCHAR(100), IN _owner_id UUID)
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    new_class_id int;
+    new_class_id INT;
     -- 用於接收 fs_insert_class 的返回值
 BEGIN
     IF (_bot_name IS NULL OR _channel_id IS NULL OR _channel_access_token IS NULL OR _channel_secret IS NULL OR _owner_id IS NULL) THEN
