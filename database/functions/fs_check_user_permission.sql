@@ -11,7 +11,7 @@ BEGIN
         SELECT
             COUNT(*)
         FROM
-            permission
+            permissions
         WHERE
             class_id = _class_id
             AND role_type = TRUE
@@ -22,7 +22,7 @@ BEGIN
             SELECT
                 fs_check_bitwise(permission_bits, _bit_position)
             FROM
-                permission
+                permissions
             WHERE
                 class_id = _class_id
                 AND role_type = TRUE
@@ -38,7 +38,7 @@ BEGIN
                         0
                     END)
             FROM
-                permission p
+                permissions p
                 JOIN group_members gm ON p.role_id = gm.group_id
                 JOIN groups g ON gm.group_id = g.group_id
             WHERE

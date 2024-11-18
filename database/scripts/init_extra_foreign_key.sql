@@ -67,9 +67,9 @@ END IF;
         FROM
             pg_constraint
         WHERE
-            conname = 'fk_permission_class_id') THEN
-    ALTER TABLE permission
-        ADD CONSTRAINT fk_permission_class_id FOREIGN KEY(class_id) REFERENCES classes(class_id);
+            conname = 'fk_permissions_class_id') THEN
+    ALTER TABLE permissions
+        ADD CONSTRAINT fk_permissions_class_id FOREIGN KEY(class_id) REFERENCES classes(class_id);
 END IF;
 END
 $$;
