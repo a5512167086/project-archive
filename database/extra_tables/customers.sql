@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS customers (
+CREATE TABLE IF NOT EXISTS customers(
     user_id UUID,
     full_name VARCHAR(255) NOT NULL,
     gender BOOLEAN NOT NULL,
@@ -6,3 +6,4 @@ CREATE TABLE IF NOT EXISTS customers (
     address VARCHAR(255) NOT NULL,
     phone_number VARCHAR(255) NOT NULL
 );
+
