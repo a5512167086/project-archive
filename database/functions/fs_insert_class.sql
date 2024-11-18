@@ -62,6 +62,20 @@ BEGIN
                 WHERE
                     class_id = _parent_class_id);
             new_id_path := fs_get_id_path(_parent_class_id, new_class_id);
+            INSERT INTO permissions(
+                class_id,
+                role_type,
+                role_id,
+                permission_bits)
+            SELECT
+                new_class_id,
+                role_type,
+                role_id,
+                permission_bits
+            FROM
+                permissions
+            WHERE
+                class_id = _parent_class_id;
             UPDATE
                 classes
             SET
