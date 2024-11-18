@@ -7,11 +7,11 @@ DECLARE
 BEGIN
     -- 獲取指定 class_id 的 id_path
     SELECT
-        id_path INTO id_path
+        c.id_path INTO id_path
     FROM
-        class
+        classes AS c
     WHERE
-        class_id = _class_id;
+        c.class_id = _class_id;
     -- 檢查 id_path 是否為空，如果為空則返回 NULL
     IF id_path IS NULL THEN
         RETURN NULL;
