@@ -1,6 +1,6 @@
-CREATE OR REPLACE FUNCTION fs_rename_class(_class_id INT, _new_class_name TEXT)
-    RETURNS VOID
-    AS $$
+CREATE OR REPLACE PROCEDURE sp_rename_class(_class_id INT, _new_class_name TEXT)
+LANGUAGE plpgsql
+AS $$
 DECLARE
     current_name_path TEXT;
     current_class_name TEXT;
@@ -95,9 +95,7 @@ EXCEPTION
         GET STACKED DIAGNOSTICS error_detail = MESSAGE_TEXT,
         error_hint = PG_EXCEPTION_DETAIL,
         error_position = PG_EXCEPTION_CONTEXT;
-    RAISE EXCEPTION '錯誤代碼：%，錯誤訊息：%，詳細資訊：%，上下文：%', SQLSTATE, SQLERRM, error_detail, error_position;
+        RAISE EXCEPTION '錯誤代碼：%，錯誤訊息：%，詳細資訊：%，上下文：%', SQLSTATE, SQLERRM, error_detail, error_position;
 END;
-
-$$
-LANGUAGE plpgsql;
+$$;
 
