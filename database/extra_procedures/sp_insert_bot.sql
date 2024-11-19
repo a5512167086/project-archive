@@ -10,16 +10,11 @@ BEGIN
     END IF;
     -- 使用 SELECT INTO 將返回值存入 new_class_id
     SELECT
-        fs_insert_class(2, 3, 'tmp', '', _owner_id) INTO new_class_id;
+        fs_insert_class(2, 3, '', '', _owner_id) INTO new_class_id;
     -- 你可以在這裡使用 new_class_id 做進一步的處理，例如插入到其他表中或進行其他邏輯操作
     SELECT
         fs_insert_object(new_class_id, NULL, _bot_name, '', _owner_id) INTO new_object_id;
-    UPDATE
-        classes
-    SET
-        chinese_name = new_object_id
-    WHERE
-        class_id = new_class_id;
+    CALL sp_rename_class(new_class_id, CAST(new_object_id AS TEXT));
     INSERT INTO bot_details(
         object_id,
         channel_id,
