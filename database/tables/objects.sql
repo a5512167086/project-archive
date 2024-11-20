@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS objects(
-    object_id INT GENERATED ALWAYS AS IDENTITY,
+    object_id SERIAL,
     entity_id INT,
     chinese_name VARCHAR(512),
     chinese_description VARCHAR(4000),
@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS objects(
     english_description VARCHAR(4000),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    extra_datetime TIMESTAMP,
     owner_id UUID,
     click_count INT DEFAULT 0 NOT NULL,
     outlink_count INT,
