@@ -11,15 +11,15 @@ BEGIN
     END IF;
     -- 呼叫 fs_insert_class 並取得 new_class_id
     SELECT
-        fs_insert_class(2, 3, '', '', _owner_id) INTO new_class_id;
+        fs_insert_class(2, 3, '', '用戶創建的機器人', _owner_id) INTO new_class_id;
     -- First insert into parent table (objects)
     INSERT INTO objects(chinese_name, owner_id)
         VALUES (_bot_name, _owner_id)
     RETURNING
         object_id INTO new_object_id;
     -- Then insert additional fields into bot_details
-    INSERT INTO bot_details(object_id, chinese_name, owner_id, channel_id, channel_access_token, channel_secret)
-        VALUES (new_object_id, _bot_name, _owner_id, _channel_id, _channel_access_token, _channel_secret);
+    INSERT INTO bot_details(object_id, channel_id, channel_access_token, channel_secret)
+        VALUES (new_object_id, _channel_id, _channel_access_token, _channel_secret);
     -- 插入到 class_object_relations 表
     INSERT INTO class_object_relations(class_id, object_id)
         VALUES (new_class_id, new_object_id);
