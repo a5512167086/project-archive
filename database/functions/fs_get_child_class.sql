@@ -1,75 +1,60 @@
-CREATE OR REPLACE FUNCTION fn_get_child_class(_parent_class_id INT)
+CREATE OR REPLACE FUNCTION fn_get_child_class(_class_id int)
     RETURNS TABLE(
-        parent_class_id INT,
-        parent_class_name TEXT,
-        child_class_id INT,
-        child_class_name TEXT,
-        child_class_description TEXT,
-        entity_name TEXT,
-        entity_description TEXT,
-        class_type INT,
-        name_path TEXT,
-        id_path TEXT,
-        level INT,
-        is_deleted BOOLEAN,
-        is_hidden BOOLEAN,
-        has_children BOOLEAN,
-        object_count BOOLEAN,
-        rank INT
+        parent_class_id int,
+        parent_chinese_name text,
+        child_class_id int,
+        child_chinese_name text,
+        child_chinese_description text,
+        entity_id int,
+        name_path text,
+        id_path text
     )
     AS $$
 BEGIN
-    RETURN QUERY WITH RECURSIVE tmp AS(
-        -- 首先選取直接子類別
+    RETURN QUERY WITH RECURSIVE tmp(
+        parent_class_id,
+        parent_chinese_name,
+        child_class_id,
+        child_chinese_name,
+        child_chinese_description,
+        entity_id,
+        name_path,
+        id_path
+) AS(
+        -- 初始查詢
         SELECT
-            parent_class.class_id AS parent_class_id,
-            parent_class.class_name AS parent_class_name,
-            child_class.class_id AS child_class_id,
-            child_class.class_name AS child_class_name,
-            child_class.class_description AS child_class_description,
-            child_class.entity_name AS entity_name,
-            child_class.entity_description AS entity_description,
-            child_class.class_type AS class_type,
-            child_class.name_path AS name_path,
-            child_class.id_path AS id_path,
-            child_class.level AS level,
-            child_class.is_deleted AS is_deleted,
-            child_class.is_hidden AS is_hidden,
-            child_class.has_children AS has_children,
-            child_class.object_count AS object_count,
-            inheritance.rank AS rank
+            c1.class_id AS parent_class_id,
+            c1.chinese_name::text AS parent_chinese_name,
+            c2.class_id AS child_class_id,
+            c2.chinese_name::text AS child_chinese_name,
+            c2.chinese_description::text AS child_chinese_description,
+            c2.entity_id AS entity_id,
+            c2.name_path::text AS name_path,
+            c2.id_path::text AS id_path
         FROM
-            class AS parent_class
-            JOIN inheritance ON parent_class.class_id = inheritance.parent_class_id
-            JOIN class AS child_class ON inheritance.child_class_id = child_class.class_id
+            classes c1
+            JOIN inheritances i ON c1.class_id = i.parent_class_id
+            JOIN classes c2 ON i.child_class_id = c2.class_id
         WHERE
-            parent_class.class_id = _parent_class_id
+            c1.class_id = _class_id
         UNION ALL
-        -- 遞迴選取子類別的子類別
+        -- 遞歸部分
         SELECT
-            tmp.child_class_id AS parent_class_id,
-            tmp.child_class_name AS parent_class_name,
-            next_class.class_id AS child_class_id,
-            next_class.class_name AS child_class_name,
-            next_class.class_description AS child_class_description,
-            next_class.entity_name AS entity_name,
-            next_class.entity_description AS entity_description,
-            next_class.class_type AS class_type,
-            next_class.name_path AS name_path,
-            next_class.id_path AS id_path,
-            next_class.level AS level,
-            next_class.is_deleted AS is_deleted,
-            next_class.is_hidden AS is_hidden,
-            next_class.has_children AS has_children,
-            next_class.object_count AS object_count,
-            inheritance.rank AS rank
+            t.child_class_id AS parent_class_id,
+            t.child_chinese_name::text AS parent_chinese_name,
+            c2.class_id AS child_class_id,
+            c2.chinese_name::text AS child_chinese_name,
+            c2.chinese_description::text AS child_chinese_description,
+            c2.entity_id AS entity_id,
+            c2.name_path::text AS name_path,
+            c2.id_path::text AS id_path
         FROM
-            tmp
-            JOIN inheritance ON tmp.child_class_id = inheritance.parent_class_id
-            JOIN class AS next_class ON inheritance.child_class_id = next_class.class_id
+            tmp t
+            JOIN inheritances i ON t.child_class_id = i.parent_class_id
+            JOIN classes c2 ON i.child_class_id = c2.class_id
 )
     SELECT
-        *
+        tmp.*
     FROM
         tmp;
 END;
