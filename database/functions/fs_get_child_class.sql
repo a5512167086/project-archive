@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION fn_get_child_class(_class_id int)
+CREATE OR REPLACE FUNCTION fs_get_child_class(_class_id int)
     RETURNS TABLE(
         parent_class_id int,
         parent_chinese_name text,
