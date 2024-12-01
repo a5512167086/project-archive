@@ -48,6 +48,20 @@
     "webhookUrl": "Webhook URL",
     "webhookHint": "The webhook URL will only be displayed upon creation. Please keep it safe."
   },
+  "createBotTutorialPage": {
+    "title": "LINE Bot Creation Tutorial",
+    "step": "Step",
+    "step1Description": "Go to LINE Developer and click Console",
+    "step2Description": "Click 'Create a new channel' to create a new channel",
+    "step3Description": "Select Messaging API",
+    "step4Description": "Complete the official account settings and go to the management page",
+    "step5Description": "Go to settings, click Messaging API, and enable the Messaging API",
+    "step6Description": "Copy the Channel ID and Channel Secret, which will be needed when adding a LINE Bot",
+    "step7Description": "Return to LINE Developer, enter Messaging API, and obtain the Channel Access Token, which will be needed when adding a LINE Bot",
+    "step8Description": "Copy the Webhook URL provided by EasyBot and paste it into the Webhook URL field",
+    "step9Description": "Go to Response Settings, enable the Webhook, and disable both the greeting message for new friends and the auto-reply message",
+    "backToBotPage": "Return to the Bot List page"
+  },
   "notFoundPage": {
     "title": "Page Not Found",
     "description": "Oops! The page you are looking for doesn't exist. It may have been moved or deleted, or you may have entered an incorrect URL."

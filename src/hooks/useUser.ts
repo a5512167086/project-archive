@@ -11,18 +11,19 @@ type UseUser = {
   isAuthenticated: boolean
   isAuthFailed: boolean
   logout: () => void
+  authStatus: 'idle' | 'loading' | 'succeeded' | 'failed'
 }
 
 export const useUser = (): UseUser => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const { username, email } = useAppSelector((state) => state.user)
+  const { username, email, status } = useAppSelector((state) => state.user)
   const [getUser] = useLazyGetUserMeQuery()
   const [isAuthFailed, setIsAuthFailed] = useState(false)
 
   const token = localStorage.getItem('token') || sessionStorage.getItem('token')
   const isAuthenticated = Boolean(username && email && token)
-
+  
   const logout = () => {
     if (isAuthenticated) {
       clearUserToken()
@@ -43,5 +44,5 @@ export const useUser = (): UseUser => {
     }
   }, [])
 
-  return { isAuthenticated, isAuthFailed, logout }
+  return { isAuthenticated, isAuthFailed, logout, authStatus: status }
 }

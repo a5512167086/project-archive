@@ -49,6 +49,20 @@
     "webhookUrl": "Webhook網址",
     "webhookHint": "Webhook網址只會在創建時顯示，請妥善保管。"
   },
+  "createBotTutorialPage": {
+    "title": "建立LINE機器人教學",
+    "step": "步驟",
+    "step1Description": "進入LINE DEVELOPER並點擊Console",
+    "step2Description": "點擊Create a new channel建立新頻道",
+    "step3Description": "選擇Messaging API",
+    "step4Description": "完成官方帳號設定並前往管理頁面",
+    "step5Description": "前往設定點擊Messaging API，啟用Messaging API",
+    "step6Description": "複製Channel ID和Channel secret，新增LINE BOT時會需要",
+    "step7Description": "回到LINE DEVELOPER進入Messaging API取得Channel access token，新增LINE BOT時會需要",
+    "step8Description": "將EasyBot給您的Webhook URL複製貼上到Webhook網址",
+    "step9Description": "到回應設定啟用Webhook，並關閉加入好友的歡迎訊息和自動回應訊息",
+    "backToBotPage": "回到Bot List頁面"
+  },
   "notFoundPage": {
     "title": "查無此頁面",
     "description": "哎呀！您正在尋找的頁面並不存在。它可能已被移動或刪除了，或者您輸入的 URL 不正確。"

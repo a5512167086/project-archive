@@ -2,12 +2,12 @@ import { Alert, Box, Snackbar } from '@mui/material'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { StyledBaseWrapper } from './BaseWrapper.style'
-import { Outlet, useNavigate } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Suspense, useEffect, useState } from 'react'
 import { CustomLoader } from '../CustomLoader'
 import { useTranslation } from 'react-i18next'
 import { useClearError } from '@/hooks/useClearError'
-import { PAGE_PATHS } from '@/routes'
+import { PAGE_PATHS, REDIRECT_BOT_LIST_ROUTES } from '@/routes'
 import { useUser } from '@/hooks/useUser'
 
 const loaderText = 'common.loading'
@@ -15,6 +15,7 @@ const loaderText = 'common.loading'
 export const BaseWrapper = () => {
   useClearError()
   const navigate = useNavigate()
+  const location = useLocation()
   const { t } = useTranslation()
   const { isAuthenticated, isAuthFailed } = useUser()
   const [isAlertOpen, setAlertOpen] = useState(false)
@@ -24,13 +25,17 @@ export const BaseWrapper = () => {
   }
 
   useEffect(() => {
-    if (isAuthenticated) {
+    const isInRedirectRoutes = REDIRECT_BOT_LIST_ROUTES.includes(
+      location.pathname
+    )
+
+    if (isAuthenticated && isInRedirectRoutes) {
       navigate(PAGE_PATHS.BOT_LIST)
     } else if (isAuthFailed) {
       setAlertOpen(true)
       navigate(PAGE_PATHS.BASE)
     }
-  }, [isAuthenticated, isAuthFailed])
+  }, [isAuthenticated, isAuthFailed, location])
 
   return (
     <StyledBaseWrapper>

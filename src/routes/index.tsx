@@ -44,6 +44,11 @@ const ResetPasswordPage = lazy(() =>
     default: module.ResetPasswordPage
   }))
 )
+const CreateBotTutorialPage = lazy(() =>
+  import('@/pages/CreateBotTutorialPage').then((module) => ({
+    default: module.CreateBotTutorialPage
+  }))
+)
 
 export const PAGE_PATHS = {
   BASE: '/',
@@ -62,6 +67,14 @@ export const PUBLIC_NAVIGATION_ROUTE = [
   { text: 'header.home', link: PAGE_PATHS.BASE },
   { text: 'header.signIn', link: PAGE_PATHS.SIGN_IN },
   { text: 'header.signUp', link: PAGE_PATHS.SIGN_UP }
+]
+
+export const REDIRECT_BOT_LIST_ROUTES = [
+  PAGE_PATHS.SIGN_IN,
+  PAGE_PATHS.SIGN_UP,
+  PAGE_PATHS.OAUTH_CALLBACK,
+  PAGE_PATHS.RESET_PASSWORD,
+  PAGE_PATHS.FORGOT_PASSWORD
 ]
 
 export const router = createBrowserRouter([
@@ -92,6 +105,10 @@ export const router = createBrowserRouter([
       {
         path: PAGE_PATHS.OAUTH_CALLBACK,
         element: <OAuthCallback />
+      },
+      {
+        path: PAGE_PATHS.CREATE_BOT_TURTROIAL,
+        element: <CreateBotTutorialPage />
       },
       {
         element: <PrivateRoute />,
