@@ -1,5 +1,6 @@
 CREATE OR REPLACE VIEW vs_bot_list AS
 SELECT
+    bd.bot_detail_id,
     co.class_id,
     o.object_id,
     o.chinese_name,
