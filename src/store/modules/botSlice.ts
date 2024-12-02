@@ -5,6 +5,7 @@ import { botApi, BotsResponse } from '../apis/botApi'
 
 interface BotState {
   botList: BotsResponse[]
+  currentBot: BotsResponse | null
   errorCode: string
   errorMessage: string
   status: 'idle' | 'loading' | 'succeeded' | 'failed'
@@ -12,6 +13,7 @@ interface BotState {
 
 const initialState: BotState = {
   botList: [],
+  currentBot: null,
   errorCode: '',
   errorMessage: '',
   status: 'idle'
@@ -21,18 +23,24 @@ export const botSlice = createSlice({
   name: 'bot',
   initialState,
   reducers: {
+    initBot: (state) => {
+      state.botList = []
+      state.errorCode = ''
+      state.errorMessage = ''
+      state.status = 'idle'
+    },
     setBotError: (state, action: PayloadAction<CustomError>) => {
       state.errorCode = action.payload.error_code
       state.errorMessage = action.payload.error_message
       state.status = 'failed'
     },
-    clearBotError: (state) => {
-      state.errorCode = ''
-      state.errorMessage = ''
-      state.status = 'idle'
+    setCurrentBot: (state, action) => {
+      state.currentBot = action.payload
     },
-    initBot: (state) => {
-      state.botList = []
+    clearCurrentBot: (state) => {
+      state.currentBot = null
+    },
+    clearBotError: (state) => {
       state.errorCode = ''
       state.errorMessage = ''
       state.status = 'idle'
@@ -56,6 +64,12 @@ export const botSlice = createSlice({
   }
 })
 
-export const { setBotError, initBot, clearBotError } = botSlice.actions
+export const {
+  initBot,
+  setBotError,
+  setCurrentBot,
+  clearCurrentBot,
+  clearBotError
+} = botSlice.actions
 
 export default botSlice.reducer

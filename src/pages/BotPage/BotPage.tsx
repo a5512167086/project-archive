@@ -13,13 +13,18 @@ import SettingsIcon from '@mui/icons-material/Settings'
 import AddIcon from '@/assets/add_icon.png'
 import BotIcon from '@/assets/bot_icon.png'
 import { CustomDialog } from '@/components/CustomDialog'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CustomLink } from '@/components/CustomLink'
 import { PAGE_PATHS } from '@/routes'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { useCreateBotMutation, useGetBotsQuery } from '@/store/apis/botApi'
-import { useAppSelector } from '@/utils/hook'
+import {
+  BotsResponse,
+  useCreateBotMutation,
+  useGetBotsQuery
+} from '@/store/apis/botApi'
+import { useAppDispatch, useAppSelector } from '@/utils/hook'
+import { clearCurrentBot, setCurrentBot } from '@/store/modules/botSlice'
 
 const dialogFields = [
   {
@@ -64,6 +69,7 @@ const botPageContent = {
 
 export const BotPage = () => {
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const { t } = useTranslation()
   const { botList } = useAppSelector((state) => state.bot)
   const { refetch } = useGetBotsQuery()
@@ -90,8 +96,9 @@ export const BotPage = () => {
     setNewLineBotWebhookUrl('')
   }
 
-  const handleBotSetting = () => {
-    navigate(PAGE_PATHS.MODULE_LIST)
+  const handleBotSetting = (bot: BotsResponse) => {
+    dispatch(setCurrentBot(bot))
+    navigate(PAGE_PATHS.BOT_LIST + `/${bot.object_id}`)
   }
 
   const handleCreateBot = async (data: {
@@ -112,6 +119,10 @@ export const BotPage = () => {
         refetch()
       })
   }
+
+  useEffect(() => {
+    dispatch(clearCurrentBot())
+  }, [])
 
   return (
     <StyledBotPage maxWidth="lg">
@@ -154,7 +165,9 @@ export const BotPage = () => {
               actionType={ActionType.Button}
               buttonText={t(botPageContent.setting)}
               buttonIcon={<SettingsIcon />}
-              buttonAction={handleBotSetting}
+              buttonAction={() => {
+                handleBotSetting(bot)
+              }}
             />
           </Grid2>
         ))}

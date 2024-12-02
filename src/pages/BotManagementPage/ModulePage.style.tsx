@@ -1,7 +1,7 @@
 import { styled } from '@mui/material/styles'
 import { Container } from '@mui/material'
 
-export const StyledModulePage = styled(Container)(() => ({
+export const StyledBotManagementPage = styled(Container)(() => ({
   '& .bot__title': {
     fontSize: '1.5rem',
     fontWeight: 'bold',

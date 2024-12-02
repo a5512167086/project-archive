@@ -23,9 +23,9 @@ const OAuthCallback = lazy(() =>
     default: module.OAuthCallbackPage
   }))
 )
-const ModulePage = lazy(() =>
-  import('@/pages/ModulePage').then((module) => ({
-    default: module.ModulePage
+const BotManagementPage = lazy(() =>
+  import('@/pages/BotManagementPage').then((module) => ({
+    default: module.BotManagementPage
   }))
 )
 const NotFoundPage = lazy(() =>
@@ -58,8 +58,8 @@ export const PAGE_PATHS = {
   RESET_PASSWORD: '/reset-password',
   OAUTH_CALLBACK: '/oauth-callback',
   BOT_LIST: '/bot-list',
+  BOT_MANAGEMENT: '/bot-list/:uuid',
   CREATE_BOT_TURTROIAL: '/bot-tutorial',
-  MODULE_LIST: '/module-list',
   NOT_FOUND: '*'
 }
 
@@ -119,8 +119,8 @@ export const router = createBrowserRouter([
             element: <BotPage />
           },
           {
-            path: PAGE_PATHS.MODULE_LIST,
-            element: <ModulePage />
+            path: PAGE_PATHS.BOT_MANAGEMENT,
+            element: <BotManagementPage />
           }
         ]
       },
