@@ -1,9 +1,10 @@
 CREATE OR REPLACE FUNCTION fs_insert_bot(_bot_name varchar(50), _channel_id varchar(100), _channel_access_token varchar(100), _channel_secret varchar(100), _owner_id uuid)
     RETURNS TABLE(
-        user_id uuid,
+        bot_detail_id uuid,
         class_id int,
         object_id int,
-        chinese_name varchar(50)
+        chinese_name varchar(50),
+        owner_id uuid
     )
     AS $$
 DECLARE
@@ -26,7 +27,9 @@ BEGIN
     -- 明確指定表字段
     -- 插入到 bot_details 表
     INSERT INTO bot_details(object_id, channel_id, channel_access_token, channel_secret)
-        VALUES (object_id, _channel_id, _channel_access_token, _channel_secret);
+        VALUES (object_id, _channel_id, _channel_access_token, _channel_secret)
+    RETURNING
+        bot_details.bot_detail_id INTO bot_detail_id;
     -- 插入到 class_object_relations 表
     INSERT INTO class_object_relations(class_id, object_id)
         VALUES (new_class_id, object_id);
@@ -50,10 +53,11 @@ BEGIN
     -- 返回結果
     RETURN QUERY
     SELECT
-        _owner_id,
+        bot_detail_id,
         new_class_id,
         object_id,
-        _bot_name;
+        _bot_name,
+        _owner_id;
 END;
 $$
 LANGUAGE plpgsql;
