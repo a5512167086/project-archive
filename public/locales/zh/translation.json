@@ -5,6 +5,13 @@
     "signUp": "註冊",
     "signOut": "登出"
   },
+  "sidebar": {
+    "moduleList": "模組列表",
+    "faq": "問答模組",
+    "ecomm": "電商模組",
+    "reservation": "預約模組",
+    "backToBotList": "回到Bot選單"
+  },
   "homePage": {
     "hero": {
       "title": "打造專屬智慧對話體驗",

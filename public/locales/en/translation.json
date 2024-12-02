@@ -2,7 +2,15 @@
   "header": {
     "home": "Home",
     "signIn": "Sign In",
-    "signUp": "Sign Up"
+    "signUp": "Sign Up",
+    "signOut": "Sign Out"
+  },
+  "sidebar": {
+    "moduleList": "Module List",
+    "faq": "FAQ Module",
+    "ecomm": "E-commerce Module",
+    "reservation": "Reservation Module",
+    "backToBotList": "Back to Bot Menu"
   },
   "homePage": {
     "hero": {

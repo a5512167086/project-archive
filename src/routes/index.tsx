@@ -1,6 +1,13 @@
 import { lazy } from 'react'
 import { createBrowserRouter } from 'react-router-dom'
 import { BaseWrapper } from '@/components/BaseWrapper'
+import { SidebarWrapper } from '@/components/SidebarWrapper/SidebarWrapper'
+import QuizIcon from '@mui/icons-material/Quiz'
+import StoreIcon from '@mui/icons-material/Store'
+import EventNoteIcon from '@mui/icons-material/EventNote'
+import BackspaceIcon from '@mui/icons-material/Backspace'
+import SettingsIcon from '@mui/icons-material/Settings'
+import ViewListIcon from '@mui/icons-material/ViewList'
 import PrivateRoute from '@/components/PrivateRoute/PrivateRoute'
 
 const SignInPage = lazy(() =>
@@ -59,6 +66,10 @@ export const PAGE_PATHS = {
   OAUTH_CALLBACK: '/oauth-callback',
   BOT_LIST: '/bot-list',
   BOT_MANAGEMENT: '/bot-list/:uuid',
+  FAQ_MODULE: 'faq',
+  ECOMM_MODULE: 'ecomm',
+  BOT_SETTING: 'setting',
+  RESERVATION_MODULE: 'reservation',
   CREATE_BOT_TURTROIAL: '/bot-tutorial',
   NOT_FOUND: '*'
 }
@@ -76,6 +87,45 @@ export const REDIRECT_BOT_LIST_ROUTES = [
   PAGE_PATHS.OAUTH_CALLBACK,
   PAGE_PATHS.RESET_PASSWORD,
   PAGE_PATHS.FORGOT_PASSWORD
+]
+
+export const SIDEBAR_NAVIGATION_ROUTE = [
+  {
+    key: 'moduleList',
+    text: 'sidebar.moduleList',
+    icon: <ViewListIcon />,
+    link: PAGE_PATHS.BOT_LIST
+  },
+  {
+    key: 'faq',
+    text: 'sidebar.faq',
+    icon: <QuizIcon />,
+    link: PAGE_PATHS.FAQ_MODULE
+  },
+  {
+    key: 'ecomm',
+    text: 'sidebar.ecomm',
+    icon: <StoreIcon />,
+    link: PAGE_PATHS.ECOMM_MODULE
+  },
+  {
+    key: 'reservation',
+    text: 'sidebar.reservation',
+    icon: <EventNoteIcon />,
+    link: PAGE_PATHS.RESERVATION_MODULE
+  },
+  {
+    key: 'setting',
+    text: 'common.setting',
+    icon: <SettingsIcon />,
+    link: PAGE_PATHS.BOT_SETTING
+  },
+  {
+    key: 'backToBotList',
+    text: 'sidebar.backToBotList',
+    icon: <BackspaceIcon />,
+    link: PAGE_PATHS.BOT_LIST
+  }
 ]
 
 export const router = createBrowserRouter([
@@ -108,25 +158,53 @@ export const router = createBrowserRouter([
         element: <OAuthCallback />
       },
       {
-        path: PAGE_PATHS.CREATE_BOT_TURTROIAL,
-        element: <CreateBotTutorialPage />
-      },
-      {
+        path: PAGE_PATHS.BOT_LIST,
         element: <PrivateRoute />,
         children: [
           {
-            path: PAGE_PATHS.BOT_LIST,
+            index: true,
             element: <BotPage />
-          },
-          {
-            path: PAGE_PATHS.BOT_MANAGEMENT,
-            element: <BotManagementPage />
           }
         ]
       },
       {
+        path: PAGE_PATHS.CREATE_BOT_TURTROIAL,
+        element: <CreateBotTutorialPage />
+      },
+      {
         path: PAGE_PATHS.NOT_FOUND,
         element: <NotFoundPage />
+      }
+    ]
+  },
+  {
+    path: PAGE_PATHS.BOT_MANAGEMENT,
+    element: <PrivateRoute />,
+    children: [
+      {
+        element: <SidebarWrapper />,
+        children: [
+          {
+            index: true,
+            element: <BotManagementPage />
+          },
+          {
+            path: PAGE_PATHS.FAQ_MODULE,
+            element: <div>test</div>
+          },
+          {
+            path: PAGE_PATHS.ECOMM_MODULE,
+            element: <div>test</div>
+          },
+          {
+            path: PAGE_PATHS.RESERVATION_MODULE,
+            element: <div>test</div>
+          },
+          {
+            path: PAGE_PATHS.BOT_SETTING,
+            element: <div>test</div>
+          }
+        ]
       }
     ]
   }

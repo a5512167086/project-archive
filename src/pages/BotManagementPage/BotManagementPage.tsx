@@ -1,5 +1,5 @@
 import { Breadcrumbs, Grid2 } from '@mui/material'
-import { StyledBotManagementPage } from './ModulePage.style'
+import { StyledBotManagementPage } from './BotManagementPage.style'
 import { CustomCard } from '@/components/CustomCard'
 import { ActionType } from '@/components/CustomCard/CustomCard.type'
 import SettingsIcon from '@mui/icons-material/Settings'
