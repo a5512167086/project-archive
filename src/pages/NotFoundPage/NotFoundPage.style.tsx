@@ -1,13 +1,13 @@
 import { Box, styled } from '@mui/material'
 
 export const StyledNotFoundPage = styled(Box)(() => ({
-  flexGrow: 1,
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'center',
   alignItems: 'center',
   textAlign: 'center',
-  height: '100%',
+  width: '100%',
+  height: '100vh',
   '& .notfound__errorImg': {
     maxWidth: '300px',
     margin: '20px 0'

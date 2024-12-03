@@ -11,7 +11,7 @@ const notFoundPage = {
 export const NotFoundPage = () => {
   const { t } = useTranslation()
   return (
-    <StyledNotFoundPage minWidth="xs" maxWidth="sm">
+    <StyledNotFoundPage>
       <img className="notfound__errorImg" src={ErrorIcon} />
       <Typography variant="h5" className="notfound__title">
         {t(notFoundPage.title)}

@@ -5,7 +5,7 @@ import { botApi, BotsResponse } from '../apis/botApi'
 
 interface BotState {
   botList: BotsResponse[]
-  currentBot: BotsResponse | null
+  currentBotObjectId: number | null
   errorCode: string
   errorMessage: string
   status: 'idle' | 'loading' | 'succeeded' | 'failed'
@@ -13,7 +13,7 @@ interface BotState {
 
 const initialState: BotState = {
   botList: [],
-  currentBot: null,
+  currentBotObjectId: null,
   errorCode: '',
   errorMessage: '',
   status: 'idle'
@@ -35,10 +35,10 @@ export const botSlice = createSlice({
       state.status = 'failed'
     },
     setCurrentBot: (state, action) => {
-      state.currentBot = action.payload
+      state.currentBotObjectId = action.payload
     },
     clearCurrentBot: (state) => {
-      state.currentBot = null
+      state.currentBotObjectId = null
     },
     clearBotError: (state) => {
       state.errorCode = ''
@@ -56,6 +56,30 @@ export const botSlice = createSlice({
         state.botList = action.payload
       })
       .addMatcher(botApi.endpoints.getBots.matchRejected, (state, action) => {
+        clearUserToken()
+        state.status = 'failed'
+        state.errorCode = action.error.code!
+        state.errorMessage = action.error.message!
+      })
+      .addMatcher(botApi.endpoints.deleteBot.matchPending, (state) => {
+        state.status = 'loading'
+      })
+      .addMatcher(botApi.endpoints.deleteBot.matchFulfilled, (state) => {
+        state.status = 'succeeded'
+      })
+      .addMatcher(botApi.endpoints.deleteBot.matchRejected, (state, action) => {
+        clearUserToken()
+        state.status = 'failed'
+        state.errorCode = action.error.code!
+        state.errorMessage = action.error.message!
+      })
+      .addMatcher(botApi.endpoints.updateBot.matchPending, (state) => {
+        state.status = 'loading'
+      })
+      .addMatcher(botApi.endpoints.updateBot.matchFulfilled, (state) => {
+        state.status = 'succeeded'
+      })
+      .addMatcher(botApi.endpoints.updateBot.matchRejected, (state, action) => {
         clearUserToken()
         state.status = 'failed'
         state.errorCode = action.error.code!

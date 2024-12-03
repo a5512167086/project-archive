@@ -2,9 +2,6 @@ import { styled } from '@mui/material/styles'
 import { Container } from '@mui/material'
 
 export const StyledBotSettingPage = styled(Container)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
   '& .setting__title': {
     fontSize: '2rem',
     fontWeight: '500'
@@ -14,13 +11,18 @@ export const StyledBotSettingPage = styled(Container)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'flex-start'
   },
   '& .setting__formBox': {
+    width: '100%',
     display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center'
+    justifyContent: 'space-between',
+    '& .setting__textField': {
+      width: '35%'
+    },
+    '& .setting_formButton': {
+      width: '100px'
+    }
   },
   '& .setting__dangerBox': {
     width: '100%',

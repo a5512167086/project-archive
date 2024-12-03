@@ -28,7 +28,8 @@ const moduleData = [
 
 export const BotManagementPage = () => {
   const { t } = useTranslation()
-  const { currentBot } = useAppSelector((state) => state.bot)
+  const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
+  const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
 
   return (
     currentBot && (
@@ -41,7 +42,7 @@ export const BotManagementPage = () => {
             linkText={t(modulePageContent.botPageTitle)}
           />
           <CustomLink
-            link={PAGE_PATHS.BOT_LIST + `/${currentBot.object_id}`}
+            link={PAGE_PATHS.BOT_LIST + `/${currentBotObjectId}`}
             linkText={currentBot!.bot_name}
             color="text.primary"
             aria-current="page"

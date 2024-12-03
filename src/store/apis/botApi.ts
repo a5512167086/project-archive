@@ -23,6 +23,13 @@ export type DeleteBotRequest = {
   bot_class_id: number
 }
 
+export type UpdateBotRequest = {
+  bot_class_id: number
+  bot_name?: string
+  channel_id?: string
+  channel_access_token?: string
+  channel_secret?: string
+}
 export const botApi = createApi({
   reducerPath: 'botApi',
   baseQuery: fetchBaseQuery({
@@ -52,6 +59,13 @@ export const botApi = createApi({
         body: bot
       })
     }),
+    updateBot: builder.mutation<void, UpdateBotRequest>({
+      query: (bot) => ({
+        url: `bot/${bot.bot_class_id}`,
+        method: 'PATCH',
+        body: bot
+      })
+    }),
     deleteBot: builder.mutation<void, DeleteBotRequest>({
       query: (bot) => ({
         url: `bot/${bot.bot_class_id}`,
@@ -64,5 +78,6 @@ export const botApi = createApi({
 export const {
   useLazyGetBotsQuery,
   useCreateBotMutation,
+  useUpdateBotMutation,
   useDeleteBotMutation
 } = botApi

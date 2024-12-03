@@ -25,6 +25,8 @@ import { useUser } from '@/hooks/useUser'
 import { CustomLoader } from '../CustomLoader'
 import { PAGE_PATHS, SIDEBAR_NAVIGATION_ROUTE } from '@/routes'
 import { useAppSelector } from '@/utils/hook'
+import { useHandleAuthRedirect } from '@/hooks/useHandleAuthRedirect'
+import { CustomAlert } from '../CustomAlert/CustomAlert'
 
 const sidebarWrapperContent = {
   logout: 'header.signOut',
@@ -34,9 +36,18 @@ const sidebarWrapperContent = {
 export const SidebarWrapper = () => {
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { currentBot } = useAppSelector((state) => state.bot)
-  const { logout } = useUser()
+  const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
+  const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
+  const { isAuthenticated, isAuthFailed, setIsAuthFailed, logout } = useUser()
   const [open, setOpen] = useState(false)
+  const [isAlertOpen, setAlertOpen] = useState(false)
+
+  const handleAuthFailed = () => {
+    setAlertOpen(true)
+    setIsAuthFailed(false)
+  }
+
+  useHandleAuthRedirect(isAuthenticated, isAuthFailed, handleAuthFailed)
 
   const handleDrawerOpen = () => {
     setOpen(true)
@@ -48,7 +59,7 @@ export const SidebarWrapper = () => {
 
   const handleNavigate = (route: string, key: string) => {
     if (key === 'moduleList') {
-      navigate(route + `/${currentBot?.object_id}`)
+      navigate(route + `/${currentBotObjectId}`)
     } else {
       navigate(route)
     }
@@ -100,22 +111,18 @@ export const SidebarWrapper = () => {
                 onClick={() => {
                   handleNavigate(route.link, route.key)
                 }}
-                sx={[
-                  {
-                    minHeight: 48,
-                    px: 2.5,
-                    justifyContent: open ? 'initial' : 'center'
-                  }
-                ]}
+                sx={{
+                  minHeight: 48,
+                  px: 2.5,
+                  justifyContent: open ? 'initial' : 'center'
+                }}
               >
                 <ListItemIcon
-                  sx={[
-                    {
-                      minWidth: 0,
-                      justifyContent: 'center',
-                      mr: open ? 3 : 'auto'
-                    }
-                  ]}
+                  sx={{
+                    minWidth: 0,
+                    justifyContent: 'center',
+                    mr: open ? 3 : 'auto'
+                  }}
                 >
                   {route.icon}
                 </ListItemIcon>
@@ -143,6 +150,11 @@ export const SidebarWrapper = () => {
           }
         >
           <Outlet />
+          <CustomAlert
+            open={isAlertOpen}
+            message={t('error.token_expired')}
+            onClose={() => setAlertOpen(false)}
+          />
         </Suspense>
       </Box>
     </Box>

@@ -98,7 +98,7 @@ export const BotPage = () => {
   }
 
   const handleBotSetting = (bot: BotsResponse) => {
-    dispatch(setCurrentBot(bot))
+    dispatch(setCurrentBot(bot.object_id))
     navigate(PAGE_PATHS.BOT_LIST + `/${bot.object_id}`)
   }
 
@@ -163,7 +163,6 @@ export const BotPage = () => {
           >
             <CustomCard
               imgSrc={BotIcon}
-              enableHeaderButton={true}
               cardButton={false}
               titleText={bot.bot_name}
               actionType={ActionType.Button}
