@@ -9,9 +9,10 @@ interface FieldProps {
 export type CustomDialogProps<T = Record<string, unknown>> = {
   isOpen: boolean
   handleClose: () => void
-  fields: FieldProps[]
+  fields?: FieldProps[]
   title: string
   linkText?: string
   link?: string
+  dangerButton?: boolean
   onSubmit: (data: T) => void
 }

@@ -60,8 +60,8 @@ export const OAuthCallbackPage = () => {
         }, 5000)
       })
   }
+
   useEffect(() => {
-    // isRequest prevents react strict mode render twice problem in development
     if (!isRequest) {
       handleOAuthCallback()
     }
@@ -69,7 +69,7 @@ export const OAuthCallbackPage = () => {
   }, [])
 
   return (
-    <StyledOAuthCallbackPage minWidth="xs" maxWidth="sm">
+    <StyledOAuthCallbackPage>
       {!errorCode ? (
         <CustomLoader size="6rem" text={t(oauthCallbackContent.loading)} />
       ) : (

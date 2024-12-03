@@ -159,10 +159,6 @@ export const router = createBrowserRouter([
         element: <ResetPasswordPage />
       },
       {
-        path: PAGE_PATHS.OAUTH_CALLBACK,
-        element: <OAuthCallback />
-      },
-      {
         path: PAGE_PATHS.BOT_LIST,
         element: <PrivateRoute />,
         children: [
@@ -175,12 +171,16 @@ export const router = createBrowserRouter([
       {
         path: PAGE_PATHS.CREATE_BOT_TURTROIAL,
         element: <CreateBotTutorialPage />
-      },
-      {
-        path: PAGE_PATHS.NOT_FOUND,
-        element: <NotFoundPage />
       }
     ]
+  },
+  {
+    path: PAGE_PATHS.OAUTH_CALLBACK,
+    element: <OAuthCallback />
+  },
+  {
+    path: PAGE_PATHS.NOT_FOUND,
+    element: <NotFoundPage />
   },
   {
     path: PAGE_PATHS.BOT_MANAGEMENT,

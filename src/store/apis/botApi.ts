@@ -19,6 +19,10 @@ export type CreateBotResponse = {
   webhook_url: string
 }
 
+export type DeleteBotRequest = {
+  bot_class_id: number
+}
+
 export const botApi = createApi({
   reducerPath: 'botApi',
   baseQuery: fetchBaseQuery({
@@ -47,8 +51,18 @@ export const botApi = createApi({
         method: 'POST',
         body: bot
       })
+    }),
+    deleteBot: builder.mutation<void, DeleteBotRequest>({
+      query: (bot) => ({
+        url: `bot/${bot.bot_class_id}`,
+        method: 'DELETE'
+      })
     })
   })
 })
 
-export const { useGetBotsQuery, useCreateBotMutation } = botApi
+export const {
+  useLazyGetBotsQuery,
+  useCreateBotMutation,
+  useDeleteBotMutation
+} = botApi

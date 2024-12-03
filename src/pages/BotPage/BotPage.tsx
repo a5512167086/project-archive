@@ -21,10 +21,11 @@ import { useTranslation } from 'react-i18next'
 import {
   BotsResponse,
   useCreateBotMutation,
-  useGetBotsQuery
+  useLazyGetBotsQuery
 } from '@/store/apis/botApi'
 import { useAppDispatch, useAppSelector } from '@/utils/hook'
 import { clearCurrentBot, setCurrentBot } from '@/store/modules/botSlice'
+import { CustomLoader } from '@/components/CustomLoader'
 
 const dialogFields = [
   {
@@ -71,8 +72,8 @@ export const BotPage = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
-  const { botList } = useAppSelector((state) => state.bot)
-  const { refetch } = useGetBotsQuery()
+  const { botList, status } = useAppSelector((state) => state.bot)
+  const [getBots] = useLazyGetBotsQuery()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [newLineBotWebhookUrl, setNewLineBotWebhookUrl] = useState('')
@@ -116,15 +117,18 @@ export const BotPage = () => {
       .unwrap()
       .then((data) => {
         handleModalOpen(data.webhook_url)
-        refetch()
+        getBots()
       })
   }
 
   useEffect(() => {
+    getBots()
     dispatch(clearCurrentBot())
   }, [])
 
-  return (
+  return status === 'loading' ? (
+    <CustomLoader />
+  ) : (
     <StyledBotPage maxWidth="lg">
       <Breadcrumbs
         sx={{ fontSize: '1.25rem', fontWeight: 'bold', margin: '20px 0' }}

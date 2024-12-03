@@ -1,7 +1,7 @@
 import { styled } from '@mui/material/styles'
 import { Container } from '@mui/material'
 
-export const StyledBotSettingPage = styled(Container)(() => ({
+export const StyledBotSettingPage = styled(Container)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -25,6 +25,10 @@ export const StyledBotSettingPage = styled(Container)(() => ({
   '& .setting__dangerBox': {
     width: '100%',
     display: 'flex',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    '& .setting_deleteText': {
+      fontWeight: '800',
+      color: theme.palette.error.main
+    }
   }
 }))

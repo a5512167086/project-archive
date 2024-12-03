@@ -70,6 +70,15 @@
     "step9Description": "Go to Response Settings, enable the Webhook, and disable both the greeting message for new friends and the auto-reply message",
     "backToBotPage": "Return to the Bot List page"
   },
+  "botSettingPage": {
+    "title": "Bot Settings",
+    "defaultSettingTitle": "Basic Settings",
+    "dangerZoneTitle": "Danger Zone",
+    "deleteBotTitle": "Delete This Bot",
+    "deleteBotDescription": "Once you delete the bot, it cannot be recovered. Please be certain.",
+    "deleteBotConfirmation": "Are you sure you want to delete the bot? This action cannot be undone.",
+    "deleteBotButton": "Delete Bot"
+  },
   "notFoundPage": {
     "title": "Page Not Found",
     "description": "Oops! The page you are looking for doesn't exist. It may have been moved or deleted, or you may have entered an incorrect URL."

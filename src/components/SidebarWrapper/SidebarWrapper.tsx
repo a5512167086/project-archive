@@ -1,4 +1,4 @@
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import Box from '@mui/material/Box'
 import Toolbar from '@mui/material/Toolbar'
 import List from '@mui/material/List'
@@ -23,7 +23,7 @@ import { Button } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useUser } from '@/hooks/useUser'
 import { CustomLoader } from '../CustomLoader'
-import { SIDEBAR_NAVIGATION_ROUTE } from '@/routes'
+import { PAGE_PATHS, SIDEBAR_NAVIGATION_ROUTE } from '@/routes'
 import { useAppSelector } from '@/utils/hook'
 
 const sidebarWrapperContent = {
@@ -53,6 +53,12 @@ export const SidebarWrapper = () => {
       navigate(route)
     }
   }
+
+  useEffect(() => {
+    if (!currentBot) {
+      navigate(PAGE_PATHS.BOT_LIST)
+    }
+  }, [currentBot])
 
   return (
     <Box sx={{ display: 'flex' }}>

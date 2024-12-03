@@ -70,6 +70,15 @@
     "step9Description": "到回應設定啟用Webhook，並關閉加入好友的歡迎訊息和自動回應訊息",
     "backToBotPage": "回到Bot List頁面"
   },
+  "botSettingPage": {
+    "title": "Bot設定",
+    "defaultSettingTitle": "基本設定",
+    "dangerZoneTitle": "危險區域",
+    "deleteBotTitle": "刪除這個機器人",
+    "deleteBotDescription": "一旦刪除機器人，將無法恢復。請務必確認。",
+    "deleteBotConfirmation": "你確定要刪除機器人嗎，此動作將無法返回",
+    "deleteBotButton": "刪除機器人"
+  },
   "notFoundPage": {
     "title": "查無此頁面",
     "description": "哎呀！您正在尋找的頁面並不存在。它可能已被移動或刪除了，或者您輸入的 URL 不正確。"

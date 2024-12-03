@@ -7,7 +7,8 @@ export const StyledOAuthCallbackPage = styled(Box)(({ theme }) => ({
   justifyContent: 'center',
   alignItems: 'center',
   textAlign: 'center',
-  height: '100%',
+  width: '100%',
+  height: '100vh',
   [theme.breakpoints.down('sm')]: {
     padding: '10px'
   },

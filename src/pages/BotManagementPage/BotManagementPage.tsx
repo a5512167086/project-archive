@@ -10,8 +10,6 @@ import { CustomLink } from '@/components/CustomLink'
 import { PAGE_PATHS } from '@/routes'
 import { useTranslation } from 'react-i18next'
 import { useAppSelector } from '@/utils/hook'
-import { useNavigate } from 'react-router-dom'
-import { useEffect } from 'react'
 
 const modulePageContent = {
   botPageTitle: 'botPage.myBot',
@@ -29,15 +27,8 @@ const moduleData = [
 ]
 
 export const BotManagementPage = () => {
-  const navigate = useNavigate()
   const { t } = useTranslation()
   const { currentBot } = useAppSelector((state) => state.bot)
-
-  useEffect(() => {
-    if (!currentBot) {
-      navigate(PAGE_PATHS.BOT_LIST)
-    }
-  }, [currentBot])
 
   return (
     currentBot && (
@@ -51,7 +42,7 @@ export const BotManagementPage = () => {
           />
           <CustomLink
             link={PAGE_PATHS.BOT_LIST + `/${currentBot.object_id}`}
-            linkText={t(currentBot!.bot_name)}
+            linkText={currentBot!.bot_name}
             color="text.primary"
             aria-current="page"
           />

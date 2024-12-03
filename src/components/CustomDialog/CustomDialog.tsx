@@ -23,6 +23,7 @@ export const CustomDialog = <T extends Record<string, unknown>>({
   title,
   linkText,
   link,
+  dangerButton,
   onSubmit
 }: CustomDialogProps<T>) => {
   const { t } = useTranslation()
@@ -56,19 +57,20 @@ export const CustomDialog = <T extends Record<string, unknown>>({
         {t(title)}
       </DialogTitle>
       <DialogContent>
-        {fields.map((field) => (
-          <TextField
-            key={field.id}
-            required={field.required}
-            margin="dense"
-            id={field.id}
-            name={field.name}
-            label={t(field.label)}
-            type={field.type}
-            fullWidth
-            variant="outlined"
-          />
-        ))}
+        {fields &&
+          fields.map((field) => (
+            <TextField
+              key={field.id}
+              required={field.required}
+              margin="dense"
+              id={field.id}
+              name={field.name}
+              label={t(field.label)}
+              type={field.type}
+              fullWidth
+              variant="outlined"
+            />
+          ))}
       </DialogContent>
       <DialogActions className="dialog__actionBox">
         <Box>
@@ -83,7 +85,7 @@ export const CustomDialog = <T extends Record<string, unknown>>({
           <Button
             type="submit"
             variant="contained"
-            color="success"
+            color={dangerButton ? 'error' : 'success'}
             disabled={loading}
             className="dialog__actionButton"
           >
