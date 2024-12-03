@@ -56,6 +56,11 @@ const CreateBotTutorialPage = lazy(() =>
     default: module.CreateBotTutorialPage
   }))
 )
+const BotSettingPage = lazy(() =>
+  import('@/pages/BotSettingPage').then((module) => ({
+    default: module.BotSettingPage
+  }))
+)
 
 export const PAGE_PATHS = {
   BASE: '/',
@@ -202,7 +207,7 @@ export const router = createBrowserRouter([
           },
           {
             path: PAGE_PATHS.BOT_SETTING,
-            element: <div>test</div>
+            element: <BotSettingPage />
           }
         ]
       }
