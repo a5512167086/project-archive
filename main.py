@@ -1,7 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
+from schemas import ErrorResponse
+from exception import add_global_exception_handler
+from router import router
 
-app = FastAPI(root_path="/easybot/searchApi")
+app = FastAPI(
+    root_path="/easybot/searchApi",
+    docs_url="/",
+    responses={status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse}},
+)
 
 
 app.add_middleware(
@@ -11,8 +18,5 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+app.include_router(router)
+add_global_exception_handler(app)
