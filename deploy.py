@@ -144,15 +144,18 @@ try:
             print(f"Error occurred while executing {file}: {e}")
             sys.exit(1)
 
-    try:
-        with open("./database/init_classes.sql", "r", encoding="utf-8") as sql_file:
-            sql_commands = sql_file.read()
-            cursor.execute(sql.SQL(sql_commands))
-            print(f"Successfully executed ./database/init_classes.sql")
-    except Exception as e:
-        print(
-            f"Error occurred while executing ./database/init_classes.sql: {e}")
-        sys.exit(1)
+    extra_tuples_folder = "./database/extra_tuples/"
+    sql_files = glob.glob(f"{extra_tuples_folder}*.sql")
+    for file in sql_files:
+        print(f"Running SQL file: {file} ...")
+        try:
+            with open(file, "r", encoding="utf-8") as sql_file:
+                sql_commands = sql_file.read()
+                cursor.execute(sql.SQL(sql_commands))
+            print(f"Successfully executed {file}")
+        except Exception as e:
+            print(f"Error occurred while executing {file}: {e}")
+            sys.exit(1)
 
     print("All SQL files executed successfully.")
 

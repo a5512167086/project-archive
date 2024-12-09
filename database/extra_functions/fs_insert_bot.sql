@@ -35,19 +35,21 @@ BEGIN
         VALUES (new_class_id, object_id);
     -- 插入其他相關 class
     PERFORM
-        fs_insert_class(new_class_id, 5, '指令', '自動回覆指令', _owner_id);
+        fs_insert_class(new_class_id, 4, '指令', '自動回覆指令', _owner_id);
     PERFORM
-        fs_insert_class(new_class_id, 6, '設定', '跟Module功能有關的設定', _owner_id);
+        fs_insert_class(new_class_id, 5, '設定', '跟Module功能有關的設定', _owner_id);
     PERFORM
-        fs_insert_class(new_class_id, 7, '訊息紀錄', '訊息紀錄', _owner_id);
+        fs_insert_class(new_class_id, 6, '訊息紀錄', '訊息紀錄', _owner_id);
     PERFORM
-        fs_insert_class(new_class_id, 8, '產品', '電商功能的產品', _owner_id);
+        fs_insert_class(new_class_id, 7, '產品', '電商功能的產品', _owner_id);
     PERFORM
-        fs_insert_class(new_class_id, 9, '知識', '問答功能的知識', _owner_id);
+        fs_insert_class(new_class_id, 8, '知識', '問答功能的知識', _owner_id);
     PERFORM
-        fs_insert_class(new_class_id, 10, '訂單', '電商功能的訂單', _owner_id);
+        fs_insert_class(new_class_id, 9, '訂單', '電商功能的訂單', _owner_id);
     PERFORM
-        fs_insert_class(new_class_id, 11, '預約', '預約功能的預約', _owner_id);
+        fs_insert_class(new_class_id, 10, '預約', '預約功能的預約', _owner_id);
+    PERFORM
+        fs_insert_class(new_class_id, 11, '搜尋', '搜尋功能的資料', _owner_id);
     -- 呼叫 sp_rename_class，傳遞 new_class_id 和 object_id
     CALL sp_rename_class(new_class_id, CAST(object_id AS text));
     -- 返回結果

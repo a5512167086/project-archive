@@ -1,24 +1,5 @@
 DO $$
 BEGIN
-    -- insert entities
-    IF NOT EXISTS(
-        SELECT
-            1
-        FROM
-            entities
-        WHERE
-            chinese_name = '資源') THEN
-    CALL sp_insert_entity('資源', 'Resource', TRUE);
-END IF;
-    IF NOT EXISTS(
-        SELECT
-            1
-        FROM
-            entities
-        WHERE
-            chinese_name = '權限角色') THEN
-    CALL sp_insert_entity('權限角色', 'Role', TRUE);
-END IF;
     IF NOT EXISTS(
         SELECT
             1
@@ -90,6 +71,15 @@ END IF;
         WHERE
             chinese_name = '預約') THEN
     CALL sp_insert_entity('預約', 'Reservation', TRUE);
+END IF;
+    IF NOT EXISTS(
+        SELECT
+            1
+        FROM
+            entities
+        WHERE
+            chinese_name = '搜尋') THEN
+    CALL sp_insert_entity('搜尋', 'Search', TRUE);
 END IF;
 END
 $$;
