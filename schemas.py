@@ -6,6 +6,10 @@ class InsertSearchItemFromUrlRequest(BaseModel):
     url: str
 
 
+class TextSearchItemRequest(BaseModel):
+    query: str
+
+
 class ErrorResponse(BaseModel):
     error_code: str
     error_message: str

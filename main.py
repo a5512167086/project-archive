@@ -1,8 +1,9 @@
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
-from schemas import ErrorResponse
+
 from exception import add_global_exception_handler
 from router import router
+from schemas import ErrorResponse
 
 app = FastAPI(
     root_path="/easybot/searchApi",

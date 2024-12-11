@@ -11,10 +11,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
+from config import SELENIUM_HUB_URL
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-SELENIUM_HUB_URL = "http://localhost:4444/wd/hub"
 
 
 def create_driver():
@@ -27,10 +27,13 @@ def create_driver():
     return webdriver.Remote(command_executor=SELENIUM_HUB_URL, options=chrome_options)
 
 
-def wait_for_element(driver, by, selector, timeout=10):
-    return WebDriverWait(driver, timeout).until(
-        EC.presence_of_element_located((by, selector))
-    )
+def wait_for_element(driver, by, selector, timeout=3):
+    try:
+        return WebDriverWait(driver, timeout).until(
+            EC.presence_of_element_located((by, selector))
+        )
+    except TimeoutException:
+        return None
 
 
 def get_product_links(driver, url: str) -> List[str]:
@@ -66,54 +69,65 @@ def get_product_details(link: str) -> Dict[str, str]:
     driver = create_driver()
     try:
         driver.get(link)
-        product_brand_name = wait_for_element(
-            driver, By.CSS_SELECTOR, "[itemprop='brand']"
-        ).text
-        product_chinese_name = wait_for_element(
-            driver, By.CSS_SELECTOR, "[itemprop='name']"
-        ).text
-        product_english_name = wait_for_element(
-            driver, By.CSS_SELECTOR, "[itemprop='description']"
-        ).text
-        product_lowest_price = wait_for_element(driver, By.CLASS_NAME, "price").text
-        product_description = wait_for_element(
-            driver, By.CSS_SELECTOR, ".product.attribute.description"
-        ).text
-        product_instruction = wait_for_element(
-            driver, By.CLASS_NAME, "Instructions_for_use"
-        ).get_attribute("innerText")
-        product_ingredient = wait_for_element(
-            driver, By.CLASS_NAME, "Main_ingredients"
-        ).get_attribute("innerText")
+
+        def get_text_or_default(by, selector, default=""):
+            element = wait_for_element(driver, by, selector)
+            return element.text.strip() if element else default
+
+        def get_attribute_or_default(by, selector, attribute, default=""):
+            element = wait_for_element(driver, by, selector)
+            return element.get_attribute(attribute).strip() if element else default
+
+        product_brand_name = get_text_or_default(By.CSS_SELECTOR, "[itemprop='brand']")
+
+        product_chinese_name = get_text_or_default(By.CSS_SELECTOR, "[itemprop='name']")
+
+        product_english_name = get_text_or_default(
+            By.CSS_SELECTOR, "[itemprop='description']"
+        )
+
+        product_lowest_price = get_text_or_default(By.CLASS_NAME, "price")
+
+        product_description = get_text_or_default(
+            By.CSS_SELECTOR, ".product.attribute.description"
+        )
+
+        product_instruction = get_attribute_or_default(
+            By.CLASS_NAME, "Instructions_for_use", "innerText"
+        )
+
+        product_ingredient = get_attribute_or_default(
+            By.CLASS_NAME, "Main_ingredients", "innerText"
+        )
 
         product_image_box = wait_for_element(
-            driver, By.CSS_SELECTOR, ".fotorama__stage__shaft.fotorama__grab"
+            driver, By.CSS_SELECTOR, ".fotorama__stage__shaft"
         )
-        product_images = product_image_box.find_elements(By.TAG_NAME, "img")
-        product_first_two_images = [
-            img.get_attribute("src") or img.get_attribute("data-src")
-            for img in product_images[:2]
-        ]
+        if product_image_box:
+            product_images = product_image_box.find_elements(By.TAG_NAME, "img")
+            product_first_two_images = [
+                img.get_attribute("src") or img.get_attribute("data-src")
+                for img in product_images[:2]
+            ]
+        else:
+            product_first_two_images = []
 
         return {
-            "product_brand_name": product_brand_name.strip(),
-            "product_chinese_name": product_chinese_name.strip(),
-            "product_english_name": product_english_name.strip(),
-            "product_lowest_price": product_lowest_price.strip(),
+            "product_brand_name": product_brand_name,
+            "product_chinese_name": product_chinese_name,
+            "product_english_name": product_english_name,
+            "product_lowest_price": product_lowest_price,
             "product_description": re.sub(r"\s+", " ", product_description).strip(),
-            "product_instruction": product_instruction.strip(),
-            "product_ingredient": product_ingredient.strip(),
+            "product_instruction": product_instruction,
+            "product_ingredient": product_ingredient,
             "product_link": link,
             "product_images": product_first_two_images,
         }
-    except Exception as e:
-        logger.warning(f"Error fetching details for {link}: {e}")
-        return {}
     finally:
         driver.quit()
 
 
-def get_product_by_url(url: str):
+def get_products_by_url(url: str):
     start_time = time.time()
     driver = create_driver()
     try:
