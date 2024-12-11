@@ -1,7 +1,12 @@
 CREATE TABLE IF NOT EXISTS search_texts(
     search_text_id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
     object_id int NOT NULL,
-    crawler_text varchar NOT NULL,
+    type varchar,
+    description varchar,
+    price varchar,
+    instruction varchar,
+    ingredient varchar,
+    url varchar,
     created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
     FOREIGN KEY (object_id) REFERENCES objects(object_id) ON DELETE CASCADE
 );
