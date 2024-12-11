@@ -2,6 +2,7 @@ from pydantic import BaseModel
 
 
 class InsertSearchItemFromUrlRequest(BaseModel):
+    bot_class_id: int
     url: str
 
 
