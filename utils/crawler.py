@@ -12,6 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from config import SELENIUM_HUB_URL
+from utils.image import extract_text_from_image
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -79,38 +80,34 @@ def get_product_details(link: str) -> Dict[str, str]:
             return element.get_attribute(attribute).strip() if element else default
 
         product_brand_name = get_text_or_default(By.CSS_SELECTOR, "[itemprop='brand']")
-
         product_chinese_name = get_text_or_default(By.CSS_SELECTOR, "[itemprop='name']")
-
         product_english_name = get_text_or_default(
             By.CSS_SELECTOR, "[itemprop='description']"
         )
-
         product_lowest_price = get_text_or_default(By.CLASS_NAME, "price")
-
         product_description = get_text_or_default(
             By.CSS_SELECTOR, ".product.attribute.description"
         )
-
         product_instruction = get_attribute_or_default(
             By.CLASS_NAME, "Instructions_for_use", "innerText"
         )
-
         product_ingredient = get_attribute_or_default(
             By.CLASS_NAME, "Main_ingredients", "innerText"
         )
-
         product_image_box = wait_for_element(
             driver, By.CSS_SELECTOR, ".fotorama__stage__shaft"
         )
+
+        product_images_with_ocr = []
         if product_image_box:
             product_images = product_image_box.find_elements(By.TAG_NAME, "img")
-            product_first_two_images = [
-                img.get_attribute("src") or img.get_attribute("data-src")
-                for img in product_images[:2]
-            ]
-        else:
-            product_first_two_images = []
+            for img in product_images[:2]:
+                image_url = img.get_attribute("src") or img.get_attribute("data-src")
+                if image_url:
+                    ocr_text = extract_text_from_image(image_url)
+                    product_images_with_ocr.append(
+                        {"url": image_url, "ocr_text": ocr_text}
+                    )
 
         return {
             "product_brand_name": product_brand_name,
@@ -121,13 +118,38 @@ def get_product_details(link: str) -> Dict[str, str]:
             "product_instruction": product_instruction,
             "product_ingredient": product_ingredient,
             "product_link": link,
-            "product_images": product_first_two_images,
+            "product_images": product_images_with_ocr,
         }
     finally:
         driver.quit()
 
 
-def get_products_by_url(url: str):
+def process_in_batches(
+    product_links: List[str], batch_size: int, wait_between_batches: int
+):
+    total_links = len(product_links)
+    product_array = []
+
+    for start in range(0, total_links, batch_size):
+        end = start + batch_size
+        batch_links = product_links[start:end]
+        logger.info(f"Processing batch: {start} to {end} (total {total_links})")
+
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            results = executor.map(get_product_details, batch_links)
+
+        for product in results:
+            if product:
+                product_array.append(product)
+
+        if end < total_links:
+            logger.info(f"Waiting {wait_between_batches} seconds before next batch...")
+            time.sleep(wait_between_batches)
+
+    return product_array
+
+
+def get_products_by_url(url: str, batch_size: int = 5, wait_between_batches: int = 20):
     start_time = time.time()
     driver = create_driver()
     try:
@@ -137,14 +159,8 @@ def get_products_by_url(url: str):
     finally:
         driver.quit()
 
-    logger.info("Fetching product details...")
-    product_array = []
-    with ThreadPoolExecutor(max_workers=5) as executor:
-        results = executor.map(get_product_details, product_links)
-
-    for product in results:
-        if product:
-            product_array.append(product)
+    logger.info("Fetching product details in batches...")
+    product_array = process_in_batches(product_links, batch_size, wait_between_batches)
 
     end_time = time.time()
     logger.info(f"Execution time: {end_time - start_time:.2f} seconds")
