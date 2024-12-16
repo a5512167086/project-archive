@@ -1,13 +1,19 @@
 from pydantic import BaseModel
 
 
-class InsertSearchItemFromUrlRequest(BaseModel):
+class InsertSearchItemsFromUrlRequest(BaseModel):
     bot_class_id: int
     url: str
 
 
-class TextSearchItemRequest(BaseModel):
+class TextSearchItemsRequest(BaseModel):
+    bot_class_id: int
     query: str
+
+
+class ImageSearchItemsRequest(BaseModel):
+    bot_class_id: int
+    image_query_src: str
 
 
 class ErrorResponse(BaseModel):

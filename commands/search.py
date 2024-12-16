@@ -22,3 +22,4 @@ def insert_search_items(bot_class_id: int, search_items: List[dict]):
     except psycopg2.Error as error:
         error_message = error.diag.message_primary
         print(f"Database error: {error_message}")
+        raise
