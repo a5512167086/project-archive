@@ -47,3 +47,21 @@ def tfidf_search(data, query):
     top_results = df.sort_values(by="similarity", ascending=False).head(3)
 
     return top_results.to_dict(orient="records")
+
+
+def tfidf_image_search(data, query):
+    df = pd.DataFrame(data)
+
+    vectorizer = TfidfVectorizer(tokenizer=custom_tokenizer, stop_words="english")
+
+    tfidf_matrix = vectorizer.fit_transform(df["ocr_text"])
+
+    query_vector = vectorizer.transform([query])
+
+    cosine_similarities = cosine_similarity(query_vector, tfidf_matrix)
+
+    df["similarity"] = cosine_similarities[0]
+
+    top_results = df.sort_values(by="similarity", ascending=False).head(3)
+
+    return top_results.to_dict(orient="records")

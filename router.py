@@ -5,7 +5,11 @@ from schemas import (
     InsertSearchItemsFromUrlRequest,
     TextSearchItemsRequest,
 )
-from services.search import add_search_items_by_url, get_search_items_by_text
+from services.search import (
+    add_search_items_by_url,
+    get_search_items_by_ocr_text,
+    get_search_items_by_text,
+)
 
 router = APIRouter()
 
@@ -22,4 +26,4 @@ def search_items_by_text(body: TextSearchItemsRequest):
 
 @router.post("/image-search", tags=["bot"])
 def search_items_by_image(body: ImageSearchItemsRequest):
-    return "ok"
+    return get_search_items_by_ocr_text(body.bot_class_id, body.image_query_src)

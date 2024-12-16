@@ -3,11 +3,13 @@ import psycopg2
 from commands.search import insert_search_items
 from exception import GlobalErrorException
 from queries.search import (
+    get_all_search_image_items_by_class_id,
     get_all_search_text_items_by_class_id,
     get_search_class_id_by_bot_class_id,
 )
 from utils.crawler import get_products_by_url
-from utils.search import tfidf_search
+from utils.image import extract_text_from_image
+from utils.search import tfidf_image_search, tfidf_search
 
 
 def add_search_items_by_url(bot_class_id: int, url: str):
@@ -52,4 +54,7 @@ def get_search_items_by_ocr_text(bot_class_id: int, image_query_src: str):
             error_code="SEARCH_CLASS_NOT_FOUND",
             error_message="Search class not found for the given bot class",
         )
-    return "ok"
+    ocr_query = extract_text_from_image(image_query_src)
+    search_items = get_all_search_image_items_by_class_id(search_class_id)
+    match_items = tfidf_image_search(search_items, ocr_query)
+    return match_items
