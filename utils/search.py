@@ -1,14 +1,26 @@
+import re
+
 import jieba
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 
-def jieba_tokenizer(text):
-    return " ".join(jieba.cut(text))
+def clean_text(text):
+    text = re.sub(r"[^a-zA-Z0-9\u4e00-\u9fff]", " ", text)
+    return text
 
 
-def combine_weighted_text(row, name_weight=2, desc_weight=1):
+def custom_tokenizer(text):
+    chinese_text = "".join(re.findall(r"[\u4e00-\u9fff]", text))
+    english_text = re.sub(r"[^a-zA-Z0-9]", " ", text)
+    chinese_tokens = jieba.lcut_for_search(chinese_text)
+    english_tokens = [word for word in re.split(r"\s+", english_text)]
+    tokens = chinese_tokens + english_tokens
+    return tokens
+
+
+def combine_weighted_text(row, name_weight=3, desc_weight=1):
     chinese_name = (row["chinese_name"] + " ") * name_weight
     english_name = (row["english_name"] + " ") * name_weight
     description = row["description"] * desc_weight
@@ -22,7 +34,7 @@ def tfidf_search(data, query):
     df = pd.DataFrame(data)
     df["weighted_text"] = df.apply(combine_weighted_text, axis=1)
 
-    vectorizer = TfidfVectorizer(tokenizer=jieba_tokenizer)
+    vectorizer = TfidfVectorizer(tokenizer=custom_tokenizer)
 
     tfidf_matrix = vectorizer.fit_transform(df["weighted_text"])
 
