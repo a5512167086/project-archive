@@ -12,6 +12,36 @@ from utils.image import extract_text_from_image
 from utils.search import tfidf_image_search, tfidf_search
 
 
+def get_search_items_by_bot_class_id(bot_class_id: int):
+    search_class_id = get_search_class_id_by_bot_class_id(bot_class_id)
+    search_text_items = get_all_search_text_items_by_class_id(search_class_id)
+    search_image_items = get_all_search_image_items_by_class_id(search_class_id)
+    combined_items = {}
+
+    for text_item in search_text_items:
+        object_id = text_item["object_id"]
+        combined_items[object_id] = {
+            **text_item,
+            "images": [],
+        }
+
+    for image_item in search_image_items:
+        object_id = image_item["object_id"]
+        if object_id not in combined_items:
+            combined_items[object_id] = {
+                "object_id": object_id,
+                "images": [],
+            }
+        combined_items[object_id]["images"].append(
+            {
+                "image_src": image_item.get("image_src", ""),
+                "ocr_text": image_item.get("ocr_text", ""),
+            }
+        )
+
+    return list(combined_items.values())
+
+
 def add_search_items_by_url(bot_class_id: int, url: str):
     products = get_products_by_url(url)
     if not products:

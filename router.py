@@ -7,11 +7,17 @@ from schemas import (
 )
 from services.search import (
     add_search_items_by_url,
+    get_search_items_by_bot_class_id,
     get_search_items_by_ocr_text,
     get_search_items_by_text,
 )
 
 router = APIRouter()
+
+
+@router.get("/search-items/{bot_class_id}", tags=["search"])
+def get_search_items(bot_class_id: int):
+    return get_search_items_by_bot_class_id(bot_class_id)
 
 
 @router.post("/search-items", tags=["search"])
