@@ -1,12 +1,14 @@
 from fastapi import APIRouter
 
 from schemas import (
+    DeleteSearchItemsRequest,
     ImageSearchItemsRequest,
     InsertSearchItemsFromUrlRequest,
     TextSearchItemsRequest,
 )
 from services.search import (
     add_search_items_by_url,
+    delete_search_items_by_bot_class_id,
     get_search_items_by_bot_class_id,
     get_search_items_by_ocr_text,
     get_search_items_by_text,
@@ -23,6 +25,11 @@ def get_search_items(bot_class_id: int):
 @router.post("/search-items", tags=["search"])
 def add_search_items(body: InsertSearchItemsFromUrlRequest):
     add_search_items_by_url(body.bot_class_id, body.url)
+
+
+@router.delete("/search-items", tags=["search"])
+def delete_search_items(body: DeleteSearchItemsRequest):
+    return delete_search_items_by_bot_class_id(body.bot_class_id, body.deleted_id_list)
 
 
 @router.post("/text-search", tags=["bot"])
