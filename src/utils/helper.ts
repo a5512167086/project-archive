@@ -1,3 +1,4 @@
+import { BotsResponse } from '@/store/apis/botApi'
 import { jwtDecode } from 'jwt-decode'
 
 export const validateEmail = (email: string) => {
@@ -36,4 +37,13 @@ export const clearUserToken = () => {
   if (sessionStorage.getItem('token')) {
     sessionStorage.removeItem('token')
   }
+}
+
+export const getBotClassId = (
+  botList: BotsResponse[],
+  currentBotObjectId: number
+) => {
+  return botList
+    .filter((bot) => bot.object_id === currentBotObjectId)
+    .map((bot) => bot.class_id)[0]
 }

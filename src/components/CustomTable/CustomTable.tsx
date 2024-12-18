@@ -1,3 +1,4 @@
+import React, { useState } from 'react'
 import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
@@ -11,53 +12,61 @@ import IconButton from '@mui/material/IconButton'
 import TablePagination from '@mui/material/TablePagination'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
-import { useState } from 'react'
 
-const rows = [
-  { id: 1, name: 'Alice', age: 25, department: 'Development' },
-  { id: 2, name: 'Bob', age: 30, department: 'Finance' },
-  { id: 3, name: 'Charlie', age: 35, department: 'Marketing' },
-  { id: 4, name: 'David', age: 28, department: 'HR' },
-  { id: 5, name: 'Eve', age: 40, department: 'Operations' },
-  { id: 6, name: 'Frank', age: 32, department: 'IT' },
-  { id: 7, name: 'Grace', age: 27, department: 'Sales' },
-  { id: 8, name: 'Hank', age: 34, department: 'Logistics' },
-  { id: 9, name: 'Eve', age: 40, department: 'Operations' },
-  { id: 10, name: 'Frank', age: 32, department: 'IT' },
-  { id: 11, name: 'Grace', age: 27, department: 'Sales' },
-  { id: 12, name: 'Hank', age: 34, department: 'Logistics' }
-]
+interface TableColumn {
+  id: string
+  label: string
+  align?: 'left' | 'right' | 'center'
+}
 
-export const CustomTable = () => {
+interface CustomTableProps<T> {
+  data: T[]
+  columns: TableColumn[]
+  onEdit?: (item: T) => void
+  onDelete?: (item: T) => void
+  rowsPerPage?: number
+}
+
+export const CustomTable = <T,>({
+  data,
+  columns,
+  onEdit,
+  onDelete,
+  rowsPerPage = 12
+}: CustomTableProps<T>) => {
   const [selected, setSelected] = useState<number[]>([])
   const [page, setPage] = useState(0)
-  const rowsPerPage = 12
 
-  const isAllSelected = selected.length === rows.length
-  const isIndeterminate = selected.length > 0 && selected.length < rows.length
+  const currentPageIndexes = data
+    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+    .map((_, index) => page * rowsPerPage + index)
 
-  const paginatedRows = rows.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+  const isAllSelected = currentPageIndexes.every((index) =>
+    selected.includes(index)
   )
+  const isIndeterminate =
+    currentPageIndexes.some((index) => selected.includes(index)) &&
+    !isAllSelected
 
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      setSelected(rows.map((row) => row.id))
+      setSelected((prevSelected) => [
+        ...new Set([...prevSelected, ...currentPageIndexes])
+      ])
     } else {
-      setSelected([])
+      setSelected((prevSelected) =>
+        prevSelected.filter((index) => !currentPageIndexes.includes(index))
+      )
     }
   }
 
   const handleSelectRow =
-    (id: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (event.target.checked) {
-        setSelected((prevSelected) => [...prevSelected, id])
-      } else {
-        setSelected((prevSelected) =>
-          prevSelected.filter((selectedId) => selectedId !== id)
-        )
-      }
+    (rowIndex: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
+      setSelected((prevSelected) =>
+        event.target.checked
+          ? [...prevSelected, rowIndex]
+          : prevSelected.filter((index) => index !== rowIndex)
+      )
     }
 
   const handleChangePage = (_: unknown, newPage: number) => {
@@ -74,51 +83,64 @@ export const CustomTable = () => {
                 <Checkbox
                   indeterminate={isIndeterminate}
                   checked={isAllSelected}
-                  onChange={handleSelectAll} // 全選事件處理
+                  onChange={handleSelectAll}
                 />
               </TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Age</TableCell>
-              <TableCell>Department</TableCell>
+              {columns.map((column) => (
+                <TableCell key={column.id} align={column.align || 'left'}>
+                  {column.label}
+                </TableCell>
+              ))}
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedRows.map((row) => (
-              <TableRow
-                key={row.id}
-                hover
-                selected={selected.includes(row.id)} // 高亮選中行
-              >
-                <TableCell padding="checkbox">
-                  <Checkbox
-                    checked={selected.includes(row.id)} // 單行選中狀態
-                    onChange={handleSelectRow(row.id)} // 單行選中事件處理
-                  />
-                </TableCell>
-                <TableCell>{row.name}</TableCell>
-                <TableCell>{row.age}</TableCell>
-                <TableCell>{row.department}</TableCell>
-                <TableCell>
-                  <IconButton aria-label="edit">
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton aria-label="delete">
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
+            {data
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((row, index) => {
+                const globalIndex = page * rowsPerPage + index
+                return (
+                  <TableRow
+                    key={globalIndex}
+                    hover
+                    selected={selected.includes(globalIndex)}
+                  >
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        checked={selected.includes(globalIndex)}
+                        onChange={handleSelectRow(globalIndex)}
+                      />
+                    </TableCell>
+                    {columns.map((column) => (
+                      <TableCell key={column.id} align={column.align || 'left'}>
+                        {String(row[column.id as keyof T] ?? '')}
+                      </TableCell>
+                    ))}
+                    <TableCell>
+                      {onEdit && (
+                        <IconButton onClick={() => onEdit(row)}>
+                          <EditIcon />
+                        </IconButton>
+                      )}
+                      {onDelete && (
+                        <IconButton onClick={() => onDelete(row)}>
+                          <DeleteIcon />
+                        </IconButton>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
           </TableBody>
         </Table>
       </TableContainer>
       <TablePagination
         component="div"
-        count={rows.length}
+        count={data.length}
         page={page}
         onPageChange={handleChangePage}
-        rowsPerPage={rowsPerPage} // 固定每頁顯示的資料數
-        rowsPerPageOptions={[]} // 移除下拉選單
+        rowsPerPage={rowsPerPage}
+        rowsPerPageOptions={[]}
       />
     </Box>
   )
