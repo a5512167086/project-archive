@@ -10,6 +10,7 @@
     "faq": "問答模組",
     "ecomm": "電商模組",
     "reservation": "預約模組",
+    "search": "搜尋模組",
     "backToBotList": "回到Bot選單"
   },
   "homePage": {
@@ -99,7 +100,8 @@
       "ecommTitle": "電商模組",
       "ecommDescription": "電商模組透過AI數據分析功能，幫助您追蹤客戶行為、預測銷售趨勢、並自動生成客戶反饋報告，同時商家也能有效地管理庫存、提升轉換率，並提供個性化的購物體驗。",
       "reservationTitle": "預約模組",
-      "reservationDescription": "預約模組讓您輕鬆管理各類預訂和安排，從客戶的角度來說，預訂過程簡單快速，支援通知功能，確保不會錯過任何重要的預約。"
+      "reservationDescription": "預約模組讓您輕鬆管理各類預訂和安排，從客戶的角度來說，預訂過程簡單快速，支援通知功能，確保不會錯過任何重要的預約。",
+      "searchTitle": "搜尋模組"
     }
   },
   "error": {

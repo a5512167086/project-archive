@@ -8,6 +8,7 @@ import EventNoteIcon from '@mui/icons-material/EventNote'
 import BackspaceIcon from '@mui/icons-material/Backspace'
 import SettingsIcon from '@mui/icons-material/Settings'
 import ViewListIcon from '@mui/icons-material/ViewList'
+import SearchIcon from '@mui/icons-material/Search'
 import PrivateRoute from '@/components/PrivateRoute/PrivateRoute'
 
 const SignInPage = lazy(() =>
@@ -75,6 +76,7 @@ export const PAGE_PATHS = {
   ECOMM_MODULE: 'ecomm',
   BOT_SETTING: 'setting',
   RESERVATION_MODULE: 'reservation',
+  SEARCH_MODULE: 'search',
   CREATE_BOT_TURTROIAL: '/bot-tutorial',
   NOT_FOUND: '*'
 }
@@ -118,6 +120,12 @@ export const SIDEBAR_NAVIGATION_ROUTE = [
     text: 'sidebar.reservation',
     icon: <EventNoteIcon />,
     link: PAGE_PATHS.RESERVATION_MODULE
+  },
+  {
+    key: 'search',
+    text: 'sidebar.search',
+    icon: <SearchIcon />,
+    link: PAGE_PATHS.SEARCH_MODULE
   },
   {
     key: 'setting',
@@ -203,6 +211,10 @@ export const router = createBrowserRouter([
           },
           {
             path: PAGE_PATHS.RESERVATION_MODULE,
+            element: <div>test</div>
+          },
+          {
+            path: PAGE_PATHS.SEARCH_MODULE,
             element: <div>test</div>
           },
           {

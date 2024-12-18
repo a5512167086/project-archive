@@ -6,6 +6,7 @@ import SettingsIcon from '@mui/icons-material/Settings'
 import FAQIcon from '@/assets/faq_icon.png'
 import EcommIcon from '@/assets/ecomm_icon.png'
 import ReservaitonIcon from '@/assets/reservation_icon.png'
+import SearchIcon from '@/assets/search_icon.png'
 import { CustomLink } from '@/components/CustomLink'
 import { PAGE_PATHS } from '@/routes'
 import { useTranslation } from 'react-i18next'
@@ -17,13 +18,18 @@ const modulePageContent = {
   faqTitle: 'common.feature.faqTitle',
   ecommTitle: 'common.feature.ecommTitle',
   reservationTitle: 'common.feature.reservationTitle',
+  searchTitle: 'common.feature.searchTitle',
   enable: 'common.enable'
 }
 
 const moduleData = [
   { moduleName: modulePageContent.faqTitle, moduleImg: FAQIcon },
   { moduleName: modulePageContent.ecommTitle, moduleImg: EcommIcon },
-  { moduleName: modulePageContent.reservationTitle, moduleImg: ReservaitonIcon }
+  {
+    moduleName: modulePageContent.reservationTitle,
+    moduleImg: ReservaitonIcon
+  },
+  { moduleName: modulePageContent.searchTitle, moduleImg: SearchIcon }
 ]
 
 export const BotManagementPage = () => {

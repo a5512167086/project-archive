@@ -10,6 +10,7 @@
     "faq": "FAQ Module",
     "ecomm": "E-commerce Module",
     "reservation": "Reservation Module",
+    "search": "Search Module",
     "backToBotList": "Back to Bot Menu"
   },
   "homePage": {
@@ -99,7 +100,8 @@
       "ecommTitle": "E-commerce Module",
       "ecommDescription": "The e-commerce module uses AI-driven data analytics to help you track customer behavior, predict sales trends, and automatically generate customer feedback reports. This enables merchants to manage inventory effectively, improve conversion rates, and provide a personalized shopping experience.",
       "reservationTitle": "Reservation Module",
-      "reservationDescription": "The Reservation Module simplifies the management of various bookings and schedules. From the customer's perspective, the booking process is quick and straightforward, with notification support ensuring no important appointments are missed."
+      "reservationDescription": "The Reservation Module simplifies the management of various bookings and schedules. From the customer's perspective, the booking process is quick and straightforward, with notification support ensuring no important appointments are missed.",
+      "searchTitle": "Search Module"
     }
   },
   "error": {
