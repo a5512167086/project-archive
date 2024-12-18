@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { SetStateAction, useState } from 'react'
 import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
@@ -25,6 +25,8 @@ interface CustomTableProps<T> {
   onEdit?: (item: T) => void
   onDelete?: (item: T) => void
   rowsPerPage?: number
+  selected: number[]
+  setSelected: React.Dispatch<SetStateAction<number[]>>
 }
 
 export const CustomTable = <T,>({
@@ -32,9 +34,10 @@ export const CustomTable = <T,>({
   columns,
   onEdit,
   onDelete,
-  rowsPerPage = 12
+  rowsPerPage = 12,
+  selected,
+  setSelected
 }: CustomTableProps<T>) => {
-  const [selected, setSelected] = useState<number[]>([])
   const [page, setPage] = useState(0)
 
   const currentPageIndexes = data

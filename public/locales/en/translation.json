@@ -82,7 +82,9 @@
   },
   "searchSettingPage": {
     "title": "Search Module Management",
-    "addSearchItemButton": "Add Search Item"
+    "addSearchItemButton": "Add Search Item",
+    "deleteSearchItemTitle": "Are you sure you want to delete {{item_name}}? This action cannot be undone.",
+    "deleteSelectedSearchItems": "Delete Selected Search Items"
   },
   "notFoundPage": {
     "title": "Page Not Found",
