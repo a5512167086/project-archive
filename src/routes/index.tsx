@@ -36,6 +36,11 @@ const BotManagementPage = lazy(() =>
     default: module.BotManagementPage
   }))
 )
+const SearchManagementPage = lazy(() =>
+  import('@/pages/SearchManagementPage').then((module) => ({
+    default: module.SearchManagementPage
+  }))
+)
 const NotFoundPage = lazy(() =>
   import('@/pages/NotFoundPage').then((module) => ({
     default: module.NotFoundPage
@@ -215,7 +220,7 @@ export const router = createBrowserRouter([
           },
           {
             path: PAGE_PATHS.SEARCH_MODULE,
-            element: <div>test</div>
+            element: <SearchManagementPage />
           },
           {
             path: PAGE_PATHS.BOT_SETTING,

@@ -80,6 +80,10 @@
     "deleteBotConfirmation": "Are you sure you want to delete the bot? This action cannot be undone.",
     "deleteBotButton": "Delete Bot"
   },
+  "searchSettingPage": {
+    "title": "Search Module Management",
+    "addSearchItemButton": "Add Search Item"
+  },
   "notFoundPage": {
     "title": "Page Not Found",
     "description": "Oops! The page you are looking for doesn't exist. It may have been moved or deleted, or you may have entered an incorrect URL."
