@@ -17,7 +17,9 @@ export const CustomCard = ({
   actionType,
   buttonText,
   buttonIcon,
-  buttonAction
+  buttonAction,
+  checked,
+  onSwitchClick
 }: CustomCardProps) => {
   return (
     <StyledCustomCard>
@@ -76,6 +78,10 @@ export const CustomCard = ({
               label={buttonText}
               className="card__switch"
               labelPlacement="start"
+              checked={checked}
+              onChange={(event) => {
+                onSwitchClick?.((event.target as HTMLInputElement).checked)
+              }}
             />
           )}
         </CardContent>

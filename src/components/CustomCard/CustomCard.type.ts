@@ -1,20 +1,21 @@
 import { ReactNode } from 'react'
 
 export enum ActionType {
-  None = 'NONE',
-  Button = 'BUTTON',
-  Switch = 'SWITCH'
+  Button = 'button',
+  Switch = 'switch'
 }
 
-export type CustomCardProps = {
+export interface CustomCardProps {
   imgSrc?: string
   enableHeaderButton?: boolean
-  cardButton: boolean
+  cardButton?: boolean
   cardButtonAction?: () => void
-  titleText?: string
+  titleText: string
   descriptionText?: string
   actionType: ActionType
   buttonText?: string
   buttonIcon?: ReactNode
   buttonAction?: () => void
+  checked?: boolean
+  onSwitchClick?: (checked: boolean) => void
 }
