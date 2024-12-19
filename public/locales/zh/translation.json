@@ -84,6 +84,7 @@
     "title": "搜尋模組設定",
     "addSearchItemButton": "新增搜尋物件",
     "deleteSearchItemTitle": "確定要刪除 {{item_name}} 嗎?此動作不可返回",
+    "deleteSearchItemsTitle": "確定要刪除所有選取的搜尋物件嗎?此動作不可返回",
     "deleteSelectedSearchItems": "刪除所選的搜尋物件"
   },
   "notFoundPage": {

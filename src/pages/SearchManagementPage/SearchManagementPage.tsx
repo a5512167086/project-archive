@@ -16,7 +16,8 @@ const searchManagementPageContent = {
   title: 'searchSettingPage.title',
   addButtonText: 'searchSettingPage.addSearchItemButton',
   deleteButtonText: 'searchSettingPage.deleteSelectedSearchItems',
-  deleteDialogTitle: 'searchSettingPage.deleteSearchItemTitle'
+  deleteDialogTitle: 'searchSettingPage.deleteSearchItemTitle',
+  deleteMutiDialogTitle: 'searchSettingPage.deleteSearchItemsTitle'
 }
 
 const columns = [
@@ -31,13 +32,18 @@ export const SearchManagementPage = () => {
   const { searchItems } = useAppSelector((state) => state.search)
   const botClassId = getBotClassId(botList, currentBotObjectId!)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isMutiDialogOpen, setIsMutiDialogOpen] = useState(false)
   const [selected, setSelected] = useState<number[]>([])
   const [currentDeleteSearchItem, setCurrentDeleteSearchItem] =
     useState<SearchItem | null>(null)
   const [getSearchItems] = useLazyGetSearchItemsQuery()
   const [deleteSearchItems] = useDeleteSearchItemsMutation()
 
-  const handleDeleteItems = () => {
+  const handleMutiDialogClose = () => {
+    setIsMutiDialogOpen(false)
+  }
+
+  const handleMutiDialogConfirm = () => {
     const deletedIdList = selected.map((index) => searchItems[index]?.object_id)
 
     deleteSearchItems({
@@ -47,6 +53,10 @@ export const SearchManagementPage = () => {
       setSelected([])
       getSearchItems({ bot_class_id: botClassId })
     })
+  }
+
+  const handleDelteItems = () => {
+    setIsMutiDialogOpen(true)
   }
 
   const handleDeleteItem = (item: SearchItem) => {
@@ -72,10 +82,6 @@ export const SearchManagementPage = () => {
     getSearchItems({ bot_class_id: botClassId })
   }, [botList, currentBotObjectId])
 
-  useEffect(() => {
-    console.log(selected)
-  }, [selected])
-
   return (
     <StyledSearchManagementPage disableGutters maxWidth={false}>
       <Box className="search__titleBox">
@@ -88,7 +94,7 @@ export const SearchManagementPage = () => {
               className="search__deleteButton"
               variant="outlined"
               color="error"
-              onClick={handleDeleteItems}
+              onClick={handleDelteItems}
               disabled={isEmpty(selected)}
             >
               {t(searchManagementPageContent.deleteButtonText)}
@@ -119,6 +125,12 @@ export const SearchManagementPage = () => {
         })}
         handleClose={handleDialogClose}
         onSubmit={handleDialogConfirm}
+      />
+      <CustomDialog
+        isOpen={isMutiDialogOpen}
+        handleClose={handleMutiDialogClose}
+        title={t(searchManagementPageContent.deleteMutiDialogTitle)}
+        onSubmit={handleMutiDialogConfirm}
       />
     </StyledSearchManagementPage>
   )
