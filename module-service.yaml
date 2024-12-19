@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: module-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: module
+  template:
+    metadata:
+      labels:
+        app: module
+    spec:
+      containers:
+        - name: module
+          image: a5512167086/easybot-module-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80 
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: module-service
+spec:
+  selector:
+    app: module
+  ports:
+    - protocol: TCP
+      port: 80        
+      targetPort: 80   
