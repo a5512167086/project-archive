@@ -37,10 +37,12 @@ export const CustomDialog = <T extends Record<string, unknown>>({
     const formJson = Object.fromEntries(formData.entries())
 
     const validatedData = formJson as T
-    await onSubmit(validatedData)
-
-    setLoading(false)
-    handleClose()
+    try {
+      await onSubmit(validatedData)
+    } finally {
+      setLoading(false)
+      handleClose()
+    }
   }
 
   return (
@@ -79,7 +81,11 @@ export const CustomDialog = <T extends Record<string, unknown>>({
           )}
         </Box>
         <Box>
-          <Button onClick={handleClose} variant="contained" color="primary">
+          <Button
+            onClick={!loading ? handleClose : () => {}}
+            variant="contained"
+            color="primary"
+          >
             {t(dialogContent.cancel)}
           </Button>
           <Button

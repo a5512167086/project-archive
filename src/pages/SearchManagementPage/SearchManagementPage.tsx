@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import {
   SearchItem,
   useDeleteSearchItemsMutation,
+  useInsertSearchItemsByUrlMutation,
   useLazyGetSearchItemsQuery
 } from '@/store/apis/searchApi'
 import { useAppSelector } from '@/utils/hook'
@@ -17,13 +18,24 @@ const searchManagementPageContent = {
   addButtonText: 'searchSettingPage.addSearchItemButton',
   deleteButtonText: 'searchSettingPage.deleteSelectedSearchItems',
   deleteDialogTitle: 'searchSettingPage.deleteSearchItemTitle',
-  deleteMutiDialogTitle: 'searchSettingPage.deleteSearchItemsTitle'
+  deleteMutiDialogTitle: 'searchSettingPage.deleteSearchItemsTitle',
+  insertByUrlDialogTitle: 'searchSettingPage.insertSearchItemsByUrlTitle'
 }
 
 const columns = [
   { id: 'chinese_name', label: '中文名稱' },
   { id: 'english_name', label: '英文名稱' },
   { id: 'type', label: '類型' }
+]
+
+const insertSearchItemsByUrlFields = [
+  {
+    id: 'url',
+    name: 'url',
+    label: 'common.url',
+    type: 'text',
+    required: true
+  }
 ]
 
 export const SearchManagementPage = () => {
@@ -33,20 +45,22 @@ export const SearchManagementPage = () => {
   const botClassId = getBotClassId(botList, currentBotObjectId!)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isMutiDialogOpen, setIsMutiDialogOpen] = useState(false)
+  const [isInsertByUrlDialogOpen, setIsInsertByUrlDialogOpen] = useState(false)
   const [selected, setSelected] = useState<number[]>([])
   const [currentDeleteSearchItem, setCurrentDeleteSearchItem] =
     useState<SearchItem | null>(null)
   const [getSearchItems] = useLazyGetSearchItemsQuery()
   const [deleteSearchItems] = useDeleteSearchItemsMutation()
+  const [insertSearchItemsByUrl] = useInsertSearchItemsByUrlMutation()
 
   const handleMutiDialogClose = () => {
     setIsMutiDialogOpen(false)
   }
 
-  const handleMutiDialogConfirm = () => {
+  const handleMutiDialogConfirm = async () => {
     const deletedIdList = selected.map((index) => searchItems[index]?.object_id)
 
-    deleteSearchItems({
+    await deleteSearchItems({
       bot_class_id: botClassId,
       deleted_id_list: deletedIdList
     }).then(() => {
@@ -69,13 +83,28 @@ export const SearchManagementPage = () => {
     setIsDialogOpen(false)
   }
 
-  const handleDialogConfirm = () => {
-    deleteSearchItems({
+  const handleDialogConfirm = async () => {
+    await deleteSearchItems({
       bot_class_id: botClassId,
       deleted_id_list: [currentDeleteSearchItem!.object_id!]
     }).then(() => {
       getSearchItems({ bot_class_id: botClassId })
     })
+  }
+
+  const handleAddSearchItemByUrl = () => {
+    setIsInsertByUrlDialogOpen(true)
+  }
+
+  const handleInsertByUrlDialogClose = () => {
+    setIsInsertByUrlDialogOpen(false)
+  }
+
+  const handleInsertByUrlDialogConfrim = async (data: { url: string }) => {
+    await insertSearchItemsByUrl({
+      bot_class_id: botClassId,
+      url: data.url
+    }).unwrap()
   }
 
   useEffect(() => {
@@ -100,7 +129,7 @@ export const SearchManagementPage = () => {
               {t(searchManagementPageContent.deleteButtonText)}
             </Button>
           )}
-          <Button variant="outlined">
+          <Button variant="outlined" onClick={handleAddSearchItemByUrl}>
             {t(searchManagementPageContent.addButtonText)}
           </Button>
         </Box>
@@ -117,6 +146,7 @@ export const SearchManagementPage = () => {
         selected={selected}
         setSelected={setSelected}
       />
+      {/* delete single search item dialog */}
       <CustomDialog
         isOpen={isDialogOpen}
         title={t(searchManagementPageContent.deleteDialogTitle, {
@@ -126,11 +156,24 @@ export const SearchManagementPage = () => {
         handleClose={handleDialogClose}
         onSubmit={handleDialogConfirm}
       />
+      {/* delete muti selected search items dialog */}
       <CustomDialog
         isOpen={isMutiDialogOpen}
         handleClose={handleMutiDialogClose}
         title={t(searchManagementPageContent.deleteMutiDialogTitle)}
         onSubmit={handleMutiDialogConfirm}
+      />
+      {/* insert search items by url dialog */}
+      <CustomDialog<{
+        url: string
+      }>
+        isOpen={isInsertByUrlDialogOpen}
+        handleClose={handleInsertByUrlDialogClose}
+        fields={insertSearchItemsByUrlFields}
+        title={searchManagementPageContent.insertByUrlDialogTitle}
+        onSubmit={async (data) => {
+          await handleInsertByUrlDialogConfrim(data)
+        }}
       />
     </StyledSearchManagementPage>
   )

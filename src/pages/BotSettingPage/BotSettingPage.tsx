@@ -66,8 +66,8 @@ export const BotSettingPage = () => {
     }
   }
 
-  const handleBotDelete = () => {
-    deleteBot({ bot_class_id: currentBot!.class_id })
+  const handleBotDelete = async () => {
+    await deleteBot({ bot_class_id: currentBot!.class_id })
       .unwrap()
       .then(() => {
         navigate(PAGE_PATHS.BOT_LIST)

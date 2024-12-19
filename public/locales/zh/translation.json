@@ -85,13 +85,15 @@
     "addSearchItemButton": "新增搜尋物件",
     "deleteSearchItemTitle": "確定要刪除 {{item_name}} 嗎?此動作不可返回",
     "deleteSearchItemsTitle": "確定要刪除所有選取的搜尋物件嗎?此動作不可返回",
-    "deleteSelectedSearchItems": "刪除所選的搜尋物件"
+    "deleteSelectedSearchItems": "刪除所選的搜尋物件",
+    "insertSearchItemsByUrlTitle": "透過URL爬蟲新增搜尋物件"
   },
   "notFoundPage": {
     "title": "查無此頁面",
     "description": "哎呀！您正在尋找的頁面並不存在。它可能已被移動或刪除了，或者您輸入的 URL 不正確。"
   },
   "common": {
+    "url": "網址",
     "loading": "載入中...",
     "enable": "啟用",
     "close": "關閉",

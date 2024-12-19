@@ -85,13 +85,15 @@
     "addSearchItemButton": "Add Search Item",
     "deleteSearchItemTitle": "Are you sure you want to delete {{item_name}}? This action cannot be undone.",
     "deleteSearchItemsTitle": "Are you sure you want to delete all selected search items? This action cannot be undone.",
-    "deleteSelectedSearchItems": "Delete Selected Search Items"
+    "deleteSelectedSearchItems": "Delete Selected Search Items",
+    "insertSearchItemsByUrlTitle": "Add search items via URL crawler"
   },
   "notFoundPage": {
     "title": "Page Not Found",
     "description": "Oops! The page you are looking for doesn't exist. It may have been moved or deleted, or you may have entered an incorrect URL."
   },
   "common": {
+    "url": "URL",
     "loading": "Loading...",
     "enable": "Enable",
     "close": "Close",
