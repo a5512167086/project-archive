@@ -12,10 +12,9 @@ import { PAGE_PATHS } from '@/routes'
 import { useTranslation } from 'react-i18next'
 import { useAppSelector } from '@/utils/hook'
 import {
-  useInsertModuleSettingMutation,
-  useLazyGetModuleSettingsQuery
+  useGetModuleSettingsQuery,
+  useInsertModuleSettingMutation
 } from '@/store/apis/moduleApi'
-import { useEffect } from 'react'
 
 const modulePageContent = {
   botPageTitle: 'botPage.myBot',
@@ -55,7 +54,9 @@ export const BotManagementPage = () => {
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
   const { moduleSettings } = useAppSelector((state) => state.module)
   const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
-  const [getModuleSettings] = useLazyGetModuleSettingsQuery()
+  const { refetch: refreshModuleSettings } = useGetModuleSettingsQuery({
+    bot_class_id: currentBot!.class_id
+  })
   const [insertModuleSetting, { isLoading }] = useInsertModuleSettingMutation()
 
   const getCheckedStatus = (moduleName: string): boolean => {
@@ -80,13 +81,9 @@ export const BotManagementPage = () => {
     })
       .unwrap()
       .then(() => {
-        getModuleSettings({ bot_class_id: currentBot!.class_id }).refetch()
+        refreshModuleSettings()
       })
   }
-
-  useEffect(() => {
-    getModuleSettings({ bot_class_id: currentBot!.class_id })
-  }, [])
 
   return (
     currentBot && (

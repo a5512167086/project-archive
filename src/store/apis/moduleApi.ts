@@ -7,7 +7,7 @@ export type ModuleSetting = {
   chinese_name: string
   is_enabled: boolean
   version: string
-  description: string
+  description: string | null
 }
 
 type GetModuleSettingsRequest = {
@@ -54,5 +54,5 @@ export const moduleApi = createApi({
   })
 })
 
-export const { useLazyGetModuleSettingsQuery, useInsertModuleSettingMutation } =
+export const { useGetModuleSettingsQuery, useInsertModuleSettingMutation } =
   moduleApi

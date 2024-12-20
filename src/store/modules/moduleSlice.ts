@@ -22,9 +22,12 @@ export const moduleSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addMatcher(moduleApi.endpoints.getModuleSettings.matchPending, (state) => {
-        state.status = 'loading'
-      })
+      .addMatcher(
+        moduleApi.endpoints.getModuleSettings.matchPending,
+        (state) => {
+          state.status = 'loading'
+        }
+      )
       .addMatcher(
         moduleApi.endpoints.getModuleSettings.matchFulfilled,
         (state, action) => {
@@ -37,6 +40,7 @@ export const moduleSlice = createSlice({
         (state, action) => {
           clearUserToken()
           state.status = 'failed'
+          console.log(action.error.code!, action.error.message!)
           state.errorCode = action.error.code!
           state.errorMessage = action.error.message!
         }
