@@ -16,16 +16,16 @@ BEGIN
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Error: 找不到 % 底下的 Command Class', _bot_class_id;
     END IF;
-    SELECT
-        *
-    FROM
-        vs_command_list
-    WHERE
-        class_id = _command_class_id
-        AND type = _type;
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Error: Command Class 存在相同的 Feature %', _type;
-    END IF;
+    IF EXISTS (
+        SELECT
+            1
+        FROM
+            vs_command_list
+        WHERE
+            class_id = _command_class_id
+            AND type = _type) THEN
+    RAISE EXCEPTION 'Error: Command Class 存在相同的 Feature %', _type;
+END IF;
     SELECT
         ms.object_id INTO _object_id
     FROM
