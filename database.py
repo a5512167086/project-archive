@@ -1,7 +1,10 @@
-from config import DB_HOST, DB_NAME, DB_PASSWORD, DB_PORT, DB_USER
 from contextlib import contextmanager
-from exception import GlobalErrorException
+
 import psycopg2
+from psycopg2 import InterfaceError, OperationalError
+
+from config import DB_HOST, DB_NAME, DB_PASSWORD, DB_PORT, DB_USER
+from exception import GlobalErrorException
 
 
 @contextmanager
@@ -16,11 +19,10 @@ def get_db_connection():
             port=DB_PORT,
         )
         yield connection
-    except (Exception, psycopg2.Error) as error:
-        print("Error while connecting to PostgreSQL:", error)
+    except (OperationalError, InterfaceError) as conn_error:
         raise GlobalErrorException(
-            error_code="DATABASE_ERROR",
-            error_message=' '.join(str(error).split()),
+            error_code="DATABASE_CONNECTION_ERROR",
+            error_message=f"Error connecting to database: {str(conn_error)}",
         )
     finally:
         if connection:

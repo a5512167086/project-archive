@@ -1,4 +1,3 @@
-import uvicorn
 from fastapi import FastAPI, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -33,7 +32,3 @@ async def validation_exception_handler(request, exc):
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={"detail": exc.errors(), "body": exc.body},
     )
-
-
-if __name__ == "__main__":
-    uvicorn.run("main:app", port=8000, reload=True)
