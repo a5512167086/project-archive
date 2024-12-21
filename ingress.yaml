@@ -37,3 +37,10 @@ spec:
                 name: module-service
                 port:
                   number: 80
+          - path: /commandapi(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: command-service
+                port:
+                  number: 80
