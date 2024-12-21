@@ -1,12 +1,18 @@
+from typing import List
+
 from fastapi import APIRouter
 
-from schemas import InsertModuleSettingRequest
+from schemas import InsertModuleSettingRequest, Module
 from services.module import get_all_module_settings, insert_new_module_setting
 
 router = APIRouter()
 
 
-@router.get("/module-setting/{bot_class_id}", tags=["module"])
+@router.get(
+    "/module-setting/{bot_class_id}",
+    tags=["module"],
+    response_model=List[Module],
+)
 def get_module_settings(bot_class_id: int):
     return get_all_module_settings(bot_class_id)
 
