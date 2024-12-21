@@ -21,7 +21,5 @@ def insert_feature_command(
                     [bot_class_id, command_name, command_keyword, command_type],
                 )
                 connection.commit()
-    except psycopg2.Error as error:
-        error_message = error.diag.message_primary
-        print(f"Database error: {error_message}")
+    except psycopg2.Error:
         raise

@@ -21,9 +21,14 @@ def add_new_feature_command(
         )
     except psycopg2.Error as error:
         error_message = error.diag.message_primary
-        if "Error: 找不到 {bot_class_id} 底下的 Command Class" in error_message:
+        if f"Error: 找不到 {bot_class_id} 底下的 Command Class" in error_message:
             raise GlobalErrorException(
                 error_code="COMMAND_CLASS_NOT_FOUND",
+                error_message="Command class not found for the given bot class",
+            )
+        elif f"Error: Command Class 存在相同的 Feature {command_type}" in error_message:
+            raise GlobalErrorException(
+                error_code="EXISTING_FEATURE_COMMAND",
                 error_message="Command class not found for the given bot class",
             )
         else:
