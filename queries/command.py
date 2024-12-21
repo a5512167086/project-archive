@@ -28,10 +28,11 @@ def get_all_feature_commands_by_bot_class_id(command_class_id: int):
         valid_types = tuple(item.value for item in CommandType)
 
         with get_db_connection() as connection:
-            with connection.cursor() as cursor:
-                # 使用 IN 子句动态过滤
+            with connection.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cursor:
                 cursor.execute(
-                    "SELECT command_name, command_keyword, type \
+                    "SELECT chinese_name, command_keyword, type \
                      FROM vs_command_list \
                      WHERE class_id = %s \
                      AND type IN %s;",
