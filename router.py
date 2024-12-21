@@ -1,9 +1,14 @@
+from typing import List
+
 from fastapi import APIRouter
 
 from schemas import (
+    DeleteSearchItemsReponse,
     DeleteSearchItemsRequest,
     ImageSearchItemsRequest,
     InsertSearchItemsFromUrlRequest,
+    SearchItem,
+    SearchItemsResponse,
     TextSearchItemsRequest,
 )
 from services.search import (
@@ -17,7 +22,9 @@ from services.search import (
 router = APIRouter()
 
 
-@router.get("/search-items/{bot_class_id}", tags=["search"])
+@router.get(
+    "/search-items/{bot_class_id}", tags=["search"], response_model=List[SearchItem]
+)
 def get_search_items(bot_class_id: int):
     return get_search_items_by_bot_class_id(bot_class_id)
 
@@ -27,16 +34,18 @@ def add_search_items(body: InsertSearchItemsFromUrlRequest):
     add_search_items_by_url(body.bot_class_id, body.url)
 
 
-@router.delete("/search-items", tags=["search"])
+@router.delete(
+    "/search-items", tags=["search"], response_model=DeleteSearchItemsReponse
+)
 def delete_search_items(body: DeleteSearchItemsRequest):
     return delete_search_items_by_bot_class_id(body.bot_class_id, body.deleted_id_list)
 
 
-@router.post("/text-search", tags=["bot"])
+@router.post("/text-search", tags=["bot"], response_model=List[SearchItemsResponse])
 def search_items_by_text(body: TextSearchItemsRequest):
     return get_search_items_by_text(body.bot_class_id, body.query)
 
 
-@router.post("/image-search", tags=["bot"])
+@router.post("/image-search", tags=["bot"], response_model=List[SearchItemsResponse])
 def search_items_by_image(body: ImageSearchItemsRequest):
     return get_search_items_by_ocr_text(body.bot_class_id, body.image_query_src)

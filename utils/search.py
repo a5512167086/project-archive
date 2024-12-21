@@ -45,6 +45,7 @@ def tfidf_search(data, query):
     df["similarity"] = cosine_similarities[0]
 
     top_results = df.sort_values(by="similarity", ascending=False).head(3)
+    top_results = top_results.drop(columns=["weighted_text", "similarity"])
 
     return top_results.to_dict(orient="records")
 
