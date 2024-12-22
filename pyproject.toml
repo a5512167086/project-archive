@@ -46,7 +46,6 @@ dependencies = [
     "python-dotenv==1.0.1",
     "python-multipart==0.0.9",
     "pyyaml==6.0.2",
-    "requests==2.32.3",
     "rich==13.8.1",
     "shellingham==1.5.4",
     "six==1.16.0",
@@ -60,4 +59,5 @@ dependencies = [
     "websockets==13.0.1",
     "wrapt==1.16.0",
     "yarl==1.11.1",
+    "requests>=2.32.3",
 ]

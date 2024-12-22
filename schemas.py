@@ -1,5 +1,6 @@
-from pydantic import BaseModel, model_validator
 from typing import Optional
+
+from pydantic import BaseModel, model_validator
 
 
 class BotHeaders(BaseModel):
@@ -41,7 +42,8 @@ class InsertBotRequest(BaseModel):
 
         if empty_fields:
             raise ValueError(
-                f"The following fields cannot be empty strings: {', '.join(empty_fields)}")
+                f"The following fields cannot be empty strings: {', '.join(empty_fields)}"
+            )
 
         return values
 
@@ -65,7 +67,8 @@ class UpdateBotRequest(BaseModel):
 
         if empty_fields:
             raise ValueError(
-                f"The following fields cannot be empty strings: {', '.join(empty_fields)}")
+                f"The following fields cannot be empty strings: {', '.join(empty_fields)}"
+            )
 
         return values
 

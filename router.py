@@ -63,5 +63,9 @@ def line_webhook(
     configuration = Configuration(access_token=credentials["channel_access_token"])
 
     custom_webhook(
-        credentials["channel_secret"], configuration, bot_body, x_line_signature
+        credentials["class_id"],
+        credentials["channel_secret"],
+        configuration,
+        bot_body,
+        x_line_signature,
     )

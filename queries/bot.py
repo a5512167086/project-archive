@@ -1,6 +1,7 @@
-from database import get_db_connection
 import psycopg2
 import psycopg2.extras
+
+from database import get_db_connection
 
 
 def get_all_bots_by_user_id(user_id: str):
@@ -65,7 +66,7 @@ def get_line_bot_credentials(bot_uuid):
                 cursor_factory=psycopg2.extras.RealDictCursor
             ) as cursor:
                 cursor.execute(
-                    "SELECT channel_access_token, channel_secret \
+                    "SELECT class_id, channel_access_token, channel_secret \
                     FROM vs_bot_list_with_credential \
                     WHERE bot_detail_id = %s;",
                     [bot_uuid],
