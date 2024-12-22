@@ -79,13 +79,18 @@ def add_search_items_by_url(bot_class_id: int, url: str):
 def get_search_items_by_text(bot_class_id: int, query: str):
     search_class_id = validate_search_class(bot_class_id)
     search_items = get_all_search_text_items_by_class_id(search_class_id)
+    if not search_items:
+        return []
+
     return tfidf_search(search_items, query)
 
 
 def get_search_items_by_ocr_text(bot_class_id: int, image_query_src: str):
     search_class_id = validate_search_class(bot_class_id)
-    ocr_query = extract_text_from_image(image_query_src)
     search_items = get_all_search_image_items_by_class_id(search_class_id)
+    if not search_items:
+        return []
+    ocr_query = extract_text_from_image(image_query_src)
     return tfidf_image_search(search_items, ocr_query)
 
 

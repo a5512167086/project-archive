@@ -45,7 +45,7 @@ class TextSearchItemsRequest(BaseModel):
 
 class ImageSearchItemsRequest(BaseModel):
     bot_class_id: int
-    image_query_src: str
+    image_query_src: HttpUrl
 
 
 class SearchItemsResponse(BaseModel):
