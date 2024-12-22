@@ -1,9 +1,10 @@
-from fastapi import Depends, HTTPException, status, Request
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from config import JWT_SECRET, LINE_BOT_WEBHOOK_SIGNATURE_KEY, ALGORITHM
-from jwt import PyJWTError
-from exception import GlobalErrorException
 import jwt
+from fastapi import Depends, HTTPException, Request, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jwt import PyJWTError
+
+from config import ALGORITHM, JWT_SECRET
+from exception import GlobalErrorException
 
 
 def verify_jwt_token(
