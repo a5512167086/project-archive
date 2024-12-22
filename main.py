@@ -1,15 +1,16 @@
+import uvicorn
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
-from router import router, privtate_router
-from exception import add_global_exception_handler
-from schemas import ErrorResponse
-import uvicorn
 
+from exception import add_global_exception_handler
+from router import privtate_router, router
+from schemas import ErrorResponse
 
 app = FastAPI(
-    root_path='/easybot/botapi',
-    docs_url='/',
-    responses={status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse}})
+    root_path="/easybot/botapi",
+    docs_url="/",
+    responses={status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse}},
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
