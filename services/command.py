@@ -9,7 +9,8 @@ from queries.command import (
     get_command_class_id_by_bot_class_id,
 )
 from schemas import CommandType
-from utils import get_enabled_commands
+from utils.command import get_enabled_commands
+from utils.search import convert_search_to_line_text
 
 
 def validate_command_class(bot_class_id: int) -> int:
@@ -54,7 +55,7 @@ def execute_command_by_bot(bot_class_id: int, message: str) -> list[dict]:
     command_list = get_all_feature_commands_by_bot_class_id(command_class_id)
     module_list = get_module_list(bot_class_id)
     split_message = message.strip().split(" ", 1)
-    command_keyword = split_message[0][1:].lower()  # 提取命令关键字，去掉前面的 "!"
+    command_keyword = split_message[0][1:].lower()
     command_body = split_message[1] if len(split_message) > 1 else ""
     enable_commands = get_enabled_commands(command_list, module_list)
 
@@ -95,8 +96,10 @@ def handle_database_error(
 
 def execute_feature_command(type: str, bot_class_id: int, message: str):
     if type == CommandType.SEARCH.value:
-        result = text_search(bot_class_id, message)
-        print(result)
-        return result
+        if not message:
+            return "Query Cannot Be Empty"
+        search_items = text_search(bot_class_id, message)
+        line_texts = convert_search_to_line_text(search_items)
+        return line_texts
     else:
         return "Feature still in development, please be patient."
