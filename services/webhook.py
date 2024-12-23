@@ -21,13 +21,14 @@ def handle_text_message(
 ):
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)
-        message_template = execute_command(
+        message_list = execute_command(
             bot_class_id, event.message.text, message_type=event.message.type
         )
+        messages = [TextMessage(text=message) for message in message_list]
         line_bot_api.reply_message_with_http_info(
             ReplyMessageRequest(
                 reply_token=event.reply_token,
-                messages=[TextMessage(text=str(message_template))],
+                messages=messages,
             )
         )
 
