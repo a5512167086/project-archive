@@ -2,12 +2,18 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: http-ingress
+  namespace: easybot
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
+  tls:
+    - hosts:
+        - easybot.wke.csie.ncnu.edu.tw
+      secretName: wke-tls
   rules:
-    - http:
+    - host: easybot.wke.csie.ncnu.edu.tw
+      http:
         paths:
           - path: /userapi(/|$)(.*)
             pathType: ImplementationSpecific
@@ -44,3 +50,4 @@ spec:
                 name: command-service
                 port:
                   number: 80
+    

@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: command-deployment
+  namespace: easybot
 spec:
   replicas: 1
   selector:
@@ -27,9 +28,9 @@ spec:
             - name: DB_PASSWORD
               value: "0000"
             - name: MODULE_SERVICE_API_URL
-              value: "https://demo.wke.csie.ncnu.edu.tw/easybot/moduleapi"
+              value: "https://easybot.wke.csie.ncnu.edu.tw/moduleapi"
             - name: SEARCH_SERVICE_API_KEY
-              value: "https://demo.wke.csie.ncnu.edu.tw/easybot/searchapi"
+              value: "https://easybot.wke.csie.ncnu.edu.tw/searchapi"
           ports:
             - containerPort: 80 
           resources:
@@ -44,6 +45,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: command-service
+  namespace: easybot
 spec:
   selector:
     app: command

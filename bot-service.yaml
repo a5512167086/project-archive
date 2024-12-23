@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bot-deployment
+  namespace: easybot
 spec:
   replicas: 1
   selector:
@@ -29,9 +30,9 @@ spec:
             - name: JWT_SECRET
               value: "REDACTED_SECRET"
             - name: BASE_URL
-              value: "https://demo.wke.csie.ncnu.edu.tw/easybot/botapi/"
+              value: "https://easybot.wke.csie.ncnu.edu.tw/botapi/"
             - name: "COMMAND_SERVICE_API_URL"
-              value: "https://demo.wke.csie.ncnu.edu.tw/easybot/commandapi"
+              value: "https://easybot.wke.csie.ncnu.edu.tw/commandapi"
           imagePullPolicy: Always
           ports:
             - containerPort: 80
@@ -47,6 +48,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: bot-service
+  namespace: easybot
 spec:
   selector:
     app: bot

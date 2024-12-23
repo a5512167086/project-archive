@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: user-deployment
+  namespace: easybot
 spec:
   replicas: 1
   selector:
@@ -29,7 +30,7 @@ spec:
             - name: JWT_SECRET
               value: "REDACTED_SECRET"
             - name: FRONTEND_URL
-              value: "https://localhost:5173"
+              value: "https://easybot-web.onrender.com/"
             - name: "EMAIL_USER"
               value: "noreply.wke@gmail.com"
             - name: "EMAIL_APP_PASSWORD"
@@ -39,7 +40,7 @@ spec:
             - name: "GOOGLE_CLIENT_SECRET"
               value: "REDACTED_GOOGLE_CLIENT_SECRET"
             - name: "GOOGLE_REDIRECT_URI"
-              value: "https://localhost:5173/oauth-callback"
+              value: "https://easybot-web.onrender.com/oauth-callback"
           imagePullPolicy: Always
           ports:
             - containerPort: 80
@@ -55,6 +56,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: user-service
+  namespace: easybot
 spec:
   selector:
     app: user
