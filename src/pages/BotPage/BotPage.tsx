@@ -151,7 +151,6 @@ export const BotPage = () => {
             cardButton={true}
             cardButtonAction={handleDialogOpen}
             titleText={t(botPageContent.addBot)}
-            actionType={ActionType.None}
           />
         </Grid2>
         {botList.map((bot) => (

@@ -1,7 +1,6 @@
 import { Grid2, Box, Typography } from '@mui/material'
 import { StyledFeatureOverview } from './FeatureOverview.style'
 import { CustomCard } from '../CustomCard'
-import { ActionType } from '../CustomCard/CustomCard.type'
 import FAQIcon from '@/assets/faq_icon.png'
 import EcommIcon from '@/assets/ecomm_icon.png'
 import ReservationIcon from '@/assets/reservation_icon.png'
@@ -36,7 +35,6 @@ export const FeatureOverview = () => {
               cardButton={false}
               titleText={t(overviewContent.faqTitle)}
               descriptionText={t(overviewContent.faqDescription)}
-              actionType={ActionType.None}
             />
           </Grid2>
           <Grid2
@@ -49,7 +47,6 @@ export const FeatureOverview = () => {
               cardButton={false}
               titleText={t(overviewContent.ecommTitle)}
               descriptionText={t(overviewContent.ecommDescription)}
-              actionType={ActionType.None}
             />
           </Grid2>
           <Grid2
@@ -62,7 +59,6 @@ export const FeatureOverview = () => {
               cardButton={false}
               titleText={t(overviewContent.reservationTitle)}
               descriptionText={t(overviewContent.reservationDescription)}
-              actionType={ActionType.None}
             />
           </Grid2>
         </Grid2>

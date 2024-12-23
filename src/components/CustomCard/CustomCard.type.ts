@@ -12,7 +12,7 @@ export interface CustomCardProps {
   cardButtonAction?: () => void
   titleText: string
   descriptionText?: string
-  actionType: ActionType
+  actionType?: ActionType
   buttonText?: string
   buttonIcon?: ReactNode
   buttonAction?: () => void
