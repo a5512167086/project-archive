@@ -40,7 +40,6 @@ export const moduleSlice = createSlice({
         (state, action) => {
           clearUserToken()
           state.status = 'failed'
-          console.log(action.error.code!, action.error.message!)
           state.errorCode = action.error.code!
           state.errorMessage = action.error.message!
         }

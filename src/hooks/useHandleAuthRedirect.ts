@@ -6,7 +6,6 @@ export const useHandleAuthRedirect = (
   isAuthenticated: boolean,
   isAuthFailed: boolean,
   onAuthFailed: () => void,
-  onRedirect?: () => void
 ) => {
   const navigate = useNavigate()
   const location = useLocation()
@@ -18,7 +17,6 @@ export const useHandleAuthRedirect = (
 
     if (isAuthenticated && isInRedirectRoutes) {
       navigate(PAGE_PATHS.BOT_LIST)
-      onRedirect?.()
     } else if (isAuthFailed) {
       onAuthFailed()
     }
@@ -28,6 +26,5 @@ export const useHandleAuthRedirect = (
     location.pathname,
     navigate,
     onAuthFailed,
-    onRedirect
   ])
 }

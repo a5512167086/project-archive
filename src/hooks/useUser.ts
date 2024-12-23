@@ -23,7 +23,8 @@ export const useUser = (): UseUser => {
   const [getUser, { isUninitialized }] = useLazyGetUserMeQuery()
 
   const token = localStorage.getItem('token') || sessionStorage.getItem('token')
-  const isAuthenticated = Boolean(username && email && token)
+
+  const isAuthenticated = Boolean(username && email && token != null)
 
   const logout = useCallback(() => {
     clearUserToken()
@@ -33,8 +34,9 @@ export const useUser = (): UseUser => {
   }, [dispatch, navigate])
 
   useEffect(() => {
-    if (token === null) {
-      logout()
+    if (token == null) {
+      dispatch(initUser())
+      dispatch(initBot())
       return
     }
 
