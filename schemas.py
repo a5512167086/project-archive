@@ -48,6 +48,11 @@ class ImageSearchItemsRequest(BaseModel):
     image_query_src: HttpUrl
 
 
+class LineImageSearchItemsRequest(BaseModel):
+    bot_class_id: int
+    image_base64: str
+
+
 class SearchItemsResponse(BaseModel):
     search_text_id: UUID4
     class_id: int

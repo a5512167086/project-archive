@@ -7,6 +7,7 @@ from schemas import (
     DeleteSearchItemsRequest,
     ImageSearchItemsRequest,
     InsertSearchItemsFromUrlRequest,
+    LineImageSearchItemsRequest,
     SearchItem,
     SearchItemsResponse,
     TextSearchItemsRequest,
@@ -15,6 +16,7 @@ from services.search import (
     add_search_items_by_url,
     delete_search_items_by_bot_class_id,
     get_search_items_by_bot_class_id,
+    get_search_items_by_line_ocr_text,
     get_search_items_by_ocr_text,
     get_search_items_by_text,
 )
@@ -49,3 +51,10 @@ def search_items_by_text(body: TextSearchItemsRequest):
 @router.post("/image-search", tags=["bot"], response_model=List[SearchItemsResponse])
 def search_items_by_image(body: ImageSearchItemsRequest):
     return get_search_items_by_ocr_text(body.bot_class_id, body.image_query_src)
+
+
+@router.post(
+    "/line-image-search", tags=["bot"], response_model=List[SearchItemsResponse]
+)
+def search_items_by_line_image(body: LineImageSearchItemsRequest):
+    return get_search_items_by_line_ocr_text(body.bot_class_id, body.image_base64)

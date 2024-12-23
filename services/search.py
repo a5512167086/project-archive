@@ -8,7 +8,7 @@ from queries.search import (
     get_search_class_id_by_bot_class_id,
 )
 from utils.crawler import get_products_by_url
-from utils.image import extract_text_from_image
+from utils.image import extract_text_from_base64_image, extract_text_from_image
 from utils.search import tfidf_image_search, tfidf_search
 
 
@@ -83,6 +83,15 @@ def get_search_items_by_text(bot_class_id: int, query: str):
         return []
 
     return tfidf_search(search_items, query)
+
+
+def get_search_items_by_line_ocr_text(bot_class_id: int, image_base64: str):
+    search_class_id = validate_search_class(bot_class_id)
+    search_items = get_all_search_image_items_by_class_id(search_class_id)
+    if not search_items:
+        return []
+    ocr_query = extract_text_from_base64_image(image_base64)
+    return tfidf_image_search(search_items, ocr_query)
 
 
 def get_search_items_by_ocr_text(bot_class_id: int, image_query_src: str):
