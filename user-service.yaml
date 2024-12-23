@@ -15,6 +15,31 @@ spec:
       containers:
         - name: user
           image: a5512167086/easybot-user-service:latest
+          env:
+            - name: DB_HOST
+              value: "10.21.26.74"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "easybot"
+            - name: DB_USER
+              value: "postgres"
+            - name: DB_PASSWORD
+              value: "0000"
+            - name: JWT_SECRET
+              value: "REDACTED_SECRET"
+            - name: FRONTEND_URL
+              value: "https://localhost:5173"
+            - name: "EMAIL_USER"
+              value: "noreply.wke@gmail.com"
+            - name: "EMAIL_APP_PASSWORD"
+              value: "iryn atxz yglr ueae"
+            - name: "GOOGLE_CLIENT_ID"
+              value: "48844684655-se9surcs5rvd5ek14o1b39k0lbhvk6on.apps.googleusercontent.com"
+            - name: "GOOGLE_CLIENT_SECRET"
+              value: "REDACTED_GOOGLE_CLIENT_SECRET"
+            - name: "GOOGLE_REDIRECT_URI"
+              value: "https://localhost:5173/oauth-callback"
           imagePullPolicy: Always
           ports:
             - containerPort: 80
