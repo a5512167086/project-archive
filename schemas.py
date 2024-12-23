@@ -3,7 +3,6 @@ from enum import Enum
 from pydantic import BaseModel
 
 
-# 定义一个 Enum 类型
 class CommandType(str, Enum):
     SEARCH = "Search"
     ECOMM = "Ecomm"
