@@ -11,9 +11,9 @@ def text_search(bot_class_id: int, query: str):
     return response.json()
 
 
-def image_search(bot_class_id: int, image_query: str):
+def image_search(bot_class_id: int, image_base64: str):
     response = requests.post(
-        f"{SEARCH_SERVICE_API_KEY}/text-search",
-        json={"bot_class_id": bot_class_id, "image_query_src": image_query},
+        f"{SEARCH_SERVICE_API_KEY}/line-image-search",
+        json={"bot_class_id": bot_class_id, "image_base64": image_base64},
     )
     return response.json()
