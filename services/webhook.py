@@ -43,7 +43,6 @@ def handle_image_message(
         message_list = execute_command(
             bot_class_id, image_base64, message_type=event.message.type
         )
-        print("Message", message_list)
         if message_list:
             messages = [TextMessage(text=message) for message in message_list]
             line_bot_api.reply_message_with_http_info(
