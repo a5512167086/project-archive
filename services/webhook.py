@@ -40,15 +40,15 @@ def handle_image_message(
         line_bot_api = MessagingApi(api_client)
         image_data = get_line_image(event.message.id, configuration.access_token)
         image_base64 = base64.b64encode(image_data).decode("utf-8")
-        message_template = execute_command(
+        message_list = execute_command(
             bot_class_id, image_base64, message_type=event.message.type
         )
-        line_bot_api.reply_message_with_http_info(
-            ReplyMessageRequest(
-                reply_token=event.reply_token,
-                messages=[TextMessage(text=str(message_template))],
+        print("Message", message_list)
+        if message_list:
+            messages = [TextMessage(text=message) for message in message_list]
+            line_bot_api.reply_message_with_http_info(
+                ReplyMessageRequest(reply_token=event.reply_token, messages=messages)
             )
-        )
 
 
 def custom_webhook(
