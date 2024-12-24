@@ -7,7 +7,7 @@ from router import privtate_router, router
 from schemas import ErrorResponse
 
 app = FastAPI(
-    root_path="/easybot/botapi",
+    root_path="/botapi",
     docs_url="/",
     responses={status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse}},
 )
