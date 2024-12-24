@@ -6,7 +6,7 @@ from router import router
 from schemas import ErrorResponse
 
 app = FastAPI(
-    root_path="/easybot/moduleApi",
+    root_path="/moduleapi",
     docs_url="/",
     responses={status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse}},
 )
