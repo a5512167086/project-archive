@@ -1,15 +1,15 @@
 from typing import List
 
 from fastapi import APIRouter
-
 from schemas import (
     DeleteSearchItemsReponse,
     DeleteSearchItemsRequest,
     ImageSearchItemsRequest,
     InsertSearchItemsFromUrlRequest,
     LineImageSearchItemsRequest,
+    SearchImageItemsResponse,
     SearchItem,
-    SearchItemsResponse,
+    SearchTextItemsResponse,
     TextSearchItemsRequest,
 )
 from services.search import (
@@ -43,18 +43,20 @@ def delete_search_items(body: DeleteSearchItemsRequest):
     return delete_search_items_by_bot_class_id(body.bot_class_id, body.deleted_id_list)
 
 
-@router.post("/text-search", tags=["bot"], response_model=List[SearchItemsResponse])
+@router.post("/text-search", tags=["bot"], response_model=List[SearchTextItemsResponse])
 def search_items_by_text(body: TextSearchItemsRequest):
     return get_search_items_by_text(body.bot_class_id, body.query)
 
 
-@router.post("/image-search", tags=["bot"], response_model=List[SearchItemsResponse])
+@router.post(
+    "/image-search", tags=["bot"], response_model=List[SearchImageItemsResponse]
+)
 def search_items_by_image(body: ImageSearchItemsRequest):
     return get_search_items_by_ocr_text(body.bot_class_id, body.image_query_src)
 
 
 @router.post(
-    "/line-image-search", tags=["bot"], response_model=List[SearchItemsResponse]
+    "/line-image-search", tags=["bot"], response_model=List[SearchImageItemsResponse]
 )
 def search_items_by_line_image(body: LineImageSearchItemsRequest):
     return get_search_items_by_line_ocr_text(body.bot_class_id, body.image_base64)

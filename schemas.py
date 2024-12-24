@@ -53,7 +53,17 @@ class LineImageSearchItemsRequest(BaseModel):
     image_base64: str
 
 
-class SearchItemsResponse(BaseModel):
+class SearchImageItemsResponse(BaseModel):
+    search_image_id: str
+    class_id: int
+    object_id: int
+    chinese_name: str
+    english_name: str
+    image_src: HttpUrl
+    url: HttpUrl
+
+
+class SearchTextItemsResponse(BaseModel):
     search_text_id: UUID4
     class_id: int
     object_id: int
