@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: platform-web-deployment
+  namespace: easybot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: platform-web
+  template:
+    metadata:
+      labels:
+        app: platform-web
+    spec:
+      containers:
+        - name: platform-web
+          image: a5512167086/easybot-platform-web:latest
+          env:
+            - name: VITE_USER_BACKEND_URL
+              value: "https://easybot.wke.csie.ncnu.edu.tw/userapi"
+            - name: VITE_BOT_BACKEND_URL
+              value: "https://easybot.wke.csie.ncnu.edu.tw/botapi"
+            - name: VITE_SEARCH_BACKEND_URL
+              value: "https://easybot.wke.csie.ncnu.edu.tw/searchapi"
+            - name: VITE_MODULE_BACKEND_URL
+              value: "https://easybot.wke.csie.ncnu.edu.tw/moduleapi"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: platform-web-service
+  namespace: easybot
+spec:
+  selector:
+    app: platform-web
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080

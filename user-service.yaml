@@ -30,7 +30,7 @@ spec:
             - name: JWT_SECRET
               value: "REDACTED_SECRET"
             - name: FRONTEND_URL
-              value: "https://easybot-web.onrender.com/"
+              value: "https://easybot.wke.csie.ncnu.edu.tw/"
             - name: "EMAIL_USER"
               value: "noreply.wke@gmail.com"
             - name: "EMAIL_APP_PASSWORD"
@@ -40,7 +40,7 @@ spec:
             - name: "GOOGLE_CLIENT_SECRET"
               value: "REDACTED_GOOGLE_CLIENT_SECRET"
             - name: "GOOGLE_REDIRECT_URI"
-              value: "https://easybot-web.onrender.com/oauth-callback"
+              value: "https://easybot.wke.csie.ncnu.edu.tw/oauth-callback"
           imagePullPolicy: Always
           ports:
             - containerPort: 80

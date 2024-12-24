@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web-ingress
+  namespace: easybot
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls:
+    - hosts:
+        - easybot.wke.csie.ncnu.edu.tw
+      secretName: wke-tls
+  rules:
+    - host: easybot.wke.csie.ncnu.edu.tw
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: platform-web-service
+                port:
+                  number: 80
