@@ -75,8 +75,9 @@ def execute_command_by_bot(bot_class_id: int, message: str, message_type) -> lis
     elif message_type == "image":
         for command in enable_commands:
             if command["command_keyword"].lower() == "search":
-                print(message)
-                return image_search(bot_class_id, message)
+                search_items = image_search(bot_class_id, message)
+                line_texts = convert_search_to_line_text(search_items)
+                return line_texts
 
 
 def handle_database_error(
