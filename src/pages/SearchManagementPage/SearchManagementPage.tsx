@@ -9,10 +9,15 @@ import {
   useInsertSearchItemsByUrlMutation,
   useLazyGetSearchItemsQuery
 } from '@/store/apis/searchApi'
-import { useAppSelector } from '@/utils/hook'
+import { useAppDispatch, useAppSelector } from '@/utils/hook'
 import { getBotClassId, isEmpty, isValidHttpUrl } from '@/utils/helper'
 import { useEffect, useState } from 'react'
 import { CustomDialog } from '@/components/CustomDialog'
+import { useNavigate } from 'react-router-dom'
+import {
+  clearCurrentSearchItem,
+  setCurrentSearchItem
+} from '@/store/modules/searchSlice'
 
 const searchManagementPageContent = {
   title: 'searchSettingPage.title',
@@ -89,6 +94,8 @@ const insertSingleSearchItemFields = [
 ]
 
 export const SearchManagementPage = () => {
+  const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const { t } = useTranslation()
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
   const { searchItems } = useAppSelector((state) => state.search)
@@ -120,6 +127,11 @@ export const SearchManagementPage = () => {
       setSelected([])
       getSearchItems({ bot_class_id: botClassId })
     })
+  }
+
+  const handleEditItem = (item: SearchItem) => {
+    dispatch(setCurrentSearchItem(item.object_id))
+    navigate(item.object_id.toString())
   }
 
   const handleDelteItems = () => {
@@ -188,6 +200,7 @@ export const SearchManagementPage = () => {
   }
 
   useEffect(() => {
+    dispatch(clearCurrentSearchItem())
     getSearchItems({ bot_class_id: botClassId })
   }, [botList, currentBotObjectId])
 
@@ -228,7 +241,7 @@ export const SearchManagementPage = () => {
           handleDeleteItem(item)
         }}
         onEdit={(item) => {
-          console.log(item)
+          handleEditItem(item)
         }}
         selected={selected}
         setSelected={setSelected}

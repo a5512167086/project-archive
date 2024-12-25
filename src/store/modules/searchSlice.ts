@@ -3,6 +3,7 @@ import { searchApi, SearchItem } from '../apis/searchApi'
 
 interface SearchState {
   searchItems: SearchItem[]
+  currentSearchItemObjectId: number | null
   errorCode: string
   errorMessage: string
   status: 'idle' | 'loading' | 'succeeded' | 'failed'
@@ -10,6 +11,7 @@ interface SearchState {
 
 const initialState: SearchState = {
   searchItems: [],
+  currentSearchItemObjectId: null,
   errorCode: '',
   errorMessage: '',
   status: 'idle'
@@ -18,7 +20,14 @@ const initialState: SearchState = {
 export const searchSlice = createSlice({
   name: 'search',
   initialState,
-  reducers: {},
+  reducers: {
+    setCurrentSearchItem: (state, action) => {
+      state.currentSearchItemObjectId = action.payload
+    },
+    clearCurrentSearchItem: (state) => {
+      state.currentSearchItemObjectId = null
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addMatcher(searchApi.endpoints.getSearchItems.matchPending, (state) => {
@@ -41,5 +50,8 @@ export const searchSlice = createSlice({
       )
   }
 })
+
+export const { setCurrentSearchItem, clearCurrentSearchItem } =
+  searchSlice.actions
 
 export default searchSlice.reducer
