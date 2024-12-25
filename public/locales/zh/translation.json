@@ -83,10 +83,15 @@
   "searchSettingPage": {
     "title": "搜尋模組設定",
     "addSearchItemButton": "新增搜尋物件",
+    "addSearchItemFromUrlButton": "透過URL新增搜尋物件",
     "deleteSearchItemTitle": "確定要刪除 {{item_name}} 嗎?此動作不可返回",
     "deleteSearchItemsTitle": "確定要刪除所有選取的搜尋物件嗎?此動作不可返回",
     "deleteSelectedSearchItems": "刪除所選的搜尋物件",
-    "insertSearchItemsByUrlTitle": "透過URL爬蟲新增搜尋物件"
+    "insertSearchItemsByUrlTitle": "透過URL爬蟲新增搜尋物件",
+    "itemName": "物件名稱",
+    "englishName": "英文名稱",
+    "instruction": "使用說明",
+    "ingredient": "成分"
   },
   "notFoundPage": {
     "title": "查無此頁面",
@@ -102,6 +107,8 @@
     "or": "或者",
     "setting": "設定",
     "rename": "重新命名",
+    "price": "價格",
+    "description": "描述",
     "backToLoginHint": "將在五秒後前往登入頁面，如未前往可以手動點擊下方按鈕繼續",
     "feature": {
       "faqTitle": "問答模組",
@@ -123,6 +130,7 @@
     "user_not_found": "該使用者不存在，請到註冊頁面註冊",
     "password_not_match": "密碼錯誤，請重新輸入",
     "unknown_error": "發生意外錯誤，請確認您的操作並重試。",
-    "token_expired": "登入狀態過期，請重新登入"
+    "token_expired": "登入狀態過期，請重新登入",
+    "invalidFormat": "格式錯誤"
   }
 }

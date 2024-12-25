@@ -47,3 +47,15 @@ export const getBotClassId = (
     .filter((bot) => bot.object_id === currentBotObjectId)
     .map((bot) => bot.class_id)[0]
 }
+
+export const isValidHttpUrl = (url: string): boolean => {
+  try {
+    const parsedUrl = new URL(url)
+    return (
+      (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:') &&
+      !!parsedUrl.hostname
+    )
+  } catch {
+    return false
+  }
+}

@@ -19,7 +19,7 @@ const dialogContent = {
 export const CustomDialog = <T extends Record<string, unknown>>({
   isOpen,
   handleClose,
-  fields,
+  fields = [],
   title,
   linkText,
   link,
@@ -28,6 +28,33 @@ export const CustomDialog = <T extends Record<string, unknown>>({
 }: CustomDialogProps<T>) => {
   const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const validateField = (field: any, value: string): string | undefined => {
+    if (!field.required && !value) {
+      return undefined
+    }
+    if (field.type === 'text' && field.validate && !field.validate(value)) {
+      return field.errorText?.invalidFormat || t('error.invalidFormat')
+    }
+    return undefined
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleFieldBlur = (field: any, value: string) => {
+    const error = validateField(field, value)
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [field.name]: error || ''
+    }))
+  }
+
+  const handleDialogClose = () => {
+    // 清除所有錯誤
+    setErrors({})
+    handleClose()
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -35,13 +62,27 @@ export const CustomDialog = <T extends Record<string, unknown>>({
 
     const formData = new FormData(event.currentTarget)
     const formJson = Object.fromEntries(formData.entries())
-
     const validatedData = formJson as T
+
+    const newErrors: Record<string, string> = {}
+    fields.forEach((field) => {
+      const error = validateField(field, formJson[field.name] as string)
+      if (error) {
+        newErrors[field.name] = error
+      }
+    })
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      setLoading(false)
+      return
+    }
+
     try {
       await onSubmit(validatedData)
     } finally {
       setLoading(false)
-      handleClose()
+      handleDialogClose()
     }
   }
 
@@ -49,7 +90,7 @@ export const CustomDialog = <T extends Record<string, unknown>>({
     <StyledDialog
       maxWidth="xs"
       open={isOpen}
-      onClose={handleClose}
+      onClose={handleDialogClose}
       PaperProps={{
         component: 'form',
         onSubmit: handleSubmit
@@ -71,6 +112,9 @@ export const CustomDialog = <T extends Record<string, unknown>>({
               type={field.type}
               fullWidth
               variant="outlined"
+              error={!!errors[field.name]}
+              helperText={errors[field.name]}
+              onBlur={(e) => handleFieldBlur(field, e.target.value)}
             />
           ))}
       </DialogContent>
@@ -82,7 +126,7 @@ export const CustomDialog = <T extends Record<string, unknown>>({
         </Box>
         <Box>
           <Button
-            onClick={!loading ? handleClose : () => {}}
+            onClick={!loading ? handleDialogClose : () => {}}
             variant="contained"
             color="primary"
           >

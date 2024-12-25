@@ -83,10 +83,15 @@
   "searchSettingPage": {
     "title": "Search Module Management",
     "addSearchItemButton": "Add Search Item",
+    "addSearchItemFromUrlButton": "Add Search Item via URL",
     "deleteSearchItemTitle": "Are you sure you want to delete {{item_name}}? This action cannot be undone.",
     "deleteSearchItemsTitle": "Are you sure you want to delete all selected search items? This action cannot be undone.",
     "deleteSelectedSearchItems": "Delete Selected Search Items",
-    "insertSearchItemsByUrlTitle": "Add search items via URL crawler"
+    "insertSearchItemsByUrlTitle": "Add search items via URL crawler",
+    "itemName": "Item Name",
+    "englishName": "English Name",
+    "instruction": "Instruction",
+    "ingredient": "Ingredient"
   },
   "notFoundPage": {
     "title": "Page Not Found",
@@ -102,6 +107,8 @@
     "or": "OR",
     "setting": "Settings",
     "rename": "Rename",
+    "price": "Price",
+    "description": "Description",
     "backToLoginHint": "You will be redirected to the login page in five seconds, or you can click the button below to continue.",
     "feature": {
       "faqTitle": "FAQ Module",
@@ -123,6 +130,7 @@
     "user_not_found": "User not found, please sign up.",
     "password_not_match": "Incorrect password, please try again.",
     "unknown_error": "An unexpected error occurred, please check your action and try again.",
-    "token_expired": "Session expired, please log in again"
+    "token_expired": "Session expired, please log in again",
+    "invalidFormat": "Invalid format"
   }
 }

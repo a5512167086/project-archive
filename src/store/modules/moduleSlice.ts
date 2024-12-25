@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { clearUserToken } from '@/utils/helper'
 import { moduleApi, ModuleSetting } from '../apis/moduleApi'
 
 interface ModuleState {
@@ -38,7 +37,6 @@ export const moduleSlice = createSlice({
       .addMatcher(
         moduleApi.endpoints.getModuleSettings.matchRejected,
         (state, action) => {
-          clearUserToken()
           state.status = 'failed'
           state.errorCode = action.error.code!
           state.errorMessage = action.error.message!

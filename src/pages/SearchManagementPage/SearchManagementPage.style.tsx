@@ -6,7 +6,7 @@ export const StyledSearchManagementPage = styled(Container)(() => ({
     justifyContent: 'space-between',
     alignItems: 'center'
   },
-  '& .search__deleteButton': {
+  '& .search__button': {
     marginRight: '10px'
   },
   '& .search__title': {

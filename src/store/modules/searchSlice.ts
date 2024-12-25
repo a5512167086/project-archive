@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { clearUserToken } from '@/utils/helper'
 import { searchApi, SearchItem } from '../apis/searchApi'
 
 interface SearchState {
@@ -35,7 +34,6 @@ export const searchSlice = createSlice({
       .addMatcher(
         searchApi.endpoints.getSearchItems.matchRejected,
         (state, action) => {
-          clearUserToken()
           state.status = 'failed'
           state.errorCode = action.error.code!
           state.errorMessage = action.error.message!

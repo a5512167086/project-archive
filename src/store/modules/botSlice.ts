@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { CustomError } from '@/configs/type'
-import { clearUserToken } from '@/utils/helper'
 import { botApi, BotsResponse } from '../apis/botApi'
 
 interface BotState {
@@ -56,7 +55,6 @@ export const botSlice = createSlice({
         state.botList = action.payload
       })
       .addMatcher(botApi.endpoints.getBots.matchRejected, (state, action) => {
-        clearUserToken()
         state.status = 'failed'
         state.errorCode = action.error.code!
         state.errorMessage = action.error.message!
@@ -68,7 +66,6 @@ export const botSlice = createSlice({
         state.status = 'succeeded'
       })
       .addMatcher(botApi.endpoints.deleteBot.matchRejected, (state, action) => {
-        clearUserToken()
         state.status = 'failed'
         state.errorCode = action.error.code!
         state.errorMessage = action.error.message!
@@ -80,7 +77,6 @@ export const botSlice = createSlice({
         state.status = 'succeeded'
       })
       .addMatcher(botApi.endpoints.updateBot.matchRejected, (state, action) => {
-        clearUserToken()
         state.status = 'failed'
         state.errorCode = action.error.code!
         state.errorMessage = action.error.message!

@@ -4,6 +4,18 @@ export type GetSearchItemsRequest = {
   bot_class_id: number
 }
 
+type InsertSearchItemRequest = {
+  bot_class_id: number
+  item_name: string
+  item_english_name: string
+  item_type: string
+  item_description: string
+  item_price: string
+  item_instruction: string
+  item_ingredient: string
+  item_url: string
+}
+
 type InsertSearchItemsByUrlRequest = {
   bot_class_id: number
   url: string
@@ -56,6 +68,13 @@ export const searchApi = createApi({
         method: 'GET'
       })
     }),
+    insertSearchItem: builder.mutation<void, InsertSearchItemRequest>({
+      query: (data) => ({
+        url: `search-item`,
+        method: 'POST',
+        body: data
+      })
+    }),
     insertSearchItemsByUrl: builder.mutation<
       void,
       InsertSearchItemsByUrlRequest
@@ -76,5 +95,9 @@ export const searchApi = createApi({
   })
 })
 
-export const { useLazyGetSearchItemsQuery,useInsertSearchItemsByUrlMutation, useDeleteSearchItemsMutation } =
-  searchApi
+export const {
+  useLazyGetSearchItemsQuery,
+  useInsertSearchItemMutation,
+  useInsertSearchItemsByUrlMutation,
+  useDeleteSearchItemsMutation
+} = searchApi
