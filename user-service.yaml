@@ -30,8 +30,8 @@ spec:
             - name: JWT_SECRET
               value: "REDACTED_SECRET"
             - name: FRONTEND_URL
-              value: "https://easybot.wke.csie.ncnu.edu.tw/"
-            - name: "EMAIL_USER"
+              value: "https://easybot.wke.csie.ncnu.edu.tw"
+            - name: "EMAIL"
               value: "noreply.wke@gmail.com"
             - name: "EMAIL_APP_PASSWORD"
               value: "iryn atxz yglr ueae"
