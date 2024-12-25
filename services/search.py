@@ -1,6 +1,6 @@
 import psycopg2
-
-from commands.search import delete_search_items, insert_search_items
+from schemas import NewSearchItem
+from commands.search import delete_search_items, insert_search_items, insert_search_item
 from exception import GlobalErrorException
 from queries.search import (
     get_all_search_image_items_by_class_id,
@@ -61,6 +61,19 @@ def get_search_items_by_bot_class_id(bot_class_id: int):
     search_text_items = get_all_search_text_items_by_class_id(search_class_id)
     search_image_items = get_all_search_image_items_by_class_id(search_class_id)
     return get_combined_search_items(search_text_items, search_image_items)
+
+
+def add_single_search_item(bot_class_id: int, new_search_item: NewSearchItem):
+    search_class_id = get_search_class_id_by_bot_class_id(bot_class_id)
+    if not search_class_id:
+        raise GlobalErrorException(
+            error_code="SEARCH_CLASS_NOT_FOUND",
+            error_message="Search class not found for the given bot class",
+        )
+    try:
+        insert_search_item(bot_class_id, new_search_item)
+    except psycopg2.Error as error:
+        handle_database_error(error, bot_class_id)
 
 
 def add_search_items_by_url(bot_class_id: int, url: str):

@@ -13,13 +13,13 @@ class SearchItem(BaseModel):
     class_id: int
     object_id: int
     chinese_name: str
-    english_name: str
-    type: str
+    english_name: Optional[str]
+    type: Optional[str]
     description: Optional[str]
     price: Optional[str]
     instruction: Optional[str]
     ingredient: Optional[str]
-    url: HttpUrl
+    url: Optional[HttpUrl]
     images: List[Image]
 
 
@@ -31,6 +31,29 @@ class DeleteSearchItemsReponse(BaseModel):
 class InsertSearchItemsFromUrlRequest(BaseModel):
     bot_class_id: int
     url: str
+
+
+class InsertSearchItemRequest(BaseModel):
+    bot_class_id: int
+    item_name: str
+    item_english_name: Optional[str] = None
+    item_type: Optional[str] = None
+    item_description: Optional[str] = None
+    item_price: Optional[str] = None
+    item_instruction: Optional[str] = None
+    item_ingredient: Optional[str] = None
+    item_url: Optional[HttpUrl] = None
+
+
+class NewSearchItem(BaseModel):
+    item_name: str
+    item_english_name: Optional[str] = None
+    item_type: Optional[str] = None
+    item_description: Optional[str] = None
+    item_price: Optional[str] = None
+    item_instruction: Optional[str] = None
+    item_ingredient: Optional[str] = None
+    item_url: Optional[HttpUrl] = None
 
 
 class DeleteSearchItemsRequest(BaseModel):
@@ -74,7 +97,7 @@ class SearchTextItemsResponse(BaseModel):
     price: Optional[str]
     instruction: Optional[str]
     ingredient: Optional[str]
-    url: Optional[str]
+    url: Optional[HttpUrl]
 
 
 class ErrorResponse(BaseModel):

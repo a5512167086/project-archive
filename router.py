@@ -5,10 +5,12 @@ from schemas import (
     DeleteSearchItemsReponse,
     DeleteSearchItemsRequest,
     ImageSearchItemsRequest,
+    InsertSearchItemRequest,
     InsertSearchItemsFromUrlRequest,
     LineImageSearchItemsRequest,
     SearchImageItemsResponse,
     SearchItem,
+    NewSearchItem,
     SearchTextItemsResponse,
     TextSearchItemsRequest,
 )
@@ -17,6 +19,7 @@ from services.search import (
     delete_search_items_by_bot_class_id,
     get_search_items_by_bot_class_id,
     get_search_items_by_line_ocr_text,
+    add_single_search_item,
     get_search_items_by_ocr_text,
     get_search_items_by_text,
 )
@@ -29,6 +32,12 @@ router = APIRouter()
 )
 def get_search_items(bot_class_id: int):
     return get_search_items_by_bot_class_id(bot_class_id)
+
+
+@router.post("/search-item", tags=["search"])
+def add_search_item(body: InsertSearchItemRequest):
+    new_item = NewSearchItem(**body.model_dump(exclude_none=True))
+    add_single_search_item(body.bot_class_id, new_item)
 
 
 @router.post("/search-items", tags=["search"])
