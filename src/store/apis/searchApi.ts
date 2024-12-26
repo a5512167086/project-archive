@@ -13,7 +13,7 @@ type InsertSearchItemRequest = {
   item_price: string
   item_instruction: string
   item_ingredient: string
-  item_url: string
+  item_url?: string
 }
 
 type InsertSearchItemsByUrlRequest = {

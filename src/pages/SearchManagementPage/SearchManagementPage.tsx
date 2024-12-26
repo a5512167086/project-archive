@@ -188,8 +188,11 @@ export const SearchManagementPage = () => {
     item_price: string
     item_instruction: string
     item_ingredient: string
-    item_url: string
+    item_url?: string
   }) => {
+    if (!data.item_url) {
+      delete data.item_url
+    }
     await insertSearchItem({
       bot_class_id: botClassId,
       ...data
