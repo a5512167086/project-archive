@@ -1,3 +1,18 @@
+import os
+
+from linebot.v3.messaging import (
+    ApiClient,
+    Configuration,
+    MessageAction,
+    MessagingApi,
+    MessagingApiBlob,
+    RichMenuArea,
+    RichMenuBounds,
+    RichMenuRequest,
+    RichMenuSize,
+    URIAction,
+)
+
 from commands.bot import delete_bot_by_id, insert_new_bot, update_bot_boy_id
 from exception import GlobalErrorException
 from queries.bot import (
@@ -24,7 +39,52 @@ def validate_bot_ownership(user_id: str, bot_id: int):
 
 def create_new_bot(user_id: str, new_bot: InsertBotRequest):
     bot_data = insert_new_bot(user_id, new_bot)
+    init_rich_menu(
+        bot_data["channel_access_token"], bot_data["liff_id"], bot_data["class_id"]
+    )
     return bot_data["bot_detail_id"]
+
+
+def init_rich_menu(line_access_token: str, liff_id: str, bot_uuid: str):
+    configuration = Configuration(access_token=line_access_token)
+    with ApiClient(configuration) as api_client:
+        line_bot_api = MessagingApi(api_client)
+        line_bot_blob_api = MessagingApiBlob(api_client)
+        response = line_bot_api.create_rich_menu(
+            rich_menu_request=RichMenuRequest(
+                size=RichMenuSize(width=1200, height=405),
+                selected=False,
+                name="選單",
+                chatBarText="開啟選單",
+                areas=[
+                    RichMenuArea(
+                        bounds=RichMenuBounds(x=0, y=0, width=600, height=405),
+                        action=URIAction(
+                            label="指令選單",
+                            uri=f"https://liff.line.me/{liff_id}?bot_uuid={bot_uuid}",
+                        ),
+                    ),
+                    RichMenuArea(
+                        bounds=RichMenuBounds(x=600, y=0, width=600, height=405),
+                        action=MessageAction(
+                            type="message", label="測試", text="你點擊了右側按鈕"
+                        ),
+                    ),
+                ],
+            )
+        )
+        rich_menu_id = response.rich_menu_id
+
+        image_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../template/rich_menu.png")
+        )
+        with open(image_path, "rb") as image:
+            line_bot_blob_api.set_rich_menu_image(
+                rich_menu_id=rich_menu_id,
+                body=bytearray(image.read()),
+                _headers={"Content-Type": "image/png"},
+            )
+        line_bot_api.set_default_rich_menu(rich_menu_id)
 
 
 def delete_current_bot(user_id: str, delete_bot_id: int):
