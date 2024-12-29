@@ -7,6 +7,7 @@ SELECT
     bd.channel_id,
     bd.channel_access_token,
     bd.channel_secret,
+    bd.liff_id,
     o.owner_id
 FROM
     objects o
