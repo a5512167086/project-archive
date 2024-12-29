@@ -3,9 +3,8 @@ kind: Ingress
 metadata:
   name: web-ingress
   namespace: easybot
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
+  ingressClassName: traefik
   tls:
     - hosts:
         - easybot.wke.csie.ncnu.edu.tw
