@@ -1,0 +1,17 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingressroute
+  namespace: traefik-system
+spec:
+  tls:
+    certResolver: letsencryptProd
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`easybot.wke.csie.ncnu.edu.tw`)
+      services:
+        - kind: TraefikService
+          name: api@internal
+  

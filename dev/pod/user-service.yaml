@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user
+  template:
+    metadata:
+      labels:
+        app: user
+    spec:
+      containers:
+        - name: user
+          image: a5512167086/easybot-user-service:latest
+          env:
+            - name: DB_HOST
+              value: "10.21.26.74"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "easybot"
+            - name: DB_USER
+              value: "postgres"
+            - name: DB_PASSWORD
+              value: "0000"
+            - name: JWT_SECRET
+              value: "REDACTED_SECRET"
+            - name: FRONTEND_URL
+              value: "https://demo.wke.csie.ncnu.edu.tw/easybot"
+            - name: "EMAIL"
+              value: "noreply.wke@gmail.com"
+            - name: "EMAIL_APP_PASSWORD"
+              value: "iryn atxz yglr ueae"
+            - name: "GOOGLE_CLIENT_ID"
+              value: "48844684655-se9surcs5rvd5ek14o1b39k0lbhvk6on.apps.googleusercontent.com"
+            - name: "GOOGLE_CLIENT_SECRET"
+              value: "REDACTED_GOOGLE_CLIENT_SECRET"
+            - name: "GOOGLE_REDIRECT_URI"
+              value: "https://demo.wke.csie.ncnu.edu.tw/easybot/oauth-callback"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+spec:
+  selector:
+    app: user
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
