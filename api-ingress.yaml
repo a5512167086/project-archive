@@ -13,6 +13,13 @@ spec:
     - host: easybot.wke.csie.ncnu.edu.tw
       http:
         paths:
+          - path: /authapi
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-service
+                port:
+                  number: 80
           - path: /userapi
             pathType: Prefix
             backend:
