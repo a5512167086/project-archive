@@ -9,7 +9,7 @@ from queries.command import (
     get_command_class_id_by_bot_class_id,
 )
 from schemas import CommandType
-from utils.command import get_enabled_commands
+from utils.command import get_enabled_commands, get_full_commands
 from utils.search import convert_search_to_line_text
 
 
@@ -27,6 +27,13 @@ def is_command_type_exists(
     feature_commands: list[dict], command_type: CommandType
 ) -> bool:
     return any(command["type"] == command_type.value for command in feature_commands)
+
+
+def get_all_command_list_with_status(bot_class_id: int) -> list[dict]:
+    command_class_id = validate_command_class(bot_class_id)
+    command_list = get_all_feature_commands_by_bot_class_id(command_class_id)
+    module_list = get_module_list(bot_class_id)
+    return get_full_commands(command_list, module_list)
 
 
 def add_new_feature_command(
