@@ -27,8 +27,8 @@ spec:
               value: "postgres"
             - name: DB_PASSWORD
               value: "0000"
-            - name: JWT_SECRET
-              value: "REDACTED_SECRET"
+            - name: AUTH_SERVICE_API_URL
+              value: "https://easybot.wke.csie.ncnu.edu.tw/authapi"
             - name: FRONTEND_URL
               value: "https://easybot.wke.csie.ncnu.edu.tw"
             - name: "EMAIL"

@@ -9,43 +9,76 @@ spec:
   entryPoints:
     - websecure
   routes:
+    # 平台 Web Service
+    # 根據 Host 配置的服務，主要用於提供平台相關的前端服務
     - kind: Rule
       match: Host(`easybot.wke.csie.ncnu.edu.tw`)
       services:
         - name: platform-web-service
           port: 80
+
+    # Auth API
+    # 提供認證相關的 API，如用戶登錄或驗證
     - kind: Rule
       match: Host(`easybot.wke.csie.ncnu.edu.tw`) && PathPrefix(`/authapi`)
       services:
         - name: auth-service
           port: 80
+
+    # User API（需要中介軟體的路由）
+    # 需要進行認證的特定用戶 API 路徑（例如獲取用戶資訊、重設密碼）
     - kind: Rule
-      match: Host(`easybot.wke.csie.ncnu.edu.tw`) && PathPrefix(`/userapi/user/me`)
+      match: Host(`easybot.wke.csie.ncnu.edu.tw`) && (PathPrefix(`/userapi/user/me`) || PathPrefix(`/userapi/user/reset_password`))
       middlewares:
         - name: auth-middleware
       services:
         - name: user-service
           port: 80
+
+    # User API（不需要中介軟體的路由）
+    # 捕獲其他 `/userapi` 路徑，不需要進行認證
     - kind: Rule
       match: Host(`easybot.wke.csie.ncnu.edu.tw`) && PathPrefix(`/userapi`)
       services:
         - name: user-service
           port: 80
+
+    # Bot API（需要中介軟體的路由）
+    # 提供與 Bot 相關的操作，例如創建、更新 Bot，需要進行認證
+    - kind: Rule
+      match: Host(`easybot.wke.csie.ncnu.edu.tw`) && (PathPrefix(`/botapi/bot`) || PathPrefix(`/botapi/bots`))
+      middlewares:
+        - name: auth-middleware
+      services:
+        - name: bot-service
+          port: 80
+
+    # Bot API（不需要中介軟體的路由）
+    # 捕獲其他 `/botapi` 路徑，如 `/botapi/webhook`，不需要進行認證
     - kind: Rule
       match: Host(`easybot.wke.csie.ncnu.edu.tw`) && PathPrefix(`/botapi`)
       services:
         - name: bot-service
           port: 80
+
+    # Search API
+    # 提供與搜索相關的 API 服務
     - kind: Rule
       match: Host(`easybot.wke.csie.ncnu.edu.tw`) && PathPrefix(`/searchapi`)
       services:
         - name: search-service
           port: 80
+
+    # Module API
+    # 提供與模組相關的 API 服務
     - kind: Rule
       match: Host(`easybot.wke.csie.ncnu.edu.tw`) && PathPrefix(`/moduleapi`)
       services:
         - name: module-service
           port: 80
+
+    # Command API
+    # 提供與命令相關的 API 服務
     - kind: Rule
       match: Host(`easybot.wke.csie.ncnu.edu.tw`) && PathPrefix(`/commandapi`)
       services:
