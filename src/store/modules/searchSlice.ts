@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { searchApi, SearchItem } from '../apis/searchApi'
+import { CustomError } from '@/configs/type'
 
 interface SearchState {
   searchItems: SearchItem[]
@@ -26,6 +27,11 @@ export const searchSlice = createSlice({
     },
     clearCurrentSearchItem: (state) => {
       state.currentSearchItemObjectId = null
+    },
+    clearSearchError: (state) => {
+      state.errorCode = ''
+      state.errorMessage = ''
+      state.status = 'idle'
     }
   },
   extraReducers: (builder) => {
@@ -43,15 +49,19 @@ export const searchSlice = createSlice({
       .addMatcher(
         searchApi.endpoints.getSearchItems.matchRejected,
         (state, action) => {
+          const error = action.payload!.data as CustomError
           state.status = 'failed'
-          state.errorCode = action.error.code!
-          state.errorMessage = action.error.message!
+          state.errorCode = error['error_code']
+          state.errorMessage = error['error_message']
         }
       )
   }
 })
 
-export const { setCurrentSearchItem, clearCurrentSearchItem } =
-  searchSlice.actions
+export const {
+  setCurrentSearchItem,
+  clearCurrentSearchItem,
+  clearSearchError
+} = searchSlice.actions
 
 export default searchSlice.reducer

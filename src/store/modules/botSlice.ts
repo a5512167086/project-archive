@@ -55,9 +55,22 @@ export const botSlice = createSlice({
         state.botList = action.payload
       })
       .addMatcher(botApi.endpoints.getBots.matchRejected, (state, action) => {
+        const error = action.payload!.data as CustomError
         state.status = 'failed'
-        state.errorCode = action.error.code!
-        state.errorMessage = action.error.message!
+        state.errorCode = error['error_code']
+        state.errorMessage = error['error_message']
+      })
+      .addMatcher(botApi.endpoints.createBot.matchPending, (state) => {
+        state.status = 'loading'
+      })
+      .addMatcher(botApi.endpoints.createBot.matchFulfilled, (state) => {
+        state.status = 'succeeded'
+      })
+      .addMatcher(botApi.endpoints.createBot.matchRejected, (state, action) => {
+        const error = action.payload!.data as CustomError
+        state.status = 'failed'
+        state.errorCode = error['error_code']
+        state.errorMessage = error['error_message']
       })
       .addMatcher(botApi.endpoints.deleteBot.matchPending, (state) => {
         state.status = 'loading'
@@ -66,9 +79,10 @@ export const botSlice = createSlice({
         state.status = 'succeeded'
       })
       .addMatcher(botApi.endpoints.deleteBot.matchRejected, (state, action) => {
+        const error = action.payload!.data as CustomError
         state.status = 'failed'
-        state.errorCode = action.error.code!
-        state.errorMessage = action.error.message!
+        state.errorCode = error['error_code']
+        state.errorMessage = error['error_message']
       })
       .addMatcher(botApi.endpoints.updateBot.matchPending, (state) => {
         state.status = 'loading'
@@ -77,9 +91,10 @@ export const botSlice = createSlice({
         state.status = 'succeeded'
       })
       .addMatcher(botApi.endpoints.updateBot.matchRejected, (state, action) => {
+        const error = action.payload!.data as CustomError
         state.status = 'failed'
-        state.errorCode = action.error.code!
-        state.errorMessage = action.error.message!
+        state.errorCode = error['error_code']
+        state.errorMessage = error['error_message']
       })
   }
 })

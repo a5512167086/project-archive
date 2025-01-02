@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { moduleApi, ModuleSetting } from '../apis/moduleApi'
+import { CustomError } from '@/configs/type'
 
 interface ModuleState {
   moduleSettings: ModuleSetting[]
@@ -18,7 +19,13 @@ const initialState: ModuleState = {
 export const moduleSlice = createSlice({
   name: 'module',
   initialState,
-  reducers: {},
+  reducers: {
+    clearModuleError: (state) => {
+      state.errorCode = ''
+      state.errorMessage = ''
+      state.status = 'idle'
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addMatcher(
@@ -37,12 +44,15 @@ export const moduleSlice = createSlice({
       .addMatcher(
         moduleApi.endpoints.getModuleSettings.matchRejected,
         (state, action) => {
+          const error = action.payload!.data as CustomError
           state.status = 'failed'
-          state.errorCode = action.error.code!
-          state.errorMessage = action.error.message!
+          state.errorCode = error['error_code']
+          state.errorMessage = error['error_message']
         }
       )
   }
 })
+
+export const { clearModuleError } = moduleSlice.actions
 
 export default moduleSlice.reducer

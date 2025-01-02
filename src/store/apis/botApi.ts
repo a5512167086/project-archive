@@ -13,6 +13,7 @@ export type CreateBotRequest = {
   bot_channel_id: string
   bot_channel_access_token: string
   bot_channel_secret: string
+  bot_liff_id: string
 }
 
 export type CreateBotResponse = {

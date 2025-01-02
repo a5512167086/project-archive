@@ -10,7 +10,8 @@ export const ERROR_CODE_MESSAGE_MAPPING = {
   OAUTH_FAILED: 'error.oauth_failed',
   USER_LOOKUP_FAILED: 'error.unknown_error',
   USER_CREATION_FAILED: 'error.unknown_error',
-  EMAIL_SERVICE_FAILED: 'error.unknown_error'
+  EMAIL_SERVICE_FAILED: 'error.unknown_error',
+  INVALID_LINE_BOT: 'error.invalid_line_bot'
 }
 
 export const SELECT_LANGUAGES_LIST = [LANGUAGES.EN, LANGUAGES.ZH]

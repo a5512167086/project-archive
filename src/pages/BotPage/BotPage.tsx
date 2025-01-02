@@ -25,7 +25,6 @@ import {
 } from '@/store/apis/botApi'
 import { useAppDispatch, useAppSelector } from '@/utils/hook'
 import { clearCurrentBot, setCurrentBot } from '@/store/modules/botSlice'
-import { CustomLoader } from '@/components/CustomLoader'
 
 const dialogFields = [
   {
@@ -39,6 +38,13 @@ const dialogFields = [
     id: 'channelId',
     name: 'channelId',
     label: 'botPage.channelId',
+    type: 'text',
+    required: true
+  },
+  {
+    id: 'liffId',
+    name: 'liffId',
+    label: 'botPage.liffId',
     type: 'text',
     required: true
   },
@@ -72,7 +78,7 @@ export const BotPage = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
-  const { botList, status } = useAppSelector((state) => state.bot)
+  const { botList } = useAppSelector((state) => state.bot)
   const [getBots] = useLazyGetBotsQuery()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -107,12 +113,14 @@ export const BotPage = () => {
     channelId: string
     channelAccessToken: string
     channelSecret: string
+    liffId: string
   }) => {
     await createBot({
       bot_name: data.botName,
       bot_channel_id: data.channelId,
       bot_channel_access_token: data.channelAccessToken,
-      bot_channel_secret: data.channelSecret
+      bot_channel_secret: data.channelSecret,
+      bot_liff_id: data.liffId
     })
       .unwrap()
       .then((data) => {
@@ -126,9 +134,7 @@ export const BotPage = () => {
     dispatch(clearCurrentBot())
   }, [])
 
-  return status === 'loading' ? (
-    <CustomLoader />
-  ) : (
+  return (
     <StyledBotPage maxWidth="lg">
       <Breadcrumbs
         sx={{ fontSize: '1.25rem', fontWeight: 'bold', margin: '20px 0' }}
@@ -179,12 +185,15 @@ export const BotPage = () => {
         channelId: string
         channelAccessToken: string
         channelSecret: string
+        liffId: string
       }>
         isOpen={isDialogOpen}
         handleClose={handleDialogClose}
         fields={dialogFields}
         title={botPageContent.addBot}
-        onSubmit={(data) => handleCreateBot(data)}
+        onSubmit={async (data) => {
+          await handleCreateBot(data)
+        }}
         linkText={botPageContent.seeTutorial}
         link={PAGE_PATHS.CREATE_BOT_TURTROIAL}
       />

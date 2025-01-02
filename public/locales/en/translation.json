@@ -53,6 +53,7 @@
     "channelId": "Channel ID",
     "channelSecret": "Channel Secret",
     "channelAccessToken": "Channel Access Token",
+    "liffId": "LIFF ID",
     "seeTutorial": "See Tutorial",
     "webhookUrl": "Webhook URL",
     "webhookHint": "The webhook URL will only be displayed upon creation. Please keep it safe."
@@ -131,6 +132,7 @@
     "password_not_match": "Incorrect password, please try again.",
     "unknown_error": "An unexpected error occurred, please check your action and try again.",
     "token_expired": "Session expired, please log in again",
-    "invalidFormat": "Invalid format"
+    "invalidFormat": "Invalid format",
+    "invalid_line_bot": "LINE bot information error, please check if the information is correct"
   }
 }

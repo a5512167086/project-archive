@@ -53,6 +53,7 @@
     "channelId": "Channel ID",
     "channelSecret": "Channel Secret",
     "channelAccessToken": "Channel Access Token",
+    "liffId": "LIFF ID",
     "seeTutorial": "查看教學",
     "webhookUrl": "Webhook網址",
     "webhookHint": "Webhook網址只會在創建時顯示，請妥善保管。"
@@ -131,6 +132,7 @@
     "password_not_match": "密碼錯誤，請重新輸入",
     "unknown_error": "發生意外錯誤，請確認您的操作並重試。",
     "token_expired": "登入狀態過期，請重新登入",
-    "invalidFormat": "格式錯誤"
+    "invalidFormat": "格式錯誤",
+    "invalid_line_bot": "LINE機器人資訊錯誤，請確認資訊是否正確"
   }
 }
