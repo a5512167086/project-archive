@@ -1,5 +1,6 @@
-from pydantic import BaseModel, EmailStr
 from typing import Literal
+
+from pydantic import BaseModel, EmailStr
 
 
 class User(BaseModel):
@@ -20,6 +21,7 @@ class RegisterResponse(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+    remember: bool
 
 
 class TokenResponse(BaseModel):
