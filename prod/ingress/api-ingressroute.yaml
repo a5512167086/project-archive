@@ -30,6 +30,7 @@ spec:
     - kind: Rule
       match: Host(`easybot.wke.csie.ncnu.edu.tw`) && (PathPrefix(`/userapi/user/me`) || PathPrefix(`/userapi/user/reset_password`))
       middlewares:
+        - name: cors-middleware
         - name: auth-middleware
       services:
         - name: user-service
@@ -48,6 +49,7 @@ spec:
     - kind: Rule
       match: Host(`easybot.wke.csie.ncnu.edu.tw`) && (PathPrefix(`/botapi/bot`) || PathPrefix(`/botapi/bots`))
       middlewares:
+        - name: cors-middleware
         - name: auth-middleware
       services:
         - name: bot-service
