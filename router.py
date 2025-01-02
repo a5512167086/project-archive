@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, Request, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from schemas import TokenRequest, TokenResponse
-from utils import verify_jwt_token
+
+from schemas import TokenRequest, TokenResponse, VerifyResponse
 from services.auth import generate_access_token
+from utils import verify_jwt_token
 
 router = APIRouter()
 security = HTTPBearer()
@@ -16,17 +17,15 @@ async def sign_jwt(data: TokenRequest):
     return token_data
 
 
-@router.post("/verify", tags=["auth"], response_model=dict)
-async def verify_jwt(
-    request: Request, credentials: HTTPAuthorizationCredentials = Depends(security)
-):
+@router.get("/verify", tags=["auth"], response_model=VerifyResponse)
+async def verify_jwt(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
-        payload = verify_jwt_token(request, credentials)
+        payload = verify_jwt_token(credentials)
         return {
             "X-User-ID": payload["sub"],
             "X-User-Email": payload["email"],
         }
-    except HTTPException as e:
+    except HTTPException:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid or expired token.",
