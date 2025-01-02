@@ -12,7 +12,7 @@ security = HTTPBearer()
 @router.post("/token", tags=["auth"], response_model=TokenResponse)
 async def sign_jwt(data: TokenRequest):
     token_data = generate_access_token(
-        user_id=data.user_id, email=data.email, is_remeber=data.is_remeber
+        user_id=data.user_id, email=data.email, is_remember=data.is_remember
     )
     return token_data
 

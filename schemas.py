@@ -9,7 +9,7 @@ class ErrorResponse(BaseModel):
 class TokenRequest(BaseModel):
     user_id: str
     email: EmailStr
-    is_remeber: bool
+    is_remember: bool
 
 
 class TokenResponse(BaseModel):
@@ -22,4 +22,4 @@ class VerifyResponse(BaseModel):
     x_user_email: str = Field(alias="X-User-Email")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
