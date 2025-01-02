@@ -1,31 +1,6 @@
-import jwt
 import requests
-from fastapi import Depends, HTTPException, Request, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jwt import PyJWTError
 
-from config import ALGORITHM, COMMAND_SERVICE_API_URL, JWT_SECRET
-from exception import GlobalErrorException
-
-
-def verify_jwt_token(
-    request: Request, credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer())
-):
-    token = credentials.credentials
-    try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=ALGORITHM)
-
-        if payload.get("sub") is None:
-            raise GlobalErrorException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Invalid user",
-            )
-        request.state.payload = payload
-    except PyJWTError:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Invalid token or expired",
-        )
+from config import COMMAND_SERVICE_API_URL
 
 
 def execute_command(bot_class_id: int, message: str, message_type: str) -> str:

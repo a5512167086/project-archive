@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, Header, Request
+from typing import Annotated, List
+
+from fastapi import APIRouter, Depends, Header
 from linebot.v3.messaging import (
     Configuration,
 )
-from typing_extensions import Annotated, List
 
 from config import BASE_URL
+from dependencies import get_auth_response_headers
 from schemas import (
     Bot,
     BotBodies,
@@ -22,34 +24,41 @@ from services.bot import (
     update_current_bot,
 )
 from services.webhook import custom_webhook
-from utils import verify_jwt_token
 
 router = APIRouter()
-privtate_router = APIRouter(dependencies=[Depends(verify_jwt_token)])
 
 
-@privtate_router.get("/bots", tags=["bots"], response_model=List[Bot])
-def get_bots(request: Request):
-    user_id = request.state.payload["sub"]
+@router.get("/bots", tags=["bots"], response_model=List[Bot])
+def get_bots(auth_headers: Annotated[dict, Depends(get_auth_response_headers)]):
+    user_id = auth_headers["X-User-ID"]
     return get_all_bots(user_id)
 
 
-@privtate_router.post("/bot", tags=["bots"], response_model=InsertBotResponse)
-def create_bot(request: Request, bot_body: InsertBotRequest):
-    user_id = request.state.payload["sub"]
+@router.post("/bot", tags=["bots"], response_model=InsertBotResponse)
+def create_bot(
+    auth_headers: Annotated[dict, Depends(get_auth_response_headers)],
+    bot_body: InsertBotRequest,
+):
+    user_id = auth_headers["X-User-ID"]
     bot_uuid = create_new_bot(user_id, bot_body)
     return {"webhook_url": f"{BASE_URL}webhook/{bot_uuid}"}
 
 
-@privtate_router.delete("/bot/{bot_class_id}", tags=["bots"])
-def delete_bot(request: Request, bot_class_id: int):
-    user_id = request.state.payload["sub"]
+@router.delete("/bot/{bot_class_id}", tags=["bots"])
+def delete_bot(
+    auth_headers: Annotated[dict, Depends(get_auth_response_headers)], bot_class_id: int
+):
+    user_id = auth_headers["X-User-ID"]
     delete_current_bot(user_id, bot_class_id)
 
 
-@privtate_router.patch("/bot/{bot_class_id}", tags=["bots"])
-def update_bot(request: Request, bot_class_id: int, bot_body: UpdateBotRequest):
-    user_id = request.state.payload["sub"]
+@router.patch("/bot/{bot_class_id}", tags=["bots"])
+def update_bot(
+    auth_headers: Annotated[dict, Depends(get_auth_response_headers)],
+    bot_class_id: int,
+    bot_body: UpdateBotRequest,
+):
+    user_id = auth_headers["X-User-ID"]
     update_current_bot(user_id, bot_class_id, bot_body)
 
 

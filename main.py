@@ -3,7 +3,7 @@ from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from exception import add_global_exception_handler
-from router import privtate_router, router
+from router import router
 from schemas import ErrorResponse
 
 app = FastAPI(
@@ -19,7 +19,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(router)
-app.include_router(privtate_router)
 add_global_exception_handler(app)
 
 if __name__ == "__main__":
