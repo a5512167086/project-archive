@@ -1,20 +1,18 @@
-from fastapi import Depends, HTTPException, status, Request
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from datetime import datetime, timedelta, timezone
-from config import (
-    JWT_SECRET,
-    ALGORITHM,
-    GOOGLE_CLIENT_SECRET,
-    GOOGLE_CLIENT_ID,
-    GOOGLE_REDIRECT_URI,
-)
-from jwt import PyJWTError
-from exception import GlobalErrorException
-import bcrypt
-import jwt
-import requests
 import secrets
 import string
+
+import bcrypt
+import requests
+from fastapi import HTTPException
+from requests.exceptions import RequestException
+
+from config import (
+    AUTH_SERVICE_API_URL,
+    GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET,
+    GOOGLE_REDIRECT_URI,
+)
+from exception import GlobalErrorException
 
 
 def hash_password(password):
@@ -23,34 +21,14 @@ def hash_password(password):
     return hashed.decode("utf-8")
 
 
-def create_jwt_token(data: dict, expires_delta: timedelta = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
-    else:
-        expire = datetime.now(timezone.utc) + timedelta(hours=24)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, JWT_SECRET, algorithm=ALGORITHM)
-    return encoded_jwt
-
-
-def verify_jwt_token(
-    request: Request, credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer())
-):
-    token = credentials.credentials
+def create_jwt_token(data: dict):
     try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=ALGORITHM)
-
-        if payload.get("sub") is None:
-            raise GlobalErrorException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Invalid user",
-            )
-        request.state.payload = payload
-    except PyJWTError:
+        response = requests.post(f"{AUTH_SERVICE_API_URL}/token", json=data)
+        return response.json()
+    except RequestException:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Invalid token or expired",
+            status_code=500,
+            detail="Failed to generate JWT token",
         )
 
 

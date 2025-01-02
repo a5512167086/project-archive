@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 from commands.oauth import create_oauth
 from commands.user import create_user, update_user_password
 from exception import GlobalErrorException
@@ -37,12 +35,14 @@ def validate_existence(data, error_code, error_message):
         raise GlobalErrorException(error_code=error_code, error_message=error_message)
 
 
-def generate_access_token(user_id: str, email: str, extra_data=None):
-    data = {"sub": user_id, "email": email}
+def generate_access_token(
+    user_id: str, email: str, is_remember: bool = False, extra_data=None
+):
+    data = {"user_id": user_id, "email": email, "is_remember": is_remember}
     if extra_data:
         data.update(extra_data)
-    access_token = create_jwt_token(data=data)
-    return {"token": access_token, "token_type": "bearer"}
+    access_token = create_jwt_token(data)
+    return access_token
 
 
 def create_new_user(username: str, email: str, password: str) -> str:
@@ -146,10 +146,13 @@ def forgot_password(user_email: ForgotPasswordRequest):
         forgot_user_data, ERROR_USER_NOT_EXISTS, "Can't find user by email."
     )
     token = create_jwt_token(
-        data={"sub": forgot_user_data["user_id"], "email": forgot_user_data["email"]},
-        expires_delta=timedelta(minutes=15),
+        data={
+            "user_id": forgot_user_data["user_id"],
+            "email": forgot_user_data["email"],
+            "is_remember": False,
+        },
     )
-    send_reset_email(user_email, token)
+    send_reset_email(user_email, token['token'])
 
 
 def reset_password(user_id: str, new_password: str):

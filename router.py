@@ -1,26 +1,28 @@
-from fastapi import APIRouter, Depends, Request
+from typing import Annotated
+
+from fastapi import APIRouter, Depends
+
+from dependencies import get_auth_response_headers
 from schemas import (
-    RegisterRequest,
-    LoginRequest,
-    TokenResponse,
-    RegisterResponse,
-    User,
-    ResetPasswordRequest,
     ForgotPasswordRequest,
+    LoginRequest,
     OAuthLoginRequest,
+    RegisterRequest,
+    RegisterResponse,
+    ResetPasswordRequest,
+    TokenResponse,
+    User,
 )
 from services.user import (
-    register,
-    login,
-    get_user_profile,
-    reset_password,
     forgot_password,
+    get_user_profile,
+    login,
     oauth_login,
+    register,
+    reset_password,
 )
-from utils import verify_jwt_token
 
 router = APIRouter()
-privtate_router = APIRouter(dependencies=[Depends(verify_jwt_token)])
 
 
 @router.post(
@@ -50,15 +52,18 @@ async def forgot_user_password(body: ForgotPasswordRequest):
     forgot_password(user_email)
 
 
-@privtate_router.get("/user/me", tags=["users"], response_model=User)
-async def get_user(request: Request):
-    user_id = request.state.payload["sub"]
+@router.get("/user/me", tags=["users"], response_model=User)
+async def get_user(auth_headers: Annotated[dict, Depends(get_auth_response_headers)]):
+    user_id = auth_headers["X-User-ID"]
     user_profile = get_user_profile(user_id)
     return user_profile
 
 
-@privtate_router.post("/user/reset_password", tags=["users"])
-async def reset_user_password(request: Request, body: ResetPasswordRequest):
-    update_user_id = request.state.payload["sub"]
+@router.post("/user/reset_password", tags=["users"])
+async def reset_user_password(
+    auth_headers: Annotated[dict, Depends(get_auth_response_headers)],
+    body: ResetPasswordRequest,
+):
+    update_user_id = auth_headers["X-User-ID"]
     new_password = body.new_password
     reset_password(update_user_id, new_password)
