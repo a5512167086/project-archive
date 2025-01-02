@@ -70,7 +70,7 @@ export const SignInPage = () => {
     }
     setEmailError(false)
     setIsLoading(true)
-    await loginUser({ email, password })
+    await loginUser({ email, password, remember })
       .unwrap()
       .then((payload) => {
         if (remember) {
