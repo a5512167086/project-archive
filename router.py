@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from schemas import TokenRequest, TokenResponse, VerifyResponse
@@ -18,13 +18,15 @@ async def sign_jwt(data: TokenRequest):
 
 
 @router.get("/verify", tags=["auth"], response_model=VerifyResponse)
-async def verify_jwt(credentials: HTTPAuthorizationCredentials = Depends(security)):
+async def verify_jwt(
+    response: Response,
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+):
     try:
         payload = verify_jwt_token(credentials)
-        return {
-            "X-User-ID": payload["sub"],
-            "X-User-Email": payload["email"],
-        }
+        response.headers["X-User-ID"] = payload["sub"]
+        response.headers["X-User-Email"] = payload["email"]
+        return {"X-User-ID": payload["sub"], "X-User-Email": payload["email"]}
     except HTTPException:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
