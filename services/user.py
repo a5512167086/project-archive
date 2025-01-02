@@ -189,7 +189,7 @@ def oauth_login(oauth: OAuthLoginRequest):
 
 
 def forgot_password(user_email: ForgotPasswordRequest):
-    logging.info("Processing forgot password request for email=%s", user_email.email)
+    logging.info("Processing forgot password request for email=%s", user_email)
     forgot_user_data = get_user_by_email(user_email)
     validate_existence(
         forgot_user_data, ERROR_USER_NOT_EXISTS, "Can't find user by email."
@@ -201,8 +201,8 @@ def forgot_password(user_email: ForgotPasswordRequest):
             "is_remember": False,
         },
     )
-    send_reset_email(user_email.email, token["token"])
-    logging.info("Reset email sent successfully to email=%s", user_email.email)
+    send_reset_email(user_email, token["token"])
+    logging.info("Reset email sent successfully to email=%s", user_email)
 
 
 def reset_password(user_id: str, new_password: str):
