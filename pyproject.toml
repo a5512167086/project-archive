@@ -6,4 +6,6 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "fastapi[standard]>=0.115.6",
+    "pandas>=2.2.3",
+    "psycopg2-binary>=2.9.10",
 ]
