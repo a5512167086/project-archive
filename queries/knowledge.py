@@ -20,3 +20,22 @@ def get_knowledge_class_id_by_bot_class_id(bot_class_id: int):
     except psycopg2.Error as error:
         error_message = error.diag.message_primary
         print(f"Database error: {error_message}")
+
+
+def get_all_knowledge_items_by_class_id(class_id: int):
+    try:
+        with get_db_connection() as connection:
+            with connection.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cursor:
+                cursor.execute(
+                    "SELECT * FROM vs_knowledge_list \
+                    WHERE class_id = %s;",
+                    [class_id],
+                )
+                knowledge_items = cursor.fetchall()
+
+                return knowledge_items
+    except psycopg2.Error as error:
+        error_message = error.diag.message_primary
+        print(f"Database error: {error_message}")

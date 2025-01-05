@@ -1,5 +1,5 @@
 [project]
-name = "faqservice-api"
+name = "knowledgeservice-api"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"

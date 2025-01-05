@@ -1,31 +1,35 @@
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, File, Form, UploadFile
 
-from schemas import InsertFAQRequest
-from services.faq import insert_single_faq
+from schemas import DeleteKnowledgeRequest, InsertKnowledgeRequest
+from services.knowledge import (
+    get_all_knowledge_list,
+    insert_knowledge_by_csv,
+    insert_single_knowledge,
+)
 
 router = APIRouter()
 
 
-@router.get("/faq", tags=["FAQ"])
-def get_all_faq():
+@router.get("/knowledge/{bot_class_id}", tags=["knowledge"])
+def get_all_knowledges(bot_class_id: int):
+    return get_all_knowledge_list(bot_class_id)
+
+
+@router.post("/knowledge", tags=["knowledge"])
+def insert_knowledge(body: InsertKnowledgeRequest):
+    insert_single_knowledge(body)
+
+
+@router.post("/knowledge/upload", tags=["knowledge"])
+def insert_knowledge_by_file(bot_class_id: int = Form(), csv_file: UploadFile = File()):
+    insert_knowledge_by_csv(bot_class_id, csv_file)
+
+
+@router.delete("/knowledge", tags=["knowledge"])
+def delete_knowledge(body: DeleteKnowledgeRequest):
     return ""
 
 
-@router.post("/faq", tags=["FAQ"])
-def insert_faq(body: InsertFAQRequest):
-    insert_single_faq(body)
-
-
-@router.post("/faq/csv", tags=["FAQ"])
-def insert_faq_by_csv(file: UploadFile = File(media_type="text/csv")):
-    return ""
-
-
-@router.delete("/faq", tags=["FAQ"])
-def delete_faq():
-    return ""
-
-
-@router.post("/query", tags=["bot"])
-def query():
+@router.post("/knowledge/query", tags=["bot"])
+def knowledge_query():
     return ""
