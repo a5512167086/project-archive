@@ -2,6 +2,7 @@ from fastapi import APIRouter, File, Form, UploadFile
 
 from schemas import DeleteKnowledgeRequest, InsertKnowledgeRequest
 from services.knowledge import (
+    delete_knowledges_by_bot_class_id,
     get_all_knowledge_list,
     insert_knowledge_by_csv,
     insert_single_knowledge,
@@ -26,8 +27,8 @@ def insert_knowledge_by_file(bot_class_id: int = Form(), csv_file: UploadFile = 
 
 
 @router.delete("/knowledge", tags=["knowledge"])
-def delete_knowledge(body: DeleteKnowledgeRequest):
-    return ""
+def delete_knowledges(body: DeleteKnowledgeRequest):
+    return delete_knowledges_by_bot_class_id(body.bot_class_id, body.deleted_id_list)
 
 
 @router.post("/knowledge/query", tags=["bot"])

@@ -1,13 +1,31 @@
 import pandas as pd
+import psycopg2
 from fastapi import UploadFile
 
-from commands.knowledge import insert_knowledge_item, insert_knowledge_items
+from commands.knowledge import (
+    delete_knowledge_items,
+    insert_knowledge_item,
+    insert_knowledge_items,
+)
 from exception import GlobalErrorException
 from queries.knowledge import (
     get_all_knowledge_items_by_class_id,
     get_knowledge_class_id_by_bot_class_id,
 )
 from schemas import InsertKnowledgeRequest
+
+
+def handle_database_error(error: psycopg2.Error, bot_class_id: int):
+    error_message = error.diag.message_primary
+    if f"Error: 找不到 {bot_class_id} 底下的 Knowledge Class" in error_message:
+        raise GlobalErrorException(
+            error_code="KNOWLEDGE_CLASS_NOT_FOUND",
+            error_message="Knowledge class not found for the given bot class",
+        )
+    raise GlobalErrorException(
+        error_code="DATABASE_ERROR",
+        error_message="Database error occurred",
+    )
 
 
 def validate_knowledge_class(bot_class_id: int) -> int:
@@ -41,15 +59,33 @@ def validate_csv_file(file: UploadFile):
 
 def insert_single_knowledge(body: InsertKnowledgeRequest):
     validate_knowledge_class(body.bot_class_id)
-    insert_knowledge_item(body.bot_class_id, body.question, body.answer)
+    try:
+        insert_knowledge_item(body.bot_class_id, body.question, body.answer)
+    except psycopg2.Error as error:
+        handle_database_error(error, body.bot_class_id)
 
 
 def insert_knowledge_by_csv(bot_class_id: int, csv_file: UploadFile):
     knowledge_list = validate_csv_file(csv_file)
     validate_knowledge_class(bot_class_id)
-    insert_knowledge_items(bot_class_id, knowledge_list)
+    try:
+        insert_knowledge_items(bot_class_id, knowledge_list)
+    except psycopg2.Error as error:
+        handle_database_error(error, bot_class_id)
 
 
 def get_all_knowledge_list(bot_class_id: int):
     knowledge_class_id = validate_knowledge_class(bot_class_id)
     return get_all_knowledge_items_by_class_id(knowledge_class_id)
+
+
+def delete_knowledges_by_bot_class_id(bot_class_id: int, deleted_id_list: list):
+    if not deleted_id_list:
+        raise GlobalErrorException(
+            error_code="EMPTY_DELETE_LIST",
+            error_message="No items to delete",
+        )
+    try:
+        return delete_knowledge_items(bot_class_id, deleted_id_list)
+    except psycopg2.Error as error:
+        handle_database_error(error, bot_class_id)

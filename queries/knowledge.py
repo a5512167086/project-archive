@@ -1,7 +1,14 @@
+import logging
+
 import psycopg2
 import psycopg2.extras
 
 from database import get_db_connection
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 def get_knowledge_class_id_by_bot_class_id(bot_class_id: int):
@@ -19,7 +26,7 @@ def get_knowledge_class_id_by_bot_class_id(bot_class_id: int):
                 return knowledge_class_id
     except psycopg2.Error as error:
         error_message = error.diag.message_primary
-        print(f"Database error: {error_message}")
+        logger.error("Database error: %s", error_message)
 
 
 def get_all_knowledge_items_by_class_id(class_id: int):
@@ -38,4 +45,4 @@ def get_all_knowledge_items_by_class_id(class_id: int):
                 return knowledge_items
     except psycopg2.Error as error:
         error_message = error.diag.message_primary
-        print(f"Database error: {error_message}")
+        logger.error("Database error: %s", error_message)
