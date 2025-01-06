@@ -86,3 +86,11 @@ spec:
       services:
         - name: command-service
           port: 80
+
+    # Knowledge API
+    # 提供與知識相關的 API 服務
+    - kind: Rule
+      match: Host(`easybot.wke.csie.ncnu.edu.tw`) && PathPrefix(`/knowledgeapi`)
+      services:
+        - name: knowledge-service
+          port: 80
