@@ -112,7 +112,6 @@ export const BotManagementPage = () => {
             >
               <CustomCard
                 imgSrc={module.moduleImg}
-                enableHeaderButton={true}
                 cardButton={false}
                 titleText={t(module.moduleName)}
                 actionType={ActionType.Switch}

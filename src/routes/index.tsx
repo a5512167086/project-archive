@@ -46,6 +46,11 @@ const SearchItemPage = lazy(() =>
     default: module.SearchItemPage
   }))
 )
+const KnowledgeManagementPage = lazy(() =>
+  import('@/pages/KnowledgeManagementPage').then((module) => ({
+    default: module.KnowledgeManagementPage
+  }))
+)
 const NotFoundPage = lazy(() =>
   import('@/pages/NotFoundPage').then((module) => ({
     default: module.NotFoundPage
@@ -82,12 +87,12 @@ export const PAGE_PATHS = {
   OAUTH_CALLBACK: '/oauth-callback',
   BOT_LIST: '/bot-list',
   BOT_MANAGEMENT: '/bot-list/:uuid',
-  FAQ_MODULE: 'faq',
   ECOMM_MODULE: 'ecomm',
   BOT_SETTING: 'setting',
   RESERVATION_MODULE: 'reservation',
   SEARCH_MODULE: 'search',
   SEARCH_MANAGMENT: 'search/:uuid',
+  KNOWLEDGE_MOUDLE: 'knowledge',
   CREATE_BOT_TURTROIAL: '/bot-tutorial',
   NOT_FOUND: '*'
 }
@@ -118,7 +123,7 @@ export const SIDEBAR_NAVIGATION_ROUTE = [
     key: 'faq',
     text: 'sidebar.faq',
     icon: <QuizIcon />,
-    link: PAGE_PATHS.FAQ_MODULE
+    link: PAGE_PATHS.KNOWLEDGE_MOUDLE
   },
   {
     key: 'ecomm',
@@ -213,8 +218,8 @@ export const router = createBrowserRouter([
             element: <BotManagementPage />
           },
           {
-            path: PAGE_PATHS.FAQ_MODULE,
-            element: <div>test</div>
+            path: PAGE_PATHS.KNOWLEDGE_MOUDLE,
+            element: <KnowledgeManagementPage />
           },
           {
             path: PAGE_PATHS.ECOMM_MODULE,

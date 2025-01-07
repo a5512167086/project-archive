@@ -144,8 +144,11 @@ export const SearchManagementPage = () => {
   }
 
   const handleDialogClose = () => {
-    setCurrentDeleteSearchItem(null)
     setIsDialogOpen(false)
+    // Delay clear currentDeleteSearchItem to prevent item name flickering
+    setTimeout(() => {
+      setCurrentDeleteSearchItem(null)
+    }, 100)
   }
 
   const handleDialogConfirm = async () => {

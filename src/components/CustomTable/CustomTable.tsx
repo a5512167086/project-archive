@@ -1,5 +1,4 @@
 import React, { SetStateAction, useState } from 'react'
-import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -34,7 +33,7 @@ export const CustomTable = <T,>({
   columns,
   onEdit,
   onDelete,
-  rowsPerPage = 12,
+  rowsPerPage = 10,
   selected,
   setSelected
 }: CustomTableProps<T>) => {
@@ -77,9 +76,9 @@ export const CustomTable = <T,>({
   }
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <TableContainer component={Paper}>
-        <Table size="small">
+    <Paper sx={{ width: '100%' }}>
+      <TableContainer sx={{ height: '600px' }}>
+        <Table size="small" stickyHeader>
           <TableHead>
             <TableRow>
               <TableCell padding="checkbox">
@@ -115,7 +114,16 @@ export const CustomTable = <T,>({
                       />
                     </TableCell>
                     {columns.map((column) => (
-                      <TableCell key={column.id} align={column.align || 'left'}>
+                      <TableCell
+                        key={column.id}
+                        align={column.align || 'left'}
+                        sx={{
+                          maxWidth: 150,
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}
+                      >
                         {String(row[column.id as keyof T] ?? '')}
                       </TableCell>
                     ))}
@@ -145,6 +153,6 @@ export const CustomTable = <T,>({
         rowsPerPage={rowsPerPage}
         rowsPerPageOptions={[]}
       />
-    </Box>
+    </Paper>
   )
 }

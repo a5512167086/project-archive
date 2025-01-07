@@ -94,6 +94,17 @@
     "instruction": "Instruction",
     "ingredient": "Ingredient"
   },
+  "knowledgeSettingPage": {
+    "title": "FAQ Module Settings",
+    "addKnowledgeItemButton": "Add Knowledge",
+    "addKnowledgeItemFromCSVButton": "Add Knowledge via CSV",
+    "deleteKnowledgeItemTitle": "Are you sure you want to delete {{knowledge_name}}? This action cannot be undone.",
+    "deleteKnowledgeItemsTitle": "Are you sure you want to delete all selected knowledge items? This action cannot be undone.",
+    "deleteSelectedKnowledgeItems": "Delete Selected Knowledge",
+    "question": "Question",
+    "answer": "Answer",
+    "uploadCSV": "Upload CSV File"
+  },
   "notFoundPage": {
     "title": "Page Not Found",
     "description": "Oops! The page you are looking for doesn't exist. It may have been moved or deleted, or you may have entered an incorrect URL."

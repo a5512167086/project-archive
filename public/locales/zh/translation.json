@@ -94,6 +94,17 @@
     "instruction": "使用說明",
     "ingredient": "成分"
   },
+  "knowledgeSettingPage": {
+    "title": "問答模組設定",
+    "addKnowledgeItemButton": "新增知識",
+    "addKnowledgeItemFromCSVButton": "透過CSV新增知識",
+    "deleteKnowledgeItemTitle": "確定要刪除 {{knowledge_name}} 嗎?此動作不可返回",
+    "deleteKnowledgeItemsTitle": "確定要刪除所有選取的知識嗎?此動作不可返回",
+    "deleteSelectedKnowledgeItems": "刪除所選的知識",
+    "question": "問題",
+    "answer": "答案",
+    "uploadCSV": "上傳CSV檔案"
+  },
   "notFoundPage": {
     "title": "查無此頁面",
     "description": "哎呀！您正在尋找的頁面並不存在。它可能已被移動或刪除了，或者您輸入的 URL 不正確。"

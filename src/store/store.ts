@@ -3,10 +3,12 @@ import userReducer from './modules/userSlice'
 import botReducer from './modules/botSlice'
 import searchReducer from './modules/searchSlice'
 import moduleReducer from './modules/moduleSlice'
+import knowledgeReducer from './modules/knowledgeSlice'
 import { userApi } from './apis/userApi'
 import { botApi } from './apis/botApi'
 import { searchApi } from './apis/searchApi'
 import { moduleApi } from './apis/moduleApi'
+import { knowledgeApi } from './apis/knowledgeApi'
 
 export const store = configureStore({
   reducer: {
@@ -14,10 +16,12 @@ export const store = configureStore({
     bot: botReducer,
     search: searchReducer,
     module: moduleReducer,
+    knowledge: knowledgeReducer,
     [userApi.reducerPath]: userApi.reducer,
     [botApi.reducerPath]: botApi.reducer,
     [searchApi.reducerPath]: searchApi.reducer,
-    [moduleApi.reducerPath]: moduleApi.reducer
+    [moduleApi.reducerPath]: moduleApi.reducer,
+    [knowledgeApi.reducerPath]: knowledgeApi.reducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
@@ -25,6 +29,7 @@ export const store = configureStore({
       .concat(botApi.middleware)
       .concat(searchApi.middleware)
       .concat(moduleApi.middleware)
+      .concat(knowledgeApi.middleware)
 })
 
 export type RootState = ReturnType<typeof store.getState>
