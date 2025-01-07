@@ -25,6 +25,8 @@ spec:
               value: "https://easybot.wke.csie.ncnu.edu.tw/searchapi"
             - name: VITE_MODULE_BACKEND_URL
               value: "https://easybot.wke.csie.ncnu.edu.tw/moduleapi"
+            - name: VITE_KNOWLEDGE_BACKEND_URL
+              value: "https://easybot.wke.csie.ncnu.edu.tw/knowledgeapi"
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
