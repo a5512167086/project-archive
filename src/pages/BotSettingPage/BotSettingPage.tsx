@@ -1,4 +1,4 @@
-import { Box, Breadcrumbs, Button, TextField, Typography } from '@mui/material'
+import { Box, Button, TextField, Typography } from '@mui/material'
 import { StyledBotSettingPage } from './BotSettingPage.style'
 import { CustomDivider } from '@/components/CustomDivider'
 import { CustomDialog } from '@/components/CustomDialog'
@@ -12,9 +12,9 @@ import {
   useUpdateBotMutation
 } from '@/store/apis/botApi'
 import { useAppSelector } from '@/utils/hook'
-import { CustomLink } from '@/components/CustomLink'
 import { isEmpty } from '@/utils/helper'
 import { CustomLoader } from '@/components/CustomLoader'
+import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
 
 const botSettingPageContent = {
   botPageTitle: 'botPage.myBot',
@@ -41,6 +41,20 @@ export const BotSettingPage = () => {
   const [getBots] = useLazyGetBotsQuery()
   const [updateBot] = useUpdateBotMutation()
   const [deleteBot] = useDeleteBotMutation()
+  const breadcrumbItems = [
+    {
+      link: PAGE_PATHS.BOT_LIST,
+      linkText: botSettingPageContent.botPageTitle
+    },
+    {
+      link: PAGE_PATHS.BOT_LIST + `/${currentBotObjectId}`,
+      linkText: currentBot!.bot_name
+    },
+    {
+      link: `${PAGE_PATHS.BOT_LIST}/${currentBotObjectId}/${PAGE_PATHS.BOT_SETTING}`,
+      linkText: botSettingPageContent.title
+    }
+  ]
 
   const handleDialogOpen = () => {
     setIsDialogOpen(true)
@@ -76,30 +90,7 @@ export const BotSettingPage = () => {
 
   return (
     <StyledBotSettingPage>
-      <Breadcrumbs
-        sx={{ fontSize: '1.25rem', fontWeight: 'bold', margin: '20px 0' }}
-      >
-        <CustomLink
-          link={PAGE_PATHS.BOT_LIST}
-          linkText={t(botSettingPageContent.botPageTitle)}
-        />
-        <CustomLink
-          link={PAGE_PATHS.BOT_LIST + `/${currentBotObjectId}`}
-          linkText={currentBot!.bot_name}
-          color="text.primary"
-          aria-current="page"
-        />
-        <CustomLink
-          link={
-            PAGE_PATHS.BOT_LIST +
-            `/${currentBotObjectId}` +
-            `/${PAGE_PATHS.BOT_SETTING}`
-          }
-          linkText={t(botSettingPageContent.title)}
-          color="text.primary"
-          aria-current="page"
-        />
-      </Breadcrumbs>
+      <CustomBreadcrumb items={breadcrumbItems} />
       <Typography variant="h5" className="setting__title">
         {t(botSettingPageContent.title)}
       </Typography>

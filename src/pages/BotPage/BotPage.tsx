@@ -1,20 +1,12 @@
 import { CustomCard } from '@/components/CustomCard'
 import { BotPageModalStyle, StyledBotPage } from './BotPage.style'
-import {
-  Breadcrumbs,
-  Grid2,
-  Modal,
-  Box,
-  Typography,
-  Button
-} from '@mui/material'
+import { Grid2, Modal, Box, Typography, Button } from '@mui/material'
 import { ActionType } from '@/components/CustomCard/CustomCard.type'
 import SettingsIcon from '@mui/icons-material/Settings'
 import AddIcon from '@/assets/add_icon.png'
 import BotIcon from '@/assets/bot_icon.png'
 import { CustomDialog } from '@/components/CustomDialog'
 import { useEffect, useState } from 'react'
-import { CustomLink } from '@/components/CustomLink'
 import { PAGE_PATHS } from '@/routes'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -25,6 +17,7 @@ import {
 } from '@/store/apis/botApi'
 import { useAppDispatch, useAppSelector } from '@/utils/hook'
 import { clearCurrentBot, setCurrentBot } from '@/store/modules/botSlice'
+import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
 
 const dialogFields = [
   {
@@ -84,6 +77,12 @@ export const BotPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [newLineBotWebhookUrl, setNewLineBotWebhookUrl] = useState('')
   const [createBot] = useCreateBotMutation()
+  const breadcrumbItems = [
+    {
+      link: PAGE_PATHS.BOT_LIST,
+      linkText: botPageContent.title
+    }
+  ]
 
   const handleDialogOpen = () => {
     setIsDialogOpen(true)
@@ -136,16 +135,7 @@ export const BotPage = () => {
 
   return (
     <StyledBotPage maxWidth="lg">
-      <Breadcrumbs
-        sx={{ fontSize: '1.25rem', fontWeight: 'bold', margin: '20px 0' }}
-      >
-        <CustomLink
-          link={PAGE_PATHS.BOT_LIST}
-          linkText={t(botPageContent.title)}
-          color="text.primary"
-          aria-current="page"
-        />
-      </Breadcrumbs>
+      <CustomBreadcrumb items={breadcrumbItems} />
       <Grid2 container spacing={4}>
         <Grid2
           size={{ xs: 12, sm: 6, md: 4 }}

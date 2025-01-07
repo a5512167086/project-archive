@@ -18,6 +18,8 @@ import {
   clearCurrentSearchItem,
   setCurrentSearchItem
 } from '@/store/modules/searchSlice'
+import { PAGE_PATHS } from '@/routes'
+import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
 
 const searchManagementPageContent = {
   title: 'searchSettingPage.title',
@@ -26,7 +28,8 @@ const searchManagementPageContent = {
   deleteButtonText: 'searchSettingPage.deleteSelectedSearchItems',
   deleteDialogTitle: 'searchSettingPage.deleteSearchItemTitle',
   deleteMutiDialogTitle: 'searchSettingPage.deleteSearchItemsTitle',
-  insertByUrlDialogTitle: 'searchSettingPage.insertSearchItemsByUrlTitle'
+  insertByUrlDialogTitle: 'searchSettingPage.insertSearchItemsByUrlTitle',
+  botPageTitle: 'botPage.myBot'
 }
 
 const columns = [
@@ -99,7 +102,6 @@ export const SearchManagementPage = () => {
   const { t } = useTranslation()
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
   const { searchItems } = useAppSelector((state) => state.search)
-  const botClassId = getBotClassId(botList, currentBotObjectId!)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isMutiDialogOpen, setIsMutiDialogOpen] = useState(false)
   const [isInsertByUrlDialogOpen, setIsInsertByUrlDialogOpen] = useState(false)
@@ -112,6 +114,22 @@ export const SearchManagementPage = () => {
   const [deleteSearchItems] = useDeleteSearchItemsMutation()
   const [insertSearchItem] = useInsertSearchItemMutation()
   const [insertSearchItemsByUrl] = useInsertSearchItemsByUrlMutation()
+  const botClassId = getBotClassId(botList, currentBotObjectId!)
+  const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
+  const breadcrumbItems = [
+    {
+      link: PAGE_PATHS.BOT_LIST,
+      linkText: searchManagementPageContent.botPageTitle
+    },
+    {
+      link: PAGE_PATHS.BOT_LIST + `/${currentBotObjectId}`,
+      linkText: currentBot!.bot_name
+    },
+    {
+      link: `${PAGE_PATHS.BOT_LIST}/${currentBotObjectId}/${PAGE_PATHS.SEARCH_MODULE}`,
+      linkText: searchManagementPageContent.title
+    }
+  ]
 
   const handleMutiDialogClose = () => {
     setIsMutiDialogOpen(false)
@@ -212,6 +230,7 @@ export const SearchManagementPage = () => {
 
   return (
     <StyledSearchManagementPage disableGutters maxWidth={false}>
+      <CustomBreadcrumb items={breadcrumbItems} />
       <Box className="search__titleBox">
         <Typography variant="h5" className="search__title">
           {t(searchManagementPageContent.title)}

@@ -1,4 +1,4 @@
-import { Box, Breadcrumbs, Button, Typography } from '@mui/material'
+import { Box, Button, Typography } from '@mui/material'
 import { StyledKnowledgeManagementPage } from './KnowledgeManagementPage.style'
 import { useTranslation } from 'react-i18next'
 import { CustomTable } from '@/components/CustomTable'
@@ -12,9 +12,9 @@ import {
 import { useEffect, useState } from 'react'
 import { useAppSelector } from '@/utils/hook'
 import { getBotClassId, isEmpty } from '@/utils/helper'
-import { CustomLink } from '@/components/CustomLink'
 import { PAGE_PATHS } from '@/routes'
 import { CustomDialog } from '@/components/CustomDialog'
+import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
 
 const knowledgeManagementPageContent = {
   title: 'knowledgeSettingPage.title',
@@ -22,7 +22,8 @@ const knowledgeManagementPageContent = {
   addButtonTextByCSV: 'knowledgeSettingPage.addKnowledgeItemFromCSVButton',
   deleteButtonText: 'knowledgeSettingPage.deleteSelectedKnowledgeItems',
   deleteDialogTitle: 'knowledgeSettingPage.deleteKnowledgeItemTitle',
-  deleteMutiDialogTitle: 'knowledgeSettingPage.deleteKnowledgeItemsTitle'
+  deleteMutiDialogTitle: 'knowledgeSettingPage.deleteKnowledgeItemsTitle',
+  botPageTitle: 'botPage.myBot'
 }
 
 const columns = [
@@ -74,6 +75,21 @@ export const KnowledgeManagementPage = () => {
   const { knowledgeItems } = useAppSelector((state) => state.knowledge)
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
   const botClassId = getBotClassId(botList, currentBotObjectId!)
+  const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
+  const breadcrumbItems = [
+    {
+      link: PAGE_PATHS.BOT_LIST,
+      linkText: knowledgeManagementPageContent.botPageTitle
+    },
+    {
+      link: PAGE_PATHS.BOT_LIST + `/${currentBotObjectId}`,
+      linkText: currentBot!.bot_name
+    },
+    {
+      link: `${PAGE_PATHS.BOT_LIST}/${currentBotObjectId}/${PAGE_PATHS.KNOWLEDGE_MOUDLE}`,
+      linkText: knowledgeManagementPageContent.title
+    }
+  ]
 
   const handleDeleteItem = (item: KnowledgeItem) => {
     setCurrentDeleteKnowledgeItem(item)
@@ -162,11 +178,7 @@ export const KnowledgeManagementPage = () => {
 
   return (
     <StyledKnowledgeManagementPage disableGutters maxWidth={false}>
-      <Breadcrumbs
-        sx={{ fontSize: '1.25rem', fontWeight: 'bold', margin: '20px 0' }}
-      >
-        <CustomLink link={PAGE_PATHS.BOT_LIST} linkText={t('test')} />
-      </Breadcrumbs>
+      <CustomBreadcrumb items={breadcrumbItems} />
       <Box className="knowledge__titleBox">
         <Typography variant="h5" className="knowledge__title">
           {t(knowledgeManagementPageContent.title)}

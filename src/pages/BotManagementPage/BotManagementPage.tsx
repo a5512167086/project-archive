@@ -1,4 +1,4 @@
-import { Breadcrumbs, Grid2 } from '@mui/material'
+import { Grid2 } from '@mui/material'
 import { StyledBotManagementPage } from './BotManagementPage.style'
 import { CustomCard } from '@/components/CustomCard'
 import { ActionType } from '@/components/CustomCard/CustomCard.type'
@@ -7,7 +7,6 @@ import FAQIcon from '@/assets/faq_icon.png'
 import EcommIcon from '@/assets/ecomm_icon.png'
 import ReservaitonIcon from '@/assets/reservation_icon.png'
 import SearchIcon from '@/assets/search_icon.png'
-import { CustomLink } from '@/components/CustomLink'
 import { PAGE_PATHS } from '@/routes'
 import { useTranslation } from 'react-i18next'
 import { useAppSelector } from '@/utils/hook'
@@ -15,6 +14,7 @@ import {
   useGetModuleSettingsQuery,
   useInsertModuleSettingMutation
 } from '@/store/apis/moduleApi'
+import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
 
 const modulePageContent = {
   botPageTitle: 'botPage.myBot',
@@ -58,6 +58,16 @@ export const BotManagementPage = () => {
     bot_class_id: currentBot!.class_id
   })
   const [insertModuleSetting, { isLoading }] = useInsertModuleSettingMutation()
+  const breadcrumbItems = [
+    {
+      link: PAGE_PATHS.BOT_LIST,
+      linkText: modulePageContent.botPageTitle
+    },
+    {
+      link: PAGE_PATHS.BOT_LIST + `/${currentBotObjectId}`,
+      linkText: currentBot!.bot_name
+    }
+  ]
 
   const getCheckedStatus = (moduleName: string): boolean => {
     const module = moduleSettings.find(
@@ -88,20 +98,7 @@ export const BotManagementPage = () => {
   return (
     currentBot && (
       <StyledBotManagementPage>
-        <Breadcrumbs
-          sx={{ fontSize: '1.25rem', fontWeight: 'bold', margin: '20px 0' }}
-        >
-          <CustomLink
-            link={PAGE_PATHS.BOT_LIST}
-            linkText={t(modulePageContent.botPageTitle)}
-          />
-          <CustomLink
-            link={PAGE_PATHS.BOT_LIST + `/${currentBotObjectId}`}
-            linkText={currentBot!.bot_name}
-            color="text.primary"
-            aria-current="page"
-          />
-        </Breadcrumbs>
+        <CustomBreadcrumb items={breadcrumbItems} />
         <Grid2 container spacing={4}>
           {moduleData.map((module) => (
             <Grid2
