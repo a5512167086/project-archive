@@ -11,6 +11,9 @@ from config import (
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
     GOOGLE_REDIRECT_URI,
+    LINE_CLIENT_ID,
+    LINE_CLIENT_SECRET,
+    LINE_REDIRECT_URI,
 )
 from exception import GlobalErrorException
 
@@ -80,6 +83,64 @@ def authenticate_with_google(oauth_code):
         )
 
     return google_user_info
+
+
+def line_code_to_token(auth_code: str):
+    token_url = "https://api.line.me/oauth2/v2.1/token"
+
+    data = {
+        "grant_type": "authorization_code",
+        "code": auth_code,
+        "client_id": LINE_CLIENT_ID,
+        "client_secret": LINE_CLIENT_SECRET,
+        "redirect_uri": LINE_REDIRECT_URI,
+    }
+
+    response = requests.post(token_url, data=data)
+
+    if response.status_code == 200:
+        token_info = response.json()
+        id_token = token_info.get("id_token")
+        access_token = token_info.get("access_token")
+        return {"id_token": id_token, "access_token": access_token}
+    else:
+        return "OAUTH_FAILED"
+
+
+def get_line_oauth_info(id_token: str):
+    verify_url = "https://api.line.me/oauth2/v2.1/verify"
+    data = {
+        "id_token": id_token,
+        "client_id": LINE_CLIENT_ID,
+    }
+
+    response = requests.post(verify_url, data=data)
+
+    if response.status_code == 200:
+        user_info = response.json()
+        return user_info
+    else:
+        return "USER_INFO_REQUEST_FAILED"
+
+
+def authenticate_with_line(auth_code: str):
+    line_oauth_response = line_code_to_token(auth_code)
+    if line_oauth_response == "OAUTH_FAILED":
+        raise GlobalErrorException(
+            "OAUTH_FAILED", "Failed to authenticate with LINE OAuth."
+        )
+
+    user_info = get_line_oauth_info(line_oauth_response["id_token"])
+    if user_info == "USER_INFO_REQUEST_FAILED":
+        raise GlobalErrorException(
+            "OAUTH_FAILED", "Failed to retrieve user info from LINE."
+        )
+
+    return {
+        "id": user_info["sub"],
+        "name": user_info["name"],
+        "email": user_info["email"],
+    }
 
 
 def generate_random_password(length=12):

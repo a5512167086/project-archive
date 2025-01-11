@@ -19,6 +19,7 @@ from schemas import (
 from services.mail import send_reset_email
 from utils import (
     authenticate_with_google,
+    authenticate_with_line,
     create_jwt_token,
     generate_random_password,
     hash_password,
@@ -162,20 +163,28 @@ def handle_existed_oauth_user(provider: str, oauth_user_id: str):
 
 def oauth_login(oauth: OAuthLoginRequest):
     logging.info("OAuth login attempt: provider=%s", oauth.provider)
-    google_user_info = authenticate_with_google(oauth.code)
-    user_info = get_user_by_email(google_user_info["email"])
 
-    if user_info == "USER_NOT_EXISTS":
-        logging.info("New user detected via OAuth: email=%s", google_user_info["email"])
-        return handle_new_oauth_user(google_user_info, oauth.provider)
-
-    if user_info:
-        oauth_user_info = handle_existed_oauth_user(
-            oauth.provider, google_user_info["id"]
+    if oauth.provider == "google":
+        user_info = authenticate_with_google(oauth.code)
+    elif oauth.provider == "line":
+        user_info = authenticate_with_line(oauth.code)
+    else:
+        logging.error("Unsupported OAuth provider: %s", oauth.provider)
+        raise GlobalErrorException(
+            "OAUTH_PROVIDER_NOT_SUPPORTED",
+            f"Provider {oauth.provider} is not supported.",
         )
+    
+    user_in_db = get_user_by_email(user_info["email"])
+    if user_in_db == "USER_NOT_EXISTS":
+        logging.info("New user detected via OAuth: email=%s", user_info["email"])
+        return handle_new_oauth_user(user_info, oauth.provider)
+
+    if user_in_db:
+        oauth_user_info = handle_existed_oauth_user(oauth.provider, user_info["id"])
         if oauth_user_info == "USER_ALREADY_EXISTS":
             logging.warning(
-                "User already exists for OAuth: email=%s", google_user_info["email"]
+                "User already exists for OAuth: email=%s", user_info["email"]
             )
             raise GlobalErrorException(
                 ERROR_USER_ALREADY_EXISTS, "User already exists, please login."
