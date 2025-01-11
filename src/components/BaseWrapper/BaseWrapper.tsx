@@ -17,6 +17,7 @@ import { clearBotError } from '@/store/modules/botSlice'
 import { clearUserError } from '@/store/modules/userSlice'
 import { clearSearchError } from '@/store/modules/searchSlice'
 import { clearModuleError } from '@/store/modules/moduleSlice'
+import { isEmpty } from '@/utils/helper'
 
 const loaderText = 'common.loading'
 const unknownError = 'error.unknown_error'
@@ -40,14 +41,14 @@ export const BaseWrapper = () => {
 
   const handleErrorNotification = useCallback(
     (errorCode: string | null, clearAction?: () => void) => {
-      if (errorCode) {
+      if (!isEmpty(errorCode)) {
         enqueueSnackbar(
           t(
             ERROR_CODE_MESSAGE_MAPPING[
               errorCode as keyof typeof ERROR_CODE_MESSAGE_MAPPING
             ] || unknownError
           ),
-          { variant: 'error' }
+          { variant: 'error', preventDuplicate: true }
         )
         if (clearAction) clearAction()
       }
@@ -70,7 +71,6 @@ export const BaseWrapper = () => {
     handleErrorNotification,
     dispatch
   ])
-
   return (
     <StyledBaseWrapper>
       <Header />

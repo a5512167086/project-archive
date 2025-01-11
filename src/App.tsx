@@ -5,11 +5,12 @@ import { router } from '@/routes/index'
 import { Provider } from 'react-redux'
 import { store } from '@/store/store'
 import { SnackbarProvider } from 'notistack'
+
 function App() {
   return (
     <Provider store={store}>
       <ThemeProvider theme={theme}>
-        <SnackbarProvider maxSnack={3} autoHideDuration={3000}>
+        <SnackbarProvider maxSnack={3} autoHideDuration={2000}>
           <CssBaseline />
           <RouterProvider router={router} />
         </SnackbarProvider>

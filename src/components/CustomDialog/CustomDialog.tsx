@@ -80,7 +80,6 @@ export const CustomDialog = <T extends Record<string, unknown>>({
         formJson[field.name] = formData.get(field.name) as string
       }
     })
-    console.log(formJson)
 
     const validatedData = formJson as T
 

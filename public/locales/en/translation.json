@@ -25,6 +25,9 @@
   },
   "signPage": {
     "google": "Continue with Google",
+    "line": "Continue with LINE",
+    "line_dialog_title": "LINE Login Email Authorization Request",
+    "line_dialog_content": "Easybot will obtain your email address to use as the login email. Do you agree?",
     "signIn": "Sign In",
     "signUp": "Sign Up",
     "forgotYourPassword": "Forgot Your Password?",

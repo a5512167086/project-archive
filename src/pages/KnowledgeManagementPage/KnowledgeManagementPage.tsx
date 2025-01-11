@@ -165,7 +165,6 @@ export const KnowledgeManagementPage = () => {
   }
 
   const handleInsertByCSVDialogConfrim = async (data: { csv_file: File }) => {
-    console.log(data)
     await insertKnowledges({
       bot_class_id: botClassId,
       csv_file: data.csv_file

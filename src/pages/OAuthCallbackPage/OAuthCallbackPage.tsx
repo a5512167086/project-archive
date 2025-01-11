@@ -37,6 +37,7 @@ export const OAuthCallbackPage = () => {
   const handleOAuthCallback = async () => {
     const urlParams = new URLSearchParams(window.location.search)
     const code = urlParams.get('code')
+    const loginType = urlParams.get('login_type')
     const error = urlParams.get('error')
     if (error || !code) {
       setTimeout(() => {
@@ -45,8 +46,7 @@ export const OAuthCallbackPage = () => {
       return
     }
 
-    const provider = OAuthProvider.Google
-    await oauthLogin({ code, provider })
+    await oauthLogin({ code, provider: loginType as OAuthProvider })
       .unwrap()
       .then((payload) => {
         localStorage.setItem('token', payload.token)

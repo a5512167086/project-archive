@@ -25,6 +25,9 @@
   },
   "signPage": {
     "google": "透過 Google 登入",
+    "line": "透過 LINE 登入",
+    "line_dialog_title": "LINE登入Email授權請求",
+    "line_dialog_content": "Easybot將會取得您的Email地址，以供作為登入的Email使用，是否同意？",
     "signIn": "登入",
     "signUp": "註冊",
     "forgotYourPassword": "忘記你的密碼了嗎?",

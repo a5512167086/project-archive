@@ -3,6 +3,8 @@ import { styled } from '@mui/material/styles'
 
 export const StyledSelect = styled(Select)<SelectProps>(({ theme }) => ({
   color: theme.palette.common.white,
+  boxShadow: 'none',
+  '& .MuiOutlinedInput-notchedOutline': { border: 0 },
   '& .MuiSelect-icon': {
     fill: theme.palette.common.white
   },
