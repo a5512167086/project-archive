@@ -3,7 +3,8 @@
     "home": "首頁",
     "signIn": "登入",
     "signUp": "註冊",
-    "signOut": "登出"
+    "signOut": "登出",
+    "userSetting": "用戶設定"
   },
   "sidebar": {
     "moduleList": "模組列表",
@@ -47,6 +48,19 @@
     "fullName": "名字",
     "confirmPassword": "確認密碼",
     "backToLogin": "返回登入頁面"
+  },
+  "userSettingPage": {
+    "title": "用戶設置",
+    "email": "電子郵件地址",
+    "conntectedAccount": "已連接的帳戶",
+    "bindGoogle": "綁定 Google 帳戶",
+    "bindLine": "綁定 LINE 帳戶",
+    "changePassword": "更改密碼",
+    "currentPassword": "當前密碼",
+    "newPassword": "新密碼",
+    "confirmPassword": "確認密碼",
+    "changePasswordSuccess": "密碼更改成功",
+    "changePasswordFailed": "密碼更改失敗"
   },
   "botPage": {
     "addBot": "新增機器人",

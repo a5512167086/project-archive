@@ -5,7 +5,7 @@ import { PAGE_PATHS, REDIRECT_BOT_LIST_ROUTES } from '@/routes'
 export const useHandleAuthRedirect = (
   isAuthenticated: boolean,
   isAuthFailed: boolean,
-  onAuthFailed: () => void,
+  onAuthFailed: () => void
 ) => {
   const navigate = useNavigate()
   const location = useLocation()
@@ -20,11 +20,5 @@ export const useHandleAuthRedirect = (
     } else if (isAuthFailed) {
       onAuthFailed()
     }
-  }, [
-    isAuthenticated,
-    isAuthFailed,
-    location.pathname,
-    navigate,
-    onAuthFailed,
-  ])
+  }, [isAuthenticated, isAuthFailed, location.pathname, navigate, onAuthFailed])
 }

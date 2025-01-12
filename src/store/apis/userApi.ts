@@ -40,6 +40,12 @@ export type OAuthLoginRequest = {
   provider: OAuthProvider
 }
 
+type OAuthBindRequest = {
+  code: string
+  provider: OAuthProvider
+  action: 'bind' | 'unbind'
+}
+
 export const userApi = createApi({
   reducerPath: 'userApi',
   baseQuery: fetchBaseQuery({
@@ -65,7 +71,14 @@ export const userApi = createApi({
     }),
     oauthLoginUser: builder.mutation<LoginResponse, OAuthLoginRequest>({
       query: (oauthUser) => ({
-        url: 'user/oauth_login',
+        url: 'user/oauth-login',
+        method: 'POST',
+        body: oauthUser
+      })
+    }),
+    oauthBindUser: builder.mutation<LoginResponse, OAuthBindRequest>({
+      query: (oauthUser) => ({
+        url: 'user/oauth-bind',
         method: 'POST',
         body: oauthUser
       })
@@ -79,7 +92,7 @@ export const userApi = createApi({
     }),
     forgotPassword: builder.mutation<void, ForgotPasswordRequest>({
       query: (email) => ({
-        url: 'user/forgot_password',
+        url: 'user/forgot-password',
         method: 'POST',
         body: email
       })
@@ -89,7 +102,7 @@ export const userApi = createApi({
     }),
     resetPassword: builder.mutation<void, ResetPasswordRequest>({
       query: (data) => ({
-        url: 'user/reset_password',
+        url: 'user/reset-password',
         method: 'POST',
         body: data,
         headers: { Authorization: `Bearer ${data.token}` }
@@ -101,6 +114,7 @@ export const userApi = createApi({
 export const {
   useLoginUserMutation,
   useOauthLoginUserMutation,
+  useOauthBindUserMutation,
   useRegisterUserMutation,
   useForgotPasswordMutation,
   useLazyGetUserMeQuery,

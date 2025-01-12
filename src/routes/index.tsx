@@ -77,9 +77,15 @@ const BotSettingPage = lazy(() =>
     default: module.BotSettingPage
   }))
 )
+const UserSettingPage = lazy(() =>
+  import('@/pages/UserSettingPage').then((module) => ({
+    default: module.UserSettingPage
+  }))
+)
 
 export const PAGE_PATHS = {
   BASE: '/',
+  USER_SETTING: '/user-setting',
   SIGN_IN: '/sign-in',
   SIGN_UP: '/sign-up',
   FORGOT_PASSWORD: '/forgot-password',
@@ -101,6 +107,10 @@ export const PUBLIC_NAVIGATION_ROUTE = [
   { text: 'header.home', link: PAGE_PATHS.BASE },
   { text: 'header.signIn', link: PAGE_PATHS.SIGN_IN },
   { text: 'header.signUp', link: PAGE_PATHS.SIGN_UP }
+]
+
+export const PRIVATE_NAVIGATION_ROUTE = [
+  { text: 'header.userSetting', link: PAGE_PATHS.USER_SETTING }
 ]
 
 export const REDIRECT_BOT_LIST_ROUTES = [
@@ -158,6 +168,7 @@ export const SIDEBAR_NAVIGATION_ROUTE = [
 ]
 
 export const router = createBrowserRouter([
+  // Public routes
   {
     path: PAGE_PATHS.BASE,
     element: <BaseWrapper />,
@@ -182,6 +193,17 @@ export const router = createBrowserRouter([
         path: PAGE_PATHS.RESET_PASSWORD,
         element: <ResetPasswordPage />
       },
+      // Private routes
+      {
+        path: PAGE_PATHS.USER_SETTING,
+        element: <PrivateRoute />,
+        children: [
+          {
+            index: true,
+            element: <UserSettingPage />
+          }
+        ]
+      },
       {
         path: PAGE_PATHS.BOT_LIST,
         element: <PrivateRoute />,
@@ -192,6 +214,7 @@ export const router = createBrowserRouter([
           }
         ]
       },
+      // Public routes
       {
         path: PAGE_PATHS.CREATE_BOT_TURTROIAL,
         element: <CreateBotTutorialPage />
@@ -206,6 +229,7 @@ export const router = createBrowserRouter([
     path: PAGE_PATHS.NOT_FOUND,
     element: <NotFoundPage />
   },
+  // Private routes
   {
     path: PAGE_PATHS.BOT_MANAGEMENT,
     element: <PrivateRoute />,

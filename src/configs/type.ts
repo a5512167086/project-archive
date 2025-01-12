@@ -7,3 +7,8 @@ export type HttpResponse = {
   status: number
   data: object
 }
+
+export enum OAuthActionType {
+  Login = 'login',
+  Bind = 'bind'
+}

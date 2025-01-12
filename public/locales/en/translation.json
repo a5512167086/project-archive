@@ -3,7 +3,8 @@
     "home": "Home",
     "signIn": "Sign In",
     "signUp": "Sign Up",
-    "signOut": "Sign Out"
+    "signOut": "Sign Out",
+    "userSetting": "User Setting"
   },
   "sidebar": {
     "moduleList": "Module List",
@@ -47,6 +48,19 @@
     "fullName": "Full Name",
     "confirmPassword": "Confirm Password",
     "backToLogin": "Back to Login Page"
+  },
+  "userSettingPage": {
+    "title": "User Settings",
+    "email": "Email Address",
+    "conntectedAccount": "Connected Account",
+    "bindGoogle": "Bind Google Account",
+    "bindLine": "Bind LINE Account",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "changePasswordSuccess": "Password changed successfully",
+    "changePasswordFailed": "Password change failed"
   },
   "botPage": {
     "addBot": "Add New Bot",

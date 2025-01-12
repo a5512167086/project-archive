@@ -9,6 +9,7 @@ import ErrorIcon from '@mui/icons-material/Error'
 import {
   OAuthProvider,
   useLazyGetUserMeQuery,
+  useOauthBindUserMutation,
   useOauthLoginUserMutation
 } from '@/store/apis/userApi'
 import { useAppSelector } from '@/utils/hook'
@@ -28,6 +29,7 @@ export const OAuthCallbackPage = () => {
   const { errorCode } = useAppSelector((state) => state.user)
   const { t } = useTranslation()
   const [oauthLogin] = useOauthLoginUserMutation()
+  const [oauthBind] = useOauthBindUserMutation()
   const [getUser] = useLazyGetUserMeQuery()
 
   const handleNavigateToLogin = () => {
@@ -37,28 +39,41 @@ export const OAuthCallbackPage = () => {
   const handleOAuthCallback = async () => {
     const urlParams = new URLSearchParams(window.location.search)
     const code = urlParams.get('code')
-    const loginType = urlParams.get('login_type')
+    const provider = urlParams.get('provider')
+    const action = urlParams.get('action')
     const error = urlParams.get('error')
+
     if (error || !code) {
       setTimeout(() => {
         navigate(PAGE_PATHS.SIGN_IN)
       }, 5000)
       return
     }
-
-    await oauthLogin({ code, provider: loginType as OAuthProvider })
-      .unwrap()
-      .then((payload) => {
-        localStorage.setItem('token', payload.token)
-        getUser().then(() => {
-          navigate(PAGE_PATHS.BOT_LIST)
+    if (action === 'login') {
+      await oauthLogin({ code, provider: provider as OAuthProvider })
+        .unwrap()
+        .then((payload) => {
+          localStorage.setItem('token', payload.token)
+          getUser().then(() => {
+            navigate(PAGE_PATHS.BOT_LIST)
+          })
         })
+        .catch(() => {
+          setTimeout(() => {
+            navigate(PAGE_PATHS.SIGN_IN)
+          }, 5000)
+        })
+    } else if (action === 'bind') {
+      await oauthBind({
+        code,
+        provider: provider as OAuthProvider,
+        action: 'bind'
       })
-      .catch(() => {
-        setTimeout(() => {
-          navigate(PAGE_PATHS.SIGN_IN)
-        }, 5000)
-      })
+        .unwrap()
+        .finally(() => {
+          navigate(PAGE_PATHS.USER_SETTING)
+        })
+    }
   }
 
   useEffect(() => {

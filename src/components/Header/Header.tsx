@@ -11,7 +11,7 @@ import MenuIcon from '@mui/icons-material/Menu'
 import LogoIcon from '@/assets/header_logo.svg?react'
 import { StyledHeader } from './Header.style'
 import { CustomDrawer } from '@/components/CustomDrawer'
-import { PUBLIC_NAVIGATION_ROUTE } from '@/routes'
+import { PRIVATE_NAVIGATION_ROUTE, PUBLIC_NAVIGATION_ROUTE } from '@/routes'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { LanguageChanger } from '../LanguageChanger'
@@ -63,20 +63,41 @@ export const Header = () => {
                 </Button>
               ))
             ) : (
-              <Button className="header__navLink" onClick={logout}>
-                {t(headerContent.logout)}
-              </Button>
+              <>
+                {PRIVATE_NAVIGATION_ROUTE.map((item) => (
+                  <Button
+                    key={t(item.text)}
+                    className="header__navLink"
+                    onClick={() => {
+                      handleNavigation(item.link)
+                    }}
+                  >
+                    {t(item.text)}
+                  </Button>
+                ))}
+                <Button className="header__navLink" onClick={logout}>
+                  {t(headerContent.logout)}
+                </Button>
+              </>
             )}
             <LanguageChanger />
           </Box>
         </Toolbar>
       </AppBar>
       <nav>
-        <CustomDrawer
-          navItems={PUBLIC_NAVIGATION_ROUTE}
-          isOpen={isDrawerOpen}
-          handleDrawerToggle={handleDrawerToggle}
-        />
+        {!isAuthenticated ? (
+          <CustomDrawer
+            navItems={PUBLIC_NAVIGATION_ROUTE}
+            isOpen={isDrawerOpen}
+            handleDrawerToggle={handleDrawerToggle}
+          />
+        ) : (
+          <CustomDrawer
+            navItems={PRIVATE_NAVIGATION_ROUTE}
+            isOpen={isDrawerOpen}
+            handleDrawerToggle={handleDrawerToggle}
+          />
+        )}
       </nav>
     </StyledHeader>
   )
