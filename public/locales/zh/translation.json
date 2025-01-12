@@ -59,8 +59,8 @@
     "currentPassword": "當前密碼",
     "newPassword": "新密碼",
     "confirmPassword": "確認密碼",
-    "changePasswordSuccess": "密碼更改成功",
-    "changePasswordFailed": "密碼更改失敗"
+    "changePasswordSuccess": "密碼更改成功，請重新登入",
+    "passwordMismatch": "新密碼和確認密碼不相同"
   },
   "botPage": {
     "addBot": "新增機器人",

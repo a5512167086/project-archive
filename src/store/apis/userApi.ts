@@ -35,6 +35,11 @@ export type ResetPasswordRequest = {
   new_password: string
 }
 
+type ChangePasswordRequest = {
+  old_password: string
+  new_password: string
+}
+
 export type OAuthLoginRequest = {
   code: string
   provider: OAuthProvider
@@ -107,6 +112,13 @@ export const userApi = createApi({
         body: data,
         headers: { Authorization: `Bearer ${data.token}` }
       })
+    }),
+    changePassword: builder.mutation<void, ChangePasswordRequest>({
+      query: (data) => ({
+        url: 'user/change-password',
+        method: 'POST',
+        body: data
+      })
     })
   })
 })
@@ -116,6 +128,7 @@ export const {
   useOauthLoginUserMutation,
   useOauthBindUserMutation,
   useRegisterUserMutation,
+  useChangePasswordMutation,
   useForgotPasswordMutation,
   useLazyGetUserMeQuery,
   useResetPasswordMutation

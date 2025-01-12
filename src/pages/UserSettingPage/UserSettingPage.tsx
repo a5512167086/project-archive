@@ -10,6 +10,8 @@ import { handleGoogleOAuth, handleLineOAuth } from '@/utils/helper'
 import { OAuthActionType } from '@/configs/type'
 import { useSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
+import { useChangePasswordMutation } from '@/store/apis/userApi'
+import { useUser } from '@/hooks/useUser'
 
 const userSettingPageContent = {
   title: 'userSettingPage.title',
@@ -20,13 +22,17 @@ const userSettingPageContent = {
   changePassword: 'userSettingPage.changePassword',
   currentPassword: 'userSettingPage.currentPassword',
   newPassword: 'userSettingPage.newPassword',
-  confirmPassword: 'userSettingPage.confirmPassword'
+  confirmPassword: 'userSettingPage.confirmPassword',
+  changePasswordSuccess: 'userSettingPage.changePasswordSuccess',
+  passwordMimatch: 'userSettingPage.passwordMismatch'
 }
 
 export const UserSettingPage = () => {
   const { t } = useTranslation()
   const { enqueueSnackbar } = useSnackbar()
+  const { logout } = useUser()
   const { email } = useAppSelector((state) => state.user)
+  const [changePassword] = useChangePasswordMutation()
   const [formData, setFormData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -42,10 +48,10 @@ export const UserSettingPage = () => {
     }))
   }
 
-  const handleChangePassword = (e: FormEvent) => {
+  const handleChangePassword = async (e: FormEvent) => {
     e.preventDefault()
     if (formData.newPassword !== formData.confirmPassword) {
-      enqueueSnackbar('New password and confirm password are not the same', {
+      enqueueSnackbar(t(userSettingPageContent.passwordMimatch), {
         variant: 'error',
         preventDuplicate: true
       })
@@ -56,6 +62,19 @@ export const UserSettingPage = () => {
       })
       return
     }
+
+    await changePassword({
+      old_password: formData.currentPassword,
+      new_password: formData.newPassword
+    })
+      .unwrap()
+      .then(() => {
+        enqueueSnackbar(t(userSettingPageContent.changePasswordSuccess), {
+          variant: 'success',
+          preventDuplicate: true
+        })
+        logout()
+      })
   }
 
   return (

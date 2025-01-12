@@ -95,6 +95,15 @@ export const userSlice = createSlice({
           state.errorMessage = error!.error_message
         }
       )
+      .addMatcher(
+        userApi.endpoints.changePassword.matchRejected,
+        (state, action) => {
+          state.status = 'failed'
+          const error = action.payload!.data as CustomError
+          state.errorCode = error!.error_code
+          state.errorMessage = error!.error_message
+        }
+      )
   }
 })
 

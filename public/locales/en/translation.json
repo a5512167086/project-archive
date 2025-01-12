@@ -59,8 +59,8 @@
     "currentPassword": "Current Password",
     "newPassword": "New Password",
     "confirmPassword": "Confirm Password",
-    "changePasswordSuccess": "Password changed successfully",
-    "changePasswordFailed": "Password change failed"
+    "changePasswordSuccess": "Password changed successfully. Please log in again.",
+    "passwordMismatch": "New password and confirm password are not the same"
   },
   "botPage": {
     "addBot": "Add New Bot",
