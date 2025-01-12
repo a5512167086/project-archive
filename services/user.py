@@ -13,6 +13,7 @@ from schemas import (
     ForgotPasswordRequest,
     LoginRequest,
     OAuth,
+    OAuthBindRequest,
     OAuthLoginRequest,
     RegisterRequest,
 )
@@ -89,7 +90,7 @@ def get_user_profile(user_id: str):
 
 def login(user: LoginRequest):
     logging.info("User login attempt: email=%s", user.email)
-    login_user_data = get_user_by_email_and_password(user)
+    login_user_data = get_user_by_email_and_password(user.email, user.password)
 
     if login_user_data == "USER_NOT_EXISTS":
         logging.error("Login failed: User not found with email=%s", user.email)
@@ -174,7 +175,7 @@ def oauth_login(oauth: OAuthLoginRequest):
             "OAUTH_PROVIDER_NOT_SUPPORTED",
             f"Provider {oauth.provider} is not supported.",
         )
-    
+
     user_in_db = get_user_by_email(user_info["email"])
     if user_in_db == "USER_NOT_EXISTS":
         logging.info("New user detected via OAuth: email=%s", user_info["email"])
@@ -194,6 +195,39 @@ def oauth_login(oauth: OAuthLoginRequest):
     logging.error("Failed to retrieve user information via OAuth.")
     raise GlobalErrorException(
         ERROR_USER_LOOKUP_FAILED, "Failed to retrieve user information."
+    )
+
+
+def oauth_bind(user_id: str, oauth: OAuthBindRequest):
+    logging.info("OAuth bind attempt: provider=%s", oauth.provider)
+    user_in_db = get_user_by_id(user_id)
+    if user_in_db == "USER_NOT_EXISTS":
+        logging.error("User not found in database: ID=%s", user_id)
+        raise GlobalErrorException(ERROR_USER_NOT_EXISTS, "User not found in database.")
+
+    if oauth.provider == "google":
+        user_info = authenticate_with_google(oauth.code)
+    elif oauth.provider == "line":
+        user_info = authenticate_with_line(oauth.code)
+    else:
+        logging.error("Unsupported OAuth provider: %s", oauth.provider)
+        raise GlobalErrorException(
+            "OAUTH_PROVIDER_NOT_SUPPORTED",
+            f"Provider {oauth.provider} is not supported.",
+        )
+
+    if not user_info:
+        logging.error("Failed to retrieve user information via OAuth.")
+        raise GlobalErrorException(
+            ERROR_USER_LOOKUP_FAILED, "Failed to retrieve user information."
+        )
+
+    create_oauth(
+        OAuth(
+            user_id=user_id,
+            oauth_provider=oauth.provider,
+            oauth_user_id=user_info["id"],
+        )
     )
 
 
@@ -223,3 +257,28 @@ def reset_password(user_id: str, new_password: str):
 
     update_user_password(user_id, hash_password(new_password))
     logging.info("Password reset successful for user_id=%s", user_id)
+
+
+def change_password(user_email: str, old_password: str, new_password: str):
+    logging.info("Changing password for user_email=%s", user_email)
+    user_data = get_user_by_email_and_password(user_email, old_password)
+
+    if user_data == "USER_NOT_EXISTS":
+        logging.error(
+            "Change password failed: User not found with user_email=%s", user_email
+        )
+        raise GlobalErrorException(
+            error_code=ERROR_USER_NOT_EXISTS, error_message="Can't find user by id."
+        )
+    if user_data == "PASSWORD_NOT_MATCH":
+        logging.error(
+            "Change password failed: Password mismatch for user_email=%s", user_email
+        )
+        raise GlobalErrorException(
+            error_code=ERROR_PASSWORD_NOT_MATCH, error_message="Password is incorrect."
+        )
+
+    validate_existence(user_data, ERROR_USER_NOT_EXISTS, "Can't find user by ID.")
+
+    update_user_password(user_data["user_id"], hash_password(new_password))
+    logging.info("Password reset successful for user_email=%s", user_email)

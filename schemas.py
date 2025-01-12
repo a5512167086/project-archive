@@ -37,9 +37,20 @@ class ResetPasswordRequest(BaseModel):
     new_password: str
 
 
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str
+
+
 class OAuthLoginRequest(BaseModel):
     code: str
     provider: Literal["google", "line"]
+
+
+class OAuthBindRequest(BaseModel):
+    code: str
+    provider: Literal["google", "line"]
+    action: Literal["bind", "unbind"]
 
 
 class OAuth(BaseModel):

@@ -7,9 +7,11 @@ from schemas import (
     ForgotPasswordRequest,
     LoginRequest,
     OAuthLoginRequest,
+    OAuthBindRequest,
     RegisterRequest,
     RegisterResponse,
     ResetPasswordRequest,
+    ChangePasswordRequest,
     TokenResponse,
     User,
 )
@@ -18,8 +20,10 @@ from services.user import (
     get_user_profile,
     login,
     oauth_login,
+    oauth_bind,
     register,
     reset_password,
+    change_password,
 )
 
 router = APIRouter()
@@ -35,9 +39,18 @@ async def login_user(user: LoginRequest):
     return jwt
 
 
-@router.post("/user/oauth_login", tags=["users"], response_model=TokenResponse)
+@router.post("/user/oauth-login", tags=["users"], response_model=TokenResponse)
 async def user_oauth_login(body: OAuthLoginRequest):
     return oauth_login(body)
+
+
+@router.post("/user/oauth-bind", tags=["users"], response_model=TokenResponse)
+async def user_oauth_bind(
+    auth_headers: Annotated[dict, Depends(get_auth_response_headers)],
+    body: OAuthBindRequest,
+):
+    user_id = auth_headers["X-User-ID"]
+    return oauth_bind(user_id, body)
 
 
 @router.post("/user/register", tags=["users"], response_model=RegisterResponse)
@@ -46,7 +59,7 @@ async def register_user(user: RegisterRequest):
     return new_user_id
 
 
-@router.post("/user/forgot_password", tags=["users"])
+@router.post("/user/forgot-password", tags=["users"])
 async def forgot_user_password(body: ForgotPasswordRequest):
     user_email = body.email
     forgot_password(user_email)
@@ -59,7 +72,7 @@ async def get_user(auth_headers: Annotated[dict, Depends(get_auth_response_heade
     return user_profile
 
 
-@router.post("/user/reset_password", tags=["users"])
+@router.post("/user/reset-password", tags=["users"])
 async def reset_user_password(
     auth_headers: Annotated[dict, Depends(get_auth_response_headers)],
     body: ResetPasswordRequest,
@@ -67,3 +80,14 @@ async def reset_user_password(
     update_user_id = auth_headers["X-User-ID"]
     new_password = body.new_password
     reset_password(update_user_id, new_password)
+
+
+@router.post("/user/change-password", tags=["users"])
+async def change_user_password(
+    auth_headers: Annotated[dict, Depends(get_auth_response_headers)],
+    body: ChangePasswordRequest,
+):
+    update_user_email = auth_headers["X-User-Email"]
+    old_password = body.old_password
+    new_password = body.new_password
+    change_password(update_user_email, old_password, new_password)
