@@ -161,6 +161,7 @@
     "unknown_error": "發生意外錯誤，請確認您的操作並重試。",
     "token_expired": "登入狀態過期，請重新登入",
     "invalidFormat": "格式錯誤",
-    "invalid_line_bot": "LINE機器人資訊錯誤，請確認資訊是否正確"
+    "invalid_line_bot": "LINE機器人資訊錯誤，請確認資訊是否正確",
+    "oauth_already_exists": "該第三方登入已經被綁定，請使用其他第三方帳號綁定"
   }
 }

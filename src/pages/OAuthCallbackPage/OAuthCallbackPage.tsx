@@ -23,10 +23,15 @@ const oauthCallbackContent = {
   oauthExistHint: 'error.oauth_exist_hint'
 }
 
+type CustomState = {
+  provider: OAuthProvider
+  action: 'login' | 'bind'
+}
+
 export const OAuthCallbackPage = () => {
   let isRequest = false
   const navigate = useNavigate()
-  const { errorCode } = useAppSelector((state) => state.user)
+  const { errorCode, isAuthenticated } = useAppSelector((state) => state.user)
   const { t } = useTranslation()
   const [oauthLogin] = useOauthLoginUserMutation()
   const [oauthBind] = useOauthBindUserMutation()
@@ -38,11 +43,15 @@ export const OAuthCallbackPage = () => {
 
   const handleOAuthCallback = async () => {
     const urlParams = new URLSearchParams(window.location.search)
-    const code = urlParams.get('code')
-    const provider = urlParams.get('provider')
-    const action = urlParams.get('action')
-    const error = urlParams.get('error')
+    const state = urlParams.get('state')
+    if (!state) {
+      navigate(PAGE_PATHS.SIGN_IN)
+      return
+    }
 
+    const { provider, action } = JSON.parse(state) as unknown as CustomState
+    const code = urlParams.get('code')
+    const error = urlParams.get('error')
     if (error || !code) {
       setTimeout(() => {
         navigate(PAGE_PATHS.SIGN_IN)
@@ -85,9 +94,10 @@ export const OAuthCallbackPage = () => {
 
   return (
     <StyledOAuthCallbackPage>
-      {!errorCode ? (
+      {!errorCode && (
         <CustomLoader size="6rem" text={t(oauthCallbackContent.loading)} />
-      ) : (
+      )}
+      {errorCode && !isAuthenticated && (
         <Paper elevation={3} className="oauth__paper">
           <ErrorIcon className="oauth__icon" />
           <Typography variant="h4" component="h1" className="oauth__text">

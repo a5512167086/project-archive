@@ -51,6 +51,11 @@ type OAuthBindRequest = {
   action: 'bind' | 'unbind'
 }
 
+export type OAuthStatusResponse = {
+  google: boolean
+  line: boolean
+}
+
 export const userApi = createApi({
   reducerPath: 'userApi',
   baseQuery: fetchBaseQuery({
@@ -87,6 +92,9 @@ export const userApi = createApi({
         method: 'POST',
         body: oauthUser
       })
+    }),
+    getOAuthStatus: builder.query<OAuthStatusResponse, void>({
+      query: () => 'user/oauth-status'
     }),
     registerUser: builder.mutation<void, RegisterRequest>({
       query: (newUser) => ({
@@ -127,6 +135,7 @@ export const {
   useLoginUserMutation,
   useOauthLoginUserMutation,
   useOauthBindUserMutation,
+  useLazyGetOAuthStatusQuery,
   useRegisterUserMutation,
   useChangePasswordMutation,
   useForgotPasswordMutation,

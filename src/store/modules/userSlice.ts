@@ -1,11 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { CustomError } from '@/configs/type'
-import { userApi } from '../apis/userApi'
-import { clearUserToken } from '@/utils/helper'
+import { OAuthStatusResponse, userApi } from '../apis/userApi'
 
 interface UserState {
   username: string
   email: string
+  isAuthenticated: boolean | null
+  oauthStatus: OAuthStatusResponse
   errorCode: string
   errorMessage: string
   status: 'idle' | 'loading' | 'succeeded' | 'failed'
@@ -14,6 +15,11 @@ interface UserState {
 const initialState: UserState = {
   username: '',
   email: '',
+  isAuthenticated: null,
+  oauthStatus: {
+    google: false,
+    line: false
+  },
   errorCode: '',
   errorMessage: '',
   status: 'idle'
@@ -27,6 +33,9 @@ export const userSlice = createSlice({
       state.errorCode = ''
       state.errorMessage = ''
       state.status = 'idle'
+    },
+    setAuthenticated(state, action) {
+      state.isAuthenticated = action.payload
     },
     initUser: (state) => {
       state.username = ''
@@ -52,7 +61,25 @@ export const userSlice = createSlice({
       .addMatcher(
         userApi.endpoints.getUserMe.matchRejected,
         (state, action) => {
-          clearUserToken()
+          state.status = 'failed'
+          const error = action.payload!.data as CustomError
+          state.errorCode = error!.error_code
+          state.errorMessage = error!.error_message
+        }
+      )
+      .addMatcher(userApi.endpoints.getOAuthStatus.matchPending, (state) => {
+        state.status = 'loading'
+      })
+      .addMatcher(
+        userApi.endpoints.getOAuthStatus.matchFulfilled,
+        (state, action) => {
+          state.status = 'succeeded'
+          state.oauthStatus = action.payload
+        }
+      )
+      .addMatcher(
+        userApi.endpoints.getOAuthStatus.matchRejected,
+        (state, action) => {
           state.status = 'failed'
           const error = action.payload!.data as CustomError
           state.errorCode = error!.error_code
@@ -96,6 +123,15 @@ export const userSlice = createSlice({
         }
       )
       .addMatcher(
+        userApi.endpoints.oauthBindUser.matchRejected,
+        (state, action) => {
+          state.status = 'failed'
+          const error = action.payload!.data as CustomError
+          state.errorCode = error!.error_code
+          state.errorMessage = error!.error_message
+        }
+      )
+      .addMatcher(
         userApi.endpoints.changePassword.matchRejected,
         (state, action) => {
           state.status = 'failed'
@@ -107,6 +143,6 @@ export const userSlice = createSlice({
   }
 })
 
-export const { clearUserError, initUser } = userSlice.actions
+export const { clearUserError, initUser, setAuthenticated } = userSlice.actions
 
 export default userSlice.reducer

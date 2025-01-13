@@ -6,7 +6,6 @@ import { Outlet } from 'react-router-dom'
 import { Suspense, useEffect, useState, useCallback } from 'react'
 import { CustomLoader } from '../CustomLoader'
 import { useTranslation } from 'react-i18next'
-import { useClearError } from '@/hooks/useClearError'
 import { useUser } from '@/hooks/useUser'
 import { useHandleAuthRedirect } from '@/hooks/useHandleAuthRedirect'
 import { CustomAlert } from '../CustomAlert/CustomAlert'
@@ -23,13 +22,14 @@ const loaderText = 'common.loading'
 const unknownError = 'error.unknown_error'
 
 export const BaseWrapper = () => {
-  useClearError()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
   const { enqueueSnackbar } = useSnackbar()
-  const { isAuthenticated, isAuthFailed, setIsAuthFailed } = useUser()
+  const { isAuthFailed, setIsAuthFailed } = useUser()
   const { errorCode: botErrorCode } = useAppSelector((state) => state.bot)
-  const { errorCode: userErrorCode } = useAppSelector((state) => state.user)
+  const { isAuthenticated, errorCode: userErrorCode } = useAppSelector(
+    (state) => state.user
+  )
   const { errorCode: searchErrorCode } = useAppSelector((state) => state.search)
   const { errorCode: moduleError } = useAppSelector((state) => state.module)
   const [isAlertOpen, setAlertOpen] = useState(false)

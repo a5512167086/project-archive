@@ -16,14 +16,16 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { LanguageChanger } from '../LanguageChanger'
 import { useUser } from '@/hooks/useUser'
+import { useAppSelector } from '@/utils/hook'
 
 const headerContent = { logout: 'header.signOut' }
 
 export const Header = () => {
   const navigate = useNavigate()
+  const { isAuthenticated } = useAppSelector((state) => state.user)
   const { t } = useTranslation()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-  const { isAuthenticated, logout } = useUser()
+  const { logout } = useUser()
   const handleDrawerToggle = () => {
     setIsDrawerOpen((prevState) => !prevState)
   }

@@ -1,11 +1,19 @@
-import { useUser } from '@/hooks/useUser'
-import { Outlet } from 'react-router-dom'
+import { PAGE_PATHS } from '@/routes'
+import { useAppSelector } from '@/utils/hook'
+import { Navigate, Outlet } from 'react-router-dom'
 
 const PrivateRoute = () => {
-  const { isAuthenticated } = useUser()
+  const { isAuthenticated } = useAppSelector((state) => state.user)
+  console.log(isAuthenticated)
+  if (isAuthenticated === null) {
+    return
+  }
+
   if (isAuthenticated) {
     return <Outlet />
   }
+
+  return <Navigate to={PAGE_PATHS.BASE} replace />
 }
 
 export default PrivateRoute

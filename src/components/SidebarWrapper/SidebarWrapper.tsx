@@ -38,7 +38,8 @@ export const SidebarWrapper = () => {
   const { t } = useTranslation()
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
   const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
-  const { isAuthenticated, isAuthFailed, setIsAuthFailed, logout } = useUser()
+  const { isAuthenticated } = useAppSelector((state) => state.user)
+  const { isAuthFailed, setIsAuthFailed, logout } = useUser()
   const [open, setOpen] = useState(false)
   const [isAlertOpen, setAlertOpen] = useState(false)
 

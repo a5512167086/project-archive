@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { LanguageChanger } from '../LanguageChanger'
 import { useUser } from '@/hooks/useUser'
+import { useAppSelector } from '@/utils/hook'
 
 const headerContent = { logout: 'header.signOut' }
 
@@ -22,7 +23,8 @@ export const CustomDrawer = ({
 }: CustomDrawerProps) => {
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { isAuthenticated, logout } = useUser()
+  const { isAuthenticated } = useAppSelector((state) => state.user)
+  const { logout } = useUser()
 
   const handleNavigation = (link: string) => {
     navigate(link)

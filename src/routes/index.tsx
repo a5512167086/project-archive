@@ -110,6 +110,7 @@ export const PUBLIC_NAVIGATION_ROUTE = [
 ]
 
 export const PRIVATE_NAVIGATION_ROUTE = [
+  { text: 'botPage.myBot', link: PAGE_PATHS.BOT_LIST },
   { text: 'header.userSetting', link: PAGE_PATHS.USER_SETTING }
 ]
 

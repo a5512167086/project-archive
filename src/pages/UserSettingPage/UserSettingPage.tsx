@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import { Container, Typography, Box, Button, TextField } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import { useAppSelector } from '@/utils/hook'
@@ -10,7 +10,10 @@ import { handleGoogleOAuth, handleLineOAuth } from '@/utils/helper'
 import { OAuthActionType } from '@/configs/type'
 import { useSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
-import { useChangePasswordMutation } from '@/store/apis/userApi'
+import {
+  useChangePasswordMutation,
+  useLazyGetOAuthStatusQuery
+} from '@/store/apis/userApi'
 import { useUser } from '@/hooks/useUser'
 
 const userSettingPageContent = {
@@ -31,13 +34,18 @@ export const UserSettingPage = () => {
   const { t } = useTranslation()
   const { enqueueSnackbar } = useSnackbar()
   const { logout } = useUser()
-  const { email } = useAppSelector((state) => state.user)
+  const { email, oauthStatus } = useAppSelector((state) => state.user)
   const [changePassword] = useChangePasswordMutation()
+  const [getOAuthStatus] = useLazyGetOAuthStatusQuery()
   const [formData, setFormData] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   })
+
+  useEffect(() => {
+    getOAuthStatus()
+  }, [])
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleInputChange = (e: { target: { name: any; value: any } }) => {
@@ -100,6 +108,7 @@ export const UserSettingPage = () => {
               <UserSettingStyledButton
                 variant="outlined"
                 color="primary"
+                disabled={oauthStatus.google}
                 onClick={() => handleGoogleOAuth(OAuthActionType.Bind)}
               >
                 {t(userSettingPageContent.bindGoogle)}
@@ -109,6 +118,7 @@ export const UserSettingPage = () => {
               <UserSettingStyledButton
                 variant="outlined"
                 color="success"
+                disabled={oauthStatus.line}
                 onClick={() => handleLineOAuth(OAuthActionType.Bind)}
               >
                 {t(userSettingPageContent.bindLine)}

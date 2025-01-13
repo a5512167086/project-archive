@@ -22,7 +22,7 @@ import {
   useLoginUserMutation
 } from '@/store/apis/userApi'
 import { useAppDispatch, useAppSelector } from '@/utils/hook'
-import { clearUserError } from '@/store/modules/userSlice'
+import { clearUserError, setAuthenticated } from '@/store/modules/userSlice'
 import { validateEmail } from '@/utils/helper'
 import { useNavigate } from 'react-router-dom'
 import { ERROR_CODE_MESSAGE_MAPPING } from '@/configs/common'
@@ -78,9 +78,15 @@ export const SignInPage = () => {
         } else {
           sessionStorage.setItem('token', payload.token)
         }
-        getUser().then(() => {
-          navigate(PAGE_PATHS.BOT_LIST)
-        })
+        console.log('Login Trigger')
+        getUser()
+          .then(() => {
+            dispatch(setAuthenticated(true))
+            navigate(PAGE_PATHS.BOT_LIST)
+          })
+          .catch(() => {
+            dispatch(setAuthenticated(false))
+          })
       })
       .finally(() => {
         setIsLoading(false)

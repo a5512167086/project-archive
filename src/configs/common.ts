@@ -11,7 +11,8 @@ export const ERROR_CODE_MESSAGE_MAPPING = {
   USER_LOOKUP_FAILED: 'error.unknown_error',
   USER_CREATION_FAILED: 'error.unknown_error',
   EMAIL_SERVICE_FAILED: 'error.unknown_error',
-  INVALID_LINE_BOT: 'error.invalid_line_bot'
+  INVALID_LINE_BOT: 'error.invalid_line_bot',
+  OAUTH_ALREADY_EXISTS: 'error.oauth_already_exists'
 }
 
 export const SELECT_LANGUAGES_LIST = [LANGUAGES.EN, LANGUAGES.ZH]

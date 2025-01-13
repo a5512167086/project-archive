@@ -161,6 +161,7 @@
     "unknown_error": "An unexpected error occurred, please check your action and try again.",
     "token_expired": "Session expired, please log in again",
     "invalidFormat": "Invalid format",
-    "invalid_line_bot": "LINE bot information error, please check if the information is correct"
+    "invalid_line_bot": "LINE bot information error, please check if the information is correct",
+    "oauth_already_exists": "The third-party login has already been bound, please use another third-party account to bind"
   }
 }

@@ -62,22 +62,31 @@ export const isValidHttpUrl = (url: string): boolean => {
 }
 
 export const handleGoogleOAuth = (action: OAuthActionType) => {
+  const state = encodeURIComponent(
+    JSON.stringify({ provider: 'google', action: action })
+  )
+
   const client_id =
     '48844684655-se9surcs5rvd5ek14o1b39k0lbhvk6on.apps.googleusercontent.com'
-  const redirect_uri = `${location.origin}/oauth-callback?action=${action}&provider=google`
+  const redirect_uri = `${location.origin}/oauth-callback`
   const scope =
     'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid'
   const response_type = 'code'
   const access_type = 'offline'
-  const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${client_id}&redirect_uri=${redirect_uri}&response_type=${response_type}&scope=${scope}&access_type=${access_type}`
+
+  const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${client_id}&redirect_uri=${redirect_uri}&response_type=${response_type}&scope=${scope}&access_type=${access_type}&state=${state}`
 
   window.location.href = oauthUrl
 }
 
 export const handleLineOAuth = (action: OAuthActionType) => {
+  const state = encodeURIComponent(
+    JSON.stringify({ provider: 'line', action: action })
+  )
+
   const client_id = '2006727725'
-  const redirect_uri = `${location.origin}/oauth-callback?action=${action}&provider=line`
-  const state = Math.random().toString(36).substring(2, 15)
+  const redirect_uri = `${location.origin}/oauth-callback`
+  // const state = Math.random().toString(36).substring(2, 15)
   const scope = 'profile%20openid%20email	'
   const response_type = 'code'
   const oauthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=${response_type}&client_id=${client_id}&redirect_uri=${encodeURIComponent(
