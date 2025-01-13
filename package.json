@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "type": "module",
+  "homepage": "/liff",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
