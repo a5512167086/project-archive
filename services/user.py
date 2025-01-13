@@ -3,7 +3,7 @@ import logging
 from commands.oauth import create_oauth
 from commands.user import create_user, update_user_password
 from exception import GlobalErrorException
-from queries.oauth import get_oauth_by_oauth_user_id
+from queries.oauth import get_oauth, get_oauth_by_oauth_user_id, get_oauth_by_user_id
 from queries.user import (
     get_user_by_email,
     get_user_by_email_and_password,
@@ -31,6 +31,7 @@ ERROR_USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS"
 ERROR_PASSWORD_NOT_MATCH = "PASSWORD_NOT_MATCH"
 ERROR_USER_LOOKUP_FAILED = "USER_LOOKUP_FAILED"
 ERROR_USER_CREATION_FAILED = "USER_CREATION_FAILED"
+ERROR_OAUTH_ALREADY_EXISTS = "OAUTH_ALREADY_EXISTS"
 
 
 logging.basicConfig(
@@ -205,7 +206,20 @@ def oauth_bind(user_id: str, oauth: OAuthBindRequest):
         logging.error("User not found in database: ID=%s", user_id)
         raise GlobalErrorException(ERROR_USER_NOT_EXISTS, "User not found in database.")
 
-    if oauth.provider == "google":
+    oauth_status = check_oauth_status(user_id)
+
+    if oauth_status["google"] is True and oauth.provider == "google":
+        raise GlobalErrorException(
+            "USER_ALREADY_BINDED",
+            "User already binded with Google OAuth.",
+        )
+    elif oauth_status["google"] is True and oauth.provider == "google":
+        raise GlobalErrorException(
+            "USER_ALREADY_BINDED",
+            "User already binded with Line OAuth.",
+        )
+
+    if oauth.provider == "google" and oauth_status["google"] is not True:
         user_info = authenticate_with_google(oauth.code)
     elif oauth.provider == "line":
         user_info = authenticate_with_line(oauth.code)
@@ -222,6 +236,12 @@ def oauth_bind(user_id: str, oauth: OAuthBindRequest):
             ERROR_USER_LOOKUP_FAILED, "Failed to retrieve user information."
         )
 
+    user_oauths = get_oauth(oauth.provider, user_info["id"])
+    if user_oauths:
+        raise GlobalErrorException(
+            ERROR_OAUTH_ALREADY_EXISTS, "OAuth already bound to the user."
+        )
+
     create_oauth(
         OAuth(
             user_id=user_id,
@@ -229,6 +249,17 @@ def oauth_bind(user_id: str, oauth: OAuthBindRequest):
             oauth_user_id=user_info["id"],
         )
     )
+
+
+def check_oauth_status(user_id: str):
+    oauth_data = get_oauth_by_user_id(user_id)
+    oauth_status = {"google": False, "line": False}
+    for row in oauth_data:
+        provider = row.get("oauth_provider")
+        if provider in oauth_status:
+            oauth_status[provider] = True
+
+    return oauth_status
 
 
 def forgot_password(user_email: ForgotPasswordRequest):

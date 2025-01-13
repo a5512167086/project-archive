@@ -35,7 +35,7 @@ def create_jwt_token(data: dict):
         )
 
 
-def google_code_to_token(code):
+def google_code_to_token(code: str):
     token_url = "https://oauth2.googleapis.com/token"
     data = {
         "client_id": GOOGLE_CLIENT_ID,

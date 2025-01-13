@@ -24,6 +24,7 @@ from services.user import (
     register,
     reset_password,
     change_password,
+    check_oauth_status,
 )
 
 router = APIRouter()
@@ -44,13 +45,21 @@ async def user_oauth_login(body: OAuthLoginRequest):
     return oauth_login(body)
 
 
-@router.post("/user/oauth-bind", tags=["users"], response_model=TokenResponse)
+@router.post("/user/oauth-bind", tags=["users"])
 async def user_oauth_bind(
     auth_headers: Annotated[dict, Depends(get_auth_response_headers)],
     body: OAuthBindRequest,
 ):
     user_id = auth_headers["X-User-ID"]
-    return oauth_bind(user_id, body)
+    oauth_bind(user_id, body)
+
+
+@router.get("/user/oauth-status", tags=["users"])
+async def user_oauth_status(
+    auth_headers: Annotated[dict, Depends(get_auth_response_headers)],
+):
+    user_id = auth_headers["X-User-ID"]
+    return check_oauth_status(user_id)
 
 
 @router.post("/user/register", tags=["users"], response_model=RegisterResponse)
