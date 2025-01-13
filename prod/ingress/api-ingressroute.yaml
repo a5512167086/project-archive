@@ -17,6 +17,16 @@ spec:
         - name: platform-web-service
           port: 80
 
+    # LIFF Web Service
+    # 根據 Host 配置的服務，主要用於提供平台相關的前端服務
+    - kind: Rule
+      match: Host(`easybot.wke.csie.ncnu.edu.tw`) && PathPrefix(`/liff`)
+      middlewares:
+        - name: liff-middleware
+      services:
+        - name: liff-web-service
+          port: 80
+
     # Auth API
     # 提供認證相關的 API，如用戶登錄或驗證
     - kind: Rule
@@ -28,7 +38,7 @@ spec:
     # User API（需要中介軟體的路由）
     # 需要進行認證的特定用戶 API 路徑（例如獲取用戶資訊、重設密碼）
     - kind: Rule
-      match: Host(`easybot.wke.csie.ncnu.edu.tw`) && (PathPrefix(`/userapi/user/me`) || PathPrefix(`/userapi/user/reset_password`))
+      match: Host(`easybot.wke.csie.ncnu.edu.tw`) && (PathPrefix(`/userapi/user/me`) || PathPrefix(`/userapi/user/reset-password`) || PathPrefix(`/userapi/user/change-password`) || PathPrefix(`/userapi/user/change-password`) || PathPrefix(`/userapi/user/oauth-bind`) || PathPrefix(`/userapi/user/change-password`) || PathPrefix(`/userapi/user/oauth-status`))
       middlewares:
         - name: cors-middleware
         - name: auth-middleware

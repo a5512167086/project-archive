@@ -41,6 +41,12 @@ spec:
               value: "REDACTED_GOOGLE_CLIENT_SECRET"
             - name: "GOOGLE_REDIRECT_URI"
               value: "https://easybot.wke.csie.ncnu.edu.tw/oauth-callback"
+            - name: "LINE_CLIENT_ID"
+              value: "2006727725"
+            - name: "LINE_CLIENT_SECRET"
+              value: "26bb770871343e6947c9bb463f809ecc"
+            - name: "LINE_REDIRECT_URI"
+              value: "https://easybot.wke.csie.ncnu.edu.tw/oauth-callback"
           imagePullPolicy: Always
           ports:
             - containerPort: 80
