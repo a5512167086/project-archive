@@ -168,7 +168,11 @@ export const KnowledgeManagementPage = () => {
     await insertKnowledges({
       bot_class_id: botClassId,
       csv_file: data.csv_file
-    }).unwrap()
+    })
+      .unwrap()
+      .then(() => {
+        getKnowledges({ bot_class_id: botClassId })
+      })
   }
 
   useEffect(() => {
