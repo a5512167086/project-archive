@@ -122,6 +122,9 @@
     "answer": "答案",
     "uploadCSV": "上傳CSV檔案"
   },
+  "reservationManagementPage": {
+    "title": "預約模組設定"
+  },
   "notFoundPage": {
     "title": "查無此頁面",
     "description": "哎呀！您正在尋找的頁面並不存在。它可能已被移動或刪除了，或者您輸入的 URL 不正確。"

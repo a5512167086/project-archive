@@ -122,6 +122,9 @@
     "answer": "Answer",
     "uploadCSV": "Upload CSV File"
   },
+  "reservationManagementPage": {
+    "title": "Reservation Module Settings"
+  },
   "notFoundPage": {
     "title": "Page Not Found",
     "description": "Oops! The page you are looking for doesn't exist. It may have been moved or deleted, or you may have entered an incorrect URL."
