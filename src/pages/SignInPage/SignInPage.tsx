@@ -40,7 +40,7 @@ const signInContent = {
   emailFormatError: 'error.email_format'
 }
 
-export const SignInPage = () => {
+const SignInPage = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { errorCode } = useAppSelector((state) => state.user)
@@ -192,3 +192,5 @@ export const SignInPage = () => {
     </StyledSignInPage>
   )
 }
+
+export default SignInPage

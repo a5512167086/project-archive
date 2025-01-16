@@ -8,7 +8,7 @@ const notFoundPage = {
   description: 'notFoundPage.description'
 }
 
-export const NotFoundPage = () => {
+const NotFoundPage = () => {
   const { t } = useTranslation()
   return (
     <StyledNotFoundPage>
@@ -22,3 +22,5 @@ export const NotFoundPage = () => {
     </StyledNotFoundPage>
   )
 }
+
+export default NotFoundPage

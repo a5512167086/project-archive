@@ -30,7 +30,7 @@ const createBotTutorialContent = {
   ]
 }
 
-export const CreateBotTutorialPage = () => {
+const CreateBotTutorialPage = () => {
   const navigate = useNavigate()
   const { t } = useTranslation()
 
@@ -61,3 +61,5 @@ export const CreateBotTutorialPage = () => {
     </StyledCreateBotTutorialPage>
   )
 }
+
+export default CreateBotTutorialPage

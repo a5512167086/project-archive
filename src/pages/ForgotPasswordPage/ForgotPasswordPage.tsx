@@ -30,7 +30,7 @@ const forgotPasswordContent = {
   backToLogin: 'signPage.backToLogin'
 }
 
-export const ForgotPasswordPage = () => {
+const ForgotPasswordPage = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
@@ -146,3 +146,5 @@ export const ForgotPasswordPage = () => {
     </StyledForgotPasswordPage>
   )
 }
+
+export default ForgotPasswordPage

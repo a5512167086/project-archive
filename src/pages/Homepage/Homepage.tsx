@@ -2,7 +2,7 @@ import { Hero } from '@/components/Hero'
 import { StyledHomePage } from './Homepage.style'
 import { FeatureOverview } from '@/components/FeatureOverview'
 
-export const Homepage = () => {
+const Homepage = () => {
   return (
     <StyledHomePage maxWidth="lg" disableGutters>
       <Hero />
@@ -10,3 +10,5 @@ export const Homepage = () => {
     </StyledHomePage>
   )
 }
+
+export default Homepage

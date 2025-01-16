@@ -32,7 +32,7 @@ const signUpContent = {
   passwordMismatch: 'error.password_mismatch'
 }
 
-export const SignUpPage = () => {
+const SignUpPage = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { errorCode } = useAppSelector((state) => state.user)
@@ -196,3 +196,5 @@ export const SignUpPage = () => {
     </StyledSignUpPage>
   )
 }
+
+export default SignUpPage

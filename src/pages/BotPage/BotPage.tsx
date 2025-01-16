@@ -67,7 +67,7 @@ const botPageContent = {
   modalClose: 'common.close'
 }
 
-export const BotPage = () => {
+const BotPage = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
@@ -220,3 +220,5 @@ export const BotPage = () => {
     </StyledBotPage>
   )
 }
+
+export default BotPage

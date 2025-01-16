@@ -25,7 +25,7 @@ const resetPasswordContent = {
   resetSuccess: 'signPage.resetSuccess'
 }
 
-export const ResetPasswordPage = () => {
+const ResetPasswordPage = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
@@ -189,3 +189,5 @@ export const ResetPasswordPage = () => {
     </StyledResetPasswordPage>
   )
 }
+
+export default ResetPasswordPage

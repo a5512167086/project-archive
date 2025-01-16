@@ -96,7 +96,7 @@ const insertSingleSearchItemFields = [
   }
 ]
 
-export const SearchManagementPage = () => {
+const SearchManagementPage = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
@@ -322,3 +322,5 @@ export const SearchManagementPage = () => {
     </StyledSearchManagementPage>
   )
 }
+
+export default SearchManagementPage

@@ -58,7 +58,7 @@ const insertKnowledgesFields = [
   }
 ]
 
-export const KnowledgeManagementPage = () => {
+const KnowledgeManagementPage = () => {
   const [getKnowledges] = useLazyGetKnowledgeItemsQuery()
   const [insertKnowledge] = useInsertKnowledgeItemMutation()
   const [insertKnowledges] = useInsertKnowledgeItemsByCSVMutation()
@@ -264,3 +264,5 @@ export const KnowledgeManagementPage = () => {
     </StyledKnowledgeManagementPage>
   )
 }
+
+export default KnowledgeManagementPage

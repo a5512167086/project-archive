@@ -7,9 +7,16 @@ import svgr from 'vite-plugin-svgr'
 export default defineConfig({
   base: '/',
   plugins: [react(), basicSsl(), svgr()],
+  optimizeDeps: {
+    include: [
+      '@fullcalendar/core',
+      '@fullcalendar/react',
+      '@fullcalendar/daygrid'
+    ]
+  },
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src')
     }
-  },
+  }
 })

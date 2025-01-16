@@ -11,77 +11,28 @@ import ViewListIcon from '@mui/icons-material/ViewList'
 import SearchIcon from '@mui/icons-material/Search'
 import PrivateRoute from '@/components/PrivateRoute/PrivateRoute'
 
-const SignInPage = lazy(() =>
-  import('@/pages/SignInPage').then((module) => ({
-    default: module.SignInPage
-  }))
+const SignInPage = lazy(() => import('@/pages/SignInPage'))
+const SignUpPage = lazy(() => import('@/pages/SignUpPage'))
+const ForgotPasswordPage = lazy(() => import('@/pages/ForgotPasswordPage'))
+const OAuthCallback = lazy(() => import('@/pages/OAuthCallbackPage'))
+const BotManagementPage = lazy(() => import('@/pages/BotManagementPage'))
+const SearchManagementPage = lazy(() => import('@/pages/SearchManagementPage'))
+const SearchItemPage = lazy(() => import('@/pages/SearchItemPage'))
+const KnowledgeManagementPage = lazy(
+  () => import('@/pages/KnowledgeManagementPage')
 )
-const SignUpPage = lazy(() =>
-  import('@/pages/SignUpPage').then((module) => ({
-    default: module.SignUpPage
-  }))
+const ReservationManagementPage = lazy(
+  () => import('@/pages/ReservationManagementPage')
 )
-const ForgotPasswordPage = lazy(() =>
-  import('@/pages/ForgotPasswordPage').then((module) => ({
-    default: module.ForgotPasswordPage
-  }))
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
+const Homepage = lazy(() => import('@/pages/Homepage'))
+const BotPage = lazy(() => import('@/pages/BotPage'))
+const ResetPasswordPage = lazy(() => import('@/pages/ResetPasswordPage'))
+const CreateBotTutorialPage = lazy(
+  () => import('@/pages/CreateBotTutorialPage')
 )
-const OAuthCallback = lazy(() =>
-  import('@/pages/OAuthCallbackPage/OAuthCallbackPage').then((module) => ({
-    default: module.OAuthCallbackPage
-  }))
-)
-const BotManagementPage = lazy(() =>
-  import('@/pages/BotManagementPage').then((module) => ({
-    default: module.BotManagementPage
-  }))
-)
-const SearchManagementPage = lazy(() =>
-  import('@/pages/SearchManagementPage').then((module) => ({
-    default: module.SearchManagementPage
-  }))
-)
-const SearchItemPage = lazy(() =>
-  import('@/pages/SearchItemPage').then((module) => ({
-    default: module.SearchItemPage
-  }))
-)
-const KnowledgeManagementPage = lazy(() =>
-  import('@/pages/KnowledgeManagementPage').then((module) => ({
-    default: module.KnowledgeManagementPage
-  }))
-)
-const NotFoundPage = lazy(() =>
-  import('@/pages/NotFoundPage').then((module) => ({
-    default: module.NotFoundPage
-  }))
-)
-const Homepage = lazy(() =>
-  import('@/pages/Homepage').then((module) => ({ default: module.Homepage }))
-)
-const BotPage = lazy(() =>
-  import('@/pages/BotPage').then((module) => ({ default: module.BotPage }))
-)
-const ResetPasswordPage = lazy(() =>
-  import('@/pages/ResetPasswordPage').then((module) => ({
-    default: module.ResetPasswordPage
-  }))
-)
-const CreateBotTutorialPage = lazy(() =>
-  import('@/pages/CreateBotTutorialPage').then((module) => ({
-    default: module.CreateBotTutorialPage
-  }))
-)
-const BotSettingPage = lazy(() =>
-  import('@/pages/BotSettingPage').then((module) => ({
-    default: module.BotSettingPage
-  }))
-)
-const UserSettingPage = lazy(() =>
-  import('@/pages/UserSettingPage').then((module) => ({
-    default: module.UserSettingPage
-  }))
-)
+const BotSettingPage = lazy(() => import('@/pages/BotSettingPage'))
+const UserSettingPage = lazy(() => import('@/pages/UserSettingPage'))
 
 export const PAGE_PATHS = {
   BASE: '/',
@@ -252,7 +203,7 @@ export const router = createBrowserRouter([
           },
           {
             path: PAGE_PATHS.RESERVATION_MODULE,
-            element: <div>test</div>
+            element: <ReservationManagementPage />
           },
           {
             path: PAGE_PATHS.SEARCH_MODULE,

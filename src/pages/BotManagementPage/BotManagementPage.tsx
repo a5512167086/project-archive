@@ -49,7 +49,7 @@ const moduleData = [
   }
 ]
 
-export const BotManagementPage = () => {
+const BotManagementPage = () => {
   const { t } = useTranslation()
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
   const { moduleSettings } = useAppSelector((state) => state.module)
@@ -126,3 +126,5 @@ export const BotManagementPage = () => {
     )
   )
 }
+
+export default BotManagementPage

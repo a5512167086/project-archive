@@ -30,7 +30,7 @@ const userSettingPageContent = {
   passwordMimatch: 'userSettingPage.passwordMismatch'
 }
 
-export const UserSettingPage = () => {
+const UserSettingPage = () => {
   const { t } = useTranslation()
   const { enqueueSnackbar } = useSnackbar()
   const { logout } = useUser()
@@ -185,3 +185,5 @@ export const UserSettingPage = () => {
     </Container>
   )
 }
+
+export default UserSettingPage

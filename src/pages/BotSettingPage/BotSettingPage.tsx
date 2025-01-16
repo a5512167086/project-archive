@@ -29,7 +29,7 @@ const botSettingPageContent = {
   rename: 'common.rename'
 }
 
-export const BotSettingPage = () => {
+const BotSettingPage = () => {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { botList, currentBotObjectId, status } = useAppSelector(
@@ -146,3 +146,5 @@ export const BotSettingPage = () => {
     </StyledBotSettingPage>
   )
 }
+
+export default BotSettingPage

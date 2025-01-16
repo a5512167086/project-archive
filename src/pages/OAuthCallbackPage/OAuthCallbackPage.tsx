@@ -28,7 +28,7 @@ type CustomState = {
   action: 'login' | 'bind'
 }
 
-export const OAuthCallbackPage = () => {
+const OAuthCallbackPage = () => {
   let isRequest = false
   const navigate = useNavigate()
   const { errorCode, isAuthenticated } = useAppSelector((state) => state.user)
@@ -130,3 +130,5 @@ export const OAuthCallbackPage = () => {
     </StyledOAuthCallbackPage>
   )
 }
+
+export default OAuthCallbackPage

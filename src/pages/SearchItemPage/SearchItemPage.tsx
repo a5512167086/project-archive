@@ -2,7 +2,7 @@ import { Box, Typography, Card, CardContent } from '@mui/material'
 import { useAppSelector } from '@/utils/hook'
 import Slider from 'react-slick'
 
-export const SearchItemPage = () => {
+const SearchItemPage = () => {
   const { searchItems, currentSearchItemObjectId } = useAppSelector(
     (state) => state.search
   )
@@ -102,3 +102,5 @@ export const SearchItemPage = () => {
     </Box>
   )
 }
+
+export default SearchItemPage
