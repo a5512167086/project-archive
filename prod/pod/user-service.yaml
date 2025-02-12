@@ -36,7 +36,7 @@ spec:
             - name: "EMAIL_APP_PASSWORD"
               value: "iryn atxz yglr ueae"
             - name: "GOOGLE_CLIENT_ID"
-              value: "48844684655-se9surcs5rvd5ek14o1b39k0lbhvk6on.apps.googleusercontent.com"
+              value: "353361777828-gppn0r0sf13l7g64lg1lo7cv1ptfe1ud.apps.googleusercontent.com"
             - name: "GOOGLE_CLIENT_SECRET"
               value: "REDACTED_GOOGLE_CLIENT_SECRET"
             - name: "GOOGLE_REDIRECT_URI"

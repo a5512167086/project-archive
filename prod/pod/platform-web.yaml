@@ -27,6 +27,10 @@ spec:
               value: "https://easybot.wke.csie.ncnu.edu.tw/moduleapi"
             - name: VITE_KNOWLEDGE_BACKEND_URL
               value: "https://easybot.wke.csie.ncnu.edu.tw/knowledgeapi"
+            - name: VITE_GOOGLE_CLIENT_ID
+              value: "353361777828-gppn0r0sf13l7g64lg1lo7cv1ptfe1ud.apps.googleusercontent.com"
+            - name: VITE_LINE_CLIENT_ID
+              value: "2006727725"
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
