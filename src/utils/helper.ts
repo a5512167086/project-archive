@@ -66,8 +66,7 @@ export const handleGoogleOAuth = (action: OAuthActionType) => {
     JSON.stringify({ provider: 'google', action: action })
   )
 
-  const client_id =
-    '48844684655-se9surcs5rvd5ek14o1b39k0lbhvk6on.apps.googleusercontent.com'
+  const client_id = import.meta.env.VITE_GOOGLE_CLIENT_ID
   const redirect_uri = `${location.origin}/oauth-callback`
   const scope =
     'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid'
@@ -84,9 +83,8 @@ export const handleLineOAuth = (action: OAuthActionType) => {
     JSON.stringify({ provider: 'line', action: action })
   )
 
-  const client_id = '2006727725'
+  const client_id = import.meta.env.VITE_LINE_CLIENT_ID
   const redirect_uri = `${location.origin}/oauth-callback`
-  // const state = Math.random().toString(36).substring(2, 15)
   const scope = 'profile%20openid%20email	'
   const response_type = 'code'
   const oauthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=${response_type}&client_id=${client_id}&redirect_uri=${encodeURIComponent(
