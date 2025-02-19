@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: knowledge-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: knowledge
+  template:
+    metadata:
+      labels:
+        app: knowledge
+    spec:
+      containers:
+        - name: knowledge
+          image: a5512167086/easybot-knowledge-service:latest
+          env:
+            - name: DB_HOST
+              value: "10.21.26.74"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "easybot"
+            - name: DB_USER
+              value: "postgres"
+            - name: DB_PASSWORD
+              value: "0000"
+          ports:
+            - containerPort: 80 
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: knowledge-service
+spec:
+  selector:
+    app: knowledge
+  ports:
+    - protocol: TCP
+      port: 80        
+      targetPort: 80   

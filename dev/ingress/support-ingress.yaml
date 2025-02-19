@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: http-ingress
+  name: support-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
@@ -42,5 +42,19 @@ spec:
             backend:
               service:
                 name: command-service
+                port:
+                  number: 80
+          - path: /knowledgeapi(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: knowledge-service
+                port:
+                  number: 80
+          - path: /liff(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: liff-web-service
                 port:
                   number: 80
