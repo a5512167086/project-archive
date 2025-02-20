@@ -1,0 +1,11 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: auth-middleware
+spec:
+  forwardAuth:
+    address: http://dev.local/authapi/verify
+    trustForwardHeader: true
+    authResponseHeaders:
+      - X-User-ID
+      - X-User-Email
