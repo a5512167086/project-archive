@@ -6,6 +6,13 @@ spec:
   entryPoints:
     - web
   routes:
+    # Traefik Dashboard
+    - match: Host(`dev.local`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
+      kind: Rule
+      services:
+        - name: api@internal
+          kind: TraefikService
+          
     # 平台 Web Service
     # 根據 Host 配置的服務，主要用於提供平台相關的前端服務
     - kind: Rule
