@@ -115,7 +115,7 @@ def init_rich_menu(line_access_token: str, liff_id: str, bot_uuid: str):
         logger.info(f"Rich menu created with ID: {rich_menu_id}")
 
         image_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../template/rich_menu.png")
+            os.path.join(os.path.dirname(__file__), "../assets/rich_menu.png")
         )
         with open(image_path, "rb") as image:
             line_bot_blob_api.set_rich_menu_image(

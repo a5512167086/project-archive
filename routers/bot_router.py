@@ -39,7 +39,7 @@ def create_bot(
 ):
     user_id = current_user["user_id"]
     bot_uuid = create_new_bot(user_id, bot_body)
-    return {"webhook_url": f"{BASE_URL}webhook/{bot_uuid}"}
+    return {"webhook_url": f"{BASE_URL}/webhook/{bot_uuid}"}
 
 
 @bot_router.delete("/bot/{bot_class_id}", tags=["bots"])

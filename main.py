@@ -20,7 +20,7 @@ app = FastAPI(responses={status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse}})
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://localhost:5173"],  # ⬅️ 不可以用 "*"
+    allow_origins=["https://localhost:5173", "http://localhost:5173"],  # ⬅️ 不可以用 "*"
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
