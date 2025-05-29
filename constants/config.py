@@ -1,0 +1,30 @@
+import os
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+DB_NAME = os.getenv("DB_NAME")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+
+FRONTEND_URL = os.getenv("FRONTEND_URL")
+
+EMAIL = os.getenv("EMAIL")
+EMAIL_APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
+
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
+
+LINE_CLIENT_ID = os.getenv("LINE_CLIENT_ID")
+LINE_CLIENT_SECRET = os.getenv("LINE_CLIENT_SECRET")
+LINE_REDIRECT_URI = os.getenv("LINE_REDIRECT_URI")
+
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
+JWT_SECRET = os.getenv("JWT_SECRET")
+JWT_REFRESH_SECRET = os.getenv("JWT_REFRESH_SECRET")
+JWT_RESET_SECRET = os.getenv("JWT_RESET_SECRET")
+ACCESS_TOKEN_EXPIRE_SECONDS = 86400
