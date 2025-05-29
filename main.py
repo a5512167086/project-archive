@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 
 from exception import add_global_exception_handler
 from routers.knowledge_router import knowledge_router
+from routers.search_router import search_router
 from routers.user_router import user_router
 from schemas.common_schema import ErrorResponse
 
@@ -23,6 +24,7 @@ add_global_exception_handler(app)
 
 app.include_router(user_router)
 app.include_router(knowledge_router)
+app.include_router(search_router)
 
 
 @app.exception_handler(RequestValidationError)

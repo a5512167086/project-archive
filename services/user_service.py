@@ -23,7 +23,7 @@ from schemas.user_schema import (
 )
 from services.auth_service import create_jwt_token, generate_token_pair
 from services.mail_service import send_reset_email
-from utils import (
+from utils.common import (
     authenticate_with_google,
     authenticate_with_line,
     generate_random_password,
