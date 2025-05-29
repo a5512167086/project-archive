@@ -1,9 +1,13 @@
+from pathlib import Path
+
+import uvicorn
 from fastapi import FastAPI, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from exception import add_global_exception_handler
+from routers.bot_router import bot_router
 from routers.command_router import command_router
 from routers.knowledge_router import knowledge_router
 from routers.module_router import module_router
@@ -16,7 +20,7 @@ app = FastAPI(responses={status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse}})
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://localhost:5173"],  # ⬅️ 不可以用 "*"
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -29,6 +33,7 @@ app.include_router(knowledge_router)
 app.include_router(search_router)
 app.include_router(command_router)
 app.include_router(module_router)
+app.include_router(bot_router)
 
 
 @app.exception_handler(RequestValidationError)
@@ -36,4 +41,19 @@ async def validation_exception_handler(request, exc):
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={"detail": exc.errors(), "body": exc.body},
+    )
+
+
+if __name__ == "__main__":
+    base_dir = Path(__file__).resolve().parent
+    cert_path = base_dir / "certs" / "localhost.pem"
+    key_path = base_dir / "certs" / "localhost-key.pem"
+
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=8000,
+        ssl_certfile=str(cert_path),
+        ssl_keyfile=str(key_path),
+        reload=True,  # optional for development
     )
