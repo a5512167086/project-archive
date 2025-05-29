@@ -14,11 +14,12 @@ import { clearUserToken } from './utils/helper'
 function AppInitializer() {
   const dispatch = useAppDispatch()
   const [getUser] = useLazyGetUserMeQuery()
-  const token = localStorage.getItem('token') || sessionStorage.getItem('token')
+  const token =
+    localStorage.getItem('access_token') ||
+    sessionStorage.getItem('access_token')
   const { isAuthenticated } = useAppSelector((state) => state.user)
 
   useEffect(() => {
-    console.log('AppInitializer')
     if (!token) {
       dispatch(setAuthenticated(false))
       return

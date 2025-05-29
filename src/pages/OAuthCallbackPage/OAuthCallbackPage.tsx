@@ -62,7 +62,8 @@ const OAuthCallbackPage = () => {
       await oauthLogin({ code, provider: provider as OAuthProvider })
         .unwrap()
         .then((payload) => {
-          localStorage.setItem('token', payload.token)
+          localStorage.setItem('access_token', payload.access_token)
+          localStorage.setItem('refresh_token', payload.refresh_token)
           getUser().then(() => {
             navigate(PAGE_PATHS.BOT_LIST)
           })

@@ -74,11 +74,12 @@ const SignInPage = () => {
       .unwrap()
       .then((payload) => {
         if (remember) {
-          localStorage.setItem('token', payload.token)
+          localStorage.setItem('access_token', payload.access_token)
+          localStorage.setItem('refresh_token', payload.refresh_token)
         } else {
-          sessionStorage.setItem('token', payload.token)
+          sessionStorage.setItem('access_token', payload.access_token)
+          sessionStorage.setItem('refresh_token', payload.refresh_token)
         }
-        console.log('Login Trigger')
         getUser()
           .then(() => {
             dispatch(setAuthenticated(true))

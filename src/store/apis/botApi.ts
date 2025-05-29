@@ -34,11 +34,12 @@ export type UpdateBotRequest = {
 export const botApi = createApi({
   reducerPath: 'botApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_BOT_BACKEND_URL,
+    baseUrl: import.meta.env.VITE_BACKEND_URL,
     prepareHeaders: (headers) => {
       if (!headers.has('Authorization')) {
         const token =
-          localStorage.getItem('token') || sessionStorage.getItem('token')
+          localStorage.getItem('access_token') ||
+          sessionStorage.getItem('access_token')
         if (token) {
           headers.set('Authorization', `Bearer ${token}`)
         }

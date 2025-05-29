@@ -32,11 +32,11 @@ export const isTokenValid = (token: string) => {
 }
 
 export const clearUserToken = () => {
-  if (localStorage.getItem('token')) {
-    localStorage.removeItem('token')
+  if (localStorage.getItem('access_token')) {
+    localStorage.removeItem('access_token')
   }
-  if (sessionStorage.getItem('token')) {
-    sessionStorage.removeItem('token')
+  if (sessionStorage.getItem('access_token')) {
+    sessionStorage.removeItem('access_token')
   }
 }
 

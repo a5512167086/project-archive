@@ -17,7 +17,9 @@ export type LoginRequest = {
 }
 
 export type LoginResponse = {
-  token: string
+  access_token: string
+  refresh_token: string
+  token_type: string
 }
 
 export type RegisterRequest = {
@@ -59,13 +61,14 @@ export type OAuthStatusResponse = {
 export const userApi = createApi({
   reducerPath: 'userApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_USER_BACKEND_URL,
+    baseUrl: import.meta.env.VITE_BACKEND_URL,
     prepareHeaders: (headers) => {
       if (!headers.has('Authorization')) {
-        const token =
-          localStorage.getItem('token') || sessionStorage.getItem('token')
-        if (token) {
-          headers.set('Authorization', `Bearer ${token}`)
+        const access_token =
+          localStorage.getItem('access_token') ||
+          sessionStorage.getItem('access_token')
+        if (access_token) {
+          headers.set('Authorization', `Bearer ${access_token}`)
         }
       }
       return headers

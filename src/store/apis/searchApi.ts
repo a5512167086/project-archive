@@ -49,7 +49,7 @@ export type SearchItem = {
 export const searchApi = createApi({
   reducerPath: 'searchApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_SEARCH_BACKEND_URL,
+    baseUrl: import.meta.env.VITE_BACKEND_URL,
     prepareHeaders: (headers) => {
       if (!headers.has('Authorization')) {
         const token =
