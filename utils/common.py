@@ -17,6 +17,15 @@ from constants.error_code import ErrorCode
 from exception import GlobalErrorException
 
 
+def get_line_image(message_id: str, access_token: str) -> bytes:
+    image_url = f"https://api-data.line.me/v2/bot/message/{message_id}/content"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = requests.get(image_url, headers=headers, stream=True)
+
+    if response.status_code == 200:
+        return response.content
+
+
 def hash_password(password):
     salt = bcrypt.gensalt()
     hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
