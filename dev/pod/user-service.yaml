@@ -17,29 +17,37 @@ spec:
           image: a5512167086/easybot-user-service:latest
           env:
             - name: DB_HOST
-              value: "10.21.26.74"
+              value: "192.168.253.34"
             - name: DB_PORT
               value: "5432"
             - name: DB_NAME
               value: "easybot"
             - name: DB_USER
-              value: "postgres"
+              value: "shin"
             - name: DB_PASSWORD
-              value: "0000"
+              value: "REDACTED_DB_PASSWORD"
             - name: JWT_SECRET
               value: "REDACTED_SECRET"
             - name: FRONTEND_URL
-              value: "https://demo.wke.csie.ncnu.edu.tw/easybot"
+              value: "http://dev.local.com"
+            - name: AUTH_SERVICE_API_URL
+              value: "http://dev.local.com/authapi"
             - name: "EMAIL"
               value: "noreply.wke@gmail.com"
             - name: "EMAIL_APP_PASSWORD"
               value: "iryn atxz yglr ueae"
             - name: "GOOGLE_CLIENT_ID"
-              value: "48844684655-se9surcs5rvd5ek14o1b39k0lbhvk6on.apps.googleusercontent.com"
+              value: "353361777828-gppn0r0sf13l7g64lg1lo7cv1ptfe1ud.apps.googleusercontent.com"
             - name: "GOOGLE_CLIENT_SECRET"
               value: "REDACTED_GOOGLE_CLIENT_SECRET"
             - name: "GOOGLE_REDIRECT_URI"
-              value: "https://demo.wke.csie.ncnu.edu.tw/easybot/oauth-callback"
+              value: "http://dev.local.com/oauth-callback"
+            - name: "LINE_CLIENT_ID"
+              value: "2006727725"
+            - name: "LINE_CLIENT_SECRET"
+              value: "26bb770871343e6947c9bb463f809ecc"
+            - name: "LINE_REDIRECT_URI"
+              value: "http://dev.local.com/oauth-callback"
           imagePullPolicy: Always
           ports:
             - containerPort: 80

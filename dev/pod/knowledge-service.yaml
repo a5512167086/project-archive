@@ -17,17 +17,17 @@ spec:
           image: a5512167086/easybot-knowledge-service:latest
           env:
             - name: DB_HOST
-              value: "10.21.26.74"
+              value: "localhost"
             - name: DB_PORT
               value: "5432"
             - name: DB_NAME
               value: "easybot"
             - name: DB_USER
-              value: "postgres"
+              value: "shin"
             - name: DB_PASSWORD
-              value: "0000"
+              value: "REDACTED_DB_PASSWORD"
           ports:
-            - containerPort: 80 
+            - containerPort: 80
           resources:
             requests:
               memory: "128Mi"
@@ -45,5 +45,5 @@ spec:
     app: knowledge
   ports:
     - protocol: TCP
-      port: 80        
-      targetPort: 80   
+      port: 80
+      targetPort: 80

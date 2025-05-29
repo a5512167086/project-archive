@@ -17,21 +17,21 @@ spec:
           image: a5512167086/easybot-command-service:latest
           env:
             - name: DB_HOST
-              value: "10.21.26.74"
+              value: "localhost"
             - name: DB_PORT
               value: "5432"
             - name: DB_NAME
               value: "easybot"
             - name: DB_USER
-              value: "postgres"
+              value: "shin"
             - name: DB_PASSWORD
-              value: "0000"
+              value: "REDACTED_DB_PASSWORD"
             - name: MODULE_SERVICE_API_URL
-              value: "https://demo.wke.csie.ncnu.edu.tw/easybot/moduleapi"
+              value: "http://dev.local.com/moduleapi"
             - name: SEARCH_SERVICE_API_KEY
-              value: "https://demo.wke.csie.ncnu.edu.tw/easybot/searchapi"
+              value: "http://dev.local.com/searchapi"
           ports:
-            - containerPort: 80 
+            - containerPort: 80
           resources:
             requests:
               memory: "128Mi"
@@ -49,5 +49,5 @@ spec:
     app: command
   ports:
     - protocol: TCP
-      port: 80        
-      targetPort: 80   
+      port: 80
+      targetPort: 80

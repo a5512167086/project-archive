@@ -17,21 +17,21 @@ spec:
           image: a5512167086/easybot-bot-service:latest
           env:
             - name: DB_HOST
-              value: "10.21.26.74"
+              value: "localhost"
             - name: DB_PORT
               value: "5432"
             - name: DB_NAME
               value: "easybot"
             - name: DB_USER
-              value: "postgres"
+              value: "shin"
             - name: DB_PASSWORD
-              value: "0000"
+              value: "REDACTED_DB_PASSWORD"
             - name: JWT_SECRET
               value: "REDACTED_SECRET"
             - name: BASE_URL
-              value: "https://demo.wke.csie.ncnu.edu.tw/easybot/botapi/"
+              value: "http://dev.local.com/botapi/"
             - name: "COMMAND_SERVICE_API_URL"
-              value: "https://demo.wke.csie.ncnu.edu.tw/easybot/commandapi"
+              value: "http://dev.local.com/commandapi"
           imagePullPolicy: Always
           ports:
             - containerPort: 80

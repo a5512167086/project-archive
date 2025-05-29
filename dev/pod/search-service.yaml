@@ -17,15 +17,15 @@ spec:
           image: a5512167086/easybot-search-service:latest
           env:
             - name: DB_HOST
-              value: "10.21.26.74"
+              value: "localhost"
             - name: DB_PORT
               value: "5432"
             - name: DB_NAME
               value: "easybot"
             - name: DB_USER
-              value: "postgres"
+              value: "shin"
             - name: DB_PASSWORD
-              value: "0000"
+              value: "REDACTED_DB_PASSWORD"
             - name: AZURE_VISION_ENDPOINT
               value: "https://easybot.cognitiveservices.azure.com/"
             - name: AZURE_VISION_KEY

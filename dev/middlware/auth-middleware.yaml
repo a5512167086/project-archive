@@ -4,7 +4,7 @@ metadata:
   name: auth-middleware
 spec:
   forwardAuth:
-    address: http://dev.local/authapi/verify
+    address: http://dev.local.com/authapi/verify
     trustForwardHeader: true
     authResponseHeaders:
       - X-User-ID

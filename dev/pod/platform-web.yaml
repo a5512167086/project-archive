@@ -15,15 +15,6 @@ spec:
       containers:
         - name: platform-web
           image: a5512167086/easybot-platform-web:latest
-          env:
-            - name: VITE_USER_BACKEND_URL
-              value: "https://demo.wke.csie.ncnu.edu.tw/easybot/userapi"
-            - name: VITE_BOT_BACKEND_URL
-              value: "https://demo.wke.csie.ncnu.edu.tw/easybot/botapi"
-            - name: VITE_SEARCH_BACKEND_URL
-              value: "https://demo.wke.csie.ncnu.edu.tw/easybot/searchapi"
-            - name: VITE_MODULE_BACKEND_URL
-              value: "https://demo.wke.csie.ncnu.edu.tw/easybot/moduleapi"
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
