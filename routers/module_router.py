@@ -3,8 +3,8 @@ from typing import List
 from fastapi import APIRouter
 
 from schemas.module_schema import InsertModuleSettingRequest, Module
+from services.command_service import add_new_feature_command
 from services.module_service import (
-    call_command_service,
     get_all_module_settings,
     insert_new_module_setting,
 )
@@ -24,4 +24,9 @@ def get_module_settings(bot_class_id: int):
 @module_router.post("/module-setting", tags=["module"])
 def add_module_setting(body: InsertModuleSettingRequest):
     insert_new_module_setting(body.bot_class_id, body.module_name, body.is_enabled)
-    call_command_service(body.bot_class_id, body.module_name)
+    add_new_feature_command(
+        body.bot_class_id,
+        f"{body.module_name} Command",
+        body.module_name.lower(),
+        body.module_name,
+    )

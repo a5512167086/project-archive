@@ -37,23 +37,3 @@ def handle_database_error(error: psycopg2.Error, bot_class_id: int):
             error_code="DATABASE_ERROR",
             error_message="Database error occurred",
         )
-
-
-def call_command_service(bot_class_id: int, module_name: str):
-    return "ok"
-    # response = requests.post(
-    #     f"{COMMAND_SERVICE_API_URL}/feature-command",
-    #     json={
-    #         "bot_class_id": bot_class_id,
-    #         "command_name": f"{module_name} Command",
-    #         "command_keyword": module_name.lower(),
-    #         "type": module_name,
-    #     },
-    # )
-    # if response.status_code == 400:
-    #     raise GlobalErrorException(
-    #         error_code=response.json().get("error_code", "UNKNOWN_ERROR"),
-    #         error_message=response.json().get(
-    #             "error_message", "Unknown error occurred"
-    #         ),
-    #     )
