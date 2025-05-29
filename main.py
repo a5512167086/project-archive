@@ -4,7 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from exception import add_global_exception_handler
-from routers.user_router import router
+from routers.knowledge_router import knowledge_router
+from routers.user_router import user_router
 from schemas.common_schema import ErrorResponse
 
 app = FastAPI(responses={status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse}})
@@ -20,7 +21,8 @@ app.add_middleware(
 
 add_global_exception_handler(app)
 
-app.include_router(router)
+app.include_router(user_router)
+app.include_router(knowledge_router)
 
 
 @app.exception_handler(RequestValidationError)
