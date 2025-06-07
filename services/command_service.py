@@ -29,7 +29,7 @@ def validate_command_class(bot_class_id: int) -> int:
 def is_command_type_exists(
     feature_commands: list[dict], command_type: CommandType
 ) -> bool:
-    return any(command["type"] == command_type.value for command in feature_commands)
+    return any(command["type"] == command_type for command in feature_commands)
 
 
 def get_all_command_list_with_status(bot_class_id: int) -> list[dict]:
