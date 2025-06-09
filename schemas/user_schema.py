@@ -1,9 +1,10 @@
 from typing import Literal
+from uuid import UUID
 
 from pydantic import BaseModel, EmailStr
 
 
-class User(BaseModel):
+class UserResponse(BaseModel):
     username: str
     email: EmailStr
 
@@ -15,7 +16,7 @@ class RegisterRequest(BaseModel):
 
 
 class RegisterResponse(BaseModel):
-    user_id: str
+    user_id: UUID
 
 
 class LoginRequest(BaseModel):
@@ -55,6 +56,6 @@ class OAuthBindRequest(BaseModel):
 
 
 class OAuth(BaseModel):
-    user_id: str
+    user_id: UUID
     oauth_provider: Literal["google", "line"]
     oauth_user_id: str

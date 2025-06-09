@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from exception import add_global_exception_handler
+from models import *  # noqa: F403
 from routers.bot_router import bot_router
 from routers.command_router import command_router
 from routers.knowledge_router import knowledge_router

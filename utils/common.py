@@ -146,6 +146,12 @@ def generate_random_password(length=12):
     return password
 
 
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return bcrypt.checkpw(
+        plain_password.encode("utf-8"), hashed_password.encode("utf-8")
+    )
+
+
 def get_enabled_commands(
     command_list: List[Dict[str, Any]], module_list: List[Dict[str, Any]]
 ) -> List[Dict[str, Any]]:

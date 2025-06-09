@@ -35,7 +35,7 @@ def generate_token_pair(
     user_id: str, email: str, is_remember: bool = False
 ) -> Dict[str, str]:
     """產生 access/refresh token pair"""
-    payload = {"sub": user_id, "email": email}
+    payload = {"sub": str(user_id), "email": email}
     access_exp = timedelta(days=7) if is_remember else ACCESS_TOKEN_EXPIRE
 
     access_token = create_jwt_token(payload, JWT_SECRET, access_exp)
