@@ -18,4 +18,5 @@ dependencies = [
     "requests>=2.32.3",
     "scikit-learn>=1.6.1",
     "selenium>=4.33.0",
+    "sqlmodel>=0.0.24",
 ]
