@@ -1,4 +1,5 @@
 from typing import Optional
+from uuid import UUID
 
 from pydantic import BaseModel, model_validator
 
@@ -17,7 +18,7 @@ class Bot(BaseModel):
     object_id: int
     bot_name: str
     channel_id: str
-    owner_id: str
+    owner_id: UUID
 
     @model_validator(mode="before")
     def map_fields(cls, values):

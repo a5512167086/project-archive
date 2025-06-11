@@ -1,11 +1,14 @@
 import logging
+from typing import List
 
 import psycopg2
 import psycopg2.extras
+from sqlmodel import Session, select
 
 from database import get_db_connection
+from models.bot_detail_model import BotListView
+from schemas.bot_schema import Bot
 
-# 設定 logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -13,28 +16,22 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def get_all_bots_by_user_id(user_id: str):
+def get_all_bots_by_user_id(session: Session, user_id: str) -> List[Bot]:
     logger.info(f"Fetching all bots for user_id: {user_id}")
-    try:
-        with get_db_connection() as connection:
-            with connection.cursor(
-                cursor_factory=psycopg2.extras.RealDictCursor
-            ) as cursor:
-                cursor.execute(
-                    "SELECT class_id, object_id, chinese_name, channel_id, owner_id\
-                    FROM vs_bot_list \
-                    WHERE owner_id = %s;",
-                    [user_id],
-                )
-                bot_list = cursor.fetchall()
-                logger.info(
-                    f"Successfully fetched {len(bot_list)} bots for user_id: {user_id}"
-                )
-                return bot_list
-    except psycopg2.Error as error:
-        error_message = error.diag.message_primary
-        logger.error(f"Error fetching bots for user_id {user_id}: {error_message}")
-        raise
+    statement = select(BotListView).where(BotListView.owner_id == user_id)
+    bot_list = session.exec(statement).all()
+    logger.info(f"Successfully fetched {len(bot_list)} bots for user_id: {user_id}")
+    return [
+        Bot(
+            bot_detail_id=bot.bot_detail_id,
+            class_id=bot.class_id,
+            object_id=bot.object_id,
+            bot_name=bot.chinese_name,
+            channel_id=bot.channel_id,
+            owner_id=bot.owner_id,
+        )
+        for bot in bot_list
+    ]
 
 
 def get_bot_by_id(bot_id: int):

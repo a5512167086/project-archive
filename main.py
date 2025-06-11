@@ -6,11 +6,9 @@ from fastapi.responses import JSONResponse
 from exception import add_global_exception_handler
 from models import *  # noqa: F403
 from routers.bot_router import bot_router
-from routers.command_router import command_router
 from routers.knowledge_router import knowledge_router
 from routers.module_router import module_router
 from routers.reservation_router import reservation_router
-from routers.search_router import search_router
 from routers.user_router import user_router
 from schemas.common_schema import ErrorResponse
 
@@ -29,8 +27,6 @@ add_global_exception_handler(app)
 
 app.include_router(user_router)
 app.include_router(knowledge_router)
-app.include_router(search_router)
-app.include_router(command_router)
 app.include_router(module_router)
 app.include_router(bot_router)
 app.include_router(reservation_router)

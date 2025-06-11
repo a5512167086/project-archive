@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Header
 from linebot.v3.messaging import Configuration
 
 from constants.config import BASE_URL
+from database import SessionDep
 from dependencies import get_current_user
 from schemas.bot_schema import (
     Bot,
@@ -27,13 +28,16 @@ bot_router = APIRouter()
 
 
 @bot_router.get("/bots", tags=["bots"], response_model=List[Bot])
-def get_bots(current_user: Annotated[dict, Depends(get_current_user)]):
+def get_bots(
+    session: SessionDep, current_user: Annotated[dict, Depends(get_current_user)]
+):
     user_id = current_user["user_id"]
-    return get_all_bots(user_id)
+    return get_all_bots(session, user_id)
 
 
 @bot_router.post("/bot", tags=["bots"], response_model=InsertBotResponse)
 def create_bot(
+    session: SessionDep,
     current_user: Annotated[dict, Depends(get_current_user)],
     bot_body: InsertBotRequest,
 ):
@@ -44,6 +48,7 @@ def create_bot(
 
 @bot_router.delete("/bot/{bot_class_id}", tags=["bots"])
 def delete_bot(
+    session: SessionDep,
     current_user: Annotated[dict, Depends(get_current_user)],
     bot_class_id: int,
 ):
@@ -53,6 +58,7 @@ def delete_bot(
 
 @bot_router.patch("/bot/{bot_class_id}", tags=["bots"])
 def update_bot(
+    session: SessionDep,
     current_user: Annotated[dict, Depends(get_current_user)],
     bot_class_id: int,
     bot_body: UpdateBotRequest,

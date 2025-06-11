@@ -1,7 +1,6 @@
 from models.bot_detail_model import BotDetail  # noqa: F401
 from models.class_model import Class  # noqa: F401
 from models.class_object_relation_model import ClassObjectRelation  # noqa: F401
-from models.command_detail_model import CommandDetail  # noqa: F401
 from models.customer_model import Customer  # noqa: F401
 from models.entity_model import Entity  # noqa: F401
 from models.inheritance_model import Inheritance  # noqa: F401
@@ -9,6 +8,4 @@ from models.moduel_setting_model import ModuleSetting  # noqa: F401
 from models.oauth_model import OAuth  # noqa: F401
 from models.object_model import Object  # noqa: F401
 from models.object_relation_model import ObjectRelation  # noqa: F401
-from models.search_image_model import SearchImage  # noqa: F401
-from models.search_text_model import SearchText  # noqa: F401
 from models.user_model import User  # noqa: F401

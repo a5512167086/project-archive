@@ -13,6 +13,7 @@ from linebot.v3.messaging import (
     RichMenuSize,
     URIAction,
 )
+from sqlmodel import Session
 
 from commands.bot_command import delete_bot_by_id, insert_new_bot, update_bot_boy_id
 from exception import GlobalErrorException
@@ -137,9 +138,9 @@ def delete_current_bot(user_id: str, delete_bot_id: int):
     logger.info(f"Bot deleted successfully for bot_id: {delete_bot_id}")
 
 
-def get_all_bots(user_id: str):
+def get_all_bots(session: Session, user_id: str):
     logger.info(f"Fetching all bots for user_id: {user_id}")
-    return get_all_bots_by_user_id(user_id)
+    return get_all_bots_by_user_id(session, user_id)
 
 
 def update_current_bot(
