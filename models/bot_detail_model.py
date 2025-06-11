@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID, uuid4
 
 from sqlmodel import Field, SQLModel
@@ -23,3 +24,17 @@ class BotListView(SQLModel, table=True):
     chinese_name: str
     channel_id: str
     owner_id: str
+
+
+class BotListWithCredentialView(SQLModel, table=True):
+    __tablename__ = "vs_bot_list_with_credential"
+
+    bot_detail_id: UUID = Field(primary_key=True)
+    class_id: int
+    object_id: int
+    chinese_name: str
+    channel_id: str
+    channel_access_token: str
+    channel_secret: str
+    liff_id: Optional[str]
+    owner_id: UUID

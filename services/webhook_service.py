@@ -6,21 +6,20 @@ from linebot.v3.messaging import (
     Configuration,
     MessagingApi,
     ReplyMessageRequest,
+    TextMessage,
 )
 from linebot.v3.webhooks import MessageEvent, TextMessageContent
 
 from schemas.bot_schema import BotBodies
 
 
-def handle_text_message(
-    bot_class_id: int, event: MessageEvent, configuration: Configuration
-):
+def handle_text_message(_: int, event: MessageEvent, configuration: Configuration):
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)
         line_bot_api.reply_message_with_http_info(
             ReplyMessageRequest(
                 reply_token=event.reply_token,
-                messages="Test",
+                messages=[TextMessage(text=event.message.text)],
             )
         )
 

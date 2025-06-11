@@ -15,8 +15,9 @@ from linebot.v3.messaging import (
 )
 from sqlmodel import Session
 
-from commands.bot_command import delete_bot_by_id, insert_new_bot, update_bot_boy_id
+from commands.bot_command import delete_bot_by_id, insert_new_bot, update_bot_by_id
 from exception import GlobalErrorException
+from models.bot_detail_model import BotListWithCredentialView
 from queries.bot_query import (
     get_all_bots_by_user_id,
     get_bot_by_id,
@@ -37,12 +38,12 @@ def raise_global_error(error_code: str, error_message: str):
     raise GlobalErrorException(error_code=error_code, error_message=error_message)
 
 
-def validate_bot_ownership(user_id: str, bot_id: int):
+def validate_bot_ownership(session: Session, user_id: str, bot_id: int):
     logger.info(f"Validating bot ownership for user_id: {user_id}, bot_id: {bot_id}")
-    bot_data = get_bot_by_id(bot_id)
+    bot_data = get_bot_by_id(session, bot_id)
     if not bot_data:
         raise_global_error("BOT_NOT_EXIST", "Bot does not exist")
-    if bot_data["owner_id"] != user_id:
+    if str(bot_data.owner_id) != user_id:
         raise_global_error("BOT_PERMISSION_DENIED", "You are not the owner of this bot")
     logger.info(f"Bot validation successful for bot_id: {bot_id}")
     return bot_data
@@ -128,13 +129,12 @@ def init_rich_menu(line_access_token: str, liff_id: str, bot_uuid: str):
         logger.info(f"Rich menu set as default for ID: {rich_menu_id}")
 
 
-def delete_current_bot(user_id: str, delete_bot_id: int):
+def delete_current_bot(session, user_id: str, delete_bot_id: int):
     logger.info(f"Deleting bot for user_id: {user_id}, bot_id: {delete_bot_id}")
-    bot_data = validate_bot_ownership(user_id, delete_bot_id)
-    bot_object_id = bot_data["object_id"]
-    bot_subclass_list = get_bot_subclass(delete_bot_id)
-    bot_subclass_ids = [subclass["child_class_id"] for subclass in bot_subclass_list]
-    delete_bot_by_id(delete_bot_id, bot_object_id, bot_subclass_ids)
+    bot_data = validate_bot_ownership(session, user_id, delete_bot_id)
+    bot_object_id = bot_data.object_id
+    bot_subclass_list = get_bot_subclass(session, delete_bot_id)
+    delete_bot_by_id(delete_bot_id, bot_object_id, bot_subclass_list)
     logger.info(f"Bot deleted successfully for bot_id: {delete_bot_id}")
 
 
@@ -144,24 +144,29 @@ def get_all_bots(session: Session, user_id: str):
 
 
 def update_current_bot(
-    user_id: str, update_bot_class_id: int, update_bot: UpdateBotRequest
+    session: Session,
+    user_id: str,
+    update_bot_class_id: int,
+    update_bot: UpdateBotRequest,
 ):
     logger.info(
         f"Updating bot for user_id: {user_id}, bot_id: {update_bot_class_id} with data: {update_bot}"
     )
-    bot_data = validate_bot_ownership(user_id, update_bot_class_id)
+    bot_data = validate_bot_ownership(session, user_id, update_bot_class_id)
     cleared_update_bot_data = update_bot.model_dump(exclude_unset=True)
     if not cleared_update_bot_data:
         raise_global_error("NO_UPDATE_DATA", "No data provided for update")
-    update_bot_boy_id(bot_data["object_id"], cleared_update_bot_data)
+    update_bot_by_id(session, bot_data["object_id"], cleared_update_bot_data)
     logger.info(f"Bot updated successfully for bot_id: {update_bot_class_id}")
 
 
-def get_bot_credential(bot_uuid: str) -> dict:
+def get_bot_credential(
+    session: Session, bot_uuid: str
+) -> BotListWithCredentialView | None:
     logger.info(f"Fetching bot credentials for bot_uuid: {bot_uuid}")
     if not bot_uuid:
         raise_global_error("EMPTY_BOT_UUID", "No bot uuid provided")
-    bot_credentials = get_line_bot_credentials(bot_uuid)
+    bot_credentials = get_line_bot_credentials(session, bot_uuid)
     if not bot_credentials:
         raise_global_error("EMPTY_CREDENTIALS", "No credential provided")
     logger.info(f"Credentials fetched successfully for bot_uuid: {bot_uuid}")

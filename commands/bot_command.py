@@ -3,8 +3,11 @@ from typing import List
 
 import psycopg2
 import psycopg2.extras
+from sqlmodel import Session, select
 
 from database import get_db_connection
+from models.bot_detail_model import BotDetail
+from models.object_model import Object
 from schemas.bot_schema import InsertBotRequest
 
 logging.basicConfig(
@@ -72,43 +75,28 @@ def delete_bot_by_id(
         raise
 
 
-def update_bot_boy_id(bot_object_id: int, update_bot: dict):
+def update_bot_by_id(session: Session, bot_object_id: int, update_bot: dict):
     logger.info(
         f"Updating bot with bot_object_id: {bot_object_id} and data: {update_bot}"
     )
-    try:
-        with get_db_connection() as connection:
-            with connection.cursor(
-                cursor_factory=psycopg2.extras.RealDictCursor
-            ) as cursor:
-                if update_bot.get("bot_name"):
-                    cursor.execute(
-                        "Update objects SET chinese_name = %s WHERE object_id = %s;",
-                        [update_bot["bot_name"], bot_object_id],
-                    )
-                    logger.info(f"Updated bot name for object_id: {bot_object_id}")
-                    update_bot.pop("bot_name")
 
-                if isinstance(update_bot, dict) and update_bot:
-                    set_clause = ", ".join([f"{key} = %s" for key in update_bot.keys()])
-                    parameters = list(update_bot.values()) + [bot_object_id]
-                    cursor.execute(
-                        f"""
-                        UPDATE bot_details
-                        SET {set_clause}
-                        WHERE object_id = %s
-                        """,
-                        parameters,
-                    )
-                    logger.info(
-                        f"Updated bot details for object_id: {bot_object_id} with fields: {list(update_bot.keys())}"
-                    )
+    if "bot_name" in update_bot:
+        stmt = select(Object).where(Object.object_id == bot_object_id)
+        obj = session.exec(stmt).first()
+        if obj:
+            obj.chinese_name = update_bot["bot_name"]
+            logger.info(f"Updated bot name for object_id: {bot_object_id}")
+        update_bot.pop("bot_name")
 
-                connection.commit()
-                logger.info(f"Bot with object_id: {bot_object_id} updated successfully")
-    except psycopg2.Error as error:
-        error_message = error.diag.message_primary
-        logger.error(
-            f"Error updating bot with object_id {bot_object_id}: {error_message}"
-        )
-        raise
+    if update_bot:
+        stmt = select(BotDetail).where(BotDetail.object_id == bot_object_id)
+        detail = session.exec(stmt).first()
+        if detail:
+            for key, value in update_bot.items():
+                if hasattr(detail, key):
+                    setattr(detail, key, value)
+            logger.info(
+                f"Updated bot details for object_id: {bot_object_id} with fields: {list(update_bot.keys())}"
+            )
+
+    logger.info(f"Bot with object_id: {bot_object_id} updated successfully")

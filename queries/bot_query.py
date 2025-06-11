@@ -1,12 +1,10 @@
 import logging
 from typing import List
 
-import psycopg2
-import psycopg2.extras
 from sqlmodel import Session, select
 
-from database import get_db_connection
-from models.bot_detail_model import BotListView
+from models.bot_detail_model import BotListView, BotListWithCredentialView
+from models.inheritance_model import Inheritance
 from schemas.bot_schema import Bot
 
 logging.basicConfig(
@@ -34,79 +32,51 @@ def get_all_bots_by_user_id(session: Session, user_id: str) -> List[Bot]:
     ]
 
 
-def get_bot_by_id(bot_id: int):
+def get_bot_by_id(session: Session, bot_id: int) -> Bot | None:
     logger.info(f"Fetching bot details for bot_id: {bot_id}")
-    try:
-        with get_db_connection() as connection:
-            with connection.cursor(
-                cursor_factory=psycopg2.extras.RealDictCursor
-            ) as cursor:
-                cursor.execute(
-                    "SELECT class_id, object_id, chinese_name, owner_id \
-                    FROM vs_bot_list \
-                    WHERE class_id = %s;",
-                    [bot_id],
-                )
-                bot_data = cursor.fetchone()
-                if bot_data:
-                    logger.info(
-                        f"Successfully fetched bot details for bot_id: {bot_id}"
-                    )
-                else:
-                    logger.warning(f"No bot found for bot_id: {bot_id}")
-                return bot_data
-    except psycopg2.Error as error:
-        error_message = error.diag.message_primary
-        logger.error(f"Error fetching bot details for bot_id {bot_id}: {error_message}")
-        raise
+    statement = select(BotListView).where(BotListView.class_id == bot_id)
+    bot_data = session.exec(statement).first()
+    if bot_data:
+        logger.info(f"Successfully fetched bot details for bot_id: {bot_id}")
+    else:
+        logger.warning(f"No bot found for bot_id: {bot_id}")
+    return Bot(
+        bot_detail_id=bot_data.bot_detail_id,
+        class_id=bot_data.class_id,
+        object_id=bot_data.object_id,
+        bot_name=bot_data.chinese_name,
+        channel_id=bot_data.channel_id,
+        owner_id=bot_data.owner_id,
+    )
 
 
-def get_bot_subclass(bot_id: int):
-    logger.info(f"Fetching subclasses for bot_id: {bot_id}")
-    try:
-        with get_db_connection() as connection:
-            with connection.cursor(
-                cursor_factory=psycopg2.extras.RealDictCursor
-            ) as cursor:
-                cursor.execute(
-                    "SELECT * FROM fs_get_child_class(%s);",
-                    [bot_id],
-                )
-                bot_subclass_list = cursor.fetchall()
-                logger.info(
-                    f"Successfully fetched {len(bot_subclass_list)} subclasses for bot_id: {bot_id}"
-                )
-                return bot_subclass_list
-    except psycopg2.Error as error:
-        error_message = error.diag.message_primary
-        logger.error(f"Error fetching subclasses for bot_id {bot_id}: {error_message}")
-        raise
+def get_bot_subclass(session: Session, bot_class_id: int) -> List[int]:
+    logger.info(
+        f"Fetching child_class_id from Inheritance for parent_class_id: {bot_class_id}"
+    )
+    statement = select(Inheritance.child_class_id).where(
+        Inheritance.parent_class_id == bot_class_id
+    )
+    result = session.exec(statement).all()
+
+    logger.info(
+        f"Successfully fetched {len(result)} subclasses for parent_class_id: {bot_class_id}"
+    )
+    return result
 
 
-def get_line_bot_credentials(bot_uuid):
+def get_line_bot_credentials(
+    session: Session, bot_uuid: str
+) -> BotListWithCredentialView | None:
     logger.info(f"Fetching credentials for bot_uuid: {bot_uuid}")
-    try:
-        with get_db_connection() as connection:
-            with connection.cursor(
-                cursor_factory=psycopg2.extras.RealDictCursor
-            ) as cursor:
-                cursor.execute(
-                    "SELECT class_id, channel_access_token, channel_secret \
-                    FROM vs_bot_list_with_credential \
-                    WHERE bot_detail_id = %s;",
-                    [bot_uuid],
-                )
-                bot_credentials = cursor.fetchone()
-                if bot_credentials:
-                    logger.info(
-                        f"Successfully fetched credentials for bot_uuid: {bot_uuid}"
-                    )
-                else:
-                    logger.warning(f"No credentials found for bot_uuid: {bot_uuid}")
-                return bot_credentials
-    except psycopg2.Error as error:
-        error_message = error.diag.message_primary
-        logger.error(
-            f"Error fetching credentials for bot_uuid {bot_uuid}: {error_message}"
-        )
-        raise
+    stmt = select(BotListWithCredentialView).where(
+        BotListWithCredentialView.bot_detail_id == bot_uuid
+    )
+    result = session.exec(stmt).first()
+
+    if result:
+        logger.info(f"Successfully fetched credentials for bot_uuid: {bot_uuid}")
+    else:
+        logger.warning(f"No credentials found for bot_uuid: {bot_uuid}")
+
+    return result
