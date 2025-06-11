@@ -40,14 +40,14 @@ export const moduleApi = createApi({
     getModuleSettings: builder.query<ModuleSetting[], GetModuleSettingsRequest>(
       {
         query: (data) => ({
-          url: `module-setting/${data.bot_class_id}`,
+          url: `modules/${data.bot_class_id}`,
           method: 'GET'
         })
       }
     ),
     insertModuleSetting: builder.mutation<void, InsertModuleSettingsRequest>({
       query: (data) => ({
-        url: `module-setting`,
+        url: `modules`,
         method: 'POST',
         body: data
       })

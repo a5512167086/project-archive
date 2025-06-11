@@ -14,7 +14,6 @@ import { useSnackbar } from 'notistack'
 import { ERROR_CODE_MESSAGE_MAPPING } from '@/configs/common'
 import { clearBotError } from '@/store/modules/botSlice'
 import { clearUserError } from '@/store/modules/userSlice'
-import { clearSearchError } from '@/store/modules/searchSlice'
 import { clearModuleError } from '@/store/modules/moduleSlice'
 import { isEmpty } from '@/utils/helper'
 
@@ -30,7 +29,6 @@ export const BaseWrapper = () => {
   const { isAuthenticated, errorCode: userErrorCode } = useAppSelector(
     (state) => state.user
   )
-  const { errorCode: searchErrorCode } = useAppSelector((state) => state.search)
   const { errorCode: moduleError } = useAppSelector((state) => state.module)
   const [isAlertOpen, setAlertOpen] = useState(false)
 
@@ -61,12 +59,10 @@ export const BaseWrapper = () => {
   useEffect(() => {
     handleErrorNotification(botErrorCode, () => dispatch(clearBotError()))
     handleErrorNotification(userErrorCode, () => dispatch(clearUserError()))
-    handleErrorNotification(searchErrorCode, () => dispatch(clearSearchError()))
     handleErrorNotification(moduleError, () => dispatch(clearModuleError()))
   }, [
     botErrorCode,
     userErrorCode,
-    searchErrorCode,
     moduleError,
     handleErrorNotification,
     dispatch

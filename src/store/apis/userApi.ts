@@ -77,48 +77,48 @@ export const userApi = createApi({
   endpoints: (builder) => ({
     loginUser: builder.mutation<LoginResponse, LoginRequest>({
       query: (credentials) => ({
-        url: 'user/login',
+        url: 'users/login',
         method: 'POST',
         body: credentials
       })
     }),
     oauthLoginUser: builder.mutation<LoginResponse, OAuthLoginRequest>({
       query: (oauthUser) => ({
-        url: 'user/oauth-login',
+        url: 'users/oauth-login',
         method: 'POST',
         body: oauthUser
       })
     }),
     oauthBindUser: builder.mutation<LoginResponse, OAuthBindRequest>({
       query: (oauthUser) => ({
-        url: 'user/oauth-bind',
+        url: 'users/oauth-bind',
         method: 'POST',
         body: oauthUser
       })
     }),
     getOAuthStatus: builder.query<OAuthStatusResponse, void>({
-      query: () => 'user/oauth-status'
+      query: () => 'users/oauth-status'
     }),
     registerUser: builder.mutation<void, RegisterRequest>({
       query: (newUser) => ({
-        url: 'user/register',
+        url: 'users/register',
         method: 'POST',
         body: newUser
       })
     }),
     forgotPassword: builder.mutation<void, ForgotPasswordRequest>({
       query: (email) => ({
-        url: 'user/forgot-password',
+        url: 'users/forgot-password',
         method: 'POST',
         body: email
       })
     }),
     getUserMe: builder.query<UserMeResponse, void>({
-      query: () => 'user/me'
+      query: () => 'users/me'
     }),
     resetPassword: builder.mutation<void, ResetPasswordRequest>({
       query: (data) => ({
-        url: 'user/reset-password',
+        url: 'users/reset-password',
         method: 'POST',
         body: data,
         headers: { Authorization: `Bearer ${data.token}` }
@@ -126,7 +126,7 @@ export const userApi = createApi({
     }),
     changePassword: builder.mutation<void, ChangePasswordRequest>({
       query: (data) => ({
-        url: 'user/change-password',
+        url: 'users/change-password',
         method: 'POST',
         body: data
       })

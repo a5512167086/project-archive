@@ -47,14 +47,14 @@ export const knowledgeApi = createApi({
     getKnowledgeItems: builder.query<KnowledgeItem[], GetKnowledgeItemsRequest>(
       {
         query: (data) => ({
-          url: `knowledge/${data.bot_class_id}`,
+          url: `knowledges/${data.bot_class_id}`,
           method: 'GET'
         })
       }
     ),
     insertKnowledgeItem: builder.mutation<void, InsertKnowledgeItemRequest>({
       query: (data) => ({
-        url: `knowledge`,
+        url: `knowledges`,
         method: 'POST',
         body: data
       })
@@ -69,7 +69,7 @@ export const knowledgeApi = createApi({
         formData.append('csv_file', data.csv_file)
 
         return {
-          url: `knowledge/upload`,
+          url: `knowledges/upload`,
           method: 'POST',
           body: formData
         }
@@ -77,7 +77,7 @@ export const knowledgeApi = createApi({
     }),
     deleteKnowledgeItems: builder.mutation<void, DeleteKnowledgeItemsRequest>({
       query: (data) => ({
-        url: `knowledge`,
+        url: `knowledges`,
         method: 'DELETE',
         body: data
       })

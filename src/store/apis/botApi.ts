@@ -56,21 +56,21 @@ export const botApi = createApi({
     }),
     createBot: builder.mutation<CreateBotResponse, CreateBotRequest>({
       query: (bot) => ({
-        url: 'bot',
+        url: 'bots',
         method: 'POST',
         body: bot
       })
     }),
     updateBot: builder.mutation<void, UpdateBotRequest>({
       query: (bot) => ({
-        url: `bot/${bot.bot_class_id}`,
+        url: `bots/${bot.bot_class_id}`,
         method: 'PATCH',
         body: bot
       })
     }),
     deleteBot: builder.mutation<void, DeleteBotRequest>({
       query: (bot) => ({
-        url: `bot/${bot.bot_class_id}`,
+        url: `bots/${bot.bot_class_id}`,
         method: 'DELETE'
       })
     })

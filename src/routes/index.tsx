@@ -8,7 +8,6 @@ import EventNoteIcon from '@mui/icons-material/EventNote'
 import BackspaceIcon from '@mui/icons-material/Backspace'
 import SettingsIcon from '@mui/icons-material/Settings'
 import ViewListIcon from '@mui/icons-material/ViewList'
-import SearchIcon from '@mui/icons-material/Search'
 import PrivateRoute from '@/components/PrivateRoute/PrivateRoute'
 
 const SignInPage = lazy(() => import('@/pages/SignInPage'))
@@ -16,8 +15,7 @@ const SignUpPage = lazy(() => import('@/pages/SignUpPage'))
 const ForgotPasswordPage = lazy(() => import('@/pages/ForgotPasswordPage'))
 const OAuthCallback = lazy(() => import('@/pages/OAuthCallbackPage'))
 const BotManagementPage = lazy(() => import('@/pages/BotManagementPage'))
-const SearchManagementPage = lazy(() => import('@/pages/SearchManagementPage'))
-const SearchItemPage = lazy(() => import('@/pages/SearchItemPage'))
+
 const KnowledgeManagementPage = lazy(
   () => import('@/pages/KnowledgeManagementPage')
 )
@@ -47,8 +45,6 @@ export const PAGE_PATHS = {
   ECOMM_MODULE: 'ecomm',
   BOT_SETTING: 'setting',
   RESERVATION_MODULE: 'reservation',
-  SEARCH_MODULE: 'search',
-  SEARCH_MANAGMENT: 'search/:uuid',
   KNOWLEDGE_MOUDLE: 'knowledge',
   CREATE_BOT_TURTROIAL: '/bot-tutorial',
   NOT_FOUND: '*'
@@ -99,12 +95,7 @@ export const SIDEBAR_NAVIGATION_ROUTE = [
     icon: <EventNoteIcon />,
     link: PAGE_PATHS.RESERVATION_MODULE
   },
-  {
-    key: 'search',
-    text: 'sidebar.search',
-    icon: <SearchIcon />,
-    link: PAGE_PATHS.SEARCH_MODULE
-  },
+
   {
     key: 'setting',
     text: 'common.setting',
@@ -204,14 +195,6 @@ export const router = createBrowserRouter([
           {
             path: PAGE_PATHS.RESERVATION_MODULE,
             element: <ReservationManagementPage />
-          },
-          {
-            path: PAGE_PATHS.SEARCH_MODULE,
-            element: <SearchManagementPage />
-          },
-          {
-            path: PAGE_PATHS.SEARCH_MANAGMENT,
-            element: <SearchItemPage />
           },
           {
             path: PAGE_PATHS.BOT_SETTING,

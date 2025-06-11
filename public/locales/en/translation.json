@@ -11,7 +11,6 @@
     "faq": "FAQ Module",
     "ecomm": "E-commerce Module",
     "reservation": "Reservation Module",
-    "search": "Search Module",
     "backToBotList": "Back to Bot Menu"
   },
   "homePage": {
@@ -98,19 +97,6 @@
     "deleteBotConfirmation": "Are you sure you want to delete the bot? This action cannot be undone.",
     "deleteBotButton": "Delete Bot"
   },
-  "searchSettingPage": {
-    "title": "Search Module Management",
-    "addSearchItemButton": "Add Search Item",
-    "addSearchItemFromUrlButton": "Add Search Item via URL",
-    "deleteSearchItemTitle": "Are you sure you want to delete {{item_name}}? This action cannot be undone.",
-    "deleteSearchItemsTitle": "Are you sure you want to delete all selected search items? This action cannot be undone.",
-    "deleteSelectedSearchItems": "Delete Selected Search Items",
-    "insertSearchItemsByUrlTitle": "Add search items via URL crawler",
-    "itemName": "Item Name",
-    "englishName": "English Name",
-    "instruction": "Instruction",
-    "ingredient": "Ingredient"
-  },
   "knowledgeSettingPage": {
     "title": "FAQ Module Settings",
     "addKnowledgeItemButton": "Add Knowledge",
@@ -148,8 +134,7 @@
       "ecommTitle": "E-commerce Module",
       "ecommDescription": "The e-commerce module uses AI-driven data analytics to help you track customer behavior, predict sales trends, and automatically generate customer feedback reports. This enables merchants to manage inventory effectively, improve conversion rates, and provide a personalized shopping experience.",
       "reservationTitle": "Reservation Module",
-      "reservationDescription": "The Reservation Module simplifies the management of various bookings and schedules. From the customer's perspective, the booking process is quick and straightforward, with notification support ensuring no important appointments are missed.",
-      "searchTitle": "Search Module"
+      "reservationDescription": "The Reservation Module simplifies the management of various bookings and schedules. From the customer's perspective, the booking process is quick and straightforward, with notification support ensuring no important appointments are missed."
     }
   },
   "error": {
