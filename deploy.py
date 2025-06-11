@@ -1,9 +1,10 @@
+import glob
 import os
 import sys
+
 import psycopg2
-import glob
-from psycopg2 import sql
 from dotenv import load_dotenv
+from psycopg2 import sql
 
 load_dotenv()
 
@@ -120,19 +121,6 @@ try:
 
     store_procedures_folder = "./database/store_procedures/"
     sql_files = glob.glob(f"{store_procedures_folder}*.sql")
-    for file in sql_files:
-        print(f"Running SQL file: {file} ...")
-        try:
-            with open(file, "r", encoding="utf-8") as sql_file:
-                sql_commands = sql_file.read()
-                cursor.execute(sql.SQL(sql_commands))
-            print(f"Successfully executed {file}")
-        except Exception as e:
-            print(f"Error occurred while executing {file}: {e}")
-            sys.exit(1)
-
-    extra_store_procedures_folder = "./database/extra_procedures/"
-    sql_files = glob.glob(f"{extra_store_procedures_folder}*.sql")
     for file in sql_files:
         print(f"Running SQL file: {file} ...")
         try:

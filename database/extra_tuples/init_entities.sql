@@ -15,15 +15,6 @@ END IF;
         FROM
             entities
         WHERE
-            chinese_name = '指令') THEN
-    CALL sp_insert_entity('指令', 'Command', TRUE);
-END IF;
-    IF NOT EXISTS(
-        SELECT
-            1
-        FROM
-            entities
-        WHERE
             chinese_name = '設定') THEN
     CALL sp_insert_entity('設定', 'Setting', TRUE);
 END IF;
@@ -71,15 +62,6 @@ END IF;
         WHERE
             chinese_name = '預約') THEN
     CALL sp_insert_entity('預約', 'Reservation', TRUE);
-END IF;
-    IF NOT EXISTS(
-        SELECT
-            1
-        FROM
-            entities
-        WHERE
-            chinese_name = '搜尋') THEN
-    CALL sp_insert_entity('搜尋', 'Search', TRUE);
 END IF;
 END
 $$;

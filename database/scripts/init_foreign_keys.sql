@@ -178,26 +178,6 @@ END IF;
         FROM
             pg_constraint
         WHERE
-            conname = 'fk_member_group_relationship_group_id') THEN
-    ALTER TABLE member_groups
-        ADD CONSTRAINT fk_member_group_relationship_group_id FOREIGN KEY(group_id) REFERENCES GROUPS(group_id);
-END IF;
-    IF NOT EXISTS(
-        SELECT
-            1
-        FROM
-            pg_constraint
-        WHERE
-            conname = 'fk_member_group_relationship_member_id') THEN
-    ALTER TABLE member_groups
-        ADD CONSTRAINT fk_member_group_relationship_member_id FOREIGN KEY(member_id) REFERENCES users(user_id);
-END IF;
-    IF NOT EXISTS(
-        SELECT
-            1
-        FROM
-            pg_constraint
-        WHERE
             conname = 'fk_permissions_class_id') THEN
     ALTER TABLE permissions
         ADD CONSTRAINT fk_permissions_class_id FOREIGN KEY(class_id) REFERENCES classes(class_id);
