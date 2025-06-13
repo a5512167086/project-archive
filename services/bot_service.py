@@ -156,7 +156,7 @@ def update_current_bot(
     cleared_update_bot_data = update_bot.model_dump(exclude_unset=True)
     if not cleared_update_bot_data:
         raise_global_error("NO_UPDATE_DATA", "No data provided for update")
-    update_bot_by_id(session, bot_data["object_id"], cleared_update_bot_data)
+    update_bot_by_id(session, bot_data.object_id, cleared_update_bot_data)
     logger.info(f"Bot updated successfully for bot_id: {update_bot_class_id}")
 
 
