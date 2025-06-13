@@ -1,11 +1,11 @@
-import json
 import logging
 from typing import List
 
-import psycopg2
-import psycopg2.extras
+from sqlmodel import Session, delete, select
 
-from database import get_db_connection
+from models.class_object_relation_model import ClassObjectRelation
+from models.object_model import Object
+from queries.entity_query import get_entity_id_by_name
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -13,70 +13,72 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def insert_knowledge_item(bot_class_id: int, question: str, answer: str):
-    try:
-        with get_db_connection() as connection:
-            with connection.cursor(
-                cursor_factory=psycopg2.extras.RealDictCursor
-            ) as cursor:
-                cursor.execute(
-                    "CALL sp_insert_knowledge_item(%s, %s, %s);",
-                    [bot_class_id, question, answer],
-                )
-                connection.commit()
-                logger.info(
-                    "Knowledge item inserted successfully for bot_class_id: %s",
-                    bot_class_id,
-                )
-    except psycopg2.Error as error:
-        error_message = error.diag.message_primary
-        logger.error("Database error: %s", error_message)
-        raise
+def insert_knowledge_item(
+    session: Session, knowledge_class_id: int, question: str, answer: str
+):
+    knowledge_entity_id = get_entity_id_by_name(session, "知識")
+
+    new_knowledge = Object(
+        chinese_name=question, english_name=answer, entity_id=knowledge_entity_id
+    )
+    session.add(new_knowledge)
+    session.flush()
+    relation = ClassObjectRelation(
+        class_id=knowledge_class_id, object_id=new_knowledge.object_id
+    )
+    session.add(relation)
 
 
-def insert_knowledge_items(bot_class_id: int, knowledge_items: List[dict]):
-    try:
-        knowledge_items_jsonb = json.dumps(knowledge_items)
-        with get_db_connection() as connection:
-            with connection.cursor(
-                cursor_factory=psycopg2.extras.RealDictCursor
-            ) as cursor:
-                cursor.execute(
-                    "CALL sp_insert_knowledge_items(%s, %s::jsonb);",
-                    [bot_class_id, knowledge_items_jsonb],
-                )
-                connection.commit()
-                logger.info(
-                    "Knowledge items inserted successfully for bot_class_id: %s",
-                    bot_class_id,
-                )
-    except psycopg2.Error as error:
-        error_message = error.diag.message_primary
-        logger.error("Database error: %s", error_message)
-        raise
+def insert_knowledge_items(
+    session: Session, knowledge_class_id: int, knowledge_items: List[dict]
+):
+    knowledge_entity_id = get_entity_id_by_name(session, "知識")
+
+    knowledges: List[Object] = []
+    new_relations = []
+
+    for item in knowledge_items:
+        question = item.get("question")
+        answer = item.get("answer")
+        if not question or not answer:
+            continue
+
+        knowledge = Object(
+            chinese_name=question,
+            english_name=answer,
+            entity_id=knowledge_entity_id,
+        )
+        knowledges.append(knowledge)
+
+    session.add_all(knowledges)
+    session.flush()
+
+    for knowledge in knowledges:
+        rel = ClassObjectRelation(
+            class_id=knowledge_class_id,
+            object_id=knowledge.object_id,
+        )
+        new_relations.append(rel)
+
+    session.add_all(new_relations)
+    session.commit()
 
 
-def delete_knowledge_items(bot_class_id: int, delete_items_id: List[int]):
-    try:
-        with get_db_connection() as connection:
-            with connection.cursor(
-                cursor_factory=psycopg2.extras.RealDictCursor
-            ) as cursor:
-                cursor.execute(
-                    "SELECT * FROM fs_delete_knowledge_items(%s, %s);",
-                    [bot_class_id, delete_items_id],
-                )
-                delete_result = cursor.fetchall()
-                connection.commit()
-                success_ids = [
-                    row["_object_id"] for row in delete_result if row["_is_deleted"]
-                ]
-                failed_ids = [
-                    row["_object_id"] for row in delete_result if not row["_is_deleted"]
-                ]
+def delete_knowledge_items(
+    session: Session, knowledge_class_id: int, delete_items_id: List[int]
+):
+    relation_stmt = select(ClassObjectRelation).where(
+        ClassObjectRelation.class_id == knowledge_class_id,
+        ClassObjectRelation.object_id.in_(delete_items_id),
+    )
+    relations = session.exec(relation_stmt).all()
+    found_ids = [r.object_id for r in relations]
 
-                return {"success_ids": success_ids, "failed_ids": failed_ids}
-    except psycopg2.Error as error:
-        error_message = error.diag.message_primary
-        logger.error("Database error: %s", error_message)
-        raise
+    session.exec(
+        delete(ClassObjectRelation).where(
+            ClassObjectRelation.class_id == knowledge_class_id,
+            ClassObjectRelation.object_id.in_(found_ids),
+        )
+    )
+
+    session.exec(delete(Object).where(Object.object_id.in_(found_ids)))

@@ -1,9 +1,11 @@
 import logging
+from typing import List
 
-import psycopg2
-import psycopg2.extras
+from sqlmodel import Session, select
 
-from database import get_db_connection
+from models.class_model import SubClassView
+from models.object_model import KnowledgeListView
+from queries.entity_query import get_entity_id_by_name
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -11,38 +13,23 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def get_knowledge_class_id_by_bot_class_id(bot_class_id: int):
-    try:
-        with get_db_connection() as connection:
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    "SELECT child_class_id FROM vs_sub_class \
-                    WHERE class_id = %s\
-                    AND entity_id = 8;",
-                    [bot_class_id],
-                )
-                knowledge_class_id = cursor.fetchone()
+def get_knowledge_class_id_by_bot_class_id(
+    session: Session, bot_class_id: int
+) -> int | None:
+    knowledge_entity_id = get_entity_id_by_name(session, "知識")
+    result = session.exec(
+        select(SubClassView.class_id).where(
+            SubClassView.parent_class_id == bot_class_id,
+            SubClassView.entity_id == knowledge_entity_id,
+        )
+    ).first()
 
-                return knowledge_class_id
-    except psycopg2.Error as error:
-        error_message = error.diag.message_primary
-        logger.error("Database error: %s", error_message)
+    return result
 
 
-def get_all_knowledge_items_by_class_id(class_id: int):
-    try:
-        with get_db_connection() as connection:
-            with connection.cursor(
-                cursor_factory=psycopg2.extras.RealDictCursor
-            ) as cursor:
-                cursor.execute(
-                    "SELECT * FROM vs_knowledge_list \
-                    WHERE class_id = %s;",
-                    [class_id],
-                )
-                knowledge_items = cursor.fetchall()
-
-                return knowledge_items
-    except psycopg2.Error as error:
-        error_message = error.diag.message_primary
-        logger.error("Database error: %s", error_message)
+def get_all_knowledge_items_by_class_id(
+    session: Session, class_id: int
+) -> List[KnowledgeListView]:
+    statement = select(KnowledgeListView).where(KnowledgeListView.class_id == class_id)
+    result = session.exec(statement)
+    return result.all()

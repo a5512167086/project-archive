@@ -8,18 +8,14 @@ from services.module_service import (
     insert_new_module_setting,
 )
 
-module_router = APIRouter()
+module_router = APIRouter(prefix="/modules", tags=["modules"])
 
 
-@module_router.get(
-    "/module-setting/{bot_class_id}",
-    tags=["module"],
-    response_model=List[Module],
-)
+@module_router.get("/{bot_class_id}", response_model=List[Module])
 def get_module_settings(bot_class_id: int):
     return get_all_module_settings(bot_class_id)
 
 
-@module_router.post("/module-setting", tags=["module"])
+@module_router.post("")
 def add_module_setting(body: InsertModuleSettingRequest):
     insert_new_module_setting(body.bot_class_id, body.module_name, body.is_enabled)

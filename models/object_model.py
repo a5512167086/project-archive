@@ -27,3 +27,12 @@ class Object(SQLModel, table=True):
 
     is_hided: bool = Field(default=False)
     is_deleted: bool = Field(default=False)
+
+
+class KnowledgeListView(SQLModel, table=True):
+    __tablename__ = "vs_knowledge_list"
+    
+    class_id: int = Field(primary_key=True)
+    object_id: int = Field(primary_key=True)
+    question: str
+    answer: Optional[str]

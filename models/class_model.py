@@ -34,3 +34,23 @@ class Class(SQLModel, table=True):
 
     is_hided: bool = Field(default=False)
     is_deleted: bool = Field(default=False)
+
+
+class SubClassView(SQLModel, table=True):
+    __tablename__ = "vs_sub_class"
+
+    parent_class_id: int
+    rank: Optional[int] = None
+
+    class_id: int = Field(primary_key=True)
+    entity_id: Optional[int] = None
+    chinese_name: str
+    chinese_description: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+    subobject_count: int
+    click_count: int
+    keywords: Optional[str] = None
+    owner_id: Optional[UUID] = None
+    is_hided: bool
+    is_deleted: bool
