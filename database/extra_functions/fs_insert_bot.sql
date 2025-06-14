@@ -36,6 +36,8 @@ _order_entity_id int;
 
 _reservation_entity_id int;
 
+_service_entity_id int;
+
 BEGIN IF (
     _bot_name IS NULL
     OR _channel_id IS NULL
@@ -80,6 +82,11 @@ LIMIT 1;
 SELECT entity_id INTO _reservation_entity_id
 FROM entities e
 WHERE e.chinese_name = '預約'
+LIMIT 1;
+
+SELECT entity_id INTO _service_entity_id
+FROM entities e
+WHERE e.chinese_name = '服務'
 LIMIT 1;
 
 SELECT sc.class_id INTO _main_bot_class_id
@@ -169,6 +176,14 @@ PERFORM fs_insert_class(
     _reservation_entity_id,
     '預約',
     '預約功能的預約',
+    _owner_id
+);
+
+PERFORM fs_insert_class(
+    _new_class_id,
+    _service_entity_id,
+    '服務',
+    '預約功能的服務',
     _owner_id
 );
 
