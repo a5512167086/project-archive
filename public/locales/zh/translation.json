@@ -9,8 +9,10 @@
   "sidebar": {
     "moduleList": "模組列表",
     "faq": "問答模組",
-    "ecomm": "電商模組",
-    "reservation": "預約模組",
+    "product": "產品管理",
+    "order": "訂單管理",
+    "reservation": "預約管理",
+    "service": "服務管理",
     "backToBotList": "回到Bot選單"
   },
   "homePage": {

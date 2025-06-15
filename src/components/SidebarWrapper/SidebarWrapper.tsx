@@ -14,7 +14,7 @@ import ListItemText from '@mui/material/ListItemText'
 import LogoIcon from '@/assets/header_logo.svg?react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import {
-  StyeldDrawerHeader,
+  StyledDrawerHeader,
   StyledDrawer,
   StyledSidebarHeader
 } from './SidebarWrapper.style'
@@ -99,40 +99,47 @@ export const SidebarWrapper = () => {
         </Toolbar>
       </StyledSidebarHeader>
       <StyledDrawer variant="permanent" open={open}>
-        <StyeldDrawerHeader>
+        <StyledDrawerHeader>
           <IconButton onClick={handleDrawerClose}>
             <ChevronLeftIcon />
           </IconButton>
-        </StyeldDrawerHeader>
+        </StyledDrawerHeader>
         <Divider />
         <List>
-          {SIDEBAR_NAVIGATION_ROUTE.map((route) => (
-            <ListItem key={route.key} disablePadding sx={{ display: 'block' }}>
-              <ListItemButton
-                onClick={() => {
-                  handleNavigate(route.link, route.key)
-                }}
-                sx={{
-                  minHeight: 48,
-                  px: 2.5,
-                  justifyContent: open ? 'initial' : 'center'
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    justifyContent: 'center',
-                    mr: open ? 3 : 'auto'
-                  }}
+          {SIDEBAR_NAVIGATION_ROUTE.map((group, groupIndex) => (
+            <Box key={group.key}>
+              {group.items.map((route) => (
+                <ListItem
+                  key={route.key}
+                  disablePadding
+                  sx={{ display: 'block' }}
                 >
-                  {route.icon}
-                </ListItemIcon>
-                <ListItemText
-                  primary={t(route.text)}
-                  sx={{ opacity: open ? 1 : 0 }}
-                />
-              </ListItemButton>
-            </ListItem>
+                  <ListItemButton
+                    onClick={() => handleNavigate(route.link, route.key)}
+                    sx={{
+                      minHeight: 48,
+                      px: 2.5,
+                      justifyContent: open ? 'initial' : 'center'
+                    }}
+                  >
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 0,
+                        justifyContent: 'center',
+                        mr: open ? 3 : 'auto'
+                      }}
+                    >
+                      {route.icon}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={t(route.text)}
+                      sx={{ opacity: open ? 1 : 0 }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+              {groupIndex < SIDEBAR_NAVIGATION_ROUTE.length - 1 && <Divider />}
+            </Box>
           ))}
         </List>
       </StyledDrawer>
@@ -141,7 +148,7 @@ export const SidebarWrapper = () => {
         className="wrapper__content"
         sx={{ flexGrow: 1, p: 3 }}
       >
-        <StyeldDrawerHeader />
+        <StyledDrawerHeader />
         <Suspense
           fallback={
             <CustomLoader

@@ -11,7 +11,7 @@ export const StyledSidebarWrapper = styled(Box)(() => ({
   width: '100%'
 }))
 
-export const StyeldDrawerHeader = styled('div')(({ theme }) => ({
+export const StyledDrawerHeader = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'flex-end',
@@ -19,7 +19,7 @@ export const StyeldDrawerHeader = styled('div')(({ theme }) => ({
   ...theme.mixins.toolbar
 }))
 
-const drawerWidth = 240
+const drawerWidth = 265
 
 const openedMixin = (theme: Theme): CSSObject => ({
   width: drawerWidth,

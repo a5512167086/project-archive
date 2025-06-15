@@ -9,8 +9,10 @@
   "sidebar": {
     "moduleList": "Module List",
     "faq": "FAQ Module",
-    "ecomm": "E-commerce Module",
-    "reservation": "Reservation Module",
+    "product": "Product Management",
+    "order": "Order Management",
+    "reservation": "Reservation Management",
+    "service": "Service Management",
     "backToBotList": "Back to Bot Menu"
   },
   "homePage": {

@@ -2,12 +2,13 @@ import { styled } from '@mui/material/styles'
 import { Container } from '@mui/material'
 
 export const StyledBotSettingPage = styled(Container)(({ theme }) => ({
+  width: '100%',
   '& .setting__title': {
     fontSize: '2rem',
     fontWeight: '500'
   },
   '& .setting__settingBox': {
-    width: '85%',
+    width: '100%',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',

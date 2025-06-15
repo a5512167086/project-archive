@@ -8,6 +8,8 @@ import EventNoteIcon from '@mui/icons-material/EventNote'
 import BackspaceIcon from '@mui/icons-material/Backspace'
 import SettingsIcon from '@mui/icons-material/Settings'
 import ViewListIcon from '@mui/icons-material/ViewList'
+import RoomServiceIcon from '@mui/icons-material/RoomService'
+import InventoryIcon from '@mui/icons-material/Inventory'
 import PrivateRoute from '@/components/PrivateRoute/PrivateRoute'
 
 const SignInPage = lazy(() => import('@/pages/SignInPage'))
@@ -42,9 +44,11 @@ export const PAGE_PATHS = {
   OAUTH_CALLBACK: '/oauth-callback',
   BOT_LIST: '/bot-list',
   BOT_MANAGEMENT: '/bot-list/:uuid',
-  ECOMM_MODULE: 'ecomm',
+  PRODUCT_MANAGEMENT: 'product',
+  ORDER_MANAGEMENT: 'order',
   BOT_SETTING: 'setting',
-  RESERVATION_MODULE: 'reservation',
+  RESERVATION_MANAGEMENT: 'reservation',
+  SERVICE_MANAGEMENT: 'service',
   KNOWLEDGE_MOUDLE: 'knowledge',
   CREATE_BOT_TURTROIAL: '/bot-tutorial',
   NOT_FOUND: '*'
@@ -72,41 +76,77 @@ export const REDIRECT_BOT_LIST_ROUTES = [
 
 export const SIDEBAR_NAVIGATION_ROUTE = [
   {
-    key: 'moduleList',
-    text: 'sidebar.moduleList',
-    icon: <ViewListIcon />,
-    link: PAGE_PATHS.BOT_LIST
-  },
-  {
-    key: 'faq',
-    text: 'sidebar.faq',
-    icon: <QuizIcon />,
-    link: PAGE_PATHS.KNOWLEDGE_MOUDLE
+    key: 'modules',
+    items: [
+      {
+        key: 'moduleList',
+        text: 'sidebar.moduleList',
+        icon: <ViewListIcon />,
+        link: PAGE_PATHS.BOT_LIST
+      },
+      {
+        key: 'faq',
+        text: 'sidebar.faq',
+        icon: <QuizIcon />,
+        link: PAGE_PATHS.KNOWLEDGE_MOUDLE
+      }
+    ]
   },
   {
     key: 'ecomm',
-    text: 'sidebar.ecomm',
-    icon: <StoreIcon />,
-    link: PAGE_PATHS.ECOMM_MODULE
+    items: [
+      {
+        key: 'product',
+        text: 'sidebar.product',
+        icon: <InventoryIcon />,
+        link: PAGE_PATHS.PRODUCT_MANAGEMENT
+      },
+      {
+        key: 'order',
+        text: 'sidebar.order',
+        icon: <StoreIcon />,
+        link: PAGE_PATHS.ORDER_MANAGEMENT
+      }
+    ]
   },
   {
     key: 'reservation',
-    text: 'sidebar.reservation',
-    icon: <EventNoteIcon />,
-    link: PAGE_PATHS.RESERVATION_MODULE
+    items: [
+      {
+        key: 'service',
+        text: 'sidebar.service',
+        icon: <RoomServiceIcon />,
+        link: PAGE_PATHS.SERVICE_MANAGEMENT
+      },
+      {
+        key: 'reservation',
+        text: 'sidebar.reservation',
+        icon: <EventNoteIcon />,
+        link: PAGE_PATHS.RESERVATION_MANAGEMENT
+      }
+    ]
   },
-
   {
-    key: 'setting',
-    text: 'common.setting',
-    icon: <SettingsIcon />,
-    link: PAGE_PATHS.BOT_SETTING
+    key: 'settings',
+    items: [
+      {
+        key: 'setting',
+        text: 'common.setting',
+        icon: <SettingsIcon />,
+        link: PAGE_PATHS.BOT_SETTING
+      }
+    ]
   },
   {
-    key: 'backToBotList',
-    text: 'sidebar.backToBotList',
-    icon: <BackspaceIcon />,
-    link: PAGE_PATHS.BOT_LIST
+    key: 'system',
+    items: [
+      {
+        key: 'backToBotList',
+        text: 'sidebar.backToBotList',
+        icon: <BackspaceIcon />,
+        link: PAGE_PATHS.BOT_LIST
+      }
+    ]
   }
 ]
 
@@ -189,12 +229,20 @@ export const router = createBrowserRouter([
             element: <KnowledgeManagementPage />
           },
           {
-            path: PAGE_PATHS.ECOMM_MODULE,
+            path: PAGE_PATHS.ORDER_MANAGEMENT,
             element: <div>test</div>
           },
           {
-            path: PAGE_PATHS.RESERVATION_MODULE,
+            path: PAGE_PATHS.PRODUCT_MANAGEMENT,
+            element: <div>test</div>
+          },
+          {
+            path: PAGE_PATHS.RESERVATION_MANAGEMENT,
             element: <ReservationManagementPage />
+          },
+          {
+            path: PAGE_PATHS.SERVICE_MANAGEMENT,
+            element: <div>test</div>
           },
           {
             path: PAGE_PATHS.BOT_SETTING,
