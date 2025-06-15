@@ -1,0 +1,74 @@
+from typing import List
+
+from sqlmodel import Session, select
+
+from models.class_model import SubClassView
+from models.reservation_model import (
+    ReservationItemListView,
+    ReservationItemOption,
+    ReservationItemSchedule,
+)
+from queries.entity_query import get_entity_id_by_name
+from schemas.reservation_schema import ReservationItemResponse
+
+
+def get_reservation_item_class_id_by_bot_class_id(
+    session: Session, bot_class_id: int
+) -> int | None:
+    entity_id = get_entity_id_by_name(session, "服務")
+    result = session.exec(
+        select(SubClassView.class_id).where(
+            SubClassView.parent_class_id == bot_class_id,
+            SubClassView.entity_id == entity_id,
+        )
+    ).first()
+    return result
+
+
+def get_reservation_items(
+    session: Session, reservation_class_id: int
+) -> List[ReservationItemResponse]:
+    items = session.exec(
+        select(ReservationItemListView).where(
+            ReservationItemListView.class_id == reservation_class_id
+        )
+    ).all()
+
+    object_ids = [i.object_id for i in items]
+    if not object_ids:
+        return []
+
+    options = session.exec(
+        select(ReservationItemOption).where(
+            ReservationItemOption.object_id.in_(object_ids)
+        )
+    ).all()
+
+    schedules = session.exec(
+        select(ReservationItemSchedule).where(
+            ReservationItemSchedule.object_id.in_(object_ids)
+        )
+    ).all()
+
+    option_map = {oid: [] for oid in object_ids}
+    schedule_map = {oid: [] for oid in object_ids}
+
+    for opt in options:
+        option_map[opt.object_id].append(opt)
+
+    for sch in schedules:
+        schedule_map[sch.object_id].append(sch)
+
+    return [
+        ReservationItemResponse(
+            object_id=item.object_id,
+            class_id=item.class_id,
+            reservation_name=item.reservation_name,
+            reservation_description=item.reservation_description,
+            duration_minutes=item.duration_minutes,
+            price=item.price,
+            options=option_map[item.object_id],
+            schedules=schedule_map[item.object_id],
+        )
+        for item in items
+    ]
