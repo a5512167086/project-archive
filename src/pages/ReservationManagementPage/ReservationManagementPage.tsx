@@ -15,6 +15,11 @@ const reservationManagementPageContent = {
   botPageTitle: 'botPage.myBot'
 }
 
+const today = new Date().toISOString().split('T')[0]
+const tomorrow = new Date()
+tomorrow.setDate(tomorrow.getDate() + 1)
+const tomorrowStr = tomorrow.toISOString().split('T')[0]
+
 const ReservationManagementPage = () => {
   const { t } = useTranslation()
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
@@ -37,25 +42,28 @@ const ReservationManagementPage = () => {
   return (
     <StyledReservationManagementPage disableGutters maxWidth={false}>
       <CustomBreadcrumb items={breadcrumbItems} />
-      <Box className="knowledge__titleBox">
-        <Typography variant="h5" className="knowledge__title">
+      <Box className="reservation__titleBox">
+        <Typography variant="h5" className="reservation__title">
           {t(reservationManagementPageContent.title)}
         </Typography>
+      </Box>
+
+      <Box className="calendar__wrapper">
         <FullCalendar
-          aspectRatio={3}
+          height={'75vh'}
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          initialView={'dayGridMonth'}
+          initialView="dayGridMonth"
           headerToolbar={{
             left: 'prev,next',
             center: 'title',
-            right: 'dayGridMonth,dayGridWeek,dayGridDay'
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
           }}
           eventColor={theme.palette.primary.main}
           eventBorderColor={theme.palette.secondary.main}
           editable
           events={[
-            { title: 'Event 1', date: '2025-01-20', end: '2025-01-22' },
-            { title: 'Event 2', date: '2025-01-21' }
+            { title: 'Event 1', date: today },
+            { title: 'Event 2', date: tomorrowStr }
           ]}
         />
       </Box>
