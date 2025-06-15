@@ -39,6 +39,7 @@ const ReservationManagementPage = () => {
       linkText: reservationManagementPageContent.title
     }
   ]
+
   return (
     <StyledReservationManagementPage disableGutters maxWidth={false}>
       <CustomBreadcrumb items={breadcrumbItems} />

@@ -77,8 +77,8 @@ export const CustomTable = <T,>({
   }
 
   return (
-    <Paper sx={{ width: '100%', height: '100%' }}>
-      <TableContainer sx={{ height: '100%' }}>
+    <Paper sx={{ width: '100%' }}>
+      <TableContainer>
         <Table size="small" stickyHeader>
           <TableHead>
             <TableRow>

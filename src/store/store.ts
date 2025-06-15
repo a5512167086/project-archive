@@ -3,10 +3,12 @@ import userReducer from './modules/userSlice'
 import botReducer from './modules/botSlice'
 import moduleReducer from './modules/moduleSlice'
 import knowledgeReducer from './modules/knowledgeSlice'
+import reservationReducer from './modules/reservationSlice'
 import { userApi } from './apis/userApi'
 import { botApi } from './apis/botApi'
 import { moduleApi } from './apis/moduleApi'
 import { knowledgeApi } from './apis/knowledgeApi'
+import { reservationApi } from './apis/reservationApi'
 
 export const store = configureStore({
   reducer: {
@@ -14,10 +16,12 @@ export const store = configureStore({
     bot: botReducer,
     module: moduleReducer,
     knowledge: knowledgeReducer,
+    reservation: reservationReducer,
     [userApi.reducerPath]: userApi.reducer,
     [botApi.reducerPath]: botApi.reducer,
     [moduleApi.reducerPath]: moduleApi.reducer,
-    [knowledgeApi.reducerPath]: knowledgeApi.reducer
+    [knowledgeApi.reducerPath]: knowledgeApi.reducer,
+    [reservationApi.reducerPath]: reservationApi.reducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
@@ -25,6 +29,7 @@ export const store = configureStore({
       .concat(botApi.middleware)
       .concat(moduleApi.middleware)
       .concat(knowledgeApi.middleware)
+      .concat(reservationApi.middleware)
 })
 
 export type RootState = ReturnType<typeof store.getState>

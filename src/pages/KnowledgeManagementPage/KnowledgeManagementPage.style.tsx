@@ -16,6 +16,5 @@ export const StyledKnowledgeManagementPage = styled(Container)(() => ({
   '& .knowledge__title': {
     fontSize: '2rem',
     fontWeight: '500',
-    marginBottom: '20px'
   }
 }))

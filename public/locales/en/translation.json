@@ -100,7 +100,7 @@
     "deleteBotButton": "Delete Bot"
   },
   "knowledgeSettingPage": {
-    "title": "FAQ Module Settings",
+    "title": "Knowledge Management",
     "addKnowledgeItemButton": "Add Knowledge",
     "addKnowledgeItemFromCSVButton": "Add Knowledge via CSV",
     "deleteKnowledgeItemTitle": "Are you sure you want to delete {{knowledge_name}}? This action cannot be undone.",
@@ -111,7 +111,10 @@
     "uploadCSV": "Upload CSV File"
   },
   "reservationManagementPage": {
-    "title": "Reservation Module Settings"
+    "title": "Reservation Management"
+  },
+  "serviceManagementPage": {
+    "title": "Service Management"
   },
   "notFoundPage": {
     "title": "Page Not Found",

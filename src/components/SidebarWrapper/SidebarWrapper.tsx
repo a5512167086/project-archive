@@ -146,7 +146,7 @@ export const SidebarWrapper = () => {
       <Box
         component="main"
         className="wrapper__content"
-        sx={{ flexGrow: 1, p: 3 }}
+        sx={{ flexGrow: 1, paddingX: 3 }}
       >
         <StyledDrawerHeader />
         <Suspense

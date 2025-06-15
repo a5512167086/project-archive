@@ -17,12 +17,14 @@ const SignUpPage = lazy(() => import('@/pages/SignUpPage'))
 const ForgotPasswordPage = lazy(() => import('@/pages/ForgotPasswordPage'))
 const OAuthCallback = lazy(() => import('@/pages/OAuthCallbackPage'))
 const BotManagementPage = lazy(() => import('@/pages/BotManagementPage'))
-
 const KnowledgeManagementPage = lazy(
   () => import('@/pages/KnowledgeManagementPage')
 )
 const ReservationManagementPage = lazy(
   () => import('@/pages/ReservationManagementPage')
+)
+const ServiceManagementPage = lazy(
+  () => import('@/pages/ServiceManagementPage')
 )
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 const Homepage = lazy(() => import('@/pages/Homepage'))
@@ -242,7 +244,7 @@ export const router = createBrowserRouter([
           },
           {
             path: PAGE_PATHS.SERVICE_MANAGEMENT,
-            element: <div>test</div>
+            element: <ServiceManagementPage />
           },
           {
             path: PAGE_PATHS.BOT_SETTING,

@@ -101,7 +101,7 @@
   },
 
   "knowledgeSettingPage": {
-    "title": "問答模組設定",
+    "title": "知識管理",
     "addKnowledgeItemButton": "新增知識",
     "addKnowledgeItemFromCSVButton": "透過CSV新增知識",
     "deleteKnowledgeItemTitle": "確定要刪除 {{knowledge_name}} 嗎?此動作不可返回",
@@ -112,7 +112,10 @@
     "uploadCSV": "上傳CSV檔案"
   },
   "reservationManagementPage": {
-    "title": "預約模組設定"
+    "title": "預約管理"
+  },
+  "serviceManagementPage": {
+    "title": "服務管理"
   },
   "notFoundPage": {
     "title": "查無此頁面",
