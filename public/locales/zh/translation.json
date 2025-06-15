@@ -97,7 +97,7 @@
     "deleteBotConfirmation": "你確定要刪除機器人嗎，此動作將無法返回",
     "deleteBotButton": "刪除機器人"
   },
- 
+
   "knowledgeSettingPage": {
     "title": "問答模組設定",
     "addKnowledgeItemButton": "新增知識",
@@ -117,6 +117,7 @@
     "description": "哎呀！您正在尋找的頁面並不存在。它可能已被移動或刪除了，或者您輸入的 URL 不正確。"
   },
   "common": {
+    "action": "操作",
     "url": "網址",
     "loading": "載入中...",
     "enable": "啟用",

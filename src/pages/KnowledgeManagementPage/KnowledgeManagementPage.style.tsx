@@ -1,6 +1,10 @@
 import { Container, styled } from '@mui/material'
 
 export const StyledKnowledgeManagementPage = styled(Container)(() => ({
+  display: 'flex',
+  flexDirection: 'column',
+  height: '80vh',
+  boxSizing: 'border-box',
   '& .knowledge__titleBox': {
     display: 'flex',
     justifyContent: 'space-between',

@@ -116,6 +116,7 @@
     "description": "Oops! The page you are looking for doesn't exist. It may have been moved or deleted, or you may have entered an incorrect URL."
   },
   "common": {
+    "action": "Action",
     "url": "URL",
     "loading": "Loading...",
     "enable": "Enable",

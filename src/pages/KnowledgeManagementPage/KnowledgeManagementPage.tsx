@@ -27,8 +27,8 @@ const knowledgeManagementPageContent = {
 }
 
 const columns = [
-  { id: 'question', label: '問題' },
-  { id: 'answer', label: '回答' }
+  { id: 'question', label: 'knowledgeSettingPage.question' },
+  { id: 'answer', label: 'knowledgeSettingPage.answer' }
 ]
 
 const insertSingleKnowledgeFields = [

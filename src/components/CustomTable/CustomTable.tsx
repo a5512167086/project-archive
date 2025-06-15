@@ -11,6 +11,7 @@ import IconButton from '@mui/material/IconButton'
 import TablePagination from '@mui/material/TablePagination'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
+import { useTranslation } from 'react-i18next'
 
 interface TableColumn {
   id: string
@@ -38,7 +39,7 @@ export const CustomTable = <T,>({
   setSelected
 }: CustomTableProps<T>) => {
   const [page, setPage] = useState(0)
-
+  const { t } = useTranslation()
   const currentPageIndexes = data
     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
     .map((_, index) => page * rowsPerPage + index)
@@ -76,8 +77,8 @@ export const CustomTable = <T,>({
   }
 
   return (
-    <Paper sx={{ width: '100%' }}>
-      <TableContainer sx={{ height: '600px' }}>
+    <Paper sx={{ width: '100%', height: '100%' }}>
+      <TableContainer sx={{ height: '100%' }}>
         <Table size="small" stickyHeader>
           <TableHead>
             <TableRow>
@@ -90,10 +91,10 @@ export const CustomTable = <T,>({
               </TableCell>
               {columns.map((column) => (
                 <TableCell key={column.id} align={column.align || 'left'}>
-                  {column.label}
+                  {t(column.label)}
                 </TableCell>
               ))}
-              <TableCell>Actions</TableCell>
+              <TableCell>{t('common.action')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
