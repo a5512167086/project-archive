@@ -137,7 +137,7 @@ const BotSettingPage = () => {
         </Box>
       </Box>
       <CustomDialog
-        isOpen={isDialogOpen}
+        open={isDialogOpen}
         handleClose={handleDialogClose}
         title={botSettingPageContent.deleteBotConfirmation}
         dangerButton={true}

@@ -1,14 +1,5 @@
-import { useEffect } from 'react'
-import {
-  Box,
-  Typography,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  Grid2
-} from '@mui/material'
+import { useEffect, useState } from 'react'
+import { Box, Button, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useAppSelector } from '@/utils/hook'
 import { PAGE_PATHS } from '@/routes'
@@ -16,7 +7,9 @@ import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
 import { StyledServiceManagementPage } from './ServiceManagementPage.style'
 import { useLazyGetServicesQuery } from '@/store/apis/reservationApi'
 import { getBotClassId } from '@/utils/helper'
-import { useNavigate } from 'react-router-dom'
+import { CustomTable } from '@/components/CustomTable'
+import { CustomDialog } from '@/components/CustomDialog'
+import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
 
 const serviceManagementPageContent = {
   title: 'serviceManagementPage.title',
@@ -25,12 +18,25 @@ const serviceManagementPageContent = {
 
 const ServiceManagementPage = () => {
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
   const { reservationItems } = useAppSelector((state) => state.reservation)
   const [getServices] = useLazyGetServicesQuery()
+  const [selected, setSelected] = useState<number[]>([])
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+
   const botClassId = getBotClassId(botList, currentBotObjectId!)
   const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
+
+  useEffect(() => {
+    getServices({ bot_class_id: botClassId })
+  }, [])
+
+  const columns = [
+    { id: 'reservation_name', label: '服務名稱' },
+    { id: 'price', label: '價格' },
+    { id: 'duration_minutes', label: '時長' },
+    { id: 'reservation_description', label: '描述' }
+  ]
 
   const breadcrumbItems = [
     {
@@ -47,121 +53,165 @@ const ServiceManagementPage = () => {
     }
   ]
 
-  useEffect(() => {
+  const createFields: FieldProps[] = [
+    {
+      id: 'reservation_name',
+      name: 'reservation_name',
+      label: '服務名稱',
+      type: 'text',
+      required: true
+    },
+    {
+      id: 'reservation_description',
+      name: 'reservation_description',
+      label: '描述',
+      type: 'text',
+      required: true
+    },
+    {
+      id: 'duration_minutes',
+      name: 'duration_minutes',
+      label: '時長（分鐘）',
+      type: 'number',
+      required: true
+    },
+    {
+      id: 'price',
+      name: 'price',
+      label: '價格',
+      type: 'number',
+      required: true
+    },
+    {
+      id: 'options',
+      name: 'options',
+      label: '選項',
+      type: 'array',
+      required: false,
+      fields: [
+        {
+          id: 'option_name',
+          name: 'option_name',
+          label: '名稱',
+          type: 'text',
+          required: true
+        },
+        {
+          id: 'option_description',
+          name: 'option_description',
+          label: '描述',
+          type: 'text',
+          required: false
+        },
+        {
+          id: 'price',
+          name: 'price',
+          label: '價格',
+          type: 'number',
+          required: true
+        },
+        {
+          id: 'type',
+          name: 'type',
+          label: '類型',
+          type: 'select',
+          required: true,
+          options: [
+            { value: 'text', label: '文字' },
+            { value: 'select', label: '選項' },
+            { value: 'number', label: '數字' }
+          ]
+        },
+        {
+          id: 'is_required',
+          name: 'is_required',
+          label: '是否必填',
+          type: 'checkbox',
+          required: false
+        }
+      ]
+    },
+    {
+      id: 'default_schedules',
+      name: 'default_schedules',
+      label: '預設時段',
+      type: 'array',
+      required: false,
+      fields: [
+        {
+          id: 'weekday',
+          name: 'weekday',
+          label: '星期 (0~6)',
+          type: 'number',
+          required: false
+        },
+        {
+          id: 'start_time',
+          name: 'start_time',
+          label: '開始時間 (HH:mm)',
+          type: 'time',
+          required: true
+        },
+        {
+          id: 'end_time',
+          name: 'end_time',
+          label: '結束時間 (HH:mm)',
+          type: 'time',
+          required: true
+        },
+        {
+          id: 'capacity',
+          name: 'capacity',
+          label: '人數上限',
+          type: 'number',
+          required: false
+        }
+      ]
+    }
+  ]
+
+  const handleCreateService = (data: Record<string, unknown>) => {
+    // insertNewReservationItem({
+    //   bot_class_id: botClassId,
+    //   reservation_name: data.reservation_name as string,
+    //   price: Number(data.price),
+    //   reservation_description: data.reservation_description as string,
+    //   duration_minutes: Number(data.duration_minutes),
+    //   options: data.options || [],
+    //   schedules: data.schedules || []
+    // })
+    console.log('Creating service with data:', data)
     getServices({ bot_class_id: botClassId })
-  }, [])
+  }
 
   return (
     <StyledServiceManagementPage disableGutters maxWidth={false}>
       <CustomBreadcrumb items={breadcrumbItems} />
-
-      <Box
-        className="reservation__titleBox"
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-      >
+      <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography variant="h4">
           {t(serviceManagementPageContent.title)}
         </Typography>
-        <Button
-          variant="contained"
-          onClick={() => navigate(`/bot/${currentBotObjectId}/services/new`)}
-        >
+        <Button variant="contained" onClick={() => setIsCreateDialogOpen(true)}>
           新增服務
         </Button>
       </Box>
+      <CustomTable
+        data={reservationItems}
+        columns={columns}
+        selected={selected}
+        setSelected={setSelected}
+        onEdit={() => {}}
+      />
 
-      {reservationItems.length === 0 && (
-        <Typography mt={4}>目前尚無任何服務，請新增一項服務。</Typography>
-      )}
-
-      <Grid2 container spacing={3}>
-        {reservationItems.map((service) => (
-          <Grid2 size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={service.object_id}>
-            <Card
-              variant="outlined"
-              sx={{ borderRadius: 3, boxShadow: 1, height: '100%' }}
-            >
-              <CardContent>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography variant="h6" fontWeight="bold">
-                    {service.reservation_name}
-                  </Typography>
-                  <Chip
-                    label={`$${service.price}`}
-                    color="primary"
-                    variant="outlined"
-                  />
-                </Box>
-                <Typography color="text.secondary" mt={0.5}>
-                  {service.reservation_description}
-                </Typography>
-                <Typography mt={1} fontSize={14}>
-                  ⏱ 時長：{service.duration_minutes} 分鐘
-                </Typography>
-
-                <Divider sx={{ my: 1.5 }} />
-
-                <Typography variant="subtitle2" fontWeight="bold">
-                  選項：
-                </Typography>
-                {service.options.map((opt) => (
-                  <Typography
-                    key={opt.option_id}
-                    fontSize={14}
-                    ml={1.5}
-                    mt={0.5}
-                  >
-                    • {opt.option_name}（+${opt.price}）
-                    {opt.option_description
-                      ? ` - ${opt.option_description}`
-                      : ''}
-                  </Typography>
-                ))}
-
-                <Box mt={2}>
-                  <Typography variant="subtitle2" fontWeight="bold">
-                    預約時段：
-                  </Typography>
-                  {service.schedules.map((s) => (
-                    <Typography
-                      key={s.reservation_item_schedule_id}
-                      fontSize={14}
-                      ml={1.5}
-                      mt={0.5}
-                    >
-                      •{' '}
-                      {s.schedule_type === 'weekly'
-                        ? `每週${s.weekday !== null ? ['日', '一', '二', '三', '四', '五', '六'][s.weekday] : ''}`
-                        : `特定日期：${s.schedule_date}`}{' '}
-                      {s.start_time} ~ {s.end_time}，最多 {s.capacity} 人
-                    </Typography>
-                  ))}
-                </Box>
-
-                <Box textAlign="right" mt={3}>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() =>
-                      navigate(
-                        `/bot/${currentBotObjectId}/services/${service.object_id}`
-                      )
-                    }
-                  >
-                    編輯
-                  </Button>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid2>
-        ))}
-      </Grid2>
+      <CustomDialog
+        fullScreen
+        maxWidth="xl"
+        handleClose={() => setIsCreateDialogOpen(false)}
+        title="新增服務"
+        fields={createFields}
+        open={isCreateDialogOpen}
+        onSubmit={handleCreateService}
+      />
     </StyledServiceManagementPage>
   )
 }

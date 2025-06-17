@@ -18,8 +18,9 @@ import {
 import { useAppDispatch, useAppSelector } from '@/utils/hook'
 import { clearCurrentBot, setCurrentBot } from '@/store/modules/botSlice'
 import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
+import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
 
-const dialogFields = [
+const dialogFields: FieldProps[] = [
   {
     id: 'botName',
     name: 'botName',
@@ -177,7 +178,7 @@ const BotPage = () => {
         channelSecret: string
         liffId: string
       }>
-        isOpen={isDialogOpen}
+        open={isDialogOpen}
         handleClose={handleDialogClose}
         fields={dialogFields}
         title={botPageContent.addBot}

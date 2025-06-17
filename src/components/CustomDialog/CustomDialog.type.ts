@@ -1,13 +1,30 @@
-interface FieldProps {
+import { DialogProps } from '@mui/material'
+
+export type FieldType =
+  | 'text'
+  | 'number'
+  | 'file'
+  | 'select'
+  | 'time'
+  | 'checkbox'
+  | 'array'
+  | 'password'
+
+export interface FieldProps {
   id: string
   name: string
   label: string
-  type: string
+  type: FieldType
   required?: boolean
+  options?: { value: string; label: string }[]
+  fields?: FieldProps[]
+  validate?: (val: string) => boolean
+  errorText?: {
+    invalidFormat?: string
+  }
 }
 
-export type CustomDialogProps<T = Record<string, unknown>> = {
-  isOpen: boolean
+export type CustomDialogProps<T = Record<string, unknown>> = DialogProps & {
   handleClose: () => void
   fields?: FieldProps[]
   title: string

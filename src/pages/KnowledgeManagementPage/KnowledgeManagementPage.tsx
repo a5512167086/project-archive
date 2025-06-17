@@ -15,6 +15,7 @@ import { getBotClassId, isEmpty } from '@/utils/helper'
 import { PAGE_PATHS } from '@/routes'
 import { CustomDialog } from '@/components/CustomDialog'
 import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
+import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
 
 const knowledgeManagementPageContent = {
   title: 'knowledgeSettingPage.title',
@@ -31,7 +32,7 @@ const columns = [
   { id: 'answer', label: 'knowledgeSettingPage.answer' }
 ]
 
-const insertSingleKnowledgeFields = [
+const insertSingleKnowledgeFields : FieldProps[]= [
   {
     id: 'question',
     name: 'question',
@@ -48,7 +49,7 @@ const insertSingleKnowledgeFields = [
   }
 ]
 
-const insertKnowledgesFields = [
+const insertKnowledgesFields: FieldProps[] = [
   {
     id: 'csv_file',
     name: 'csv_file',
@@ -224,7 +225,7 @@ const KnowledgeManagementPage = () => {
         question: string
         answer: string
       }>
-        isOpen={isInsertSingleDialogOpen}
+        open={isInsertSingleDialogOpen}
         handleClose={handleInsertSingleDialogClose}
         fields={insertSingleKnowledgeFields}
         title={t(knowledgeManagementPageContent.addButtonText)}
@@ -236,7 +237,7 @@ const KnowledgeManagementPage = () => {
       <CustomDialog<{
         csv_file: File
       }>
-        isOpen={isInsertByCSVDialogOpen}
+        open={isInsertByCSVDialogOpen}
         handleClose={handleInsertByCSVDialogClose}
         fields={insertKnowledgesFields}
         title={knowledgeManagementPageContent.addButtonTextByCSV}
@@ -246,7 +247,7 @@ const KnowledgeManagementPage = () => {
       />
       {/* delete single knowledge dialog */}
       <CustomDialog
-        isOpen={isDialogOpen}
+        open={isDialogOpen}
         title={t(knowledgeManagementPageContent.deleteDialogTitle, {
           knowledge_name:
             currentDeleteKnowledgeItem && currentDeleteKnowledgeItem.question
@@ -256,7 +257,7 @@ const KnowledgeManagementPage = () => {
       />
       {/* delete muti selected knowledges dialog */}
       <CustomDialog
-        isOpen={isMutiDialogOpen}
+        open={isMutiDialogOpen}
         handleClose={handleMutiDialogClose}
         title={t(knowledgeManagementPageContent.deleteMutiDialogTitle)}
         onSubmit={handleMutiDialogConfirm}

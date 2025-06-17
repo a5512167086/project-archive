@@ -4,7 +4,6 @@ import { Navigate, Outlet } from 'react-router-dom'
 
 const PrivateRoute = () => {
   const { isAuthenticated } = useAppSelector((state) => state.user)
-  console.log(isAuthenticated)
   if (isAuthenticated === null) {
     return
   }

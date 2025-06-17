@@ -19,7 +19,6 @@ export const useUser = (): UseUser => {
   const [isAuthFailed, setIsAuthFailed] = useState(false)
 
   const logout = useCallback(() => {
-    console.log('logout')
     clearUserToken()
     dispatch(initUser())
     dispatch(initBot())
