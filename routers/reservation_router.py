@@ -3,33 +3,20 @@ from typing import List
 from fastapi import APIRouter
 
 from database import SessionDep
-from schemas.reservation_schema import ReservationItemCreate, ReservationItemResponse
+from schemas.reservation_schema import (
+    ReservationItemCreate,
+    ReservationItemDelete,
+    ReservationItemPatch,
+    ReservationItemResponse,
+)
 from services.reservation_service import (
+    delete_reservation_item_by_object_id,
     get_reservation_items_by_bot_class_id,
     insert_new_reservation_item,
+    update_reservation_item_by_object_id,
 )
 
 reservation_router = APIRouter(prefix="/reservations", tags=["reservations"])
-
-
-@reservation_router.get("")
-def list_reservations():
-    return
-
-
-@reservation_router.post("")
-def create_reservation():
-    return
-
-
-@reservation_router.patch("/{reservation_id}")
-def update_reservation():
-    return
-
-
-@reservation_router.delete("/{reservation_id}")
-def delete_reservation():
-    return
 
 
 @reservation_router.get(
@@ -47,11 +34,34 @@ def create_reservation_item(
     session.commit()
 
 
-@reservation_router.patch("/items/{item_id}")
-def update_reservation_item():
+@reservation_router.delete("/items")
+def delete_reservation_item(
+    session: SessionDep, delete_reservation: ReservationItemDelete
+):
+    delete_reservation_item_by_object_id(
+        session, delete_reservation.bot_class_id, delete_reservation.delete_object_list
+    )
+    session.commit()
+
+
+@reservation_router.patch("/items")
+def update_reservation_item(
+    session: SessionDep, reservation_item_patch: ReservationItemPatch
+):
+    update_reservation_item_by_object_id(session, reservation_item_patch)
+    session.commit()
+
+
+@reservation_router.get("")
+def list_reservations():
     return
 
 
-@reservation_router.delete("/items/{item_id}")
-def delete_reservation_item():
+@reservation_router.post("")
+def create_reservation():
+    return
+
+
+@reservation_router.delete("/{reservation_id}")
+def delete_reservation():
     return

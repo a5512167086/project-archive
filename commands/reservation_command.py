@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List
 
-from sqlmodel import Session
+from sqlmodel import Session, delete, select
 
 from models.class_object_relation_model import ClassObjectRelation
 from models.object_model import Object
@@ -13,6 +13,7 @@ from models.reservation_model import (
 from queries.entity_query import get_entity_id_by_name
 from schemas.reservation_schema import (
     ReservationItemOptionCreate,
+    ReservationItemPatch,
     ReservationItemScheduleCreate,
 )
 
@@ -91,3 +92,87 @@ def insert_reservation_item(
         for schedule in schedule_list
     ]
     session.add_all(schedule_models)
+
+
+def delete_reservation_items(
+    session: Session,
+    reservation_item_class_id: int,
+    object_ids: List[int],
+) -> int:
+    statement = (
+        select(Object.object_id)
+        .join(ClassObjectRelation, ClassObjectRelation.object_id == Object.object_id)
+        .where(
+            ClassObjectRelation.class_id == reservation_item_class_id,
+            Object.object_id.in_(object_ids),
+        )
+    )
+    valid_object_ids = [row for row in session.exec(statement).all()]
+
+    if not valid_object_ids:
+        return 0
+
+    session.exec(
+        delete(ClassObjectRelation).where(
+            ClassObjectRelation.class_id == reservation_item_class_id,
+            ClassObjectRelation.object_id.in_(valid_object_ids),
+        )
+    )
+
+    session.exec(delete(Object).where(Object.object_id.in_(valid_object_ids)))
+
+
+def update_reservation_item(
+    session: Session, reservation_item_patch: ReservationItemPatch
+):
+    object_id = reservation_item_patch.object_id
+
+    if reservation_item_patch.detail:
+        detail = session.exec(
+            select(ReservationItemDetail).where(
+                ReservationItemDetail.object_id == object_id
+            )
+        ).first()
+        if detail:
+            for field, value in reservation_item_patch.detail.dict(
+                exclude_unset=True
+            ).items():
+                if field not in ["reservation_name", "reservation_description"]:
+                    setattr(detail, field, value)
+
+        obj = session.exec(select(Object).where(Object.object_id == object_id)).first()
+        if obj:
+            if reservation_item_patch.detail.reservation_name is not None:
+                obj.chinese_name = reservation_item_patch.detail.reservation_name
+            if reservation_item_patch.detail.reservation_description is not None:
+                obj.chinese_description = (
+                    reservation_item_patch.detail.reservation_description
+                )
+
+    if reservation_item_patch.options is not None:
+        session.exec(
+            delete(ReservationItemOption).where(
+                ReservationItemOption.object_id == object_id
+            )
+        )
+        new_options = [
+            ReservationItemOption(
+                object_id=object_id, **option.model_dump(exclude_unset=True)
+            )
+            for option in reservation_item_patch.options
+        ]
+        session.add_all(new_options)
+
+    if reservation_item_patch.schedules is not None:
+        session.exec(
+            delete(ReservationItemSchedule).where(
+                ReservationItemSchedule.object_id == object_id
+            )
+        )
+        new_schedules = [
+            ReservationItemSchedule(
+                object_id=object_id, **schedule.model_dump(exclude_unset=True)
+            )
+            for schedule in reservation_item_patch.schedules
+        ]
+        session.add_all(new_schedules)

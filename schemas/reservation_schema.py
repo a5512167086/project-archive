@@ -1,5 +1,6 @@
 from datetime import date, datetime, time
 from typing import List, Optional
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
@@ -47,3 +48,47 @@ class ReservationItemResponse(BaseModel):
     price: int
     options: List[ReservationItemOption]
     schedules: List[ReservationItemSchedule]
+
+
+class ReservationItemDelete(BaseModel):
+    bot_class_id: int
+    delete_object_list: List[int]
+
+
+class DetailUpdate(BaseModel):
+    reservation_name: Optional[str] = None
+    reservation_description: Optional[str] = None
+    duration_minutes: Optional[int] = None
+    price: Optional[int] = None
+    is_active: Optional[bool] = None
+
+
+class OptionUpdate(BaseModel):
+    option_id: Optional[UUID] = None
+    option_name: Optional[str] = None
+    option_description: Optional[str] = None
+    price: Optional[int] = None
+    type: Optional[str] = None
+    is_required: Optional[bool] = None
+    is_active: Optional[bool] = None
+
+
+class ScheduleUpdate(BaseModel):
+    reservation_item_schedule_id: Optional[UUID] = None
+    schedule_type: Optional[str] = None
+    weekday: Optional[int] = None
+    schedule_date: Optional[date] = None
+    start_time: Optional[time] = None
+    end_time: Optional[time] = None
+    capacity: Optional[int] = None
+    is_closed: Optional[bool] = None
+    note: Optional[str] = None
+    is_active: Optional[bool] = None
+
+
+class ReservationItemPatch(BaseModel):
+    bot_class_id: int
+    object_id: int
+    detail: Optional[DetailUpdate] = None
+    options: Optional[List[OptionUpdate]] = None
+    schedules: Optional[List[ScheduleUpdate]] = None

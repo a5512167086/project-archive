@@ -13,8 +13,8 @@ class ReservationItemDetail(SQLModel, table=True):
     duration_minutes: int
     price: int
     is_active: bool = True
-    created_at: datetime = Field(default_factory=datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class ReservationItemOption(SQLModel, table=True):
@@ -28,8 +28,8 @@ class ReservationItemOption(SQLModel, table=True):
     type: str = Field(..., regex="^(text|select|number)$")
     is_required: bool = False
     is_active: bool = True
-    created_at: datetime = Field(default_factory=datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class ReservationItemSchedule(SQLModel, table=True):
@@ -47,8 +47,8 @@ class ReservationItemSchedule(SQLModel, table=True):
     note: Optional[str] = None
     is_active: bool = True
     latest_reservation_time: Optional[datetime] = None
-    created_at: datetime = Field(default_factory=datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class ReservationItemListView(SQLModel, table=True):

@@ -1,12 +1,16 @@
 from sqlmodel import Session
 
-from commands.reservation_command import insert_reservation_item
+from commands.reservation_command import (
+    delete_reservation_items,
+    insert_reservation_item,
+    update_reservation_item,
+)
 from exception import GlobalErrorException
 from queries.reservation_query import (
     get_reservation_item_class_id_by_bot_class_id,
     get_reservation_items,
 )
-from schemas.reservation_schema import ReservationItemCreate
+from schemas.reservation_schema import ReservationItemCreate, ReservationItemPatch
 
 
 def validate_reservation_item_class(session: Session, bot_class_id: int) -> int:
@@ -43,3 +47,17 @@ def insert_new_reservation_item(
         option_list=new_reservation_item.options,
         schedule_list=new_reservation_item.default_schedules,
     )
+
+
+def delete_reservation_item_by_object_id(
+    session: Session, bot_class_id: int, object_id_list: list[int]
+):
+    reservation_item_class_id = validate_reservation_item_class(session, bot_class_id)
+    delete_reservation_items(session, reservation_item_class_id, object_id_list)
+
+
+def update_reservation_item_by_object_id(
+    session: Session, reservation_item_patch: ReservationItemPatch
+):
+    validate_reservation_item_class(session, reservation_item_patch.bot_class_id)
+    update_reservation_item(session, reservation_item_patch)
