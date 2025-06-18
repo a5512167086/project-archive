@@ -9,6 +9,7 @@ export type FieldType =
   | 'checkbox'
   | 'array'
   | 'password'
+  | 'multi-select'
 
 export interface FieldProps {
   id: string
@@ -16,7 +17,7 @@ export interface FieldProps {
   label: string
   type: FieldType
   required?: boolean
-  options?: { value: string; label: string }[]
+  options?: { value: string | number; label: string }[]
   fields?: FieldProps[]
   validate?: (val: string) => boolean
   errorText?: {

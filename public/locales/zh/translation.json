@@ -71,7 +71,8 @@
     "channelId": "Channel ID",
     "channelSecret": "Channel Secret",
     "channelAccessToken": "Channel Access Token",
-    "liffId": "LIFF ID",
+    "loginChannelId": "Login Channel ID",
+    "loginChannelSecret": "Login Channel Secret",
     "seeTutorial": "查看教學",
     "webhookUrl": "Webhook網址",
     "webhookHint": "Webhook網址只會在創建時顯示，請妥善保管。"

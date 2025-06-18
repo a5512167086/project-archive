@@ -10,19 +10,23 @@ import {
   Checkbox,
   IconButton,
   Typography,
-  MenuItem
+  MenuItem,
+  ListItemText,
+  InputLabel,
+  FormControl,
+  Select,
+  OutlinedInput
 } from '@mui/material'
+import { TimePicker } from '@mui/x-date-pickers/TimePicker'
+import { useTranslation } from 'react-i18next'
+import dayjs, { Dayjs } from 'dayjs'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
-import { useTranslation } from 'react-i18next'
-import { TimePicker } from '@mui/x-date-pickers/TimePicker'
-import dayjs, { Dayjs } from 'dayjs'
-import { CustomDialogProps } from './CustomDialog.type'
+import { CustomDialogProps, FieldProps } from './CustomDialog.type'
 import { CustomLoader } from '../CustomLoader'
 import { CustomLink } from '../CustomLink'
 import { StyledDialog, VisuallyHiddenInput } from './CustomDialog.style'
-import { FieldProps } from './CustomDialog.type'
 
 const dialogContent = {
   cancel: 'common.cancel',
@@ -45,14 +49,14 @@ export const CustomDialog = <T extends Record<string, unknown>>({
   const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [arrayState, setArrayState] = useState<
-    Record<string, Record<string, unknown>[]>
-  >({})
-  const [timeValues, setTimeValues] = useState<Record<string, Dayjs | null>>({})
+  const [formState, setFormState] = useState<Record<string, unknown>>({})
   const [checkboxValues, setCheckboxValues] = useState<Record<string, boolean>>(
     {}
   )
-  const [formState, setFormState] = useState<Record<string, unknown>>({})
+  const [timeValues, setTimeValues] = useState<Record<string, Dayjs | null>>({})
+  const [arrayState, setArrayState] = useState<
+    Record<string, Record<string, unknown>[]>
+  >({})
 
   const validateField = (
     field: FieldProps,
@@ -74,15 +78,15 @@ export const CustomDialog = <T extends Record<string, unknown>>({
 
   const handleFieldBlur = (field: FieldProps, value: string | File | null) => {
     const error = validateField(field, value)
-    setErrors((prevErrors) => ({ ...prevErrors, [field.name]: error || '' }))
+    setErrors((prev) => ({ ...prev, [field.name]: error || '' }))
   }
 
   const handleDialogClose = () => {
     setErrors({})
-    setArrayState({})
-    setTimeValues({})
-    setCheckboxValues({})
     setFormState({})
+    setCheckboxValues({})
+    setTimeValues({})
+    setArrayState({})
     handleClose()
   }
 
@@ -113,9 +117,7 @@ export const CustomDialog = <T extends Record<string, unknown>>({
         field,
         formJson[field.name] as string | File | null
       )
-      if (error) {
-        newErrors[field.name] = error
-      }
+      if (error) newErrors[field.name] = error
     })
 
     if (Object.keys(newErrors).length > 0) {
@@ -130,6 +132,124 @@ export const CustomDialog = <T extends Record<string, unknown>>({
       setLoading(false)
       handleDialogClose()
     }
+  }
+
+  const renderArrayFields = (
+    field: FieldProps,
+    items: Record<string, unknown>[],
+    idx: number
+  ) => {
+    return (field.fields ?? []).map((subField) => {
+      const key = `${field.name}[${idx}].${subField.name}`
+      const value = items[idx][subField.name] ?? ''
+
+      if (subField.type === 'time') {
+        return (
+          <TimePicker
+            key={key}
+            label={t(subField.label)}
+            value={value ? dayjs(value as string, 'HH:mm') : null}
+            onChange={(newValue) => {
+              const next = [...items]
+              next[idx][subField.name] = newValue?.format('HH:mm') || ''
+              setArrayState((prev) => ({ ...prev, [field.name]: next }))
+            }}
+            slotProps={{
+              textField: { variant: 'outlined', margin: 'dense' }
+            }}
+          />
+        )
+      }
+
+      if (subField.type === 'checkbox') {
+        return (
+          <FormControlLabel
+            key={key}
+            control={
+              <Checkbox
+                checked={!!value}
+                onChange={(e) => {
+                  const next = [...items]
+                  next[idx][subField.name] = e.target.checked
+                  setArrayState((prev) => ({ ...prev, [field.name]: next }))
+                }}
+              />
+            }
+            label={t(subField.label)}
+          />
+        )
+      }
+
+      if (subField.type === 'multi-select') {
+        return (
+          <FormControl key={key} sx={{ minWidth: 100, mt: 0.5 }}>
+            <InputLabel>{t(subField.label)}</InputLabel>
+            <Select
+              multiple
+              value={Array.isArray(value) ? value : []}
+              onChange={(e) => {
+                const next = [...items]
+                next[idx][subField.name] = e.target.value
+                setArrayState((prev) => ({ ...prev, [field.name]: next }))
+              }}
+              input={<OutlinedInput label={t(subField.label)} />}
+              renderValue={(selected) => (selected as string[]).join(', ')}
+            >
+              {(subField.options ?? []).map((opt) => (
+                <MenuItem key={opt.value} value={opt.value}>
+                  <Checkbox
+                    checked={Array.isArray(value) && value.includes(opt.value)}
+                  />
+                  <ListItemText primary={opt.label} />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )
+      }
+
+      if (subField.type === 'select') {
+        return (
+          <TextField
+            key={key}
+            select
+            sx={{ minWidth: 120 }}
+            label={t(subField.label)}
+            value={value}
+            onChange={(e) => {
+              const next = [...items]
+              next[idx][subField.name] = e.target.value
+              setArrayState((prev) => ({ ...prev, [field.name]: next }))
+            }}
+            variant="outlined"
+            margin="dense"
+          >
+            <MenuItem value="">請選擇</MenuItem>
+            {(subField.options ?? []).map((opt) => (
+              <MenuItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </MenuItem>
+            ))}
+          </TextField>
+        )
+      }
+
+      return (
+        <TextField
+          key={key}
+          label={t(subField.label)}
+          value={value as string}
+          type={subField.type}
+          onChange={(e) => {
+            const next = [...items]
+            next[idx][subField.name] = e.target.value
+            setArrayState((prev) => ({ ...prev, [field.name]: next }))
+          }}
+          variant="outlined"
+          margin="dense"
+        />
+      )
+    })
   }
 
   return (
@@ -178,20 +298,19 @@ export const CustomDialog = <T extends Record<string, unknown>>({
                   <IconButton
                     onClick={() => {
                       const newItem = (field.fields ?? []).reduce(
-                        (acc: Record<string, unknown>, f: FieldProps) => ({
-                          ...acc,
-                          [f.name]: ''
-                        }),
+                        (acc, f) => ({ ...acc, [f.name]: '' }),
                         {}
                       )
-                      const next = [...items, newItem]
-                      setArrayState((prev) => ({ ...prev, [field.name]: next }))
+                      setArrayState((prev) => ({
+                        ...prev,
+                        [field.name]: [...items, newItem]
+                      }))
                     }}
                   >
                     <AddIcon />
                   </IconButton>
                 </Box>
-                {items.map((item, idx) => (
+                {items.map((_, idx) => (
                   <Box
                     key={idx}
                     display="flex"
@@ -200,111 +319,7 @@ export const CustomDialog = <T extends Record<string, unknown>>({
                     flexWrap="wrap"
                     width="100%"
                   >
-                    {(field.fields ?? []).map((subField: FieldProps) => {
-                      const key = `${field.name}[${idx}].${subField.name}`
-                      const value = item[subField.name] ?? ''
-
-                      if (subField.type === 'time') {
-                        return (
-                          <TimePicker
-                            key={key}
-                            label={t(subField.label)}
-                            value={
-                              item[subField.name]
-                                ? dayjs(item[subField.name] as string, 'HH:mm')
-                                : null
-                            }
-                            onChange={(newValue) => {
-                              const next = [...items]
-                              next[idx][subField.name] =
-                                newValue?.format('HH:mm') || ''
-                              setArrayState((prev) => ({
-                                ...prev,
-                                [field.name]: next
-                              }))
-                            }}
-                            slotProps={{
-                              textField: {
-                                variant: 'outlined',
-                                margin: 'dense',
-                                size: 'small'
-                              }
-                            }}
-                          />
-                        )
-                      }
-
-                      if (subField.type === 'checkbox') {
-                        return (
-                          <FormControlLabel
-                            key={key}
-                            control={
-                              <Checkbox
-                                checked={!!item[subField.name]}
-                                onChange={(e) => {
-                                  const next = [...items]
-                                  next[idx][subField.name] = e.target.checked
-                                  setArrayState((prev) => ({
-                                    ...prev,
-                                    [field.name]: next
-                                  }))
-                                }}
-                              />
-                            }
-                            label={t(subField.label)}
-                          />
-                        )
-                      }
-
-                      if (subField.type === 'select') {
-                        return (
-                          <TextField
-                            key={key}
-                            select
-                            sx={{ minWidth: 120 }}
-                            label={t(subField.label)}
-                            value={value}
-                            onChange={(e) => {
-                              const next = [...items]
-                              next[idx][subField.name] = e.target.value
-                              setArrayState((prev) => ({
-                                ...prev,
-                                [field.name]: next
-                              }))
-                            }}
-                            size="small"
-                            variant="outlined"
-                            margin="dense"
-                          >
-                            <MenuItem value="">請選擇</MenuItem>
-                            {(subField.options ?? []).map((opt) => (
-                              <MenuItem key={opt.value} value={opt.value}>
-                                {opt.label}
-                              </MenuItem>
-                            ))}
-                          </TextField>
-                        )
-                      }
-
-                      return (
-                        <TextField
-                          key={key}
-                          label={t(subField.label)}
-                          value={value as string}
-                          onChange={(e) => {
-                            const next = [...items]
-                            next[idx][subField.name] = e.target.value
-                            setArrayState((prev) => ({
-                              ...prev,
-                              [field.name]: next
-                            }))
-                          }}
-                          size="small"
-                          variant="outlined"
-                          margin="dense"
-                        />
-                      )
-                    })}
+                    {renderArrayFields(field, items, idx)}
                     <IconButton
                       onClick={() => {
                         const next = [...items]
@@ -328,18 +343,16 @@ export const CustomDialog = <T extends Record<string, unknown>>({
               <TextField
                 key={field.id}
                 required={field.required}
-                margin="dense"
-                id={field.id}
-                name={field.name}
-                label={t(field.label)}
-                value={(formState[field.name] as string) ?? ''}
-                onChange={(e) => {
-                  const value = e.target.value
-                  setFormState((prev) => ({ ...prev, [field.name]: value }))
-                }}
                 select
                 fullWidth
-                variant="outlined"
+                label={t(field.label)}
+                value={(formState[field.name] as string) ?? ''}
+                onChange={(e) =>
+                  setFormState((prev) => ({
+                    ...prev,
+                    [field.name]: e.target.value
+                  }))
+                }
                 error={!!errors[field.name]}
                 helperText={errors[field.name]}
               >
@@ -359,14 +372,13 @@ export const CustomDialog = <T extends Record<string, unknown>>({
                 key={field.id}
                 control={
                   <Checkbox
-                    name={field.name}
                     checked={checkboxValues[field.name] || false}
-                    onChange={(e) => {
+                    onChange={(e) =>
                       setCheckboxValues((prev) => ({
                         ...prev,
                         [field.name]: e.target.checked
                       }))
-                    }}
+                    }
                   />
                 }
                 label={t(field.label)}
@@ -381,12 +393,9 @@ export const CustomDialog = <T extends Record<string, unknown>>({
                 ampm={false}
                 label={t(field.label)}
                 value={timeValues[field.name] || null}
-                onChange={(newValue) => {
-                  setTimeValues((prev) => ({
-                    ...prev,
-                    [field.name]: newValue
-                  }))
-                }}
+                onChange={(newValue) =>
+                  setTimeValues((prev) => ({ ...prev, [field.name]: newValue }))
+                }
                 slotProps={{
                   textField: {
                     fullWidth: true,
@@ -403,20 +412,18 @@ export const CustomDialog = <T extends Record<string, unknown>>({
               key={field.id}
               required={field.required}
               margin="dense"
-              id={field.id}
-              name={field.name}
               label={t(field.label)}
               type={field.type}
-              fullWidth
-              variant="outlined"
+              value={(formState[field.name] as string) ?? ''}
+              onChange={(e) =>
+                setFormState((prev) => ({
+                  ...prev,
+                  [field.name]: e.target.value
+                }))
+              }
+              onBlur={(e) => handleFieldBlur(field, e.target.value)}
               error={!!errors[field.name]}
               helperText={errors[field.name]}
-              value={(formState[field.name] as string) ?? ''}
-              onChange={(e) => {
-                const value = e.target.value
-                setFormState((prev) => ({ ...prev, [field.name]: value }))
-              }}
-              onBlur={(e) => handleFieldBlur(field, e.target.value)}
             />
           )
         })}
@@ -439,8 +446,8 @@ export const CustomDialog = <T extends Record<string, unknown>>({
           <Button
             type="submit"
             variant="contained"
-            color={dangerButton ? 'error' : 'success'}
             className="dialog__actionButton"
+            color={dangerButton ? 'error' : 'success'}
             disabled={loading}
           >
             {loading ? <CustomLoader size={24} /> : t(dialogContent.done)}

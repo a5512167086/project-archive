@@ -36,13 +36,6 @@ const dialogFields: FieldProps[] = [
     required: true
   },
   {
-    id: 'liffId',
-    name: 'liffId',
-    label: 'botPage.liffId',
-    type: 'text',
-    required: true
-  },
-  {
     id: 'channelSecret',
     name: 'channelSecret',
     label: 'botPage.channelSecret',
@@ -53,6 +46,20 @@ const dialogFields: FieldProps[] = [
     id: 'channelAccessToken',
     name: 'channelAccessToken',
     label: 'botPage.channelAccessToken',
+    type: 'password',
+    required: true
+  },
+  {
+    id: 'loginChannelId',
+    name: 'loginChannelId',
+    label: 'botPage.loginChannelId',
+    type: 'text',
+    required: true
+  },
+  {
+    id: 'loginChannelSecret',
+    name: 'loginChannelSecret',
+    label: 'botPage.loginChannelSecret',
     type: 'password',
     required: true
   }
@@ -113,14 +120,16 @@ const BotPage = () => {
     channelId: string
     channelAccessToken: string
     channelSecret: string
-    liffId: string
+    loginChannelId: string
+    loginChannelSecret: string
   }) => {
     await createBot({
       bot_name: data.botName,
       bot_channel_id: data.channelId,
       bot_channel_access_token: data.channelAccessToken,
       bot_channel_secret: data.channelSecret,
-      bot_liff_id: data.liffId
+      bot_login_channel_id: data.loginChannelId,
+      bot_login_channel_secret: data.loginChannelSecret
     })
       .unwrap()
       .then((data) => {
@@ -176,7 +185,8 @@ const BotPage = () => {
         channelId: string
         channelAccessToken: string
         channelSecret: string
-        liffId: string
+        loginChannelId: string
+        loginChannelSecret: string
       }>
         open={isDialogOpen}
         handleClose={handleDialogClose}
