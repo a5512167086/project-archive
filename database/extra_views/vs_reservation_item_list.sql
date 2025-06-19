@@ -1,5 +1,6 @@
 CREATE OR REPLACE VIEW vs_reservation_item_list AS
-SELECT o.object_id,
+SELECT rd.reservation_item_id,
+    o.object_id,
     co.class_id,
     o.chinese_name AS reservation_name,
     o.chinese_description AS reservation_description,
