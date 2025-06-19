@@ -21,10 +21,6 @@ class Object(SQLModel, table=True):
 
     owner_id: Optional[UUID] = Field(default=None, foreign_key="users.user_id")
 
-    click_count: int = Field(default=0)
-    outlink_count: Optional[int] = Field(default=None)
-    inlink_count: Optional[int] = Field(default=None)
-
     is_hided: bool = Field(default=False)
     is_deleted: bool = Field(default=False)
 

@@ -22,12 +22,9 @@ class Class(SQLModel, table=True):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-    subobject_count: int = Field(default=0)
-    class_rank: Optional[int] = Field(default=0)
-    object_rank: Optional[int] = Field(default=0)
-    hierarchy_level: Optional[int] = Field(default=None)
-
-    click_count: int = Field(default=0)
+    class_rank: int = Field(default=0)
+    object_rank: int = Field(default=0)
+    hierarchy_level: Optional[int] = None
     keywords: str = Field(default="", max_length=512)
 
     owner_id: Optional[UUID] = Field(default=None, foreign_key="users.user_id")
@@ -48,8 +45,6 @@ class SubClassView(SQLModel, table=True):
     chinese_description: Optional[str] = None
     created_at: datetime
     updated_at: datetime
-    subobject_count: int
-    click_count: int
     keywords: Optional[str] = None
     owner_id: Optional[UUID] = None
     is_hided: bool
