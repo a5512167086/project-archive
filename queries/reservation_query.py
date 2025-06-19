@@ -12,6 +12,19 @@ from queries.entity_query import get_entity_id_by_name
 from schemas.reservation_schema import ReservationItemResponse
 
 
+def get_reservation_class_id_by_bot_class_id(
+    session: Session, bot_class_id: int
+) -> int | None:
+    entity_id = get_entity_id_by_name(session, "預約")
+    result = session.exec(
+        select(SubClassView.class_id).where(
+            SubClassView.parent_class_id == bot_class_id,
+            SubClassView.entity_id == entity_id,
+        )
+    ).first()
+    return result
+
+
 def get_reservation_item_class_id_by_bot_class_id(
     session: Session, bot_class_id: int
 ) -> int | None:
@@ -61,6 +74,7 @@ def get_reservation_items(
 
     return [
         ReservationItemResponse(
+            reservation_item_id=item.reservation_item_id,
             object_id=item.object_id,
             class_id=item.class_id,
             reservation_name=item.reservation_name,
@@ -72,3 +86,41 @@ def get_reservation_items(
         )
         for item in items
     ]
+
+
+def get_reservation_item_by_id(
+    session: Session, reservation_item_class_id, reservation_item_id: int
+) -> ReservationItemResponse | None:
+    item = session.exec(
+        select(ReservationItemListView).where(
+            ReservationItemListView.reservation_item_id == reservation_item_id,
+            ReservationItemListView.class_id == reservation_item_class_id,
+        )
+    ).first()
+
+    if not item:
+        return None
+
+    options = session.exec(
+        select(ReservationItemOption).where(
+            ReservationItemOption.object_id == item.object_id
+        )
+    ).all()
+
+    schedules = session.exec(
+        select(ReservationItemSchedule).where(
+            ReservationItemSchedule.object_id == item.object_id
+        )
+    ).all()
+
+    return ReservationItemResponse(
+        reservation_item_id=item.reservation_item_id,
+        object_id=item.object_id,
+        class_id=item.class_id,
+        reservation_name=item.reservation_name,
+        reservation_description=item.reservation_description,
+        duration_minutes=item.duration_minutes,
+        price=item.price,
+        options=options,
+        schedules=schedules,
+    )

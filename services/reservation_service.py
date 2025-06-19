@@ -7,10 +7,16 @@ from commands.reservation_command import (
 )
 from exception import GlobalErrorException
 from queries.reservation_query import (
+    get_reservation_class_id_by_bot_class_id,
+    get_reservation_item_by_id,
     get_reservation_item_class_id_by_bot_class_id,
     get_reservation_items,
 )
-from schemas.reservation_schema import ReservationItemCreate, ReservationItemPatch
+from schemas.reservation_schema import (
+    ReservationCreate,
+    ReservationItemCreate,
+    ReservationItemPatch,
+)
 
 
 def validate_reservation_item_class(session: Session, bot_class_id: int) -> int:
@@ -23,6 +29,18 @@ def validate_reservation_item_class(session: Session, bot_class_id: int) -> int:
             error_message="Reservation item class not found for the given bot class",
         )
     return reservation_item_class_id
+
+
+def validate_reservation_class(session: Session, bot_class_id: int) -> int:
+    reservation_class_id = get_reservation_class_id_by_bot_class_id(
+        session, bot_class_id
+    )
+    if not reservation_class_id:
+        raise GlobalErrorException(
+            error_code="RESERVATION_CLASS_NOT_FOUND",
+            error_message="Reservation class not found for the given bot class",
+        )
+    return reservation_class_id
 
 
 def get_reservation_items_by_bot_class_id(session: Session, bot_class_id: int):
@@ -61,3 +79,16 @@ def update_reservation_item_by_object_id(
 ):
     validate_reservation_item_class(session, reservation_item_patch.bot_class_id)
     update_reservation_item(session, reservation_item_patch)
+
+
+# TODO: Implement the logic for creating a user reservation
+def create_user_reservation(session: Session, reservation: ReservationCreate):
+    reservation_item_class_id = validate_reservation_item_class(
+        session, reservation.bot_class_id
+    )
+    reservation_item = get_reservation_item_by_id(
+        session, reservation_item_class_id, reservation.reservation_item_id
+    )
+    print(f"Reservation item: {reservation_item}")
+    # reservation_class_id = validate_reservation_class(session, reservation.bot_class_id)
+    # insert_reservation(session, reservation_class_id, reservation)

@@ -1,9 +1,10 @@
 from datetime import date, datetime, time
-from typing import List, Optional
+from typing import Any, List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+from constants.common import PaymentMethod, PaymentStatus
 from models.reservation_model import ReservationItemOption, ReservationItemSchedule
 
 
@@ -40,7 +41,7 @@ class ReservationItemCreate(BaseModel):
 
 
 class ReservationItemResponse(BaseModel):
-    object_id: int
+    reservation_item_id: UUID
     class_id: int
     reservation_name: str
     reservation_description: str
@@ -92,3 +93,19 @@ class ReservationItemPatch(BaseModel):
     detail: Optional[DetailUpdate] = None
     options: Optional[List[OptionUpdate]] = None
     schedules: Optional[List[ScheduleUpdate]] = None
+
+
+class OptionValue(BaseModel):
+    option_id: UUID
+    value: Any
+
+
+class ReservationCreate(BaseModel):
+    bot_class_id: int
+    user_id: UUID
+    reservation_item_id: UUID
+    start_time: time
+    payment_method: Optional[PaymentMethod] = None
+    payment_status: Optional[PaymentStatus] = None
+    option_values: Optional[List[OptionValue]] = None
+    note: Optional[str] = None

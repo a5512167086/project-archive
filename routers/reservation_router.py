@@ -4,12 +4,14 @@ from fastapi import APIRouter
 
 from database import SessionDep
 from schemas.reservation_schema import (
+    ReservationCreate,
     ReservationItemCreate,
     ReservationItemDelete,
     ReservationItemPatch,
     ReservationItemResponse,
 )
 from services.reservation_service import (
+    create_user_reservation,
     delete_reservation_item_by_object_id,
     get_reservation_items_by_bot_class_id,
     insert_new_reservation_item,
@@ -58,8 +60,9 @@ def list_reservations():
 
 
 @reservation_router.post("")
-def create_reservation():
-    return
+def create_reservation(session: SessionDep, reservation: ReservationCreate):
+    create_user_reservation(session, reservation)
+    session.commit()
 
 
 @reservation_router.delete("/{reservation_id}")
