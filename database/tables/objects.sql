@@ -8,13 +8,9 @@ CREATE TABLE IF NOT EXISTS objects(
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     owner_id UUID,
-    click_count INT DEFAULT 0 NOT NULL,
-    outlink_count INT,
-    inlink_count INT,
     is_hided BOOLEAN DEFAULT FALSE,
     is_deleted BOOLEAN DEFAULT FALSE,
     PRIMARY KEY (object_id)
 );
 
 CREATE INDEX IF NOT EXISTS ix_objects_chinese_name ON objects(chinese_name);
-

@@ -6,9 +6,7 @@ CREATE TABLE IF NOT EXISTS groups (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     group_type SMALLINT,
     is_hidden BOOLEAN DEFAULT FALSE NOT NULL,
-    is_deleted BOOLEAN DEFAULT FALSE NOT NULL,
-    identifier INT,
-    class_id INT,
-    CONSTRAINT uq_groups UNIQUE (group_name)
+    is_deleted BOOLEAN DEFAULT FALSE NOT NULL
 );
 
+CREATE INDEX IF NOT EXISTS idx_groups_group_name ON groups(group_name);

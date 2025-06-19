@@ -41,12 +41,6 @@ WHERE NOT EXISTS (
             AND chinese_name = '根目錄'
     );
 
-INSERT INTO permissions(class_id, role_type, role_id, permission_bits)
-VALUES (1, FALSE, 1, 63),
-    (1, FALSE, 2, 3),
-    (1, FALSE, 3, 3),
-    (1, FALSE, 4, 3) ON CONFLICT (class_id, role_type, role_id) DO NOTHING;
-
 SELECT entity_id INTO _entity_id
 FROM entities
 WHERE chinese_name = '機器人'

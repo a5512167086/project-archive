@@ -139,19 +139,6 @@ END IF;
 
 COMMENT ON TABLE oauths IS 'OAuth 第三方登入資訊';
 
--- customers
-IF NOT EXISTS (
-    SELECT 1
-    FROM pg_constraint
-    WHERE conname = 'fk_customers_user_id'
-) THEN
-ALTER TABLE customers
-ADD CONSTRAINT fk_customers_user_id FOREIGN KEY(user_id) REFERENCES users(user_id);
-
-END IF;
-
-COMMENT ON TABLE customers IS '顧客使用者擴展資料表';
-
 -- group_members
 IF NOT EXISTS (
     SELECT 1
@@ -174,19 +161,6 @@ ADD CONSTRAINT fk_group_members_member_id FOREIGN KEY(member_id) REFERENCES user
 END IF;
 
 COMMENT ON TABLE group_members IS '群組成員關聯表';
-
--- groups
-IF NOT EXISTS (
-    SELECT 1
-    FROM pg_constraint
-    WHERE conname = 'fk_groups_class_id'
-) THEN
-ALTER TABLE groups
-ADD CONSTRAINT fk_groups_class_id FOREIGN KEY(class_id) REFERENCES classes(class_id);
-
-END IF;
-
-COMMENT ON TABLE groups IS '使用者群組資訊';
 
 -- permissions
 IF NOT EXISTS (

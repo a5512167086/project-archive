@@ -8,7 +8,6 @@ SELECT
     o.created_at,
     o.updated_at,
     o.owner_id,
-    o.click_count,
     o.is_hided,
     o.is_deleted
 FROM

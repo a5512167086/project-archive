@@ -38,6 +38,14 @@ _reservation_entity_id int;
 
 _service_entity_id int;
 
+_admin_group_id int;
+
+_manager_group_id int;
+
+_user_group_id int;
+
+_guest_group_id int;
+
 BEGIN IF (
     _bot_name IS NULL
     OR _channel_id IS NULL
@@ -129,6 +137,40 @@ RETURNING bot_details.bot_detail_id INTO _new_bot_detail_id;
 -- 綁定主 class 和 object
 INSERT INTO class_object_relations(class_id, object_id)
 VALUES (_new_class_id, _new_object_id);
+
+INSERT INTO groups (group_name, group_description)
+VALUES (
+        'Administrators',
+        'Bot Admin Group'
+    )
+RETURNING group_id INTO _admin_group_id;
+
+-- 插入並取得 _manager_group_id
+INSERT INTO groups (group_name, group_description)
+VALUES (
+        'Managers',
+        'Bot Manager Group'
+    )
+RETURNING group_id INTO _manager_group_id;
+
+-- 插入並取得 _user_group_id
+INSERT INTO groups (group_name, group_description)
+VALUES ('Users', 'Bot User Group')
+RETURNING group_id INTO _user_group_id;
+
+-- 插入並取得 _guest_group_id
+INSERT INTO groups (group_name, group_description)
+VALUES ('Guests', 'Bot Guest Group')
+RETURNING group_id INTO _guest_group_id;
+
+INSERT INTO permissions(class_id, role_type, role_id, permission_bits)
+VALUES (_new_class_id, FALSE, _admin_group_id, 63),
+    -- 全權
+    (_new_class_id, FALSE, _manager_group_id, 15),
+    -- 管理權限
+    (_new_class_id, FALSE, _user_group_id, 3),
+    -- 一般使用
+    (_new_class_id, FALSE, _guest_group_id, 1);
 
 -- 插入子 class
 PERFORM fs_insert_class(
