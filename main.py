@@ -17,7 +17,13 @@ app = FastAPI(responses={status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse}})
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://localhost:5173", "http://localhost:5173"],
+    allow_origins=[
+        "https://localhost:5173",
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "https://platform-web-gnod.onrender.com",
+        "https://liff-web.onrender.com",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

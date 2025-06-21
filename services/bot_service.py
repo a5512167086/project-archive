@@ -1,10 +1,10 @@
 import logging
 import os
+from uuid import UUID
 
 from linebot.v3.messaging import (
     ApiClient,
     Configuration,
-    MessageAction,
     MessagingApi,
     MessagingApiBlob,
     RichMenuArea,
@@ -17,10 +17,11 @@ from sqlmodel import Session
 
 from commands.bot_command import delete_bot_by_id, insert_new_bot, update_bot_by_id
 from exception import GlobalErrorException
-from models.bot_detail_model import BotListWithCredentialView
+from models.bot_detail_model import BotListView, BotListWithCredentialView
 from queries.bot_query import (
     get_all_bots_by_user_id,
     get_bot_by_id,
+    get_bot_by_uuid,
     get_bot_subclass,
     get_line_bot_credentials,
 )
@@ -59,12 +60,20 @@ def create_new_bot(user_id: str, new_bot: InsertBotRequest):
 
     bot_data = insert_new_bot(user_id, new_bot)
     init_rich_menu(
-        bot_data["channel_access_token"], bot_data["liff_id"], bot_data["class_id"]
+        bot_data["channel_access_token"], bot_data["liff_id"], bot_data["bot_detail_id"]
     )
     logger.info(
         f"New bot created successfully with bot_detail_id: {bot_data['bot_detail_id']}"
     )
     return bot_data["bot_detail_id"]
+
+
+def validate_line_bot_exists(session: Session, bot_id: str) -> BotListWithCredentialView | None:
+    bot = get_bot_by_uuid(session, bot_id)
+    if not bot:
+        raise_global_error("BOT_NOT_EXIST", "The specified bot does not exist")
+
+    return bot
 
 
 def validate_line_bot(channel_access_token: str) -> bool:
@@ -98,16 +107,10 @@ def init_rich_menu(line_access_token: str, liff_id: str, bot_uuid: str):
                 chatBarText="開啟選單",
                 areas=[
                     RichMenuArea(
-                        bounds=RichMenuBounds(x=0, y=0, width=600, height=405),
+                        bounds=RichMenuBounds(x=0, y=0, width=1200, height=405),
                         action=URIAction(
                             label="指令選單",
                             uri=f"https://liff.line.me/{liff_id}?bot_uuid={bot_uuid}",
-                        ),
-                    ),
-                    RichMenuArea(
-                        bounds=RichMenuBounds(x=600, y=0, width=600, height=405),
-                        action=MessageAction(
-                            type="message", label="測試", text="你點擊了右側按鈕"
                         ),
                     ),
                 ],
@@ -161,7 +164,7 @@ def update_current_bot(
 
 
 def get_bot_credential(
-    session: Session, bot_uuid: str
+    session: Session, bot_uuid: UUID
 ) -> BotListWithCredentialView | None:
     logger.info(f"Fetching bot credentials for bot_uuid: {bot_uuid}")
     if not bot_uuid:

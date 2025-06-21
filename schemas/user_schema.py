@@ -59,3 +59,8 @@ class OAuth(BaseModel):
     user_id: UUID
     oauth_provider: Literal["google", "line"]
     oauth_user_id: str
+
+
+class CustomerLoginRequest(BaseModel):
+    line_id_token: str
+    bot_id: UUID

@@ -13,6 +13,7 @@ class BotDetail(SQLModel, table=True):
     channel_id: str = Field(max_length=256)
     channel_access_token: str = Field(max_length=256)
     channel_secret: str = Field(max_length=256)
+    login_channel_id: str = Field(max_length=256)
     liff_id: str = Field(max_length=256)
 
 
@@ -36,5 +37,6 @@ class BotListWithCredentialView(SQLModel, table=True):
     channel_id: str
     channel_access_token: str
     channel_secret: str
+    login_channel_id: str
     liff_id: Optional[str]
     owner_id: UUID

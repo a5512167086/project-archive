@@ -6,6 +6,7 @@ from database import SessionDep
 from dependencies import get_current_user, get_reset_user
 from schemas.user_schema import (
     ChangePasswordRequest,
+    CustomerLoginRequest,
     ForgotPasswordRequest,
     LoginRequest,
     OAuthBindRequest,
@@ -20,6 +21,7 @@ from services.user_service import (
     change_password,
     check_oauth_status,
     create_new_user,
+    customer_login,
     forgot_password,
     get_user_profile,
     login,
@@ -101,3 +103,10 @@ async def change_user_password(
         session, current_user["email"], body.old_password, body.new_password
     )
     session.commit()
+
+
+@user_router.post("/customer-login", response_model=TokenResponse)
+async def user_customer_login(session: SessionDep, body: CustomerLoginRequest):
+    token_response = customer_login(session, body)
+    session.commit()
+    return token_response

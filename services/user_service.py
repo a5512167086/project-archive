@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from sqlmodel import Session
 
+from commands.group_command import insert_group_member
 from commands.user_command import create_oauth, create_user, update_user_password
 from constants.config import ACCESS_TOKEN_EXPIRE_SECONDS, JWT_RESET_SECRET
 from constants.error_code import ErrorCode
@@ -14,6 +15,7 @@ from queries.user_query import (
     get_user_by_id,
 )
 from schemas.user_schema import (
+    CustomerLoginRequest,
     ForgotPasswordRequest,
     LoginRequest,
     OAuthBindRequest,
@@ -21,11 +23,14 @@ from schemas.user_schema import (
     RegisterRequest,
 )
 from services.auth_service import create_jwt_token, generate_token_pair
+from services.bot_service import validate_line_bot_exists
+from services.group_service import validate_group_exist_in_bot
 from services.mail_service import send_reset_email
 from utils.common import (
     authenticate_with_google,
     authenticate_with_line,
     generate_random_password,
+    get_line_oauth_info,
     hash_password,
     verify_password,
 )
@@ -65,7 +70,6 @@ def get_user_profile(session: Session, user_id: str):
             error_code=ErrorCode.USER_NOT_EXISTS,
             error_message="User not found.",
         )
-    print(f"User profile retrieved: {user}")
 
     return user
 
@@ -104,8 +108,12 @@ def handle_new_oauth_user(session, oauth_user_info, provider):
         session, oauth_user_info["name"], oauth_user_info["email"], random_password
     )
     create_oauth(session, new_user_id, provider, oauth_user_info["id"])
+    token = generate_token_pair(new_user_id, oauth_user_info["email"], is_remember=True)
 
-    return generate_token_pair(new_user_id, oauth_user_info["email"], is_remember=True)
+    return {
+        "user_id": new_user_id,
+        "token": token,
+    }
 
 
 def handle_existed_oauth_user(session, provider: str, oauth_user_id: str):
@@ -136,7 +144,8 @@ def oauth_login(session: Session, oauth: OAuthLoginRequest):
 
     user = get_user_by_email(session, user_info["email"])
     if not user:
-        return handle_new_oauth_user(session, user_info, oauth.provider)
+        new_user = handle_new_oauth_user(session, user_info, oauth.provider)
+        return new_user["token"]
 
     oauth_user_info = handle_existed_oauth_user(
         session, oauth.provider, user_info["id"]
@@ -246,3 +255,24 @@ def change_password(session, user_email: str, old_password: str, new_password: s
         )
 
     update_user_password(session, user_data.user_id, hash_password(new_password))
+
+
+def customer_login(session: Session, customer: CustomerLoginRequest):
+    bot = validate_line_bot_exists(session, customer.bot_id)
+    group = validate_group_exist_in_bot(session, bot.class_id, "Users")
+
+    user_info = get_line_oauth_info(customer.line_id_token, bot.login_channel_id)
+
+    user = get_user_by_email(session, user_info["email"])
+    if not user:
+        new_user = handle_new_oauth_user(session, user_info, "line")
+        insert_group_member(session, group.group_id, new_user["user_id"], 2, None, True)
+        return new_user["token"]
+    oauth_user_info = handle_existed_oauth_user(session, "line", user_info["sub"])
+    if oauth_user_info == "USER_ALREADY_EXISTS":
+        raise GlobalErrorException(
+            ErrorCode.USER_ALREADY_EXISTS, "User already exists, please login and bind."
+        )
+    insert_group_member(session, group.group_id, user.user_id, 2, None, True)
+
+    return oauth_user_info

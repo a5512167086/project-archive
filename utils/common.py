@@ -44,13 +44,15 @@ def google_code_to_token(code: str):
 
     response = requests.post(token_url, data=data)
 
-    if response.status_code == 200:
-        token_info = response.json()
-        access_token = token_info.get("access_token")
-        id_token = token_info.get("id_token")
-        return {"access_token": access_token, "id_token": id_token}
-    else:
-        return "OAUTH_FAILED"
+    if response.status_code != 200:
+        raise GlobalErrorException(
+            ErrorCode.OAUTH_FAILED, "Failed to authenticate with Google OAuth."
+        )
+
+    token_info = response.json()
+    access_token = token_info.get("access_token")
+    id_token = token_info.get("id_token")
+    return {"access_token": access_token, "id_token": id_token}
 
 
 def get_google_oauth_info(access_token):
@@ -59,25 +61,19 @@ def get_google_oauth_info(access_token):
 
     response = requests.get(user_info_url, headers=headers)
 
-    if response.status_code == 200:
-        user_info = response.json()
-        return user_info
-    else:
-        return "USER_INFO_REQUEST_FAILED"
+    if response.status_code != 200:
+        raise GlobalErrorException(
+            ErrorCode.OAUTH_FAILED, "Failed to retrieve user info from Google."
+        )
+
+    user_info = response.json()
+    return user_info
 
 
 def authenticate_with_google(oauth_code):
     google_oauth_response = google_code_to_token(oauth_code)
-    if google_oauth_response == "OAUTH_FAILED":
-        raise GlobalErrorException(
-            ErrorCode.OAUTH_FAILED, "Failed to authenticate with Google OAuth."
-        )
 
     google_user_info = get_google_oauth_info(google_oauth_response["access_token"])
-    if google_user_info == "USER_INFO_REQUEST_FAILED":
-        raise GlobalErrorException(
-            ErrorCode.OAUTH_FAILED, "Failed to retrieve user info from Google."
-        )
 
     return google_user_info
 
@@ -95,49 +91,47 @@ def line_code_to_token(auth_code: str):
 
     response = requests.post(token_url, data=data)
 
-    if response.status_code == 200:
-        token_info = response.json()
-        id_token = token_info.get("id_token")
-        access_token = token_info.get("access_token")
-        return {"id_token": id_token, "access_token": access_token}
-    else:
-        return "OAUTH_FAILED"
-
-
-def get_line_oauth_info(id_token: str):
-    verify_url = "https://api.line.me/oauth2/v2.1/verify"
-    data = {
-        "id_token": id_token,
-        "client_id": LINE_CLIENT_ID,
-    }
-
-    response = requests.post(verify_url, data=data)
-
-    if response.status_code == 200:
-        user_info = response.json()
-        return user_info
-    else:
-        return "USER_INFO_REQUEST_FAILED"
-
-
-def authenticate_with_line(auth_code: str):
-    line_oauth_response = line_code_to_token(auth_code)
-    if line_oauth_response == "OAUTH_FAILED":
+    if response.status_code != 200:
         raise GlobalErrorException(
             ErrorCode.OAUTH_FAILED, "Failed to authenticate with LINE OAuth."
         )
 
-    user_info = get_line_oauth_info(line_oauth_response["id_token"])
-    if user_info == "USER_INFO_REQUEST_FAILED":
+    token_info = response.json()
+    id_token = token_info.get("id_token")
+    access_token = token_info.get("access_token")
+    return {"id_token": id_token, "access_token": access_token}
+
+
+def get_line_oauth_info(id_token: str, login_channel_id: str = ""):
+    verify_url = "https://api.line.me/oauth2/v2.1/verify"
+    client_id = login_channel_id if login_channel_id else LINE_CLIENT_ID
+
+    data = {
+        "id_token": id_token,
+        "client_id": client_id,
+    }
+
+    response = requests.post(verify_url, data=data)
+
+    if response.status_code != 200:
         raise GlobalErrorException(
             ErrorCode.OAUTH_FAILED, "Failed to retrieve user info from LINE."
         )
 
+    user_info = response.json()
     return {
-        "id": user_info["sub"],
-        "name": user_info["name"],
-        "email": user_info["email"],
+        "id": user_info.get("sub"),
+        "name": user_info.get("name"),
+        "email": user_info.get("email"),
     }
+
+
+def authenticate_with_line(auth_code: str):
+    line_oauth_response = line_code_to_token(auth_code)
+
+    user_info = get_line_oauth_info(line_oauth_response["id_token"])
+
+    return user_info
 
 
 def generate_random_password(length=12):

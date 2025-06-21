@@ -1,4 +1,5 @@
 from typing import Annotated, List
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header
 from linebot.v3.messaging import Configuration
@@ -6,6 +7,7 @@ from linebot.v3.messaging import Configuration
 from constants.config import BASE_URL
 from database import SessionDep
 from dependencies import get_current_user
+from models.bot_detail_model import BotListWithCredentialView
 from schemas.bot_schema import (
     Bot,
     BotBodies,
@@ -33,6 +35,11 @@ def get_bots(
 ):
     user_id = current_user["user_id"]
     return get_all_bots(session, user_id)
+
+
+@bot_router.get("/{bot_uuid}", response_model=BotListWithCredentialView)
+def get_bot_credential_by_uuid(session: SessionDep, bot_uuid: UUID):
+    return get_bot_credential(session, bot_uuid)
 
 
 @bot_router.post("", tags=["bots"], response_model=InsertBotResponse)

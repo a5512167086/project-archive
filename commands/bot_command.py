@@ -25,12 +25,13 @@ def insert_new_bot(user_id: str, new_bot: InsertBotRequest):
                 cursor_factory=psycopg2.extras.RealDictCursor
             ) as cursor:
                 cursor.execute(
-                    "SELECT * FROM fs_insert_bot(%s, %s, %s, %s, %s, %s);",
+                    "SELECT * FROM fs_insert_bot(%s, %s, %s, %s, %s, %s, %s);",
                     [
                         new_bot.bot_name,
                         new_bot.bot_channel_id,
                         new_bot.bot_channel_access_token,
                         new_bot.bot_channel_secret,
+                        new_bot.bot_login_channel_id,
                         new_bot.bot_liff_id,
                         user_id,
                     ],
