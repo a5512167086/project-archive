@@ -3,15 +3,21 @@ CREATE OR REPLACE FUNCTION fs_insert_bot(
         _channel_id varchar(100),
         _channel_access_token varchar(100),
         _channel_secret varchar(100),
-        _liff_id varchar(100),
+        _login_channel_id varchar(256),
+        _login_channel_secret varchar(100),
+        _liff_id varchar(256),
         _owner_id uuid
     ) RETURNS TABLE (
         bot_detail_id uuid,
         class_id int,
         object_id int,
         chinese_name varchar(50),
+        channel_id varchar(100),
         channel_access_token varchar(100),
-        liff_id varchar(100),
+        channel_secret varchar(100),
+        login_channel_id varchar(256),
+        login_channel_secret varchar(100),
+        liff_id varchar(256),
         owner_id uuid
     ) AS $$
 DECLARE _main_bot_class_id int;
@@ -52,7 +58,7 @@ BEGIN IF (
     OR _channel_access_token IS NULL
     OR _channel_secret IS NULL
     OR _owner_id IS NULL
-) THEN RAISE EXCEPTION 'Error: 所有參數 (_bot_name, _channel_id, _channel_access_token, _channel_secret, _liff_id, _owner_id) 都必須提供';
+) THEN RAISE EXCEPTION 'Error: 所有參數 (_bot_name, _channel_id, _channel_access_token, _channel_secret, _login_channel_id, _login_channel_secret, _owner_id) 都必須提供';
 
 END IF;
 
@@ -123,6 +129,8 @@ INSERT INTO bot_details(
         channel_id,
         channel_access_token,
         channel_secret,
+        login_channel_id,
+        login_channel_secret,
         liff_id
     )
 VALUES (
@@ -130,6 +138,8 @@ VALUES (
         _channel_id,
         _channel_access_token,
         _channel_secret,
+        _login_channel_id,
+        _login_channel_secret,
         _liff_id
     )
 RETURNING bot_details.bot_detail_id INTO _new_bot_detail_id;
@@ -234,7 +244,11 @@ SELECT _new_bot_detail_id,
     _new_class_id,
     _new_object_id,
     _bot_name,
+    _channel_id,
     _channel_access_token,
+    _channel_secret,
+    _login_channel_id,
+    _login_channel_secret,
     _liff_id,
     _owner_id;
 
