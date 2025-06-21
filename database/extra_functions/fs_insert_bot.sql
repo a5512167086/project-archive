@@ -163,13 +163,10 @@ INSERT INTO groups (group_name, group_description)
 VALUES ('Guests', 'Bot Guest Group')
 RETURNING group_id INTO _guest_group_id;
 
-INSERT INTO permissions(class_id, role_type, role_id, permission_bits)
+INSERT INTO permissions(class_id, role_type, group_id, permission_bits)
 VALUES (_new_class_id, FALSE, _admin_group_id, 63),
-    -- 全權
     (_new_class_id, FALSE, _manager_group_id, 15),
-    -- 管理權限
     (_new_class_id, FALSE, _user_group_id, 3),
-    -- 一般使用
     (_new_class_id, FALSE, _guest_group_id, 1);
 
 -- 插入子 class

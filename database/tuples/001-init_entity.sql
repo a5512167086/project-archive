@@ -1,6 +1,14 @@
 DO $$ BEGIN IF NOT EXISTS(
     SELECT 1
     FROM entities
+    WHERE chinese_name = '資源'
+) THEN CALL sp_insert_entity('資源', 'Resource', TRUE);
+
+END IF;
+
+IF NOT EXISTS(
+    SELECT 1
+    FROM entities
     WHERE chinese_name = '機器人'
 ) THEN CALL sp_insert_entity('機器人', 'Bot', TRUE);
 

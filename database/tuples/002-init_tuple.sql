@@ -1,15 +1,7 @@
 DO $$
 DECLARE _entity_id INT;
 
-BEGIN BEGIN CALL sp_insert_entity('資源', 'Resource', TRUE);
-
-EXCEPTION
-WHEN OTHERS THEN RAISE NOTICE '忽略插入資源的錯誤: %',
-SQLERRM;
-
-END;
-
--- 取得 entity_id
+BEGIN -- 取得 entity_id
 SELECT entity_id INTO _entity_id
 FROM entities
 WHERE chinese_name = '資源'
@@ -41,11 +33,13 @@ WHERE NOT EXISTS (
             AND chinese_name = '根目錄'
     );
 
+-- 重新取得「機器人」的 entity_id
 SELECT entity_id INTO _entity_id
 FROM entities
 WHERE chinese_name = '機器人'
 LIMIT 1;
 
+-- 如果尚未存在「機器人」的 class，就插入
 IF NOT EXISTS (
     SELECT 1
     FROM classes
@@ -55,4 +49,4 @@ IF NOT EXISTS (
 
 END IF;
 
-END $$;
+END $$ LANGUAGE plpgsql;
