@@ -17,7 +17,7 @@ from sqlmodel import Session
 
 from commands.bot_command import delete_bot_by_id, insert_new_bot, update_bot_by_id
 from exception import GlobalErrorException
-from models.bot_detail_model import BotListView, BotListWithCredentialView
+from models.bot_detail_model import BotListWithCredentialView
 from queries.bot_query import (
     get_all_bots_by_user_id,
     get_bot_by_id,
@@ -26,6 +26,7 @@ from queries.bot_query import (
     get_line_bot_credentials,
 )
 from schemas.bot_schema import InsertBotRequest, UpdateBotRequest
+from utils.api import create_liff_app, get_channel_access_token
 
 logging.basicConfig(
     level=logging.INFO,
@@ -59,8 +60,12 @@ def create_new_bot(user_id: str, new_bot: InsertBotRequest):
         )
 
     bot_data = insert_new_bot(user_id, new_bot)
+    login_channel_access_token = get_channel_access_token(
+        bot_data["login_channel_id"], bot_data["login_channel_secret"]
+    )
+    liff = create_liff_app(login_channel_access_token)
     init_rich_menu(
-        bot_data["channel_access_token"], bot_data["liff_id"], bot_data["bot_detail_id"]
+        bot_data["channel_access_token"], liff["liffId"], bot_data["bot_detail_id"]
     )
     logger.info(
         f"New bot created successfully with bot_detail_id: {bot_data['bot_detail_id']}"
@@ -68,7 +73,9 @@ def create_new_bot(user_id: str, new_bot: InsertBotRequest):
     return bot_data["bot_detail_id"]
 
 
-def validate_line_bot_exists(session: Session, bot_id: str) -> BotListWithCredentialView | None:
+def validate_line_bot_exists(
+    session: Session, bot_id: str
+) -> BotListWithCredentialView | None:
     bot = get_bot_by_uuid(session, bot_id)
     if not bot:
         raise_global_error("BOT_NOT_EXIST", "The specified bot does not exist")

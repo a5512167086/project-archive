@@ -34,7 +34,7 @@ class InsertBotRequest(BaseModel):
     bot_channel_access_token: str
     bot_channel_secret: str
     bot_login_channel_id: str
-    bot_liff_id: str
+    bot_login_channel_secret: str
 
     @model_validator(mode="before")
     def prevent_empty_strings(cls, values):

@@ -32,7 +32,7 @@ def insert_new_bot(user_id: str, new_bot: InsertBotRequest):
                         new_bot.bot_channel_access_token,
                         new_bot.bot_channel_secret,
                         new_bot.bot_login_channel_id,
-                        new_bot.bot_liff_id,
+                        new_bot.bot_login_channel_secret,
                         user_id,
                     ],
                 )
