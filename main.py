@@ -21,6 +21,7 @@ app.add_middleware(
         "https://localhost:5173",
         "http://localhost:5173",
         "http://localhost:5174",
+        "https://localhost:5174",
         "https://platform-web-gnod.onrender.com",
         "https://liff-web.onrender.com",
     ],

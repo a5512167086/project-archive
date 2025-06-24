@@ -1,4 +1,3 @@
-from typing import Optional
 from uuid import UUID, uuid4
 
 from sqlmodel import Field, SQLModel
@@ -14,6 +13,7 @@ class BotDetail(SQLModel, table=True):
     channel_access_token: str = Field(max_length=256)
     channel_secret: str = Field(max_length=256)
     login_channel_id: str = Field(max_length=256)
+    login_channel_secret: str = Field(max_length=256)
     liff_id: str = Field(max_length=256)
 
 
@@ -38,5 +38,6 @@ class BotListWithCredentialView(SQLModel, table=True):
     channel_access_token: str
     channel_secret: str
     login_channel_id: str
-    liff_id: Optional[str]
+    login_channel_secret: str
+    liff_id: str
     owner_id: UUID

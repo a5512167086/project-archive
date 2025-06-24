@@ -268,7 +268,7 @@ def customer_login(session: Session, customer: CustomerLoginRequest):
         new_user = handle_new_oauth_user(session, user_info, "line")
         insert_group_member(session, group.group_id, new_user["user_id"], 2, None, True)
         return new_user["token"]
-    oauth_user_info = handle_existed_oauth_user(session, "line", user_info["sub"])
+    oauth_user_info = handle_existed_oauth_user(session, "line", user_info["id"])
     if oauth_user_info == "USER_ALREADY_EXISTS":
         raise GlobalErrorException(
             ErrorCode.USER_ALREADY_EXISTS, "User already exists, please login and bind."

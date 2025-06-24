@@ -16,6 +16,7 @@ from linebot.v3.messaging import (
 from sqlmodel import Session
 
 from commands.bot_command import delete_bot_by_id, insert_new_bot, update_bot_by_id
+from constants.error_code import ErrorCode
 from exception import GlobalErrorException
 from models.bot_detail_model import BotListWithCredentialView
 from queries.bot_query import (
@@ -35,38 +36,63 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def raise_global_error(error_code: str, error_message: str):
+def raise_global_error(error_code: ErrorCode, error_message: str):
     logger.error(f"Raising Global Error - Code: {error_code}, Message: {error_message}")
     raise GlobalErrorException(error_code=error_code, error_message=error_message)
+
+
+def safe_create_liff_app(access_token: str) -> dict:
+    try:
+        return create_liff_app(access_token)
+    except Exception as e:
+        logger.error(f"Failed to create LIFF app: {e}")
+        raise_global_error(ErrorCode.CREATE_LIFF_APP_FAILED, "建立 LIFF App 時發生錯誤")
+
+
+def safe_get_channel_access_token(channel_id: str, channel_secret: str) -> str:
+    try:
+        return get_channel_access_token(channel_id, channel_secret)
+    except Exception as e:
+        logger.error(f"Failed to get channel access token: {e}")
+        raise_global_error(
+            ErrorCode.GET_CHANNEL_ACCESS_TOKEN_FAILED,
+            "取得 Login Channel Token 時發生錯誤",
+        )
 
 
 def validate_bot_ownership(session: Session, user_id: str, bot_id: int):
     logger.info(f"Validating bot ownership for user_id: {user_id}, bot_id: {bot_id}")
     bot_data = get_bot_by_id(session, bot_id)
     if not bot_data:
-        raise_global_error("BOT_NOT_EXIST", "Bot does not exist")
+        raise_global_error(ErrorCode.BOT_NOT_EXIST, "Bot does not exist")
     if str(bot_data.owner_id) != user_id:
-        raise_global_error("BOT_PERMISSION_DENIED", "You are not the owner of this bot")
+        raise_global_error(
+            ErrorCode.BOT_PERMISSION_DENIED, "You are not the owner of this bot"
+        )
     logger.info(f"Bot validation successful for bot_id: {bot_id}")
     return bot_data
 
 
 def create_new_bot(user_id: str, new_bot: InsertBotRequest):
     logger.info(f"Creating new bot for user_id: {user_id} with data: {new_bot}")
+
     if not validate_line_bot(new_bot.bot_channel_access_token):
         raise_global_error(
-            "INVALID_LINE_BOT",
+            ErrorCode.INVALID_LINE_BOT,
             "The LINE Bot credentials are invalid or the bot does not exist",
         )
 
-    bot_data = insert_new_bot(user_id, new_bot)
-    login_channel_access_token = get_channel_access_token(
-        bot_data["login_channel_id"], bot_data["login_channel_secret"]
+    login_channel_access_token = safe_get_channel_access_token(
+        new_bot.bot_login_channel_id, new_bot.bot_login_channel_secret
     )
-    liff = create_liff_app(login_channel_access_token)
-    init_rich_menu(
-        bot_data["channel_access_token"], liff["liffId"], bot_data["bot_detail_id"]
-    )
+
+    liff = safe_create_liff_app(login_channel_access_token)
+    liff_id = liff["liffId"]
+
+    bot_data = insert_new_bot(user_id, new_bot, liff_id)
+
+    init_rich_menu(bot_data["channel_access_token"], liff_id, bot_data["bot_detail_id"])
+
     logger.info(
         f"New bot created successfully with bot_detail_id: {bot_data['bot_detail_id']}"
     )
@@ -78,7 +104,7 @@ def validate_line_bot_exists(
 ) -> BotListWithCredentialView | None:
     bot = get_bot_by_uuid(session, bot_id)
     if not bot:
-        raise_global_error("BOT_NOT_EXIST", "The specified bot does not exist")
+        raise_global_error(ErrorCode.BOT_NOT_EXIST, "The specified bot does not exist")
 
     return bot
 
@@ -165,7 +191,7 @@ def update_current_bot(
     bot_data = validate_bot_ownership(session, user_id, update_bot_class_id)
     cleared_update_bot_data = update_bot.model_dump(exclude_unset=True)
     if not cleared_update_bot_data:
-        raise_global_error("NO_UPDATE_DATA", "No data provided for update")
+        raise_global_error(ErrorCode.NO_UPDATE_DATA, "No data provided for update")
     update_bot_by_id(session, bot_data.object_id, cleared_update_bot_data)
     logger.info(f"Bot updated successfully for bot_id: {update_bot_class_id}")
 
@@ -175,10 +201,10 @@ def get_bot_credential(
 ) -> BotListWithCredentialView | None:
     logger.info(f"Fetching bot credentials for bot_uuid: {bot_uuid}")
     if not bot_uuid:
-        raise_global_error("EMPTY_BOT_UUID", "No bot uuid provided")
+        raise_global_error(ErrorCode.EMPTY_BOT_UUID, "No bot uuid provided")
     bot_credentials = get_line_bot_credentials(session, bot_uuid)
     if not bot_credentials:
-        raise_global_error("EMPTY_CREDENTIALS", "No credential provided")
+        raise_global_error(ErrorCode.EMPTY_CREDENTIALS, "No credential provided")
     logger.info(f"Credentials fetched successfully for bot_uuid: {bot_uuid}")
     return bot_credentials
 
@@ -186,5 +212,7 @@ def get_bot_credential(
 def check_x_line_signature(x_line_signature: str):
     logger.info("Checking X-Line-Signature header")
     if not x_line_signature:
-        raise_global_error("EMPTY_X_LINE_SIGNATURE", "Missing X-Line-Signature header")
+        raise_global_error(
+            ErrorCode.EMPTY_X_LINE_SIGNATURE, "Missing X-Line-Signature header"
+        )
     logger.info("X-Line-Signature is valid")

@@ -17,7 +17,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def insert_new_bot(user_id: str, new_bot: InsertBotRequest):
+def insert_new_bot(user_id: str, new_bot: InsertBotRequest, liff_id: str):
     logger.info(f"Inserting new bot for user_id: {user_id} with data: {new_bot}")
     try:
         with get_db_connection() as connection:
@@ -25,7 +25,7 @@ def insert_new_bot(user_id: str, new_bot: InsertBotRequest):
                 cursor_factory=psycopg2.extras.RealDictCursor
             ) as cursor:
                 cursor.execute(
-                    "SELECT * FROM fs_insert_bot(%s, %s, %s, %s, %s, %s, %s);",
+                    "SELECT * FROM fs_insert_bot(%s, %s, %s, %s, %s, %s, %s, %s);",
                     [
                         new_bot.bot_name,
                         new_bot.bot_channel_id,
@@ -33,6 +33,7 @@ def insert_new_bot(user_id: str, new_bot: InsertBotRequest):
                         new_bot.bot_channel_secret,
                         new_bot.bot_login_channel_id,
                         new_bot.bot_login_channel_secret,
+                        liff_id,
                         user_id,
                     ],
                 )

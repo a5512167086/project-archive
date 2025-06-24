@@ -5,6 +5,7 @@ from commands.reservation_command import (
     insert_reservation_item,
     update_reservation_item,
 )
+from constants.error_code import ErrorCode
 from exception import GlobalErrorException
 from queries.reservation_query import (
     get_reservation_class_id_by_bot_class_id,
@@ -25,7 +26,7 @@ def validate_reservation_item_class(session: Session, bot_class_id: int) -> int:
     )
     if not reservation_item_class_id:
         raise GlobalErrorException(
-            error_code="RESERVATION_ITEM_CLASS_NOT_FOUND",
+            error_code=ErrorCode.RESERVATION_ITEM_CLASS_NOT_FOUND,
             error_message="Reservation item class not found for the given bot class",
         )
     return reservation_item_class_id
@@ -37,7 +38,7 @@ def validate_reservation_class(session: Session, bot_class_id: int) -> int:
     )
     if not reservation_class_id:
         raise GlobalErrorException(
-            error_code="RESERVATION_CLASS_NOT_FOUND",
+            error_code=ErrorCode.RESERVATION_CLASS_NOT_FOUND,
             error_message="Reservation class not found for the given bot class",
         )
     return reservation_class_id

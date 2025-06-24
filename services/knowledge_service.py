@@ -7,6 +7,7 @@ from commands.knowledge_command import (
     insert_knowledge_item,
     insert_knowledge_items,
 )
+from constants.error_code import ErrorCode
 from exception import GlobalErrorException
 from queries.knowledge_query import (
     get_all_knowledge_items_by_class_id,
@@ -19,7 +20,7 @@ def validate_knowledge_class(session: Session, bot_class_id: int) -> int:
     knowledge_class_id = get_knowledge_class_id_by_bot_class_id(session, bot_class_id)
     if not knowledge_class_id:
         raise GlobalErrorException(
-            error_code="KNOWLEDGE_CLASS_NOT_FOUND",
+            error_code=ErrorCode.KNOWLEDGE_CLASS_NOT_FOUND,
             error_message="Knowledge class not found for the given bot class",
         )
     return knowledge_class_id
@@ -28,7 +29,7 @@ def validate_knowledge_class(session: Session, bot_class_id: int) -> int:
 def validate_csv_file(file: UploadFile):
     if file.content_type != "text/csv":
         raise GlobalErrorException(
-            error_code="INVALID_FILE_TYPE",
+            error_code=ErrorCode.INVALID_FILE_TYPE,
             error_message="The uploaded file must be a CSV",
         )
     knowledge_dataframe = pd.read_csv(file.file)
@@ -37,7 +38,7 @@ def validate_csv_file(file: UploadFile):
         or "answer" not in knowledge_dataframe.columns
     ):
         raise GlobalErrorException(
-            error_code="INVALID_CSV_FORMAT",
+            error_code=ErrorCode.INVALID_CSV_FORMAT,
             error_message="The CSV file must have columns 'question' and 'answer'",
         )
     knowledge_list = knowledge_dataframe.to_dict(orient="records")
@@ -66,7 +67,7 @@ def delete_knowledges_by_bot_class_id(
     knowledge_class_id = validate_knowledge_class(session, bot_class_id)
     if not deleted_id_list:
         raise GlobalErrorException(
-            error_code="EMPTY_DELETE_LIST",
+            error_code=ErrorCode.EMPTY_DELETE_LIST,
             error_message="No items to delete",
         )
     delete_knowledge_items(session, knowledge_class_id, deleted_id_list)

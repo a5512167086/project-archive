@@ -1,6 +1,7 @@
 from sqlmodel import Session
 
 from commands.module_command import insert_module_setting, update_module_setting
+from constants.error_code import ErrorCode
 from exception import GlobalErrorException
 from queries.module_query import (
     get_all_settings_by_class_id,
@@ -13,7 +14,7 @@ def validate_setting_class(session: Session, bot_class_id: int) -> int:
     setting_class_id = get_setting_class_id_by_bot_class_id(session, bot_class_id)
     if not setting_class_id:
         raise GlobalErrorException(
-            error_code="SETTING_CLASS_NOT_FOUND",
+            error_code=ErrorCode.SETTING_CLASS_NOT_FOUND,
             error_message="Setting class not found for the given bot class",
         )
     return setting_class_id

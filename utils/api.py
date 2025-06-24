@@ -29,6 +29,7 @@ def create_liff_app(channel_access_token: str):
         "view": {
             "type": "full",
             "url": "https://liff-web.onrender.com",
+            "scope": "openid profile email chat_message.write",
         },
         "description": "Easybot LIFF App",
     }
