@@ -1,10 +1,9 @@
 from typing import Annotated, List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header, Request
 from linebot.v3.messaging import Configuration
 
-from constants.config import BASE_URL
 from database import SessionDep
 from dependencies import get_current_user
 from models.bot_detail_model import BotListWithCredentialView
@@ -44,12 +43,14 @@ def get_bot_credential_by_uuid(session: SessionDep, bot_uuid: UUID):
 
 @bot_router.post("", tags=["bots"], response_model=InsertBotResponse)
 def create_bot(
+    request: Request,
     current_user: Annotated[dict, Depends(get_current_user)],
     bot_body: InsertBotRequest,
 ):
     user_id = current_user["user_id"]
     bot_uuid = create_new_bot(user_id, bot_body)
-    return {"webhook_url": f"{BASE_URL}/webhook/{bot_uuid}"}
+    base_url = str(request.base_url).rstrip("/")
+    return {"webhook_url": f"{base_url}/bots/webhook/{bot_uuid}"}
 
 
 @bot_router.delete("/{bot_class_id}", tags=["bots"])
