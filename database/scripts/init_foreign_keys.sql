@@ -258,6 +258,29 @@ ADD CONSTRAINT fk_reservation_details_schedule_id FOREIGN KEY(reservation_item_s
 
 END IF;
 
+IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'fk_reservation_details_reservation_item_id'
+) THEN
+ALTER TABLE reservation_details
+ADD CONSTRAINT fk_reservation_details_reservation_item_id FOREIGN KEY(reservation_item_id) REFERENCES reservation_item_details(reservation_item_id) ON DELETE CASCADE;
+
+END IF;
+
 COMMENT ON TABLE reservation_details IS '預約詳細資訊表';
+
+-- module_settings
+IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'fk_module_settings_object_id'
+) THEN
+ALTER TABLE module_settings
+ADD CONSTRAINT fk_module_settings_object_id FOREIGN KEY(object_id) REFERENCES objects(object_id) ON DELETE CASCADE;
+
+END IF;
+
+COMMENT ON TABLE module_settings IS '模組設定表';
 
 END $$ LANGUAGE plpgsql;

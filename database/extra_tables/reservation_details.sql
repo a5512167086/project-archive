@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS reservation_details (
     reservation_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     object_id INT NOT NULL,
+    reservation_item_id UUID NOT NULL,
     reservation_item_schedule_id UUID NOT NULL,
     reservation_date DATE NOT NULL,
     start_time TIME NOT NULL,
@@ -20,3 +21,9 @@ CREATE TABLE IF NOT EXISTS reservation_details (
 );
 
 CREATE INDEX IF NOT EXISTS idx_reservation_details_object_id ON reservation_details(object_id);
+
+CREATE INDEX IF NOT EXISTS idx_reservation_details_reservation_item_id ON reservation_details(reservation_item_id);
+
+CREATE INDEX IF NOT EXISTS idx_reservation_details_reservation_item_schedule_id ON reservation_details(reservation_item_schedule_id);
+
+CREATE INDEX IF NOT EXISTS idx_reservation_details_reservation_date ON reservation_details(reservation_date);
