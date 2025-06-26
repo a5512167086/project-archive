@@ -1,4 +1,5 @@
 from typing import List
+from uuid import UUID
 
 from fastapi import APIRouter
 
@@ -12,15 +13,12 @@ from services.module_service import (
 module_router = APIRouter(prefix="/modules", tags=["modules"])
 
 
-@module_router.get("/{bot_class_id}", response_model=List[Module])
-def get_module_settings(session: SessionDep, bot_class_id: int):
-    return get_all_module_settings(session, bot_class_id)
+@module_router.get("/{bot_uuid}", response_model=List[Module])
+def get_module_settings(session: SessionDep, bot_uuid: UUID):
+    return get_all_module_settings(session, bot_uuid)
 
 
 @module_router.post("")
 def add_module_setting(session: SessionDep, body: InsertModuleSettingRequest):
-    
-    insert_new_module_setting(
-        session, body.bot_class_id, body.module_name, body.is_enabled
-    )
+    insert_new_module_setting(session, body.bot_uuid, body.module_name, body.is_enabled)
     session.commit()

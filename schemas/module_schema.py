@@ -14,7 +14,7 @@ class Module(BaseModel):
 
 
 class InsertModuleSettingRequest(BaseModel):
-    bot_class_id: int
+    bot_uuid: UUID4
     module_name: str
     is_enabled: bool
 

@@ -6,9 +6,8 @@ from linebot.v3.messaging import Configuration
 
 from database import SessionDep
 from dependencies import get_current_user
-from models.bot_detail_model import BotListWithCredentialView
+from models.bot_detail_model import BotListView, BotListWithCredentialView
 from schemas.bot_schema import (
-    Bot,
     BotBodies,
     BotHeaders,
     InsertBotRequest,
@@ -28,7 +27,7 @@ from services.webhook_service import custom_webhook
 bot_router = APIRouter(prefix="/bots", tags=["bots"])
 
 
-@bot_router.get("", tags=["bots"], response_model=List[Bot])
+@bot_router.get("", tags=["bots"], response_model=List[BotListView])
 def get_bots(
     session: SessionDep, current_user: Annotated[dict, Depends(get_current_user)]
 ):
@@ -53,25 +52,25 @@ def create_bot(
     return {"webhook_url": f"{base_url}/bots/webhook/{bot_uuid}"}
 
 
-@bot_router.delete("/{bot_class_id}", tags=["bots"])
+@bot_router.delete("/{bot_uuid}", tags=["bots"])
 def delete_bot(
     session: SessionDep,
     current_user: Annotated[dict, Depends(get_current_user)],
-    bot_class_id: int,
+    bot_uuid: UUID,
 ):
     user_id = current_user["user_id"]
-    delete_current_bot(session, user_id, bot_class_id)
+    delete_current_bot(session, user_id, bot_uuid)
 
 
-@bot_router.patch("/{bot_class_id}", tags=["bots"])
+@bot_router.patch("/{bot_uuid}", tags=["bots"])
 def update_bot(
     session: SessionDep,
     current_user: Annotated[dict, Depends(get_current_user)],
-    bot_class_id: int,
+    bot_uuid: UUID,
     bot_body: UpdateBotRequest,
 ):
     user_id = current_user["user_id"]
-    update_current_bot(session, user_id, bot_class_id, bot_body)
+    update_current_bot(session, user_id, bot_uuid, bot_body)
     session.commit()
 
 

@@ -6,7 +6,6 @@ from sqlmodel import Session, select
 
 from models.bot_detail_model import BotListView, BotListWithCredentialView
 from models.inheritance_model import Inheritance
-from schemas.bot_schema import Bot
 
 logging.basicConfig(
     level=logging.INFO,
@@ -15,26 +14,16 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def get_all_bots_by_user_id(session: Session, user_id: str) -> List[Bot]:
+def get_all_bots_by_user_id(session: Session, user_id: str) -> List[BotListView]:
     logger.info(f"Fetching all bots for user_id: {user_id}")
     statement = select(BotListView).where(BotListView.owner_id == user_id)
     bot_list = session.exec(statement).all()
     logger.info(f"Successfully fetched {len(bot_list)} bots for user_id: {user_id}")
-    return [
-        Bot(
-            bot_detail_id=bot.bot_detail_id,
-            class_id=bot.class_id,
-            object_id=bot.object_id,
-            bot_name=bot.chinese_name,
-            channel_id=bot.channel_id,
-            owner_id=bot.owner_id,
-        )
-        for bot in bot_list
-    ]
+    return bot_list
 
 
 def get_bot_by_uuid(
-    session: Session, bot_uuid: int
+    session: Session, bot_uuid: UUID
 ) -> BotListWithCredentialView | None:
     logger.info(f"Fetching bot details for bot_id: {bot_uuid}")
     statement = select(BotListWithCredentialView).where(
@@ -45,24 +34,6 @@ def get_bot_by_uuid(
         return None
 
     return bot_data
-
-
-def get_bot_by_id(session: Session, bot_id: int) -> Bot | None:
-    logger.info(f"Fetching bot details for bot_id: {bot_id}")
-    statement = select(BotListView).where(BotListView.class_id == bot_id)
-    bot_data = session.exec(statement).first()
-    if bot_data:
-        logger.info(f"Successfully fetched bot details for bot_id: {bot_id}")
-    else:
-        logger.warning(f"No bot found for bot_id: {bot_id}")
-    return Bot(
-        bot_detail_id=bot_data.bot_detail_id,
-        class_id=bot_data.class_id,
-        object_id=bot_data.object_id,
-        bot_name=bot_data.chinese_name,
-        channel_id=bot_data.channel_id,
-        owner_id=bot_data.owner_id,
-    )
 
 
 def get_bot_subclass(session: Session, bot_class_id: int) -> List[int]:

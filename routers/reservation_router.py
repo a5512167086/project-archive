@@ -1,8 +1,10 @@
-from typing import List
+from typing import Annotated, List
+from uuid import UUID
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from database import SessionDep
+from dependencies import get_current_user
 from schemas.reservation_schema import (
     ReservationCreate,
     ReservationItemCreate,
@@ -22,10 +24,10 @@ reservation_router = APIRouter(prefix="/reservations", tags=["reservations"])
 
 
 @reservation_router.get(
-    "/items/{bot_class_id}", response_model=List[ReservationItemResponse]
+    "/items/{bot_uuid}", response_model=List[ReservationItemResponse]
 )
-def list_reservation_items(session: SessionDep, bot_class_id: int):
-    return get_reservation_items_by_bot_class_id(session, bot_class_id)
+def list_reservation_items(session: SessionDep, bot_uuid: UUID):
+    return get_reservation_items_by_bot_class_id(session, bot_uuid)
 
 
 @reservation_router.post("/items")
@@ -41,7 +43,7 @@ def delete_reservation_item(
     session: SessionDep, delete_reservation: ReservationItemDelete
 ):
     delete_reservation_item_by_object_id(
-        session, delete_reservation.bot_class_id, delete_reservation.delete_object_list
+        session, delete_reservation.bot_uuid, delete_reservation.delete_object_list
     )
     session.commit()
 
@@ -60,9 +62,14 @@ def list_reservations():
 
 
 @reservation_router.post("")
-def create_reservation(session: SessionDep, reservation: ReservationCreate):
-    create_user_reservation(session, reservation)
-    session.commit()
+def create_reservation(
+    session: SessionDep,
+    reservation: ReservationCreate,
+    current_user: Annotated[dict, Depends(get_current_user)],
+):
+    user_id = current_user["user_id"]
+    create_user_reservation(session, user_id, reservation)
+    # session.commit()
 
 
 @reservation_router.delete("/{reservation_id}")

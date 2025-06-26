@@ -1,9 +1,12 @@
 from typing import List
+from uuid import UUID
+from datetime import date, time
 
-from sqlmodel import Session, select
+from sqlmodel import Session, select, func
 
 from models.class_model import SubClassView
 from models.reservation_model import (
+    ReservationDetail,
     ReservationItemListView,
     ReservationItemOption,
     ReservationItemSchedule,
@@ -124,3 +127,28 @@ def get_reservation_item_by_id(
         options=options,
         schedules=schedules,
     )
+
+def get_reservation_item_schedule_by_id(
+    session: Session, schedule_id: UUID
+) -> ReservationItemSchedule | None:
+    return session.get(ReservationItemSchedule, schedule_id)
+
+
+def get_concurrent_reservations_count(
+    session: Session, schedule_id: UUID, reservation_date: date, start_time: time
+) -> int:
+    return session.exec(
+        select(func.count(ReservationDetail.reservation_id)).where(
+            ReservationDetail.reservation_item_schedule_id == schedule_id,
+            ReservationDetail.reservation_date == reservation_date,
+            ReservationDetail.start_time == start_time,
+        )
+    ).one()
+
+
+def get_reservation_item_options_by_ids(
+    session: Session, option_ids: List[UUID]
+) -> List[ReservationItemOption]:
+    return session.exec(
+        select(ReservationItemOption).where(ReservationItemOption.option_id.in_(option_ids))
+    ).all()

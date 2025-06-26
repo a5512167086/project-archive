@@ -31,7 +31,7 @@ class ReservationItemScheduleCreate(BaseModel):
 
 
 class ReservationItemCreate(BaseModel):
-    bot_class_id: int
+    bot_uuid: UUID
     reservation_name: str
     reservation_description: str
     duration_minutes: int
@@ -52,7 +52,7 @@ class ReservationItemResponse(BaseModel):
 
 
 class ReservationItemDelete(BaseModel):
-    bot_class_id: int
+    bot_uuid: UUID
     delete_object_list: List[int]
 
 
@@ -88,7 +88,7 @@ class ScheduleUpdate(BaseModel):
 
 
 class ReservationItemPatch(BaseModel):
-    bot_class_id: int
+    bot_uuid: UUID
     object_id: int
     detail: Optional[DetailUpdate] = None
     options: Optional[List[OptionUpdate]] = None
@@ -101,9 +101,9 @@ class OptionValue(BaseModel):
 
 
 class ReservationCreate(BaseModel):
-    bot_class_id: int
-    user_id: UUID
+    bot_uuid: UUID
     reservation_item_id: UUID
+    reservation_date: date
     start_time: time
     payment_method: Optional[PaymentMethod] = None
     payment_status: Optional[PaymentStatus] = None

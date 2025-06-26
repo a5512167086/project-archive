@@ -259,7 +259,7 @@ def change_password(session, user_email: str, old_password: str, new_password: s
 
 def customer_login(session: Session, customer: CustomerLoginRequest):
     bot = validate_line_bot_exists(session, customer.bot_id)
-    group = validate_group_exist_in_bot(session, bot.class_id, "Users")
+    group = validate_group_exist_in_bot(session, bot.bot_detail_id, "Users")
 
     user_info = get_line_oauth_info(customer.line_id_token, bot.login_channel_id)
 

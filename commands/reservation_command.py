@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime, time
 from typing import List
 
 from sqlmodel import Session, delete, select
@@ -14,7 +14,6 @@ from models.reservation_model import (
 )
 from queries.entity_query import get_entity_id_by_name
 from schemas.reservation_schema import (
-    ReservationCreate,
     ReservationItemOptionCreate,
     ReservationItemPatch,
     ReservationItemScheduleCreate,
@@ -183,13 +182,25 @@ def update_reservation_item(
 
 # TODO: Implement the logic for creating a user reservation
 def insert_reservation(
-    session: Session, reservation_class_id: int, reservation: ReservationCreate
+    session: Session,
+    reservation_class_id: int,
+    user_id: str,
+    reservation_item_id: int,
+    reservation_item_schedule_id: int,
+    reservation_date: date,
+    start_time: time,
+    end_time: time,
+    price: int,
+    payment_method: str,
+    payment_status: str,
+    option_values: list,
+    note: str,
 ):
     reservation_entity_id = get_entity_id_by_name(session, "預約")
     new_object = Object(
-        chinese_name=None,
-        chinese_description=None,
+        chinese_name=f"{user_id}'s reservation",
         entity_id=reservation_entity_id,
+        owner_id=user_id,
     )
     session.add(new_object)
     session.flush()
@@ -203,20 +214,23 @@ def insert_reservation(
 
     now = datetime.now()
     reservation_detail = ReservationDetail(
-        object_id=reservation.object_id,
-        start_time=reservation.start_time,
-        end_time=reservation.end_time,
+        object_id=new_object.object_id,
+        reservation_item_schedule_id=reservation_item_schedule_id,
+        reservation_date=reservation_date,
+        start_time=start_time,
+        end_time=end_time,
+        price=price,
         status="pending",
-        notes=reservation.note,
-        payment_method=reservation.payment_method,
-        payment_status=reservation.payment_status,
+        notes=note,
+        payment_method=payment_method,
+        payment_status=payment_status,
         created_at=now,
     )
     session.add(reservation_detail)
     session.flush()
 
-    if hasattr(reservation, "option_values") and reservation.option_values:
-        for option in reservation.option_values:
+    if option_values:
+        for option in option_values:
             session.add(
                 ReservationOption(
                     reservation_id=reservation_detail.reservation_id,
