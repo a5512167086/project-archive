@@ -146,7 +146,7 @@ IF NOT EXISTS (
     WHERE conname = 'fk_group_members_group_id'
 ) THEN
 ALTER TABLE group_members
-ADD CONSTRAINT fk_group_members_group_id FOREIGN KEY(group_id) REFERENCES groups(group_id);
+ADD CONSTRAINT fk_group_members_group_id FOREIGN KEY(group_id) REFERENCES groups(group_id) ON DELETE CASCADE;
 
 END IF;
 
@@ -156,7 +156,7 @@ IF NOT EXISTS (
     WHERE conname = 'fk_group_members_member_id'
 ) THEN
 ALTER TABLE group_members
-ADD CONSTRAINT fk_group_members_member_id FOREIGN KEY(member_id) REFERENCES users(user_id);
+ADD CONSTRAINT fk_group_members_member_id FOREIGN KEY(member_id) REFERENCES users(user_id) ON DELETE CASCADE;
 
 END IF;
 
