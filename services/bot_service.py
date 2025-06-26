@@ -99,7 +99,7 @@ def create_new_bot(user_id: str, new_bot: InsertBotRequest):
 
 
 def validate_line_bot_exists(
-    session: Session, bot_id: str
+    session: Session, bot_id: UUID
 ) -> BotListWithCredentialView | None:
     bot = get_bot_by_uuid(session, bot_id)
     if not bot:

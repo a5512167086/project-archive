@@ -1,7 +1,7 @@
-import pandas as pd
-from fastapi import UploadFile
 from uuid import UUID
 
+import pandas as pd
+from fastapi import UploadFile
 from sqlmodel import Session
 
 from commands.knowledge_command import (
@@ -16,12 +16,11 @@ from queries.knowledge_query import (
     get_knowledge_class_id_by_bot_class_id,
 )
 from schemas.knowledge_schema import InsertKnowledgeRequest
-from services.bot_service import get_bot_credential
+from services.bot_service import validate_line_bot_exists
 
 
-def validate_knowledge_class(session: Session, bot_uuid: UUID) -> int:
-    bot_credentials = get_bot_credential(session, bot_uuid)
-    knowledge_class_id = get_knowledge_class_id_by_bot_class_id(session, bot_credentials.class_id)
+def validate_knowledge_class(session: Session, bot_class_id: int) -> int:
+    knowledge_class_id = get_knowledge_class_id_by_bot_class_id(session, bot_class_id)
     if not knowledge_class_id:
         raise GlobalErrorException(
             error_code=ErrorCode.KNOWLEDGE_CLASS_NOT_FOUND,
@@ -50,25 +49,29 @@ def validate_csv_file(file: UploadFile):
 
 
 def insert_single_knowledge(session: Session, body: InsertKnowledgeRequest):
-    knowledge_class_id = validate_knowledge_class(session, body.bot_uuid)
+    bot = validate_line_bot_exists(session, body.bot_uuid)
+    knowledge_class_id = validate_knowledge_class(session, bot.class_id)
     insert_knowledge_item(session, knowledge_class_id, body.question, body.answer)
 
 
 def insert_knowledges_by_csv(session: Session, bot_uuid: UUID, csv_file: UploadFile):
     knowledge_list = validate_csv_file(csv_file)
-    knowledge_class_id = validate_knowledge_class(session, bot_uuid)
+    bot = validate_line_bot_exists(session, bot_uuid)
+    knowledge_class_id = validate_knowledge_class(session, bot.class_id)
     insert_knowledge_items(session, knowledge_class_id, knowledge_list)
 
 
 def get_all_knowledge_list(session: Session, bot_uuid: UUID):
-    knowledge_class_id = validate_knowledge_class(session, bot_uuid)
+    bot = validate_line_bot_exists(session, bot_uuid)
+    knowledge_class_id = validate_knowledge_class(session, bot.class_id)
     return get_all_knowledge_items_by_class_id(session, knowledge_class_id)
 
 
 def delete_knowledges_by_bot_class_id(
     session: Session, bot_uuid: UUID, deleted_id_list: list
 ):
-    knowledge_class_id = validate_knowledge_class(session, bot_uuid)
+    bot = validate_line_bot_exists(session, bot_uuid)
+    knowledge_class_id = validate_knowledge_class(session, bot.class_id)
     if not deleted_id_list:
         raise GlobalErrorException(
             error_code=ErrorCode.EMPTY_DELETE_LIST,

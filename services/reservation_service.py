@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from uuid import UUID
 
 from sqlmodel import Session
@@ -8,7 +9,6 @@ from commands.reservation_command import (
     insert_reservation_item,
     update_reservation_item,
 )
-from constants.common import ScheduleType
 from constants.error_code import ErrorCode
 from exception import GlobalErrorException
 from queries.group_query import is_user_in_group
@@ -18,7 +18,7 @@ from queries.reservation_query import (
     get_reservation_item_by_id,
     get_reservation_item_class_id_by_bot_class_id,
     get_reservation_item_options_by_ids,
-    get_reservation_item_schedule_by_id,
+    get_reservation_item_schedule_by_date,
     get_reservation_items,
 )
 from schemas.reservation_schema import (
@@ -26,14 +26,13 @@ from schemas.reservation_schema import (
     ReservationItemCreate,
     ReservationItemPatch,
 )
-from services.bot_service import get_bot_credential
+from services.bot_service import validate_line_bot_exists
 from services.group_service import validate_group_exist_in_bot
 
 
-def validate_reservation_item_class(session: Session, bot_uuid: UUID) -> int:
-    bot_credentials = get_bot_credential(session, bot_uuid)
+def validate_reservation_item_class(session: Session, bot_class_id: int) -> int:
     reservation_item_class_id = get_reservation_item_class_id_by_bot_class_id(
-        session, bot_credentials.class_id
+        session, bot_class_id
     )
     if not reservation_item_class_id:
         raise GlobalErrorException(
@@ -43,10 +42,9 @@ def validate_reservation_item_class(session: Session, bot_uuid: UUID) -> int:
     return reservation_item_class_id
 
 
-def validate_reservation_class(session: Session, bot_uuid: UUID) -> int:
-    bot_credentials = get_bot_credential(session, bot_uuid)
+def validate_reservation_class(session: Session, bot_class_id: int) -> int:
     reservation_class_id = get_reservation_class_id_by_bot_class_id(
-        session, bot_credentials.class_id
+        session, bot_class_id
     )
     if not reservation_class_id:
         raise GlobalErrorException(
@@ -57,7 +55,8 @@ def validate_reservation_class(session: Session, bot_uuid: UUID) -> int:
 
 
 def get_reservation_items_by_bot_class_id(session: Session, bot_uuid: UUID):
-    reservation_item_class_id = validate_reservation_item_class(session, bot_uuid)
+    bot = validate_line_bot_exists(session, bot_uuid)
+    reservation_item_class_id = validate_reservation_item_class(session, bot.class_id)
 
     return get_reservation_items(session, reservation_item_class_id)
 
@@ -65,9 +64,8 @@ def get_reservation_items_by_bot_class_id(session: Session, bot_uuid: UUID):
 def insert_new_reservation_item(
     session: Session, new_reservation_item: ReservationItemCreate
 ):
-    reservation_item_class_id = validate_reservation_item_class(
-        session, new_reservation_item.bot_uuid
-    )
+    bot = validate_line_bot_exists(session, new_reservation_item.bot_uuid)
+    reservation_item_class_id = validate_reservation_item_class(session, bot.class_id)
     insert_reservation_item(
         session=session,
         reservation_item_class_id=reservation_item_class_id,
@@ -83,30 +81,31 @@ def insert_new_reservation_item(
 def delete_reservation_item_by_object_id(
     session: Session, bot_uuid: UUID, object_id_list: list[int]
 ):
-    reservation_item_class_id = validate_reservation_item_class(session, bot_uuid)
+    bot = validate_line_bot_exists(session, bot_uuid)
+    reservation_item_class_id = validate_reservation_item_class(session, bot.class_id)
     delete_reservation_items(session, reservation_item_class_id, object_id_list)
 
 
 def update_reservation_item_by_object_id(
     session: Session, reservation_item_patch: ReservationItemPatch
 ):
-    validate_reservation_item_class(session, reservation_item_patch.bot_uuid)
+    bot = validate_line_bot_exists(session, reservation_item_patch.bot_uuid)
+    validate_reservation_item_class(session, bot.class_id)
     update_reservation_item(session, reservation_item_patch)
 
 
 def create_user_reservation(
     session: Session, user_id: UUID, reservation: ReservationCreate
 ):
-    bot_group = validate_group_exist_in_bot(session, reservation.bot_uuid, "Users")
+    bot = validate_line_bot_exists(session, reservation.bot_uuid)
+    bot_group = validate_group_exist_in_bot(session, bot.class_id, "Users")
     if not is_user_in_group(session, bot_group.group_id, user_id):
         raise GlobalErrorException(
             error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
             error_message="User is not a member of this bot's group.",
         )
 
-    reservation_item_class_id = validate_reservation_item_class(
-        session, reservation.bot_uuid
-    )
+    reservation_item_class_id = validate_reservation_item_class(session, bot.class_id)
     reservation_item = get_reservation_item_by_id(
         session, reservation_item_class_id, reservation.reservation_item_id
     )
@@ -116,27 +115,14 @@ def create_user_reservation(
             error_message="Reservation item not found",
         )
 
-    schedule = get_reservation_item_schedule_by_id(
-        session, reservation.reservation_item_schedule_id
+    schedule = get_reservation_item_schedule_by_date(
+        session, reservation_item.object_id, reservation.reservation_date
     )
     if not schedule or not schedule.is_active:
         raise GlobalErrorException(
             error_code=ErrorCode.RESERVATION_SCHEDULE_NOT_FOUND,
-            error_message="Reservation schedule not found or not active",
+            error_message="Reservation schedule not found or not active for the given date",
         )
-
-    if schedule.schedule_type == ScheduleType.weekly:
-        if schedule.weekday != reservation.reservation_date.weekday():
-            raise GlobalErrorException(
-                error_code=ErrorCode.RESERVATION_TIME_INVALID,
-                error_message="Invalid date for weekly schedule",
-            )
-    elif schedule.schedule_type == ScheduleType.specific:
-        if schedule.schedule_date != reservation.reservation_date:
-            raise GlobalErrorException(
-                error_code=ErrorCode.RESERVATION_TIME_INVALID,
-                error_message="Invalid date for specific schedule",
-            )
 
     if not (schedule.start_time <= reservation.start_time <= schedule.end_time):
         raise GlobalErrorException(
@@ -182,13 +168,13 @@ def create_user_reservation(
         + timedelta(minutes=reservation_item.duration_minutes)
     ).time()
 
-    reservation_class_id = validate_reservation_class(session, reservation.bot_uuid)
+    reservation_class_id = validate_reservation_class(session, bot.class_id)
     insert_reservation(
         session,
         reservation_class_id=reservation_class_id,
         user_id=user_id,
         reservation_item_id=reservation.reservation_item_id,
-        reservation_item_schedule_id=reservation.reservation_item_schedule_id,
+        reservation_item_schedule_id=schedule.reservation_item_schedule_id,
         reservation_date=reservation.reservation_date,
         start_time=reservation.start_time,
         end_time=end_time,

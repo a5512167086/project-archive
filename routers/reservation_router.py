@@ -69,7 +69,7 @@ def create_reservation(
 ):
     user_id = current_user["user_id"]
     create_user_reservation(session, user_id, reservation)
-    # session.commit()
+    session.commit()
 
 
 @reservation_router.delete("/{reservation_id}")

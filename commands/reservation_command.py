@@ -2,7 +2,7 @@ from datetime import date, datetime, time
 from typing import List
 
 from sqlmodel import Session, delete, select
-
+from schemas.reservation_schema import OptionValue
 from models.class_object_relation_model import ClassObjectRelation
 from models.object_model import Object
 from models.reservation_model import (
@@ -193,7 +193,7 @@ def insert_reservation(
     price: int,
     payment_method: str,
     payment_status: str,
-    option_values: list,
+    option_values: list[OptionValue],
     note: str,
 ):
     reservation_entity_id = get_entity_id_by_name(session, "預約")
@@ -215,6 +215,7 @@ def insert_reservation(
     now = datetime.now()
     reservation_detail = ReservationDetail(
         object_id=new_object.object_id,
+        reservation_item_id=reservation_item_id,
         reservation_item_schedule_id=reservation_item_schedule_id,
         reservation_date=reservation_date,
         start_time=start_time,
@@ -234,6 +235,7 @@ def insert_reservation(
             session.add(
                 ReservationOption(
                     reservation_id=reservation_detail.reservation_id,
+                    object_id=new_object.object_id,
                     option_id=option.option_id,
                     value=option.value,
                 )

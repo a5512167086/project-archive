@@ -1,8 +1,8 @@
+from datetime import date, time
 from typing import List
 from uuid import UUID
-from datetime import date, time
 
-from sqlmodel import Session, select, func
+from sqlmodel import Session, func, select
 
 from models.class_model import SubClassView
 from models.reservation_model import (
@@ -128,6 +128,7 @@ def get_reservation_item_by_id(
         schedules=schedules,
     )
 
+
 def get_reservation_item_schedule_by_id(
     session: Session, schedule_id: UUID
 ) -> ReservationItemSchedule | None:
@@ -150,5 +151,35 @@ def get_reservation_item_options_by_ids(
     session: Session, option_ids: List[UUID]
 ) -> List[ReservationItemOption]:
     return session.exec(
-        select(ReservationItemOption).where(ReservationItemOption.option_id.in_(option_ids))
+        select(ReservationItemOption).where(
+            ReservationItemOption.option_id.in_(option_ids)
+        )
     ).all()
+
+
+def get_reservation_item_schedule_by_date(
+    session: Session, object_id: int, reservation_date: date
+) -> ReservationItemSchedule | None:
+    # First, try to find a specific schedule for the given date
+    specific_schedule = session.exec(
+        select(ReservationItemSchedule).where(
+            ReservationItemSchedule.object_id == object_id,
+            ReservationItemSchedule.schedule_type == "specific",
+            ReservationItemSchedule.schedule_date == reservation_date,
+            ReservationItemSchedule.is_active,
+        )
+    ).first()
+    if specific_schedule:
+        return specific_schedule
+
+    # If no specific schedule is found, try to find a weekly schedule
+    weekday = reservation_date.weekday()
+    weekly_schedule = session.exec(
+        select(ReservationItemSchedule).where(
+            ReservationItemSchedule.object_id == object_id,
+            ReservationItemSchedule.schedule_type == "weekly",
+            ReservationItemSchedule.weekday == weekday,
+            ReservationItemSchedule.is_active,
+        )
+    ).first()
+    return weekly_schedule

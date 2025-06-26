@@ -10,12 +10,11 @@ from queries.module_query import (
     get_setting_class_id_by_bot_class_id,
     get_single_module_setting,
 )
-from services.bot_service import get_bot_credential
+from services.bot_service import validate_line_bot_exists
 
 
-def validate_setting_class(session: Session, bot_uuid: UUID) -> int:
-    bot_credentials = get_bot_credential(session, bot_uuid)
-    setting_class_id = get_setting_class_id_by_bot_class_id(session, bot_credentials.class_id)
+def validate_setting_class(session: Session, bot_class_id: int) -> int:
+    setting_class_id = get_setting_class_id_by_bot_class_id(session, bot_class_id)
     if not setting_class_id:
         raise GlobalErrorException(
             error_code=ErrorCode.SETTING_CLASS_NOT_FOUND,
@@ -25,14 +24,16 @@ def validate_setting_class(session: Session, bot_uuid: UUID) -> int:
 
 
 def get_all_module_settings(session: Session, bot_uuid: UUID):
-    setting_class_id = validate_setting_class(session, bot_uuid)
+    bot = validate_line_bot_exists(session, bot_uuid)
+    setting_class_id = validate_setting_class(session, bot.class_id)
     return get_all_settings_by_class_id(session, setting_class_id)
 
 
 def insert_new_module_setting(
     session: Session, bot_uuid: UUID, module_name: str, is_enabled: bool
 ):
-    setting_class_id = validate_setting_class(session, bot_uuid)
+    bot = validate_line_bot_exists(session, bot_uuid)
+    setting_class_id = validate_setting_class(session, bot.class_id)
     existing_setting = get_single_module_setting(session, setting_class_id, module_name)
     if existing_setting:
         update_module_setting(

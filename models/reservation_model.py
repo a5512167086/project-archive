@@ -76,9 +76,13 @@ class ReservationDetail(SQLModel, table=True):
 
     reservation_id: UUID = Field(default_factory=uuid4, primary_key=True)
     object_id: int = Field(foreign_key="objects.object_id")
+    reservation_item_id: UUID = Field(
+        foreign_key="reservation_item_details.reservation_item_id"
+    )
     reservation_item_schedule_id: UUID = Field(
         foreign_key="reservation_item_schedules.reservation_item_schedule_id"
     )
+    reservation_date: date
     start_time: time
     end_time: time
     price: int

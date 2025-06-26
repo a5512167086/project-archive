@@ -42,6 +42,7 @@ class ReservationItemCreate(BaseModel):
 
 class ReservationItemResponse(BaseModel):
     reservation_item_id: UUID
+    object_id: int
     class_id: int
     reservation_name: str
     reservation_description: str
