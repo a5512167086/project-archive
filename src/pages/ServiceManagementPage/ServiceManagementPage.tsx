@@ -15,7 +15,6 @@ import {
   ReservationItemOptionUpdate,
   ReservationItemScheduleUpdate
 } from '@/store/apis/reservationApi'
-import { getBotClassId } from '@/utils/helper'
 import { CustomTable } from '@/components/CustomTable'
 import { CustomDialog } from '@/components/CustomDialog'
 import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
@@ -183,18 +182,17 @@ const ServiceManagementPage = () => {
   const [deleteServices] = useDeleteReservationItemsMutation()
   const [patchReservationItem] = usePatchReservationItemMutation()
 
-  const botClassId = getBotClassId(botList, currentBotObjectId!)
   const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
 
   useEffect(() => {
-    getServices({ bot_class_id: botClassId })
-  }, [botClassId, getServices])
+    getServices({ bot_uuid: currentBot!.bot_detail_id })
+  }, [currentBot, getServices])
 
   const breadcrumbItems = [
     { link: PAGE_PATHS.BOT_LIST, linkText: t(TEXT.botPageTitle) },
     {
       link: `${PAGE_PATHS.BOT_LIST}/${currentBotObjectId}`,
-      linkText: currentBot?.bot_name ?? ''
+      linkText: currentBot?.chinese_name ?? ''
     },
     {
       link: `${PAGE_PATHS.BOT_LIST}/${currentBotObjectId}/${PAGE_PATHS.KNOWLEDGE_MOUDLE}`,
@@ -255,7 +253,7 @@ const ServiceManagementPage = () => {
       }
 
       const payload: InsertReservationItemRequest = {
-        bot_class_id: botClassId,
+        bot_uuid: currentBot!.bot_detail_id,
         reservation_name: data.reservation_name,
         reservation_description: data.reservation_description,
         duration_minutes: Number(data.duration_minutes),
@@ -266,7 +264,7 @@ const ServiceManagementPage = () => {
 
       await insertService(payload).unwrap()
       setDialogs((prev) => ({ ...prev, create: false }))
-      getServices({ bot_class_id: botClassId })
+      getServices({ bot_uuid: currentBot!.bot_detail_id })
     } catch (error) {
       console.error('新增服務失敗', error)
     }
@@ -274,10 +272,10 @@ const ServiceManagementPage = () => {
 
   const handleDelete = async (objectIds: number[]) => {
     await deleteServices({
-      bot_class_id: botClassId,
+      bot_uuid: currentBot!.bot_detail_id,
       delete_object_list: objectIds
     }).unwrap()
-    getServices({ bot_class_id: botClassId })
+    getServices({ bot_uuid: currentBot!.bot_detail_id })
   }
 
   const handleSingleDelete = (item: ReservationItemsResponse) => {
@@ -306,29 +304,34 @@ const ServiceManagementPage = () => {
       duration_minutes: item.duration_minutes ?? 0,
       price: item.price ?? 0,
       is_active: true,
-      options: (item.options || []).map((opt): ReservationItemOptionUpdate => ({
-        option_id: opt.option_id,
-        option_name: opt.option_name ?? '', // 保證 string
-        option_description: opt.option_description ?? '',
-        price: opt.price ?? 0,
-        type: opt.type ?? 'text',
-        is_required: opt.is_required ?? false,
-        is_active: opt.is_active ?? true,
-      })),
-      schedules: (item.schedules || []).map((sch): ReservationItemScheduleUpdate => ({
-        reservation_item_schedule_id: sch.reservation_item_schedule_id,
-        schedule_type: (sch.schedule_type === 'weekly' || sch.schedule_type === 'specific')
-          ? sch.schedule_type
-          : 'weekly', // fallback 預設
-        weekday: sch.weekday,
-        schedule_date: sch.schedule_date ?? undefined,
-        start_time: sch.start_time ?? '',
-        end_time: sch.end_time ?? '',
-        capacity: sch.capacity ?? 1,
-        is_closed: sch.is_closed ?? false,
-        note: sch.note ?? '',
-        is_active: sch.is_active ?? true,
-      })),
+      options: (item.options || []).map(
+        (opt): ReservationItemOptionUpdate => ({
+          option_id: opt.option_id,
+          option_name: opt.option_name ?? '', // 保證 string
+          option_description: opt.option_description ?? '',
+          price: opt.price ?? 0,
+          type: opt.type ?? 'text',
+          is_required: opt.is_required ?? false,
+          is_active: opt.is_active ?? true
+        })
+      ),
+      schedules: (item.schedules || []).map(
+        (sch): ReservationItemScheduleUpdate => ({
+          reservation_item_schedule_id: sch.reservation_item_schedule_id,
+          schedule_type:
+            sch.schedule_type === 'weekly' || sch.schedule_type === 'specific'
+              ? sch.schedule_type
+              : 'weekly', // fallback 預設
+          weekday: sch.weekday,
+          schedule_date: sch.schedule_date ?? undefined,
+          start_time: sch.start_time ?? '',
+          end_time: sch.end_time ?? '',
+          capacity: sch.capacity ?? 1,
+          is_closed: sch.is_closed ?? false,
+          note: sch.note ?? '',
+          is_active: sch.is_active ?? true
+        })
+      )
     })
     setEditDialogOpen(true)
   }
@@ -342,7 +345,7 @@ const ServiceManagementPage = () => {
     field: K,
     value: EditFormType[K]
   ) => {
-    setEditForm((prev) => prev ? { ...prev, [field]: value } : prev)
+    setEditForm((prev) => (prev ? { ...prev, [field]: value } : prev))
   }
 
   // 編輯送出
@@ -352,11 +355,14 @@ const ServiceManagementPage = () => {
       const fixedOptions = editForm.options.map(
         (opt: ReservationItemOptionUpdate): ReservationItemOptionUpdate => ({
           ...opt,
-          option_id: typeof opt.option_id === 'string' ? opt.option_id : undefined
+          option_id:
+            typeof opt.option_id === 'string' ? opt.option_id : undefined
         })
       )
       const fixedSchedules = editForm.schedules.map(
-        (sch: ReservationItemScheduleUpdate): ReservationItemScheduleUpdate => ({
+        (
+          sch: ReservationItemScheduleUpdate
+        ): ReservationItemScheduleUpdate => ({
           ...sch,
           reservation_item_schedule_id:
             typeof sch.reservation_item_schedule_id === 'string'
@@ -366,7 +372,7 @@ const ServiceManagementPage = () => {
       )
 
       await patchReservationItem({
-        bot_class_id: botClassId,
+        bot_uuid: currentBot!.bot_detail_id,
         object_id: editTarget.object_id,
         detail: {
           reservation_name: editForm.reservation_name,
@@ -381,7 +387,7 @@ const ServiceManagementPage = () => {
 
       setEditDialogOpen(false)
       setEditTarget(null)
-      getServices({ bot_class_id: botClassId })
+      getServices({ bot_uuid: currentBot!.bot_detail_id })
     } catch {
       alert('更新失敗')
     }
@@ -501,14 +507,19 @@ const ServiceManagementPage = () => {
                 label="價格"
                 type="number"
                 value={editForm.price}
-                onChange={(e) => handleEditFormChange('price', Number(e.target.value))}
+                onChange={(e) =>
+                  handleEditFormChange('price', Number(e.target.value))
+                }
               />
               <TextField
                 label="時長（分鐘）"
                 type="number"
                 value={editForm.duration_minutes}
                 onChange={(e) =>
-                  handleEditFormChange('duration_minutes', Number(e.target.value))
+                  handleEditFormChange(
+                    'duration_minutes',
+                    Number(e.target.value)
+                  )
                 }
               />
               <Typography variant="subtitle1" sx={{ mt: 2 }}>

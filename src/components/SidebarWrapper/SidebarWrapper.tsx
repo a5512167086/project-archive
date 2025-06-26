@@ -18,15 +18,18 @@ import {
   StyledDrawer,
   StyledSidebarHeader
 } from './SidebarWrapper.style'
+import { useLazyGetBotsQuery } from '@/store/apis/botApi'
 import { LanguageChanger } from '../LanguageChanger'
 import { Button } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useUser } from '@/hooks/useUser'
 import { CustomLoader } from '../CustomLoader'
 import { PAGE_PATHS, SIDEBAR_NAVIGATION_ROUTE } from '@/routes'
-import { useAppSelector } from '@/utils/hook'
+import { useAppSelector, useAppDispatch } from '@/utils/hook'
 import { useHandleAuthRedirect } from '@/hooks/useHandleAuthRedirect'
 import { CustomAlert } from '../CustomAlert/CustomAlert'
+import { useParams } from 'react-router-dom'
+import { setCurrentBot } from '@/store/modules/botSlice'
 
 const sidebarWrapperContent = {
   logout: 'header.signOut',
@@ -34,14 +37,16 @@ const sidebarWrapperContent = {
 }
 
 export const SidebarWrapper = () => {
+  const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const { uuid } = useParams()
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
-  const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
   const { isAuthenticated } = useAppSelector((state) => state.user)
   const { isAuthFailed, setIsAuthFailed, logout } = useUser()
   const [open, setOpen] = useState(false)
   const [isAlertOpen, setAlertOpen] = useState(false)
+  const [getBots] = useLazyGetBotsQuery()
 
   const handleAuthFailed = () => {
     setAlertOpen(true)
@@ -67,10 +72,30 @@ export const SidebarWrapper = () => {
   }
 
   useEffect(() => {
-    if (!currentBot) {
-      navigate(PAGE_PATHS.BOT_LIST)
+    const fetchAndSetBot = async () => {
+      let bots = botList
+
+      if (bots.length === 0) {
+        const res = await getBots()
+          .unwrap()
+          .catch(() => null)
+        if (res && Array.isArray(res)) {
+          bots = res
+        }
+      }
+
+      if (uuid && bots.length > 0 && !currentBotObjectId) {
+        const matchedBot = bots.find((bot) => bot.bot_detail_id === uuid)
+        if (matchedBot) {
+          dispatch(setCurrentBot(matchedBot.object_id))
+        } else {
+          navigate(PAGE_PATHS.BOT_LIST)
+        }
+      }
     }
-  }, [currentBot])
+
+    fetchAndSetBot()
+  }, [uuid, botList, currentBotObjectId])
 
   return (
     <Box sx={{ display: 'flex' }}>

@@ -11,11 +11,11 @@ export type ModuleSetting = {
 }
 
 type GetModuleSettingsRequest = {
-  bot_class_id: number
+  bot_uuid: string
 }
 
 type InsertModuleSettingsRequest = {
-  bot_class_id: number
+  bot_uuid: string
   module_name: string
   is_enabled: boolean
 }
@@ -40,7 +40,7 @@ export const moduleApi = createApi({
     getModuleSettings: builder.query<ModuleSetting[], GetModuleSettingsRequest>(
       {
         query: (data) => ({
-          url: `modules/${data.bot_class_id}`,
+          url: `modules/${data.bot_uuid}`,
           method: 'GET'
         })
       }

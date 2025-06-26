@@ -57,6 +57,7 @@ export const CustomDialog = <T extends Record<string, unknown>>({
   const [arrayState, setArrayState] = useState<
     Record<string, Record<string, unknown>[]>
   >({})
+  const [uploadedFiles, setUploadedFiles] = useState<Record<string, File>>({})
 
   const validateField = (
     field: FieldProps,
@@ -79,6 +80,11 @@ export const CustomDialog = <T extends Record<string, unknown>>({
   const handleFieldBlur = (field: FieldProps, value: string | File | null) => {
     const error = validateField(field, value)
     setErrors((prev) => ({ ...prev, [field.name]: error || '' }))
+
+    // Track uploaded files
+    if (field.type === 'file' && value instanceof File) {
+      setUploadedFiles((prev) => ({ ...prev, [field.name]: value }))
+    }
   }
 
   const handleDialogClose = () => {
@@ -87,6 +93,7 @@ export const CustomDialog = <T extends Record<string, unknown>>({
     setCheckboxValues({})
     setTimeValues({})
     setArrayState({})
+    setUploadedFiles({})
     handleClose()
   }
 
@@ -272,11 +279,17 @@ export const CustomDialog = <T extends Record<string, unknown>>({
                 component="label"
                 variant="contained"
                 startIcon={<CloudUploadIcon />}
+                disabled={!!uploadedFiles[field.name]}
               >
-                {field.name}
+                {uploadedFiles[field.name]
+                  ? `${t('common.uploaded')}: ${uploadedFiles[field.name].name}`
+                  : t(field.label)}
                 <VisuallyHiddenInput
                   type="file"
                   name={field.name}
+                  accept={
+                    field.name === 'csv_file' ? '.csv,text/csv' : undefined
+                  }
                   onChange={(e) =>
                     handleFieldBlur(field, e.target.files?.[0] || null)
                   }

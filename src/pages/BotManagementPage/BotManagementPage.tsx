@@ -39,8 +39,7 @@ const moduleData = [
     moduleName: modulePageContent.reservationTitle,
     moduleImg: ReservaitonIcon,
     databaseName: 'Reservation'
-  },
-
+  }
 ]
 
 const BotManagementPage = () => {
@@ -49,7 +48,7 @@ const BotManagementPage = () => {
   const { moduleSettings } = useAppSelector((state) => state.module)
   const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
   const { refetch: refreshModuleSettings } = useGetModuleSettingsQuery({
-    bot_class_id: currentBot!.class_id
+    bot_uuid: currentBot!.bot_detail_id
   })
   const [insertModuleSetting, { isLoading }] = useInsertModuleSettingMutation()
   const breadcrumbItems = [
@@ -59,7 +58,7 @@ const BotManagementPage = () => {
     },
     {
       link: PAGE_PATHS.BOT_LIST + `/${currentBotObjectId}`,
-      linkText: currentBot!.bot_name
+      linkText: currentBot!.chinese_name
     }
   ]
 
@@ -79,7 +78,7 @@ const BotManagementPage = () => {
     }
 
     await insertModuleSetting({
-      bot_class_id: currentBot!.class_id,
+      bot_uuid: currentBot!.bot_detail_id,
       module_name: moduleName,
       is_enabled: isEnabled
     })

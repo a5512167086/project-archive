@@ -11,7 +11,7 @@ import {
 } from '@/store/apis/knowledgeApi'
 import { useEffect, useState } from 'react'
 import { useAppSelector } from '@/utils/hook'
-import { getBotClassId, isEmpty } from '@/utils/helper'
+import { isEmpty } from '@/utils/helper'
 import { PAGE_PATHS } from '@/routes'
 import { CustomDialog } from '@/components/CustomDialog'
 import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
@@ -32,7 +32,7 @@ const columns = [
   { id: 'answer', label: 'knowledgeSettingPage.answer' }
 ]
 
-const insertSingleKnowledgeFields : FieldProps[]= [
+const insertSingleKnowledgeFields: FieldProps[] = [
   {
     id: 'question',
     name: 'question',
@@ -55,7 +55,10 @@ const insertKnowledgesFields: FieldProps[] = [
     name: 'csv_file',
     label: 'knowledgeSettingPage.uploadCSV',
     type: 'file',
-    required: true
+    required: true,
+    errorText: {
+      invalidFormat: 'Please upload a valid CSV file'
+    }
   }
 ]
 
@@ -75,7 +78,6 @@ const KnowledgeManagementPage = () => {
   const { t } = useTranslation()
   const { knowledgeItems } = useAppSelector((state) => state.knowledge)
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
-  const botClassId = getBotClassId(botList, currentBotObjectId!)
   const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
   const breadcrumbItems = [
     {
@@ -84,7 +86,7 @@ const KnowledgeManagementPage = () => {
     },
     {
       link: PAGE_PATHS.BOT_LIST + `/${currentBotObjectId}`,
-      linkText: currentBot!.bot_name
+      linkText: currentBot!.chinese_name
     },
     {
       link: `${PAGE_PATHS.BOT_LIST}/${currentBotObjectId}/${PAGE_PATHS.KNOWLEDGE_MOUDLE}`,
@@ -107,10 +109,10 @@ const KnowledgeManagementPage = () => {
 
   const handleDialogConfirm = async () => {
     await deleteKnowledges({
-      bot_class_id: botClassId,
+      bot_uuid: currentBot!.bot_detail_id,
       deleted_id_list: [currentDeleteKnowledgeItem!.object_id!]
     }).then(() => {
-      getKnowledges({ bot_class_id: botClassId })
+      getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
     })
   }
 
@@ -128,11 +130,11 @@ const KnowledgeManagementPage = () => {
     )
 
     await deleteKnowledges({
-      bot_class_id: botClassId,
+      bot_uuid: currentBot!.bot_detail_id,
       deleted_id_list: deletedIdList
     }).then(() => {
       setSelected([])
-      getKnowledges({ bot_class_id: botClassId })
+      getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
     })
   }
 
@@ -149,10 +151,10 @@ const KnowledgeManagementPage = () => {
     answer: string
   }) => {
     await insertKnowledge({
-      bot_class_id: botClassId,
+      bot_uuid: currentBot!.bot_detail_id,
       ...data
     }).then(() => {
-      getKnowledges({ bot_class_id: botClassId })
+      getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
       handleInsertSingleDialogClose()
     })
   }
@@ -165,19 +167,34 @@ const KnowledgeManagementPage = () => {
     setIsInsertByCSVDialogOpen(false)
   }
 
-  const handleInsertByCSVDialogConfrim = async (data: { csv_file: File }) => {
-    await insertKnowledges({
-      bot_class_id: botClassId,
-      csv_file: data.csv_file
-    })
-      .unwrap()
-      .then(() => {
-        getKnowledges({ bot_class_id: botClassId })
+  const handleInsertByCSVDialogConfirm = async (data: { csv_file: File }) => {
+    // Validate CSV file type
+    if (
+      !data.csv_file.type.includes('csv') &&
+      !data.csv_file.name.toLowerCase().endsWith('.csv')
+    ) {
+      // Handle error - you might want to show an error message
+      console.error('Invalid file type. Please upload a CSV file.')
+      return
+    }
+
+    try {
+      await insertKnowledges({
+        bot_uuid: currentBot!.bot_detail_id,
+        csv_file: data.csv_file
       })
+        .unwrap()
+        .then(() => {
+          getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
+        })
+    } catch (error) {
+      console.error('Error uploading CSV:', error)
+      // Handle error appropriately
+    }
   }
 
   useEffect(() => {
-    getKnowledges({ bot_class_id: botClassId })
+    getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
   }, [])
 
   return (
@@ -242,7 +259,7 @@ const KnowledgeManagementPage = () => {
         fields={insertKnowledgesFields}
         title={knowledgeManagementPageContent.addButtonTextByCSV}
         onSubmit={async (data) => {
-          await handleInsertByCSVDialogConfrim(data)
+          await handleInsertByCSVDialogConfirm(data)
         }}
       />
       {/* delete single knowledge dialog */}

@@ -112,7 +112,7 @@ const BotPage = () => {
 
   const handleBotSetting = (bot: BotsResponse) => {
     dispatch(setCurrentBot(bot.object_id))
-    navigate(PAGE_PATHS.BOT_LIST + `/${bot.object_id}`)
+    navigate(PAGE_PATHS.BOT_LIST + `/${bot.bot_detail_id}`)
   }
 
   const handleCreateBot = async (data: {
@@ -169,7 +169,7 @@ const BotPage = () => {
             <CustomCard
               imgSrc={BotIcon}
               cardButton={false}
-              titleText={bot.bot_name}
+              titleText={bot.chinese_name}
               actionType={ActionType.Button}
               buttonText={t(botPageContent.setting)}
               buttonIcon={<SettingsIcon />}

@@ -1,9 +1,10 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 export type BotsResponse = {
+  bot_detail_id: string
   class_id: number
   object_id: number
-  bot_name: string
+  chinese_name: string
   channel_id: string
   owner_id: string
 }
@@ -22,11 +23,11 @@ export type CreateBotResponse = {
 }
 
 export type DeleteBotRequest = {
-  bot_class_id: number
+  bot_uuid: string
 }
 
 export type UpdateBotRequest = {
-  bot_class_id: number
+  bot_uuid: string
   bot_name?: string
   channel_id?: string
   channel_access_token?: string
@@ -64,14 +65,14 @@ export const botApi = createApi({
     }),
     updateBot: builder.mutation<void, UpdateBotRequest>({
       query: (bot) => ({
-        url: `bots/${bot.bot_class_id}`,
+        url: `bots/${bot.bot_uuid}`,
         method: 'PATCH',
         body: bot
       })
     }),
     deleteBot: builder.mutation<void, DeleteBotRequest>({
       query: (bot) => ({
-        url: `bots/${bot.bot_class_id}`,
+        url: `bots/${bot.bot_uuid}`,
         method: 'DELETE'
       })
     })

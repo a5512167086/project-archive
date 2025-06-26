@@ -36,7 +36,7 @@ const BotSettingPage = () => {
     (state) => state.bot
   )
   const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
-  const [botName, setBotName] = useState(currentBot!.bot_name)
+  const [botName, setBotName] = useState(currentBot!.chinese_name)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [getBots] = useLazyGetBotsQuery()
   const [updateBot] = useUpdateBotMutation()
@@ -48,7 +48,7 @@ const BotSettingPage = () => {
     },
     {
       link: PAGE_PATHS.BOT_LIST + `/${currentBotObjectId}`,
-      linkText: currentBot!.bot_name
+      linkText: currentBot!.chinese_name
     },
     {
       link: `${PAGE_PATHS.BOT_LIST}/${currentBotObjectId}/${PAGE_PATHS.BOT_SETTING}`,
@@ -67,7 +67,7 @@ const BotSettingPage = () => {
   const handleRename = async () => {
     try {
       const updatedBot = {
-        bot_class_id: currentBot!.class_id,
+        bot_uuid: currentBot!.bot_detail_id,
         bot_name: botName
       }
       await updateBot(updatedBot)
@@ -81,7 +81,7 @@ const BotSettingPage = () => {
   }
 
   const handleBotDelete = async () => {
-    await deleteBot({ bot_class_id: currentBot!.class_id })
+    await deleteBot({ bot_uuid: currentBot!.bot_detail_id })
       .unwrap()
       .then(() => {
         navigate(PAGE_PATHS.BOT_LIST)

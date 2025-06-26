@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 type GetReservationItemsRequest = {
-  bot_class_id: number
+  bot_uuid: string
 }
 
 type ReservationOption = {
@@ -45,7 +45,7 @@ export type ReservationItemsResponse = {
 }
 
 export type InsertReservationItemRequest = {
-  bot_class_id: number
+  bot_uuid: string
   reservation_name: string
   reservation_description: string
   duration_minutes: number
@@ -72,7 +72,7 @@ export type InsertReservationItemRequest = {
 }
 
 type DeleteReservationRequest = {
-  bot_class_id: number
+  bot_uuid: string
   delete_object_list: number[]
 }
 
@@ -109,7 +109,7 @@ export type ReservationItemScheduleUpdate = {
 }
 
 export type PatchReservationItemRequest = {
-  bot_class_id: number
+  bot_uuid: string
   object_id: number
   detail?: ReservationItemDetailUpdate
   options?: ReservationItemOptionUpdate[]
@@ -125,7 +125,7 @@ export const reservationApi = createApi({
       GetReservationItemsRequest
     >({
       query: (data) => ({
-        url: `reservations/items/${data.bot_class_id}`,
+        url: `reservations/items/${data.bot_uuid}`,
         method: 'GET'
       })
     }),

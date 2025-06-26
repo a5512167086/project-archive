@@ -8,22 +8,22 @@ export type KnowledgeItem = {
 }
 
 type GetKnowledgeItemsRequest = {
-  bot_class_id: number
+  bot_uuid: string
 }
 
 type InsertKnowledgeItemRequest = {
-  bot_class_id: number
+  bot_uuid: string
   question: string
   answer: string
 }
 
 type InsertKnowledgeItemsRequest = {
-  bot_class_id: number
+  bot_uuid: string
   csv_file: File
 }
 
 type DeleteKnowledgeItemsRequest = {
-  bot_class_id: number
+  bot_uuid: string
   deleted_id_list: number[]
 }
 
@@ -47,7 +47,7 @@ export const knowledgeApi = createApi({
     getKnowledgeItems: builder.query<KnowledgeItem[], GetKnowledgeItemsRequest>(
       {
         query: (data) => ({
-          url: `knowledges/${data.bot_class_id}`,
+          url: `knowledges/${data.bot_uuid}`,
           method: 'GET'
         })
       }
@@ -65,7 +65,7 @@ export const knowledgeApi = createApi({
     >({
       query: (data) => {
         const formData = new FormData()
-        formData.append('bot_class_id', data.bot_class_id.toString())
+        formData.append('bot_uuid', data.bot_uuid)
         formData.append('csv_file', data.csv_file)
 
         return {
