@@ -50,31 +50,32 @@ export const useLiff = () => {
           throw new Error("VITE_API_BASE_URL 環境變數未設定");
         }
 
-        // 從 localStorage 或 URL 取得 bot_uuid
-        let botUUID = localStorage.getItem("bot_uuid");
+        // 優先從 URL 取得 bot_uuid，沒有才從 localStorage 取得
+        const urlParams = new URLSearchParams(window.location.search);
+        let botUUID = urlParams.get("bot_uuid");
+
+        // 檢查 liff.state 參數
         if (!botUUID) {
-          const urlParams = new URLSearchParams(window.location.search);
-          botUUID = urlParams.get("bot_uuid");
-
-          // 檢查 liff.state 參數
-          if (!botUUID) {
-            const liffState = urlParams.get("liff.state");
-            if (liffState) {
-              const stateParams = new URLSearchParams(
-                liffState.startsWith("?") ? liffState : `?${liffState}`
-              );
-              botUUID = stateParams.get("bot_uuid");
-            }
+          const liffState = urlParams.get("liff.state");
+          if (liffState) {
+            const stateParams = new URLSearchParams(
+              liffState.startsWith("?") ? liffState : `?${liffState}`
+            );
+            botUUID = stateParams.get("bot_uuid");
           }
+        }
 
-          if (botUUID) {
-            localStorage.setItem("bot_uuid", botUUID);
-            // 清理 URL 參數
-            const url = new URL(window.location.href);
-            url.searchParams.delete("bot_uuid");
-            url.searchParams.delete("liff.state");
-            window.history.replaceState({}, "", url.toString());
-          }
+        // 如果 URL 中有 bot_uuid，保存到 localStorage 並清理 URL
+        if (botUUID) {
+          localStorage.setItem("bot_uuid", botUUID);
+          // 清理 URL 參數
+          const url = new URL(window.location.href);
+          url.searchParams.delete("bot_uuid");
+          url.searchParams.delete("liff.state");
+          window.history.replaceState({}, "", url.toString());
+        } else {
+          // URL 中沒有才從 localStorage 取得
+          botUUID = localStorage.getItem("bot_uuid");
         }
 
         if (!botUUID) {
@@ -107,8 +108,8 @@ export const useLiff = () => {
 
         if (!liff.isLoggedIn()) {
           log("🔐 尚未登入，導向登入頁面...");
-          const redirectUri = window.location.origin + window.location.pathname;
-          liff.login({ redirectUri });
+
+          liff.login();
           return;
         }
 
