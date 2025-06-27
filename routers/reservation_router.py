@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends
 from database import SessionDep
 from dependencies import get_current_user
 from schemas.reservation_schema import (
+    DailyAvailableSlots,
     ReservationCreate,
     ReservationItemCreate,
     ReservationItemDelete,
@@ -15,6 +16,7 @@ from schemas.reservation_schema import (
 from services.reservation_service import (
     create_user_reservation,
     delete_reservation_item_by_object_id,
+    get_available_times_for_item,
     get_reservation_items_by_bot_class_id,
     insert_new_reservation_item,
     update_reservation_item_by_object_id,
@@ -56,9 +58,16 @@ def update_reservation_item(
     session.commit()
 
 
-@reservation_router.get("")
-def list_reservations():
-    return
+@reservation_router.get(
+    "/items/{reservation_item_id}/available-times",
+    response_model=List[DailyAvailableSlots],
+)
+def get_available_times(
+    reservation_item_id: UUID, session: SessionDep, time_slot_duration_minutes: int = 30
+):
+    return get_available_times_for_item(
+        session, reservation_item_id, time_slot_duration_minutes
+    )
 
 
 @reservation_router.post("")

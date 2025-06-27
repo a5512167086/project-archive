@@ -183,3 +183,50 @@ def get_reservation_item_schedule_by_date(
         )
     ).first()
     return weekly_schedule
+
+
+def get_available_schedules_for_item(
+    session: Session, reservation_item_id: UUID
+) -> List[ReservationItemSchedule]:
+    """獲取預約項目的所有可用時間表"""
+    # 先獲取預約項目的 object_id
+    item = session.exec(
+        select(ReservationItemListView).where(
+            ReservationItemListView.reservation_item_id == reservation_item_id
+        )
+    ).first()
+
+    if not item:
+        return []
+
+    return session.exec(
+        select(ReservationItemSchedule).where(
+            ReservationItemSchedule.object_id == item.object_id,
+            ReservationItemSchedule.is_active,
+        )
+    ).all()
+
+
+def get_reservations_count_by_schedule_and_date(
+    session: Session, schedule_id: UUID, reservation_date: date
+) -> int:
+    """獲取特定時間表和日期的預約數量"""
+    return session.exec(
+        select(func.count(ReservationDetail.reservation_id)).where(
+            ReservationDetail.reservation_item_schedule_id == schedule_id,
+            ReservationDetail.reservation_date == reservation_date,
+        )
+    ).one()
+
+
+def get_reservations_count_by_schedule_date_and_time(
+    session: Session, schedule_id: UUID, reservation_date: date, start_time: time
+) -> int:
+    """獲取特定時間表、日期和時間的預約數量"""
+    return session.exec(
+        select(func.count(ReservationDetail.reservation_id)).where(
+            ReservationDetail.reservation_item_schedule_id == schedule_id,
+            ReservationDetail.reservation_date == reservation_date,
+            ReservationDetail.start_time == start_time,
+        )
+    ).one()

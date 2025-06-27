@@ -110,3 +110,21 @@ class ReservationCreate(BaseModel):
     payment_status: Optional[PaymentStatus] = None
     option_values: Optional[List[OptionValue]] = None
     note: Optional[str] = None
+
+
+class AvailableTimeSlot(BaseModel):
+    date: date
+    start_time: time
+    end_time: time
+    available_capacity: int
+
+
+class TimeSlot(BaseModel):
+    start_time: time
+    end_time: time
+    available_capacity: int
+
+
+class DailyAvailableSlots(BaseModel):
+    date: date
+    times: List[TimeSlot]
