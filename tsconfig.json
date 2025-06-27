@@ -4,6 +4,9 @@
     "paths": {
       "@/*": [
         "src/*"
+      ],
+      "@/hooks/*": [
+        "src/hooks/*"
       ]
     },
     "target": "ESNext",

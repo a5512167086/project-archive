@@ -1,113 +1,63 @@
-import { useEffect, useState } from "react";
-import liff from "@line/liff";
-import eruda from "eruda";
-import { aw } from "react-router/dist/development/route-data-aSUFWnQ6";
+import { useEffect } from "react";
+import { RouterProvider } from "react-router";
+import { router } from "./router/routes";
+import { useLiff } from "./hooks/useLiff";
+
+// Import modules
+import { bookingModule } from "./modules/booking/booking-module";
+import { ecommerceModule } from "./modules/ecommerce/ecommerce-module";
+
+// Import registry
+import { moduleRegistry } from "./lib/module-registry";
 
 function App() {
-  const [idToken, setIdToken] = useState<string | null>(null);
-  eruda.init();
+  const liffState = useLiff();
 
+  // Register modules on component mount
   useEffect(() => {
-    const log = (msg: string) => {
-      const div = document.createElement("div");
-      div.textContent = msg;
-      document.body.appendChild(div);
-    };
-
-    const API_BASE = import.meta.env.VITE_API_BASE_URL;
-
-    // ✅ 優先從 sessionStorage 取 bot_uuid，若沒有則從 URL 抓
-    let botUUID = sessionStorage.getItem("bot_uuid");
-    if (!botUUID) {
-      const urlParams = new URLSearchParams(window.location.search);
-      botUUID = urlParams.get("bot_uuid");
-
-      // ✅ 若沒有直接找到，就解析 liff.state 中的 query string
-      if (!botUUID) {
-        const liffState = urlParams.get("liff.state"); // 可能是 "?bot_uuid=xxx"
-        if (liffState) {
-          const stateParams = new URLSearchParams(
-            liffState.startsWith("?") ? liffState : `?${liffState}`
-          );
-          botUUID = stateParams.get("bot_uuid");
-        }
-      }
-
-      if (botUUID) {
-        sessionStorage.setItem("bot_uuid", botUUID);
-      }
-    }
-
-    if (!botUUID) {
-      log("❌ 缺少 bot_uuid");
-      return;
-    }
-
-    // ✅ 先取 bot 資訊（取得 liff_id）
-    fetch(`${API_BASE}/bots/${botUUID}`)
-      .then(async (res) => {
-        const data = await res.json();
-        if (!res.ok) {
-          console.error("❌ 錯誤回應內容:", data);
-          throw new Error(data.detail || data.message || JSON.stringify(data));
-        }
-        return data;
-      })
-      .then(async (botInfo) => {
-        log(`✅ 成功取得 bot 資訊，liff_id: ${botInfo.liff_id}`);
-
-        await liff.init({ liffId: botInfo.liff_id });
-
-        if (!liff.isLoggedIn()) {
-          log("🔐 尚未登入，導向中...");
-          liff.login({});
-          return;
-        }
-        const idToken = await liff.getIDToken();
-        console.log(await liff.getProfile());
-        setIdToken(idToken);
-        if (!idToken) {
-          log("❌ 缺少 ID Token");
-          return;
-        }
-
-        fetch(`${API_BASE}/users/customer-login`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            line_id_token: idToken,
-            bot_id: botUUID,
-          }),
-        })
-          .then(async (res) => {
-            const body = await res.json();
-            if (!res.ok) {
-              console.error("❌ 登入錯誤:", body);
-              throw new Error(
-                body.detail || body.message || JSON.stringify(body)
-              );
-            }
-            return body;
-          })
-          .then((data) => {
-            log("✅ 登入成功！");
-            localStorage.setItem("token", data.token);
-          })
-          .catch((err) => {
-            log(`❌ 登入失敗: ${err.message}`);
-          });
-      })
-      .catch((err) => {
-        log(`❌ 取得 bot 資訊或 LIFF 初始化失敗: ${err.message}`);
-      });
+    moduleRegistry.register(bookingModule);
+    moduleRegistry.register(ecommerceModule);
   }, []);
 
-  useEffect(() => {
-    console.log(idToken);
-  }, [idToken]);
+  // Loading state
+  if (liffState.isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">正在初始化 LIFF...</p>
+        </div>
+      </div>
+    );
+  }
 
+  // Error state
+  if (liffState.error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center p-6 max-w-md">
+          <div className="text-6xl mb-4">❌</div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            初始化失敗
+          </h2>
+          <p className="text-gray-600 mb-4">{liffState.error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            重新載入
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Success state - show main app
+  if (liffState.isLoggedIn && liffState.isInitialized) {
+    return <RouterProvider router={router} />;
+  }
+
+  // Fallback
   return null;
 }
 
