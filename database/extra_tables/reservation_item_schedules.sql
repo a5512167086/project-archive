@@ -9,10 +9,7 @@ CREATE TABLE IF NOT EXISTS reservation_item_schedules (
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
     capacity INT NOT NULL DEFAULT 1,
-    is_closed BOOLEAN DEFAULT FALSE,
-    note TEXT,
     is_active BOOLEAN DEFAULT TRUE,
-    latest_reservation_time TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
