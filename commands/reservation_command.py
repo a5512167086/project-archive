@@ -1,8 +1,10 @@
 from datetime import date, datetime, time
 from typing import List
+from uuid import UUID
 
 from sqlmodel import Session, delete, select
-from schemas.reservation_schema import OptionValue
+
+from constants.config import TAIWAN_TZ
 from models.class_object_relation_model import ClassObjectRelation
 from models.object_model import Object
 from models.reservation_model import (
@@ -14,6 +16,7 @@ from models.reservation_model import (
 )
 from queries.entity_query import get_entity_id_by_name
 from schemas.reservation_schema import (
+    OptionValue,
     ReservationItemOptionCreate,
     ReservationItemPatch,
     ReservationItemScheduleCreate,
@@ -30,7 +33,7 @@ def insert_reservation_item(
     option_list: List[ReservationItemOptionCreate],
     schedule_list: List[ReservationItemScheduleCreate],
 ):
-    now = datetime.now()
+    now = datetime.now(TAIWAN_TZ)
 
     reservation_item_entity_id = get_entity_id_by_name(session, "服務")
 
@@ -212,7 +215,7 @@ def insert_reservation(
         )
     )
 
-    now = datetime.now()
+    now = datetime.now(TAIWAN_TZ)
     reservation_detail = ReservationDetail(
         object_id=new_object.object_id,
         reservation_item_id=reservation_item_id,
@@ -242,3 +245,35 @@ def insert_reservation(
             )
 
     return reservation_detail
+
+
+def delete_reservation_by_id(session: Session, reservation_id: UUID):
+    """Delete a reservation and its associated options by reservation ID"""
+    # First delete the reservation options
+    session.exec(
+        delete(ReservationOption).where(
+            ReservationOption.object_id.in_(
+                select(ReservationDetail.object_id).where(
+                    ReservationDetail.reservation_id == reservation_id
+                )
+            )
+        )
+    )
+
+    # Then delete the reservation detail
+    session.exec(
+        delete(ReservationDetail).where(
+            ReservationDetail.reservation_id == reservation_id
+        )
+    )
+
+    # Finally delete the object
+    session.exec(
+        delete(Object).where(
+            Object.object_id.in_(
+                select(ReservationDetail.object_id).where(
+                    ReservationDetail.reservation_id == reservation_id
+                )
+            )
+        )
+    )

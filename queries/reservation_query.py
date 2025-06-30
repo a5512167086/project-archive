@@ -174,7 +174,8 @@ def get_reservation_item_schedule_by_date(
         return specific_schedule
 
     # If no specific schedule is found, try to find a weekly schedule
-    weekday = reservation_date.weekday()
+    # Convert Python weekday (0=Monday) to Sunday-first format (0=Sunday, 1=Monday, ..., 6=Saturday)
+    weekday = (reservation_date.weekday() + 1) % 7
     weekly_schedule = session.exec(
         select(ReservationItemSchedule).where(
             ReservationItemSchedule.object_id == object_id,
@@ -248,3 +249,10 @@ def get_reservation_item_details_by_uuid(
             ReservationItemDetail.reservation_item_id == reservation_item_id
         )
     ).first()
+
+
+def get_reservation_by_id(
+    session: Session, reservation_id: UUID
+) -> ReservationDetail | None:
+    """Get reservation by ID"""
+    return session.get(ReservationDetail, reservation_id)

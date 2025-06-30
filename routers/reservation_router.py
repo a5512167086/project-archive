@@ -16,6 +16,7 @@ from schemas.reservation_schema import (
 from services.reservation_service import (
     create_user_reservation,
     delete_reservation_item_by_object_id,
+    delete_user_reservation,
     get_available_times_for_item,
     get_reservation_items_by_bot_class_id,
     insert_new_reservation_item,
@@ -78,5 +79,12 @@ def create_reservation(
 
 
 @reservation_router.delete("/{reservation_id}")
-def delete_reservation():
-    return
+def delete_reservation(
+    session: SessionDep,
+    reservation_id: UUID,
+    current_user: Annotated[dict, Depends(get_current_user)],
+):
+    user_id = current_user["user_id"]
+    print(f"Deleting reservation {reservation_id} for user {user_id}")
+    delete_user_reservation(session, reservation_id)
+    session.commit()

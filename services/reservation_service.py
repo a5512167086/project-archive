@@ -1,21 +1,24 @@
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import List
 from uuid import UUID
 
 from sqlmodel import Session
 
 from commands.reservation_command import (
+    delete_reservation_by_id,
     delete_reservation_items,
     insert_reservation,
     insert_reservation_item,
     update_reservation_item,
 )
+from constants.config import TAIWAN_TZ
 from constants.error_code import ErrorCode
 from exception import GlobalErrorException
 from queries.group_query import is_user_in_group
 from queries.reservation_query import (
     get_available_schedules_for_item,
     get_concurrent_reservations_count,
+    get_reservation_by_id,
     get_reservation_class_id_by_bot_class_id,
     get_reservation_item_by_id,
     get_reservation_item_class_id_by_bot_class_id,
@@ -138,7 +141,7 @@ def create_user_reservation(
 
     if (
         schedule.latest_reservation_time
-        and datetime.now() > schedule.latest_reservation_time
+        and datetime.now(TAIWAN_TZ) > schedule.latest_reservation_time
     ):
         raise GlobalErrorException(
             error_code=ErrorCode.RESERVATION_TIME_INVALID,
@@ -209,7 +212,8 @@ def get_available_times_for_item(
 
     time_slot_duration_minutes = reservation_item_details.duration_minutes
 
-    today = date.today()
+    # 使用台湾时区获取今天的日期
+    today = datetime.now(TAIWAN_TZ).date()
     end_date = today + timedelta(days=30)  # 查詢未來30天
 
     # 獲取所有可用的時間表
@@ -221,7 +225,8 @@ def get_available_times_for_item(
     for single_date in (
         today + timedelta(days=n) for n in range((end_date - today).days + 1)
     ):
-        weekday = single_date.weekday()
+        # 將 Python 的 weekday (0=周一) 轉換為從周日開始的格式 (0=周日, 1=周一, ..., 6=周六)
+        weekday = (single_date.weekday() + 1) % 7
         daily_time_slots = []
 
         # 檢查每個時間表是否適用於這一天
@@ -288,3 +293,15 @@ def get_available_times_for_item(
         )
 
     return result
+
+
+def delete_user_reservation(session: Session, reservation_id: UUID):
+    """Delete a user's reservation"""
+    reservation = get_reservation_by_id(session, reservation_id)
+    if not reservation:
+        raise GlobalErrorException(
+            error_code=ErrorCode.RESERVATION_ITEM_NOT_FOUND,
+            error_message="Reservation not found",
+        )
+
+    delete_reservation_by_id(session, reservation_id)
