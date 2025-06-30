@@ -57,4 +57,3 @@ def update_module_setting(
         module_setting.description = description
 
     session.add(module_setting)
-    session.commit()

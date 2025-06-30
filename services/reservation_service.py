@@ -26,7 +26,7 @@ from queries.reservation_query import (
     get_reservation_item_options_by_ids,
     get_reservation_item_schedule_by_date,
     get_reservation_items,
-    get_reservations_count_by_schedule_date_and_time,
+    get_reservations_count_batch,
 )
 from schemas.reservation_schema import (
     DailyAvailableSlots,
@@ -198,7 +198,7 @@ def create_user_reservation(
 def get_available_times_for_item(
     session: Session, reservation_item_id: UUID
 ) -> List[DailyAvailableSlots]:
-    """獲取預約項目的可用時間段，按天分組並拆分為小時間段"""
+    """獲取預約項目的可用時間段，按天分組並拆分為小時間段 - 優化版本"""
 
     # 獲取預約項目詳情以取得持續時間
     reservation_item_details = get_reservation_item_details_by_uuid(
@@ -219,7 +219,33 @@ def get_available_times_for_item(
     # 獲取所有可用的時間表
     all_schedules = get_available_schedules_for_item(session, reservation_item_id)
 
+    if not all_schedules:
+        return []
+
+    # 批量獲取所有相關的預約數量 - 這是關鍵優化
+    schedule_ids = [schedule.reservation_item_schedule_id for schedule in all_schedules]
+    reservations_count_map = get_reservations_count_batch(
+        session, schedule_ids, today, end_date
+    )
+
     daily_slots_map = {}  # 用來按日期分組
+
+    # 預先建立時間表的索引以提高查找效率
+    weekly_schedules = {}  # {weekday: [schedules]}
+    specific_schedules = {}  # {date: [schedules]}
+
+    for schedule in all_schedules:
+        if schedule.is_closed:
+            continue
+
+        if schedule.schedule_type == "weekly":
+            if schedule.weekday not in weekly_schedules:
+                weekly_schedules[schedule.weekday] = []
+            weekly_schedules[schedule.weekday].append(schedule)
+        elif schedule.schedule_type == "specific":
+            if schedule.schedule_date not in specific_schedules:
+                specific_schedules[schedule.schedule_date] = []
+            specific_schedules[schedule.schedule_date].append(schedule)
 
     # 遍歷每一天
     for single_date in (
@@ -229,23 +255,19 @@ def get_available_times_for_item(
         weekday = (single_date.weekday() + 1) % 7
         daily_time_slots = []
 
-        # 檢查每個時間表是否適用於這一天
-        for schedule in all_schedules:
-            is_valid_weekly = (
-                schedule.schedule_type == "weekly" and schedule.weekday == weekday
-            )
-            is_valid_specific = (
-                schedule.schedule_type == "specific"
-                and schedule.schedule_date == single_date
-            )
+        # 獲取該日期適用的時間表
+        applicable_schedules = []
 
-            if not (is_valid_weekly or is_valid_specific):
-                continue
+        # 添加週期性時間表
+        if weekday in weekly_schedules:
+            applicable_schedules.extend(weekly_schedules[weekday])
 
-            # 檢查是否已關閉
-            if schedule.is_closed:
-                continue
+        # 添加特定日期時間表
+        if single_date in specific_schedules:
+            applicable_schedules.extend(specific_schedules[single_date])
 
+        # 處理每個適用的時間表
+        for schedule in applicable_schedules:
             # 將大時間段拆分為小時間段
             current_time = datetime.combine(single_date, schedule.start_time)
             end_time = datetime.combine(single_date, schedule.end_time)
@@ -257,15 +279,13 @@ def get_available_times_for_item(
                 if slot_end_time > end_time:
                     slot_end_time = end_time
 
-                # 獲取這個特定時間段的現有預約數量
-                existing_reservations = (
-                    get_reservations_count_by_schedule_date_and_time(
-                        session,
-                        schedule.reservation_item_schedule_id,
-                        single_date,
-                        current_time.time(),
-                    )
+                # 從預先查詢的結果中獲取預約數量，避免重複查詢數據庫
+                key = (
+                    schedule.reservation_item_schedule_id,
+                    single_date,
+                    current_time.time(),
                 )
+                existing_reservations = reservations_count_map.get(key, 0)
 
                 # 計算剩餘容量
                 remaining = schedule.capacity - existing_reservations

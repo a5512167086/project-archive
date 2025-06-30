@@ -43,12 +43,14 @@ def get_bot_credential_by_uuid(session: SessionDep, bot_uuid: UUID):
 @bot_router.post("", tags=["bots"], response_model=InsertBotResponse)
 def create_bot(
     request: Request,
+    session: SessionDep,
     current_user: Annotated[dict, Depends(get_current_user)],
     bot_body: InsertBotRequest,
 ):
     user_id = current_user["user_id"]
-    bot_uuid = create_new_bot(user_id, bot_body)
+    bot_uuid = create_new_bot(session, user_id, bot_body)
     base_url = str(request.base_url).rstrip("/")
+    session.commit()
     return {"webhook_url": f"{base_url}/bots/webhook/{bot_uuid}"}
 
 
@@ -60,6 +62,7 @@ def delete_bot(
 ):
     user_id = current_user["user_id"]
     delete_current_bot(session, user_id, bot_uuid)
+    session.commit()
 
 
 @bot_router.patch("/{bot_uuid}", tags=["bots"])

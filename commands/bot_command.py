@@ -1,12 +1,10 @@
 import logging
 from typing import List
 
-import psycopg2
-import psycopg2.extras
-from sqlmodel import Session, select
+from sqlmodel import Session, delete, select, text
 
-from database import get_db_connection
 from models.bot_detail_model import BotDetail
+from models.class_object_relation_model import ClassObjectRelation
 from models.object_model import Object
 from schemas.bot_schema import InsertBotRequest
 
@@ -17,64 +15,93 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def insert_new_bot(user_id: str, new_bot: InsertBotRequest, liff_id: str):
+def insert_new_bot(
+    session: Session, user_id: str, new_bot: InsertBotRequest, liff_id: str
+):
     logger.info(f"Inserting new bot for user_id: {user_id} with data: {new_bot}")
-    try:
-        with get_db_connection() as connection:
-            with connection.cursor(
-                cursor_factory=psycopg2.extras.RealDictCursor
-            ) as cursor:
-                cursor.execute(
-                    "SELECT * FROM fs_insert_bot(%s, %s, %s, %s, %s, %s, %s, %s);",
-                    [
-                        new_bot.bot_name,
-                        new_bot.bot_channel_id,
-                        new_bot.bot_channel_access_token,
-                        new_bot.bot_channel_secret,
-                        new_bot.bot_login_channel_id,
-                        new_bot.bot_login_channel_secret,
-                        liff_id,
-                        user_id,
-                    ],
-                )
-                new_bot_data = cursor.fetchone()
-                connection.commit()
-                logger.info(f"New bot inserted successfully: {new_bot_data}")
-                return new_bot_data
-    except psycopg2.Error as error:
-        error_message = error.diag.message_primary
-        logger.error(f"Error inserting new bot: {error_message}")
-        raise
+
+    result = session.exec(
+        text(
+            "SELECT * FROM fs_insert_bot(:bot_name, :bot_channel_id, :bot_channel_access_token, :bot_channel_secret, "
+            ":bot_login_channel_id, :bot_login_channel_secret, :liff_id, :user_id)"
+        ).bindparams(
+            bot_name=new_bot.bot_name,
+            bot_channel_id=new_bot.bot_channel_id,
+            bot_channel_access_token=new_bot.bot_channel_access_token,
+            bot_channel_secret=new_bot.bot_channel_secret,
+            bot_login_channel_id=new_bot.bot_login_channel_id,
+            bot_login_channel_secret=new_bot.bot_login_channel_secret,
+            liff_id=liff_id,
+            user_id=user_id,
+        )
+    ).mappings()
+    new_bot_data = result.first()
+    logger.info(f"New bot inserted successfully: {new_bot_data}")
+    return new_bot_data
 
 
 def delete_bot_by_id(
-    delete_bot_id: int, bot_object_id: int, bot_subclass_id_list: List[int]
+    session: Session,
+    delete_bot_id: int,
+    bot_object_id: int,
+    bot_subclass_id_list: List[int],
 ):
     logger.info(
         f"Deleting bot with delete_bot_id: {delete_bot_id}, bot_object_id: {bot_object_id}, "
         f"bot_subclass_id_list: {bot_subclass_id_list}"
     )
-    try:
-        with get_db_connection() as connection:
-            with connection.cursor(
-                cursor_factory=psycopg2.extras.RealDictCursor
-            ) as cursor:
-                cursor.execute("CALL sp_delete_class(%s);", [delete_bot_id])
-                logger.info(f"Deleted bot class with ID: {delete_bot_id}")
+    # Delete objects related to bot subclasses
+    for bot_subclass_id in bot_subclass_id_list:
+        # Get all object_ids related to this bot_subclass_id
+        related_objects = session.exec(
+            select(ClassObjectRelation.object_id).where(
+                ClassObjectRelation.class_id == bot_subclass_id
+            )
+        ).all()
 
-                cursor.execute("CALL sp_delete_object(%s);", [bot_object_id])
-                logger.info(f"Deleted bot object with ID: {bot_object_id}")
+        if related_objects:
+            # Delete class_object_relations
+            session.exec(
+                delete(ClassObjectRelation).where(
+                    ClassObjectRelation.class_id == bot_subclass_id
+                )
+            )
+            logger.info(
+                f"Deleted class_object_relations for bot_subclass_id: {bot_subclass_id}"
+            )
 
-                for bot_subclass_id in bot_subclass_id_list:
-                    cursor.execute("CALL sp_delete_class(%s);", [bot_subclass_id])
-                    logger.info(f"Deleted bot subclass with ID: {bot_subclass_id}")
+            # Delete the objects
+            session.exec(delete(Object).where(Object.object_id.in_(related_objects)))
+            logger.info(
+                f"Deleted {len(related_objects)} objects for bot_subclass_id: {bot_subclass_id}"
+            )
 
-                connection.commit()
-                logger.info("All related bot data deleted successfully")
-    except psycopg2.Error as error:
-        error_message = error.diag.message_primary
-        logger.error(f"Error deleting bot: {error_message}")
-        raise
+    # Delete bot class
+    session.exec(
+        text("CALL sp_delete_class(:delete_bot_id)").bindparams(
+            delete_bot_id=delete_bot_id
+        )
+    )
+    logger.info(f"Deleted bot class with ID: {delete_bot_id}")
+
+    # Delete bot object
+    session.exec(
+        text("CALL sp_delete_object(:bot_object_id)").bindparams(
+            bot_object_id=bot_object_id
+        )
+    )
+    logger.info(f"Deleted bot object with ID: {bot_object_id}")
+
+    # Delete bot subclasses
+    for bot_subclass_id in bot_subclass_id_list:
+        session.exec(
+            text("CALL sp_delete_class(:bot_subclass_id)").bindparams(
+                bot_subclass_id=bot_subclass_id
+            )
+        )
+        logger.info(f"Deleted bot subclass with ID: {bot_subclass_id}")
+
+    logger.info("All related bot data deleted successfully")
 
 
 def update_bot_by_id(session: Session, bot_object_id: int, update_bot: dict):

@@ -61,7 +61,6 @@ def insert_knowledge_items(
         new_relations.append(rel)
 
     session.add_all(new_relations)
-    session.commit()
 
 
 def delete_knowledge_items(

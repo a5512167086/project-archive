@@ -234,6 +234,48 @@ def get_reservations_count_by_schedule_date_and_time(
     ).one()
 
 
+def get_reservations_count_batch(
+    session: Session,
+    schedule_ids: List[UUID],
+    start_date: date,
+    end_date: date,
+) -> dict:
+    """批量獲取多個時間表在指定日期範圍內的預約數量"""
+    if not schedule_ids:
+        return {}
+
+    reservations = session.exec(
+        select(
+            ReservationDetail.reservation_item_schedule_id,
+            ReservationDetail.reservation_date,
+            ReservationDetail.start_time,
+            func.count(ReservationDetail.reservation_id).label("count"),
+        )
+        .where(
+            ReservationDetail.reservation_item_schedule_id.in_(schedule_ids),
+            ReservationDetail.reservation_date >= start_date,
+            ReservationDetail.reservation_date <= end_date,
+        )
+        .group_by(
+            ReservationDetail.reservation_item_schedule_id,
+            ReservationDetail.reservation_date,
+            ReservationDetail.start_time,
+        )
+    ).all()
+
+    # 構建查詢結果的字典 {(schedule_id, date, time): count}
+    result = {}
+    for reservation in reservations:
+        key = (
+            reservation.reservation_item_schedule_id,
+            reservation.reservation_date,
+            reservation.start_time,
+        )
+        result[key] = reservation.count
+
+    return result
+
+
 def get_reservation_item_detail_by_id(
     session: Session, reservation_item_id: UUID
 ) -> ReservationItemDetail | None:

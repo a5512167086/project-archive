@@ -32,6 +32,7 @@ def insert_knowledge_by_file(
     session: SessionDep, bot_uuid: UUID = Form(), csv_file: UploadFile = File()
 ):
     insert_knowledges_by_csv(session, bot_uuid, csv_file)
+    session.commit()
 
 
 @knowledge_router.delete("")

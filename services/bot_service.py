@@ -60,7 +60,9 @@ def safe_get_channel_access_token(channel_id: str, channel_secret: str) -> str:
 
 
 def validate_bot_ownership(session: Session, user_id: str, bot_uuid: UUID):
-    logger.info(f"Validating bot ownership for user_id: {user_id}, bot_uuid: {bot_uuid}")
+    logger.info(
+        f"Validating bot ownership for user_id: {user_id}, bot_uuid: {bot_uuid}"
+    )
     bot_data = get_bot_by_uuid(session, bot_uuid)
     if not bot_data:
         raise_global_error(ErrorCode.BOT_NOT_EXIST, "Bot does not exist")
@@ -72,7 +74,7 @@ def validate_bot_ownership(session: Session, user_id: str, bot_uuid: UUID):
     return bot_data
 
 
-def create_new_bot(user_id: str, new_bot: InsertBotRequest):
+def create_new_bot(session: Session, user_id: str, new_bot: InsertBotRequest):
     logger.info(f"Creating new bot for user_id: {user_id} with data: {new_bot}")
 
     if not validate_line_bot(new_bot.bot_channel_access_token):
@@ -88,7 +90,7 @@ def create_new_bot(user_id: str, new_bot: InsertBotRequest):
     liff = safe_create_liff_app(login_channel_access_token)
     liff_id = liff["liffId"]
 
-    bot_data = insert_new_bot(user_id, new_bot, liff_id)
+    bot_data = insert_new_bot(session, user_id, new_bot, liff_id)
 
     init_rich_menu(bot_data["channel_access_token"], liff_id, bot_data["bot_detail_id"])
 
@@ -170,7 +172,7 @@ def delete_current_bot(session: Session, user_id: str, delete_bot_uuid: UUID):
     bot_object_id = bot_data.object_id
     bot_class_id = bot_data.class_id
     bot_subclass_list = get_bot_subclass(session, bot_class_id)
-    delete_bot_by_id(bot_class_id, bot_object_id, bot_subclass_list)
+    delete_bot_by_id(session, bot_class_id, bot_object_id, bot_subclass_list)
     logger.info(f"Bot deleted successfully for bot_uuid: {delete_bot_uuid}")
 
 
