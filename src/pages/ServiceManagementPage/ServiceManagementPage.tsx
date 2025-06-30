@@ -22,6 +22,7 @@ import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
+import { useApiErrorHandler } from '@/hooks/useApiErrorHandler'
 import { OptionEditor } from './OptionEditor'
 import { ScheduleEditor } from './ScheduleEditor'
 
@@ -161,6 +162,7 @@ const createFields: FieldProps[] = [
 
 const ServiceManagementPage = () => {
   const { t } = useTranslation()
+  const { handleError, showSuccess } = useApiErrorHandler()
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
   const { reservationItems } = useAppSelector((state) => state.reservation)
 
@@ -263,19 +265,31 @@ const ServiceManagementPage = () => {
       }
 
       await insertService(payload).unwrap()
+      showSuccess('success.service_created')
       setDialogs((prev) => ({ ...prev, create: false }))
       getServices({ bot_uuid: currentBot!.bot_detail_id })
     } catch (error) {
-      console.error('新增服務失敗', error)
+      handleError(error)
     }
   }
 
   const handleDelete = async (objectIds: number[]) => {
-    await deleteServices({
-      bot_uuid: currentBot!.bot_detail_id,
-      delete_object_list: objectIds
-    }).unwrap()
-    getServices({ bot_uuid: currentBot!.bot_detail_id })
+    try {
+      await deleteServices({
+        bot_uuid: currentBot!.bot_detail_id,
+        delete_object_list: objectIds
+      }).unwrap()
+
+      if (objectIds.length > 1) {
+        showSuccess('success.services_deleted')
+      } else {
+        showSuccess('success.service_deleted')
+      }
+
+      getServices({ bot_uuid: currentBot!.bot_detail_id })
+    } catch (error) {
+      handleError(error)
+    }
   }
 
   const handleSingleDelete = (item: ReservationItemsResponse) => {

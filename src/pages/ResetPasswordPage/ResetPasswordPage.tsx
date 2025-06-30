@@ -11,6 +11,7 @@ import { useResetPasswordMutation } from '@/store/apis/userApi'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { useAppDispatch } from '@/utils/hook'
 import { clearUserError } from '@/store/modules/userSlice'
+import { useApiErrorHandler } from '@/hooks/useApiErrorHandler'
 
 const resetPasswordContent = {
   title: 'signPage.resetPassword',
@@ -29,6 +30,7 @@ const ResetPasswordPage = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
+  const { wrapApiCall } = useApiErrorHandler()
   const [resetPassword] = useResetPasswordMutation()
   const [searchParams] = useSearchParams()
   const [isInitLoading, setIsInitLoading] = useState(true)
@@ -81,9 +83,10 @@ const ResetPasswordPage = () => {
       return
     }
     setIsLoading(true)
-    await resetPassword({ token: token!, new_password: password })
-      .unwrap()
-      .then(() => {
+
+    const wrappedResetPassword = wrapApiCall(resetPassword, {
+      showSuccessMessage: 'success.password_reset_success',
+      onSuccess: () => {
         setIsSuccess(true)
         if (!isEmpty(token)) {
           searchParams.delete('token')
@@ -95,13 +98,17 @@ const ResetPasswordPage = () => {
             { replace: true }
           )
         }
-      })
-      .catch(() => {
+      },
+      onError: () => {
         navigate(PAGE_PATHS.BASE)
-      })
-      .finally(() => {
-        setIsLoading(false)
-      })
+      }
+    })
+
+    try {
+      await wrappedResetPassword({ token: token!, new_password: password })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   if (isInitLoading) {

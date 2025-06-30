@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { CustomError } from '@/configs/type'
 import {
   reservationApi,
   ReservationItemsResponse
@@ -29,6 +30,11 @@ export const reservationSlice = createSlice({
       action: PayloadAction<number | null>
     ) {
       state.currentReservationItemObjectId = action.payload
+    },
+    clearReservationError: (state) => {
+      state.errorCode = ''
+      state.errorMessage = ''
+      state.status = 'idle'
     }
   },
   extraReducers: (builder) => {
@@ -51,14 +57,43 @@ export const reservationSlice = createSlice({
       .addMatcher(
         reservationApi.endpoints.getServices.matchRejected,
         (state, action) => {
+          const error = action.payload!.data as CustomError
           state.status = 'failed'
-          state.errorMessage = action.error?.message || '取得失敗'
-          state.errorCode = action.error?.name || 'ERROR'
+          state.errorCode = error?.error_code || 'UNKNOWN_ERROR'
+          state.errorMessage = error?.error_message || 'Unknown error occurred'
+        }
+      )
+      .addMatcher(
+        reservationApi.endpoints.insertService.matchRejected,
+        (state, action) => {
+          const error = action.payload!.data as CustomError
+          state.status = 'failed'
+          state.errorCode = error?.error_code || 'UNKNOWN_ERROR'
+          state.errorMessage = error?.error_message || 'Unknown error occurred'
+        }
+      )
+      .addMatcher(
+        reservationApi.endpoints.patchReservationItem.matchRejected,
+        (state, action) => {
+          const error = action.payload!.data as CustomError
+          state.status = 'failed'
+          state.errorCode = error?.error_code || 'UNKNOWN_ERROR'
+          state.errorMessage = error?.error_message || 'Unknown error occurred'
+        }
+      )
+      .addMatcher(
+        reservationApi.endpoints.deleteReservationItems.matchRejected,
+        (state, action) => {
+          const error = action.payload!.data as CustomError
+          state.status = 'failed'
+          state.errorCode = error?.error_code || 'UNKNOWN_ERROR'
+          state.errorMessage = error?.error_message || 'Unknown error occurred'
         }
       )
   }
 })
 
-export const { setCurrentReservationItemObjectId } = reservationSlice.actions
+export const { setCurrentReservationItemObjectId, clearReservationError } =
+  reservationSlice.actions
 
 export default reservationSlice.reducer

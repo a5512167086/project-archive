@@ -16,6 +16,7 @@ import { PAGE_PATHS } from '@/routes'
 import { CustomDialog } from '@/components/CustomDialog'
 import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
 import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
+import { useApiErrorHandler } from '@/hooks/useApiErrorHandler'
 
 const knowledgeManagementPageContent = {
   title: 'knowledgeSettingPage.title',
@@ -76,6 +77,7 @@ const KnowledgeManagementPage = () => {
   const [currentDeleteKnowledgeItem, setCurrentDeleteKnowledgeItem] =
     useState<KnowledgeItem | null>(null)
   const { t } = useTranslation()
+  const { handleError, showSuccess } = useApiErrorHandler()
   const { knowledgeItems } = useAppSelector((state) => state.knowledge)
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
   const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
@@ -108,12 +110,17 @@ const KnowledgeManagementPage = () => {
   }
 
   const handleDialogConfirm = async () => {
-    await deleteKnowledges({
-      bot_uuid: currentBot!.bot_detail_id,
-      deleted_id_list: [currentDeleteKnowledgeItem!.object_id!]
-    }).then(() => {
+    try {
+      await deleteKnowledges({
+        bot_uuid: currentBot!.bot_detail_id,
+        deleted_id_list: [currentDeleteKnowledgeItem!.object_id!]
+      }).unwrap()
+
+      showSuccess('success.knowledge_deleted')
       getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
-    })
+    } catch (error) {
+      handleError(error)
+    }
   }
 
   const handleDelteItems = () => {
@@ -125,17 +132,22 @@ const KnowledgeManagementPage = () => {
   }
 
   const handleMutiDialogConfirm = async () => {
-    const deletedIdList = selected.map(
-      (index) => knowledgeItems[index]?.object_id
-    )
+    try {
+      const deletedIdList = selected.map(
+        (index) => knowledgeItems[index]?.object_id
+      )
 
-    await deleteKnowledges({
-      bot_uuid: currentBot!.bot_detail_id,
-      deleted_id_list: deletedIdList
-    }).then(() => {
+      await deleteKnowledges({
+        bot_uuid: currentBot!.bot_detail_id,
+        deleted_id_list: deletedIdList
+      }).unwrap()
+
+      showSuccess('success.knowledges_deleted')
       setSelected([])
       getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
-    })
+    } catch (error) {
+      handleError(error)
+    }
   }
 
   const handleAddSingleKnowledge = () => {
@@ -150,13 +162,18 @@ const KnowledgeManagementPage = () => {
     question: string
     answer: string
   }) => {
-    await insertKnowledge({
-      bot_uuid: currentBot!.bot_detail_id,
-      ...data
-    }).then(() => {
+    try {
+      await insertKnowledge({
+        bot_uuid: currentBot!.bot_detail_id,
+        ...data
+      }).unwrap()
+
+      showSuccess('success.knowledge_added')
       getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
       handleInsertSingleDialogClose()
-    })
+    } catch (error) {
+      handleError(error)
+    }
   }
 
   const handleAddKnowledgesByCSV = () => {
@@ -173,8 +190,7 @@ const KnowledgeManagementPage = () => {
       !data.csv_file.type.includes('csv') &&
       !data.csv_file.name.toLowerCase().endsWith('.csv')
     ) {
-      // Handle error - you might want to show an error message
-      console.error('Invalid file type. Please upload a CSV file.')
+      handleError(null, t('error.invalid_file_type'))
       return
     }
 
@@ -182,14 +198,12 @@ const KnowledgeManagementPage = () => {
       await insertKnowledges({
         bot_uuid: currentBot!.bot_detail_id,
         csv_file: data.csv_file
-      })
-        .unwrap()
-        .then(() => {
-          getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
-        })
+      }).unwrap()
+
+      showSuccess('success.csv_imported')
+      getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
     } catch (error) {
-      console.error('Error uploading CSV:', error)
-      // Handle error appropriately
+      handleError(error)
     }
   }
 

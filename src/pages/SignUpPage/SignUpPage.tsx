@@ -1,11 +1,4 @@
-import {
-  Avatar,
-  Button,
-  TextField,
-  Box,
-  Typography,
-  Alert
-} from '@mui/material'
+import { Avatar, Button, TextField, Box, Typography } from '@mui/material'
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt'
 import { StyledSignUpPage } from './SignUpPage.style'
 import { PAGE_PATHS } from '@/routes'
@@ -15,10 +8,10 @@ import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { validateEmail } from '@/utils/helper'
 import { useRegisterUserMutation } from '@/store/apis/userApi'
-import { useAppDispatch, useAppSelector } from '@/utils/hook'
+import { useAppDispatch } from '@/utils/hook'
 import { clearUserError } from '@/store/modules/userSlice'
-import { ERROR_CODE_MESSAGE_MAPPING } from '@/configs/common'
 import { CustomLoader } from '@/components/CustomLoader'
+import { useApiErrorHandler } from '@/hooks/useApiErrorHandler'
 
 const signUpContent = {
   title: 'signPage.signUp',
@@ -35,8 +28,8 @@ const signUpContent = {
 const SignUpPage = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
-  const { errorCode } = useAppSelector((state) => state.user)
   const { t } = useTranslation()
+  const { wrapApiCall } = useApiErrorHandler()
   const [registerUser] = useRegisterUserMutation()
   const [isLoading, setIsLoading] = useState(false)
   const [email, setEmail] = useState('')
@@ -84,14 +77,19 @@ const SignUpPage = () => {
     setEmailError(false)
     setPasswordError(false)
     setIsLoading(true)
-    await registerUser({ email, username: name, password })
-      .unwrap()
-      .then(() => {
+
+    const wrappedRegisterUser = wrapApiCall(registerUser, {
+      showSuccessMessage: 'success.account_created_success',
+      onSuccess: () => {
         navigate(PAGE_PATHS.SIGN_IN)
-      })
-      .finally(() => {
-        setIsLoading(false)
-      })
+      }
+    })
+
+    try {
+      await wrappedRegisterUser({ email, username: name, password })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -164,15 +162,6 @@ const SignUpPage = () => {
             error={passwordError}
             helperText={passwordError && t(signUpContent.passwordMismatch)}
           />
-          {errorCode && (
-            <Alert variant="outlined" severity="error">
-              {t(
-                ERROR_CODE_MESSAGE_MAPPING[
-                  errorCode as keyof typeof ERROR_CODE_MESSAGE_MAPPING
-                ]
-              )}
-            </Alert>
-          )}
           <Button
             fullWidth
             type="submit"

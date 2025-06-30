@@ -10,26 +10,31 @@ import { useUser } from '@/hooks/useUser'
 import { useHandleAuthRedirect } from '@/hooks/useHandleAuthRedirect'
 import { CustomAlert } from '../CustomAlert/CustomAlert'
 import { useAppDispatch, useAppSelector } from '@/utils/hook'
-import { useSnackbar } from 'notistack'
-import { ERROR_CODE_MESSAGE_MAPPING } from '@/configs/common'
+import { useApiErrorHandler } from '@/hooks/useApiErrorHandler'
 import { clearBotError } from '@/store/modules/botSlice'
 import { clearUserError } from '@/store/modules/userSlice'
 import { clearModuleError } from '@/store/modules/moduleSlice'
-import { isEmpty } from '@/utils/helper'
+import { clearKnowledgeError } from '@/store/modules/knowledgeSlice'
+import { clearReservationError } from '@/store/modules/reservationSlice'
 
 const loaderText = 'common.loading'
-const unknownError = 'error.unknown_error'
 
 export const BaseWrapper = () => {
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
-  const { enqueueSnackbar } = useSnackbar()
+  const { handleError } = useApiErrorHandler()
   const { isAuthFailed, setIsAuthFailed } = useUser()
   const { errorCode: botErrorCode } = useAppSelector((state) => state.bot)
   const { isAuthenticated, errorCode: userErrorCode } = useAppSelector(
     (state) => state.user
   )
   const { errorCode: moduleError } = useAppSelector((state) => state.module)
+  const { errorCode: knowledgeError } = useAppSelector(
+    (state) => state.knowledge
+  )
+  const { errorCode: reservationError } = useAppSelector(
+    (state) => state.reservation
+  )
   const [isAlertOpen, setAlertOpen] = useState(false)
 
   const handleAuthFailed = useCallback(() => {
@@ -39,19 +44,12 @@ export const BaseWrapper = () => {
 
   const handleErrorNotification = useCallback(
     (errorCode: string | null, clearAction?: () => void) => {
-      if (!isEmpty(errorCode)) {
-        enqueueSnackbar(
-          t(
-            ERROR_CODE_MESSAGE_MAPPING[
-              errorCode as keyof typeof ERROR_CODE_MESSAGE_MAPPING
-            ] || unknownError
-          ),
-          { variant: 'error', preventDuplicate: true }
-        )
+      if (errorCode) {
+        handleError({ error_code: errorCode })
         if (clearAction) clearAction()
       }
     },
-    [enqueueSnackbar, t]
+    [handleError]
   )
 
   useHandleAuthRedirect(isAuthenticated, isAuthFailed, handleAuthFailed)
@@ -60,10 +58,18 @@ export const BaseWrapper = () => {
     handleErrorNotification(botErrorCode, () => dispatch(clearBotError()))
     handleErrorNotification(userErrorCode, () => dispatch(clearUserError()))
     handleErrorNotification(moduleError, () => dispatch(clearModuleError()))
+    handleErrorNotification(knowledgeError, () =>
+      dispatch(clearKnowledgeError())
+    )
+    handleErrorNotification(reservationError, () =>
+      dispatch(clearReservationError())
+    )
   }, [
     botErrorCode,
     userErrorCode,
     moduleError,
+    knowledgeError,
+    reservationError,
     handleErrorNotification,
     dispatch
   ])

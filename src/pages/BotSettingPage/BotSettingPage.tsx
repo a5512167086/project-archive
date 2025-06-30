@@ -15,6 +15,7 @@ import { useAppSelector } from '@/utils/hook'
 import { isEmpty } from '@/utils/helper'
 import { CustomLoader } from '@/components/CustomLoader'
 import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
+import { useApiErrorHandler } from '@/hooks/useApiErrorHandler'
 
 const botSettingPageContent = {
   botPageTitle: 'botPage.myBot',
@@ -32,6 +33,7 @@ const botSettingPageContent = {
 const BotSettingPage = () => {
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const { wrapApiCall } = useApiErrorHandler()
   const { botList, currentBotObjectId, status } = useAppSelector(
     (state) => state.bot
   )
@@ -65,27 +67,30 @@ const BotSettingPage = () => {
   }
 
   const handleRename = async () => {
-    try {
-      const updatedBot = {
-        bot_uuid: currentBot!.bot_detail_id,
-        bot_name: botName
-      }
-      await updateBot(updatedBot)
-        .unwrap()
-        .then(() => {
-          getBots()
-        })
-    } catch (error) {
-      console.error('Update failed:', error)
+    const updatedBot = {
+      bot_uuid: currentBot!.bot_detail_id,
+      bot_name: botName
     }
+
+    const wrappedUpdateBot = wrapApiCall(updateBot, {
+      showSuccessMessage: 'success.bot_updated_success',
+      onSuccess: () => {
+        getBots()
+      }
+    })
+
+    await wrappedUpdateBot(updatedBot)
   }
 
   const handleBotDelete = async () => {
-    await deleteBot({ bot_uuid: currentBot!.bot_detail_id })
-      .unwrap()
-      .then(() => {
+    const wrappedDeleteBot = wrapApiCall(deleteBot, {
+      showSuccessMessage: 'success.bot_deleted_success',
+      onSuccess: () => {
         navigate(PAGE_PATHS.BOT_LIST)
-      })
+      }
+    })
+
+    await wrappedDeleteBot({ bot_uuid: currentBot!.bot_detail_id })
   }
 
   return (

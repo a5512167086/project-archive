@@ -1,11 +1,4 @@
-import {
-  Avatar,
-  Button,
-  TextField,
-  Box,
-  Typography,
-  Alert
-} from '@mui/material'
+import { Avatar, Button, TextField, Box, Typography } from '@mui/material'
 import HelpCenterIcon from '@mui/icons-material/HelpCenter'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { StyledForgotPasswordPage } from './ForgotPasswordPage.style'
@@ -13,12 +6,12 @@ import { useTranslation } from 'react-i18next'
 import { validateEmail } from '@/utils/helper'
 import { useState } from 'react'
 import { CustomLoader } from '@/components/CustomLoader'
-import { useAppDispatch, useAppSelector } from '@/utils/hook'
+import { useAppDispatch } from '@/utils/hook'
 import { useForgotPasswordMutation } from '@/store/apis/userApi'
 import { clearUserError } from '@/store/modules/userSlice'
-import { ERROR_CODE_MESSAGE_MAPPING } from '@/configs/common'
 import { useNavigate } from 'react-router-dom'
 import { PAGE_PATHS } from '@/routes'
+import { useApiErrorHandler } from '@/hooks/useApiErrorHandler'
 
 const forgotPasswordContent = {
   title: 'signPage.forgotPassword',
@@ -34,7 +27,7 @@ const ForgotPasswordPage = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
-  const { errorCode } = useAppSelector((state) => state.user)
+  const { wrapApiCall } = useApiErrorHandler()
   const [forgotPassword] = useForgotPasswordMutation()
   const [isLoading, setIsLoading] = useState(false)
   const [email, setEmail] = useState('')
@@ -58,14 +51,18 @@ const ForgotPasswordPage = () => {
     }
 
     setIsLoading(true)
-    await forgotPassword({ email })
-      .unwrap()
-      .then(() => {
+    const wrappedForgotPassword = wrapApiCall(forgotPassword, {
+      showSuccessMessage: 'success.email_sent_success',
+      onSuccess: () => {
         setIsSuccess(true)
-      })
-      .finally(() => {
-        setIsLoading(false)
-      })
+      }
+    })
+
+    try {
+      await wrappedForgotPassword({ email })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleNavigateToLogin = () => {
@@ -106,15 +103,6 @@ const ForgotPasswordPage = () => {
             error={emailError}
             helperText={emailError && t(forgotPasswordContent.emailFormatError)}
           />
-          {errorCode && (
-            <Alert variant="outlined" severity="error">
-              {t(
-                ERROR_CODE_MESSAGE_MAPPING[
-                  errorCode as keyof typeof ERROR_CODE_MESSAGE_MAPPING
-                ]
-              )}
-            </Alert>
-          )}
           <Button
             type="submit"
             fullWidth

@@ -8,13 +8,13 @@ import {
 } from './UserSettingPage.style'
 import { handleGoogleOAuth, handleLineOAuth } from '@/utils/helper'
 import { OAuthActionType } from '@/configs/type'
-import { useSnackbar } from 'notistack'
 import { useTranslation } from 'react-i18next'
 import {
   useChangePasswordMutation,
   useLazyGetOAuthStatusQuery
 } from '@/store/apis/userApi'
 import { useUser } from '@/hooks/useUser'
+import { useApiErrorHandler } from '@/hooks/useApiErrorHandler'
 
 const userSettingPageContent = {
   title: 'userSettingPage.title',
@@ -32,7 +32,7 @@ const userSettingPageContent = {
 
 const UserSettingPage = () => {
   const { t } = useTranslation()
-  const { enqueueSnackbar } = useSnackbar()
+  const { handleError, showSuccess } = useApiErrorHandler()
   const { logout } = useUser()
   const { email, oauthStatus } = useAppSelector((state) => state.user)
   const [changePassword] = useChangePasswordMutation()
@@ -59,10 +59,7 @@ const UserSettingPage = () => {
   const handleChangePassword = async (e: FormEvent) => {
     e.preventDefault()
     if (formData.newPassword !== formData.confirmPassword) {
-      enqueueSnackbar(t(userSettingPageContent.passwordMimatch), {
-        variant: 'error',
-        preventDuplicate: true
-      })
+      handleError(null, t('error.password_mismatch'))
       setFormData({
         currentPassword: '',
         newPassword: '',
@@ -71,18 +68,17 @@ const UserSettingPage = () => {
       return
     }
 
-    await changePassword({
-      old_password: formData.currentPassword,
-      new_password: formData.newPassword
-    })
-      .unwrap()
-      .then(() => {
-        enqueueSnackbar(t(userSettingPageContent.changePasswordSuccess), {
-          variant: 'success',
-          preventDuplicate: true
-        })
-        logout()
-      })
+    try {
+      await changePassword({
+        old_password: formData.currentPassword,
+        new_password: formData.newPassword
+      }).unwrap()
+
+      showSuccess('success.password_changed')
+      logout()
+    } catch (error) {
+      handleError(error)
+    }
   }
 
   return (

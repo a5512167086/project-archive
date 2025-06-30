@@ -7,8 +7,7 @@ import {
   Checkbox,
   Grid2,
   Box,
-  Typography,
-  Alert
+  Typography
 } from '@mui/material'
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import { StyledSignInPage } from './SignInPage.style'
@@ -21,12 +20,12 @@ import {
   useLazyGetUserMeQuery,
   useLoginUserMutation
 } from '@/store/apis/userApi'
-import { useAppDispatch, useAppSelector } from '@/utils/hook'
+import { useAppDispatch } from '@/utils/hook'
 import { clearUserError, setAuthenticated } from '@/store/modules/userSlice'
 import { validateEmail } from '@/utils/helper'
 import { useNavigate } from 'react-router-dom'
-import { ERROR_CODE_MESSAGE_MAPPING } from '@/configs/common'
 import { CustomLoader } from '@/components/CustomLoader'
+import { useApiErrorHandler } from '@/hooks/useApiErrorHandler'
 
 const signInContent = {
   title: 'signPage.signIn',
@@ -43,8 +42,8 @@ const signInContent = {
 const SignInPage = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const { errorCode } = useAppSelector((state) => state.user)
   const { t } = useTranslation()
+  const { wrapApiCall } = useApiErrorHandler()
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [password, setPassword] = useState('')
@@ -70,28 +69,35 @@ const SignInPage = () => {
     }
     setEmailError(false)
     setIsLoading(true)
-    await loginUser({ email, password, remember })
-      .unwrap()
-      .then((payload) => {
-        if (remember) {
-          localStorage.setItem('access_token', payload.access_token)
-          localStorage.setItem('refresh_token', payload.refresh_token)
-        } else {
-          sessionStorage.setItem('access_token', payload.access_token)
-          sessionStorage.setItem('refresh_token', payload.refresh_token)
+
+    const wrappedLoginUser = wrapApiCall(loginUser, {
+      onSuccess: (result) => {
+        const payload = result.data
+        if (payload) {
+          if (remember) {
+            localStorage.setItem('access_token', payload.access_token)
+            localStorage.setItem('refresh_token', payload.refresh_token)
+          } else {
+            sessionStorage.setItem('access_token', payload.access_token)
+            sessionStorage.setItem('refresh_token', payload.refresh_token)
+          }
+          getUser()
+            .then(() => {
+              dispatch(setAuthenticated(true))
+              navigate(PAGE_PATHS.BOT_LIST)
+            })
+            .catch(() => {
+              dispatch(setAuthenticated(false))
+            })
         }
-        getUser()
-          .then(() => {
-            dispatch(setAuthenticated(true))
-            navigate(PAGE_PATHS.BOT_LIST)
-          })
-          .catch(() => {
-            dispatch(setAuthenticated(false))
-          })
-      })
-      .finally(() => {
-        setIsLoading(false)
-      })
+      }
+    })
+
+    try {
+      await wrappedLoginUser({ email, password, remember })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -140,15 +146,6 @@ const SignInPage = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          {errorCode && (
-            <Alert variant="outlined" severity="error">
-              {t(
-                ERROR_CODE_MESSAGE_MAPPING[
-                  errorCode as keyof typeof ERROR_CODE_MESSAGE_MAPPING
-                ]
-              )}
-            </Alert>
-          )}
           <FormControlLabel
             control={
               <Checkbox
