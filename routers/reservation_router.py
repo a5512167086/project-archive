@@ -12,6 +12,7 @@ from schemas.reservation_schema import (
     ReservationItemDelete,
     ReservationItemPatch,
     ReservationItemResponse,
+    ReservationResponse,
 )
 from services.reservation_service import (
     create_user_reservation,
@@ -67,15 +68,29 @@ def get_available_times(reservation_item_id: UUID, session: SessionDep):
     return get_available_times_for_item(session, reservation_item_id)
 
 
-@reservation_router.post("")
+@reservation_router.post("", response_model=ReservationResponse)
 def create_reservation(
     session: SessionDep,
     reservation: ReservationCreate,
     current_user: Annotated[dict, Depends(get_current_user)],
 ):
     user_id = current_user["user_id"]
-    create_user_reservation(session, user_id, reservation)
+    reservation_detail = create_user_reservation(session, user_id, reservation)
     session.commit()
+
+    return ReservationResponse(
+        reservation_id=reservation_detail.reservation_id,
+        reservation_item_id=reservation_detail.reservation_item_id,
+        reservation_date=reservation_detail.reservation_date,
+        start_time=reservation_detail.start_time,
+        end_time=reservation_detail.end_time,
+        price=reservation_detail.price,
+        status=reservation_detail.status,
+        payment_method=reservation_detail.payment_method,
+        payment_status=reservation_detail.payment_status,
+        note=reservation_detail.notes,
+        created_at=reservation_detail.created_at,
+    )
 
 
 @reservation_router.delete("/{reservation_id}")

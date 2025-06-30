@@ -13,13 +13,14 @@ from models.reservation_model import (
     ReservationItemOption,
     ReservationItemSchedule,
     ReservationOption,
+    ReservationOptionGroup,
 )
 from queries.entity_query import get_entity_id_by_name
 from schemas.reservation_schema import (
     OptionValue,
-    ReservationItemOptionCreate,
     ReservationItemPatch,
     ReservationItemScheduleCreate,
+    ReservationOptionGroupCreate,
 )
 
 
@@ -30,7 +31,7 @@ def insert_reservation_item(
     reservation_item_description: str,
     reservation_duration_minutes: int,
     reservation_price: int,
-    option_list: List[ReservationItemOptionCreate],
+    option_group_list: List[ReservationOptionGroupCreate],
     schedule_list: List[ReservationItemScheduleCreate],
 ):
     now = datetime.now(TAIWAN_TZ)
@@ -62,21 +63,33 @@ def insert_reservation_item(
         )
     )
 
-    option_models = [
-        ReservationItemOption(
+    for group in option_group_list:
+        option_group = ReservationOptionGroup(
             object_id=new_object.object_id,
-            option_name=option.option_name,
-            option_description=option.option_description,
-            price=option.price,
-            type=option.type,
-            is_required=option.is_required,
-            is_active=option.is_active,
+            group_name=group.group_name,
+            group_description=group.group_description,
+            selection_type=group.selection_type,
+            is_required=group.is_required,
+            display_order=group.display_order,
+            is_active=group.is_active,
             created_at=now,
             updated_at=now,
         )
-        for option in option_list
-    ]
-    session.add_all(option_models)
+        session.add(option_group)
+        session.flush()
+
+        for option in group.options:
+            option_model = ReservationItemOption(
+                option_group_id=option_group.option_group_id,
+                option_name=option.option_name,
+                option_description=option.option_description,
+                price=option.price,
+                display_order=option.display_order,
+                is_active=option.is_active,
+                created_at=now,
+                updated_at=now,
+            )
+            session.add(option_model)
 
     schedule_models = [
         ReservationItemSchedule(
@@ -154,19 +167,54 @@ def update_reservation_item(
                     reservation_item_patch.detail.reservation_description
                 )
 
-    if reservation_item_patch.options is not None:
+    if reservation_item_patch.option_groups is not None:
         session.exec(
             delete(ReservationItemOption).where(
-                ReservationItemOption.object_id == object_id
+                ReservationItemOption.option_group_id.in_(
+                    select(ReservationOptionGroup.option_group_id).where(
+                        ReservationOptionGroup.object_id == object_id
+                    )
+                )
             )
         )
-        new_options = [
-            ReservationItemOption(
-                object_id=object_id, **option.model_dump(exclude_unset=True)
+        session.exec(
+            delete(ReservationOptionGroup).where(
+                ReservationOptionGroup.object_id == object_id
             )
-            for option in reservation_item_patch.options
-        ]
-        session.add_all(new_options)
+        )
+
+        now = datetime.now(TAIWAN_TZ)
+        for group_update in reservation_item_patch.option_groups:
+            if group_update.option_group_id:
+                pass
+
+            option_group = ReservationOptionGroup(
+                object_id=object_id,
+                group_name=group_update.group_name,
+                group_description=group_update.group_description,
+                selection_type=group_update.selection_type,
+                is_required=group_update.is_required,
+                display_order=group_update.display_order,
+                is_active=group_update.is_active,
+                created_at=now,
+                updated_at=now,
+            )
+            session.add(option_group)
+            session.flush()
+
+            if group_update.options:
+                for option_update in group_update.options:
+                    option_model = ReservationItemOption(
+                        option_group_id=option_group.option_group_id,
+                        option_name=option_update.option_name,
+                        option_description=option_update.option_description,
+                        price=option_update.price,
+                        display_order=option_update.display_order,
+                        is_active=option_update.is_active,
+                        created_at=now,
+                        updated_at=now,
+                    )
+                    session.add(option_model)
 
     if reservation_item_patch.schedules is not None:
         session.exec(
@@ -183,7 +231,6 @@ def update_reservation_item(
         session.add_all(new_schedules)
 
 
-# TODO: Implement the logic for creating a user reservation
 def insert_reservation(
     session: Session,
     reservation_class_id: int,
@@ -235,45 +282,45 @@ def insert_reservation(
 
     if option_values:
         for option in option_values:
-            session.add(
-                ReservationOption(
-                    reservation_id=reservation_detail.reservation_id,
-                    object_id=new_object.object_id,
-                    option_id=option.option_id,
-                    value=option.value,
+            # 獲取選項對應的 option_group_id
+            option_info = session.exec(
+                select(ReservationItemOption).where(
+                    ReservationItemOption.option_id == option.option_id
                 )
-            )
+            ).first()
+
+            if option_info:
+                session.add(
+                    ReservationOption(
+                        object_id=new_object.object_id,
+                        option_group_id=option_info.option_group_id,
+                        option_id=option.option_id,
+                    )
+                )
 
     return reservation_detail
 
 
 def delete_reservation_by_id(session: Session, reservation_id: UUID):
-    """Delete a reservation and its associated options by reservation ID"""
-    # First delete the reservation options
-    session.exec(
-        delete(ReservationOption).where(
-            ReservationOption.object_id.in_(
-                select(ReservationDetail.object_id).where(
-                    ReservationDetail.reservation_id == reservation_id
-                )
-            )
+    reservation_detail = session.exec(
+        select(ReservationDetail).where(
+            ReservationDetail.reservation_id == reservation_id
         )
+    ).first()
+
+    if not reservation_detail:
+        return
+
+    object_id = reservation_detail.object_id
+
+    session.exec(
+        delete(ReservationOption).where(ReservationOption.object_id == object_id)
     )
 
-    # Then delete the reservation detail
     session.exec(
         delete(ReservationDetail).where(
             ReservationDetail.reservation_id == reservation_id
         )
     )
 
-    # Finally delete the object
-    session.exec(
-        delete(Object).where(
-            Object.object_id.in_(
-                select(ReservationDetail.object_id).where(
-                    ReservationDetail.reservation_id == reservation_id
-                )
-            )
-        )
-    )
+    session.exec(delete(Object).where(Object.object_id == object_id))

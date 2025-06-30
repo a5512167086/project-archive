@@ -28,3 +28,8 @@ class OptionType(str, Enum):
     text = "text"
     select = "select"
     number = "number"
+
+
+class SelectionType(str, Enum):
+    single = "single"
+    multiple = "multiple"

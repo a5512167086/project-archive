@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# 台湾时区
 TAIWAN_TZ = pytz.timezone("Asia/Taipei")
 
 DB_HOST = os.getenv("DB_HOST")

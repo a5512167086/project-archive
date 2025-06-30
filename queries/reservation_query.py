@@ -11,9 +11,13 @@ from models.reservation_model import (
     ReservationItemListView,
     ReservationItemOption,
     ReservationItemSchedule,
+    ReservationOptionGroup,
 )
 from queries.entity_query import get_entity_id_by_name
-from schemas.reservation_schema import ReservationItemResponse
+from schemas.reservation_schema import (
+    ReservationItemResponse,
+    ReservationOptionGroupResponse,
+)
 
 
 def get_reservation_class_id_by_bot_class_id(
@@ -43,11 +47,11 @@ def get_reservation_item_class_id_by_bot_class_id(
 
 
 def get_reservation_items(
-    session: Session, reservation_class_id: int
+    session: Session, reservation_item_class_id: int
 ) -> List[ReservationItemResponse]:
     items = session.exec(
         select(ReservationItemListView).where(
-            ReservationItemListView.class_id == reservation_class_id
+            ReservationItemListView.class_id == reservation_item_class_id
         )
     ).all()
 
@@ -55,11 +59,20 @@ def get_reservation_items(
     if not object_ids:
         return []
 
-    options = session.exec(
-        select(ReservationItemOption).where(
-            ReservationItemOption.object_id.in_(object_ids)
+    option_groups = session.exec(
+        select(ReservationOptionGroup).where(
+            ReservationOptionGroup.object_id.in_(object_ids)
         )
     ).all()
+
+    group_ids = [og.option_group_id for og in option_groups]
+    options = []
+    if group_ids:
+        options = session.exec(
+            select(ReservationItemOption).where(
+                ReservationItemOption.option_group_id.in_(group_ids)
+            )
+        ).all()
 
     schedules = session.exec(
         select(ReservationItemSchedule).where(
@@ -67,11 +80,25 @@ def get_reservation_items(
         )
     ).all()
 
-    option_map = {oid: [] for oid in object_ids}
+    option_group_map = {oid: [] for oid in object_ids}
     schedule_map = {oid: [] for oid in object_ids}
+    options_by_group = {gid: [] for gid in group_ids}
 
     for opt in options:
-        option_map[opt.object_id].append(opt)
+        options_by_group[opt.option_group_id].append(opt)
+
+    for group in option_groups:
+        group_response = ReservationOptionGroupResponse(
+            option_group_id=group.option_group_id,
+            group_name=group.group_name,
+            group_description=group.group_description,
+            selection_type=group.selection_type,
+            is_required=group.is_required,
+            display_order=group.display_order,
+            is_active=group.is_active,
+            options=options_by_group.get(group.option_group_id, []),
+        )
+        option_group_map[group.object_id].append(group_response)
 
     for sch in schedules:
         schedule_map[sch.object_id].append(sch)
@@ -85,7 +112,7 @@ def get_reservation_items(
             reservation_description=item.reservation_description,
             duration_minutes=item.duration_minutes,
             price=item.price,
-            options=option_map[item.object_id],
+            option_groups=option_group_map[item.object_id],
             schedules=schedule_map[item.object_id],
         )
         for item in items
@@ -105,11 +132,38 @@ def get_reservation_item_by_id(
     if not item:
         return None
 
-    options = session.exec(
-        select(ReservationItemOption).where(
-            ReservationItemOption.object_id == item.object_id
+    option_groups = session.exec(
+        select(ReservationOptionGroup).where(
+            ReservationOptionGroup.object_id == item.object_id
         )
     ).all()
+
+    group_ids = [og.option_group_id for og in option_groups]
+    options = []
+    if group_ids:
+        options = session.exec(
+            select(ReservationItemOption).where(
+                ReservationItemOption.option_group_id.in_(group_ids)
+            )
+        ).all()
+
+    options_by_group = {gid: [] for gid in group_ids}
+    for opt in options:
+        options_by_group[opt.option_group_id].append(opt)
+
+    option_group_responses = []
+    for group in option_groups:
+        group_response = ReservationOptionGroupResponse(
+            option_group_id=group.option_group_id,
+            group_name=group.group_name,
+            group_description=group.group_description,
+            selection_type=group.selection_type,
+            is_required=group.is_required,
+            display_order=group.display_order,
+            is_active=group.is_active,
+            options=options_by_group.get(group.option_group_id, []),
+        )
+        option_group_responses.append(group_response)
 
     schedules = session.exec(
         select(ReservationItemSchedule).where(
@@ -125,7 +179,7 @@ def get_reservation_item_by_id(
         reservation_description=item.reservation_description,
         duration_minutes=item.duration_minutes,
         price=item.price,
-        options=options,
+        option_groups=option_group_responses,
         schedules=schedules,
     )
 
@@ -161,7 +215,6 @@ def get_reservation_item_options_by_ids(
 def get_reservation_item_schedule_by_date(
     session: Session, object_id: int, reservation_date: date
 ) -> ReservationItemSchedule | None:
-    # First, try to find a specific schedule for the given date
     specific_schedule = session.exec(
         select(ReservationItemSchedule).where(
             ReservationItemSchedule.object_id == object_id,
@@ -173,8 +226,6 @@ def get_reservation_item_schedule_by_date(
     if specific_schedule:
         return specific_schedule
 
-    # If no specific schedule is found, try to find a weekly schedule
-    # Convert Python weekday (0=Monday) to Sunday-first format (0=Sunday, 1=Monday, ..., 6=Saturday)
     weekday = (reservation_date.weekday() + 1) % 7
     weekly_schedule = session.exec(
         select(ReservationItemSchedule).where(
@@ -190,8 +241,6 @@ def get_reservation_item_schedule_by_date(
 def get_available_schedules_for_item(
     session: Session, reservation_item_id: UUID
 ) -> List[ReservationItemSchedule]:
-    """獲取預約項目的所有可用時間表"""
-    # 先獲取預約項目的 object_id
     item = session.exec(
         select(ReservationItemListView).where(
             ReservationItemListView.reservation_item_id == reservation_item_id
@@ -263,7 +312,6 @@ def get_reservations_count_batch(
         )
     ).all()
 
-    # 構建查詢結果的字典 {(schedule_id, date, time): count}
     result = {}
     for reservation in reservations:
         key = (

@@ -50,9 +50,7 @@ def delete_bot_by_id(
         f"Deleting bot with delete_bot_id: {delete_bot_id}, bot_object_id: {bot_object_id}, "
         f"bot_subclass_id_list: {bot_subclass_id_list}"
     )
-    # Delete objects related to bot subclasses
     for bot_subclass_id in bot_subclass_id_list:
-        # Get all object_ids related to this bot_subclass_id
         related_objects = session.exec(
             select(ClassObjectRelation.object_id).where(
                 ClassObjectRelation.class_id == bot_subclass_id
@@ -60,7 +58,6 @@ def delete_bot_by_id(
         ).all()
 
         if related_objects:
-            # Delete class_object_relations
             session.exec(
                 delete(ClassObjectRelation).where(
                     ClassObjectRelation.class_id == bot_subclass_id
@@ -70,13 +67,11 @@ def delete_bot_by_id(
                 f"Deleted class_object_relations for bot_subclass_id: {bot_subclass_id}"
             )
 
-            # Delete the objects
             session.exec(delete(Object).where(Object.object_id.in_(related_objects)))
             logger.info(
                 f"Deleted {len(related_objects)} objects for bot_subclass_id: {bot_subclass_id}"
             )
 
-    # Delete bot class
     session.exec(
         text("CALL sp_delete_class(:delete_bot_id)").bindparams(
             delete_bot_id=delete_bot_id
@@ -84,7 +79,6 @@ def delete_bot_by_id(
     )
     logger.info(f"Deleted bot class with ID: {delete_bot_id}")
 
-    # Delete bot object
     session.exec(
         text("CALL sp_delete_object(:bot_object_id)").bindparams(
             bot_object_id=bot_object_id
@@ -92,7 +86,6 @@ def delete_bot_by_id(
     )
     logger.info(f"Deleted bot object with ID: {bot_object_id}")
 
-    # Delete bot subclasses
     for bot_subclass_id in bot_subclass_id_list:
         session.exec(
             text("CALL sp_delete_class(:bot_subclass_id)").bindparams(

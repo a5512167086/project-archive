@@ -4,17 +4,26 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from constants.common import PaymentMethod, PaymentStatus
+from constants.common import PaymentMethod, PaymentStatus, SelectionType
 from models.reservation_model import ReservationItemOption, ReservationItemSchedule
 
 
 class ReservationItemOptionCreate(BaseModel):
     option_name: str
     option_description: Optional[str] = None
-    price: int
-    type: str = Field(pattern="^(text|select|number)$")
-    is_required: Optional[bool] = False
+    price: int = 0
+    display_order: int = 0
     is_active: Optional[bool] = True
+
+
+class ReservationOptionGroupCreate(BaseModel):
+    group_name: str
+    group_description: Optional[str] = None
+    selection_type: SelectionType
+    is_required: bool = False
+    display_order: int = 0
+    is_active: bool = True
+    options: List[ReservationItemOptionCreate] = []
 
 
 class ReservationItemScheduleCreate(BaseModel):
@@ -36,8 +45,19 @@ class ReservationItemCreate(BaseModel):
     reservation_description: str
     duration_minutes: int
     price: int
-    options: List[ReservationItemOptionCreate] = []
+    option_groups: List[ReservationOptionGroupCreate] = []
     default_schedules: List[ReservationItemScheduleCreate] = []
+
+
+class ReservationOptionGroupResponse(BaseModel):
+    option_group_id: UUID
+    group_name: str
+    group_description: Optional[str] = None
+    selection_type: SelectionType
+    is_required: bool
+    display_order: int
+    is_active: bool
+    options: List[ReservationItemOption]
 
 
 class ReservationItemResponse(BaseModel):
@@ -48,7 +68,7 @@ class ReservationItemResponse(BaseModel):
     reservation_description: str
     duration_minutes: int
     price: int
-    options: List[ReservationItemOption]
+    option_groups: List[ReservationOptionGroupResponse]
     schedules: List[ReservationItemSchedule]
 
 
@@ -70,9 +90,19 @@ class OptionUpdate(BaseModel):
     option_name: Optional[str] = None
     option_description: Optional[str] = None
     price: Optional[int] = None
-    type: Optional[str] = None
-    is_required: Optional[bool] = None
+    display_order: Optional[int] = None
     is_active: Optional[bool] = None
+
+
+class OptionGroupUpdate(BaseModel):
+    option_group_id: Optional[UUID] = None
+    group_name: Optional[str] = None
+    group_description: Optional[str] = None
+    selection_type: Optional[SelectionType] = None
+    is_required: Optional[bool] = None
+    display_order: Optional[int] = None
+    is_active: Optional[bool] = None
+    options: Optional[List[OptionUpdate]] = None
 
 
 class ScheduleUpdate(BaseModel):
@@ -92,7 +122,7 @@ class ReservationItemPatch(BaseModel):
     bot_uuid: UUID
     object_id: int
     detail: Optional[DetailUpdate] = None
-    options: Optional[List[OptionUpdate]] = None
+    option_groups: Optional[List[OptionGroupUpdate]] = None
     schedules: Optional[List[ScheduleUpdate]] = None
 
 
@@ -110,6 +140,20 @@ class ReservationCreate(BaseModel):
     payment_status: Optional[PaymentStatus] = None
     option_values: Optional[List[OptionValue]] = None
     note: Optional[str] = None
+
+
+class ReservationResponse(BaseModel):
+    reservation_id: UUID
+    reservation_item_id: UUID
+    reservation_date: date
+    start_time: time
+    end_time: time
+    price: int
+    status: str
+    payment_method: Optional[PaymentMethod] = None
+    payment_status: Optional[PaymentStatus] = None
+    note: Optional[str] = None
+    created_at: datetime
 
 
 class AvailableTimeSlot(BaseModel):

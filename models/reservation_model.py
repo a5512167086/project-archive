@@ -5,11 +5,11 @@ from uuid import UUID, uuid4
 from sqlmodel import Field, SQLModel
 
 from constants.common import (
-    OptionType,
     PaymentMethod,
     PaymentStatus,
     ReservationStatus,
     ScheduleType,
+    SelectionType,
 )
 
 
@@ -25,16 +25,32 @@ class ReservationItemDetail(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+class ReservationOptionGroup(SQLModel, table=True):
+    __tablename__ = "reservation_option_groups"
+
+    option_group_id: UUID = Field(default_factory=uuid4, primary_key=True)
+    object_id: int = Field(foreign_key="objects.object_id")
+    group_name: str
+    group_description: Optional[str] = None
+    selection_type: SelectionType
+    is_required: bool = False
+    display_order: int = 0
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
 class ReservationItemOption(SQLModel, table=True):
     __tablename__ = "reservation_item_options"
 
     option_id: UUID = Field(default_factory=uuid4, primary_key=True)
-    object_id: int = Field(foreign_key="objects.object_id")
+    option_group_id: UUID = Field(
+        foreign_key="reservation_option_groups.option_group_id"
+    )
     option_name: str
     option_description: Optional[str] = None
-    price: int
-    type: OptionType
-    is_required: bool = False
+    price: int = 0
+    display_order: int = 0
     is_active: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -96,11 +112,11 @@ class ReservationDetail(SQLModel, table=True):
 class ReservationOption(SQLModel, table=True):
     __tablename__ = "reservation_options"
 
+    object_id: int = Field(foreign_key="objects.object_id", primary_key=True)
+    option_group_id: UUID = Field(
+        foreign_key="reservation_option_groups.option_group_id", primary_key=True
+    )
     option_id: UUID = Field(
         foreign_key="reservation_item_options.option_id", primary_key=True
     )
-    object_id: int = Field(
-        foreign_key="reservation_details.object_id", primary_key=True
-    )
-    value: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

@@ -82,7 +82,7 @@ def insert_new_reservation_item(
         reservation_item_description=new_reservation_item.reservation_description,
         reservation_duration_minutes=new_reservation_item.duration_minutes,
         reservation_price=new_reservation_item.price,
-        option_list=new_reservation_item.options,
+        option_group_list=new_reservation_item.option_groups,
         schedule_list=new_reservation_item.default_schedules,
     )
 
@@ -113,7 +113,6 @@ def create_user_reservation(
             error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
             error_message="User is not a member of this bot's group.",
         )
-
     reservation_item_class_id = validate_reservation_item_class(session, bot.class_id)
     reservation_item = get_reservation_item_by_id(
         session, reservation_item_class_id, reservation.reservation_item_id
@@ -178,7 +177,7 @@ def create_user_reservation(
     ).time()
 
     reservation_class_id = validate_reservation_class(session, bot.class_id)
-    insert_reservation(
+    reservation_detail = insert_reservation(
         session,
         reservation_class_id=reservation_class_id,
         user_id=user_id,
@@ -194,13 +193,12 @@ def create_user_reservation(
         note=reservation.note,
     )
 
+    return reservation_detail
+
 
 def get_available_times_for_item(
     session: Session, reservation_item_id: UUID
 ) -> List[DailyAvailableSlots]:
-    """獲取預約項目的可用時間段，按天分組並拆分為小時間段 - 優化版本"""
-
-    # 獲取預約項目詳情以取得持續時間
     reservation_item_details = get_reservation_item_details_by_uuid(
         session, reservation_item_id
     )
@@ -212,27 +210,23 @@ def get_available_times_for_item(
 
     time_slot_duration_minutes = reservation_item_details.duration_minutes
 
-    # 使用台湾时区获取今天的日期
     today = datetime.now(TAIWAN_TZ).date()
-    end_date = today + timedelta(days=30)  # 查詢未來30天
+    end_date = today + timedelta(days=30)
 
-    # 獲取所有可用的時間表
     all_schedules = get_available_schedules_for_item(session, reservation_item_id)
 
     if not all_schedules:
         return []
 
-    # 批量獲取所有相關的預約數量 - 這是關鍵優化
     schedule_ids = [schedule.reservation_item_schedule_id for schedule in all_schedules]
     reservations_count_map = get_reservations_count_batch(
         session, schedule_ids, today, end_date
     )
 
-    daily_slots_map = {}  # 用來按日期分組
+    daily_slots_map = {}
 
-    # 預先建立時間表的索引以提高查找效率
-    weekly_schedules = {}  # {weekday: [schedules]}
-    specific_schedules = {}  # {date: [schedules]}
+    weekly_schedules = {}
+    specific_schedules = {}
 
     for schedule in all_schedules:
         if schedule.is_closed:
@@ -247,28 +241,21 @@ def get_available_times_for_item(
                 specific_schedules[schedule.schedule_date] = []
             specific_schedules[schedule.schedule_date].append(schedule)
 
-    # 遍歷每一天
     for single_date in (
         today + timedelta(days=n) for n in range((end_date - today).days + 1)
     ):
-        # 將 Python 的 weekday (0=周一) 轉換為從周日開始的格式 (0=周日, 1=周一, ..., 6=周六)
         weekday = (single_date.weekday() + 1) % 7
         daily_time_slots = []
 
-        # 獲取該日期適用的時間表
         applicable_schedules = []
 
-        # 添加週期性時間表
         if weekday in weekly_schedules:
             applicable_schedules.extend(weekly_schedules[weekday])
 
-        # 添加特定日期時間表
         if single_date in specific_schedules:
             applicable_schedules.extend(specific_schedules[single_date])
 
-        # 處理每個適用的時間表
         for schedule in applicable_schedules:
-            # 將大時間段拆分為小時間段
             current_time = datetime.combine(single_date, schedule.start_time)
             end_time = datetime.combine(single_date, schedule.end_time)
 
@@ -279,7 +266,6 @@ def get_available_times_for_item(
                 if slot_end_time > end_time:
                     slot_end_time = end_time
 
-                # 從預先查詢的結果中獲取預約數量，避免重複查詢數據庫
                 key = (
                     schedule.reservation_item_schedule_id,
                     single_date,
@@ -287,7 +273,6 @@ def get_available_times_for_item(
                 )
                 existing_reservations = reservations_count_map.get(key, 0)
 
-                # 計算剩餘容量
                 remaining = schedule.capacity - existing_reservations
 
                 if remaining > 0:
@@ -301,11 +286,9 @@ def get_available_times_for_item(
 
                 current_time = slot_end_time
 
-        # 如果這一天有可用時間段，加入結果
         if daily_time_slots:
             daily_slots_map[single_date] = daily_time_slots
 
-    # 轉換為最終格式
     result = []
     for date_key in sorted(daily_slots_map.keys()):
         result.append(
