@@ -1,77 +1,126 @@
+import { useState } from "react";
 import { Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SearchInput } from "../../components/SearchInput";
-import { ServiceCard } from "../../components/ServiceCard";
 import { FeaturedItem } from "../../components/FeaturedItem";
+import { BookingDialog } from "../../components/BookingDialog";
+import {
+  useGetReservationItemsQuery,
+  type ReservationItem,
+} from "../../store/api/reservationApi";
+import { useLiff } from "../../hooks/useLiff";
 import type { AppModule } from "../../types/module";
 
-const services = [
-  {
-    id: "1",
-    icon: Calendar,
-    title: "美容護理",
-    description: "專業美容服務",
-    color: "blue" as const,
-  },
-  {
-    id: "2",
-    icon: Calendar,
-    title: "按摩服務",
-    description: "放鬆身心",
-    color: "green" as const,
-  },
-  {
-    id: "3",
-    icon: Calendar,
-    title: "健身教練",
-    description: "一對一指導",
-    color: "purple" as const,
-  },
-  {
-    id: "4",
-    icon: Calendar,
-    title: "醫療諮詢",
-    description: "專業醫師",
-    color: "orange" as const,
-  },
-];
-
 function BookingContent() {
+  const { botUUID } = useLiff();
+  const [selectedItem, setSelectedItem] = useState<ReservationItem | null>(
+    null
+  );
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const {
+    data: reservationItemsData,
+    isLoading,
+    error,
+  } = useGetReservationItemsQuery(botUUID || "", { skip: !botUUID });
+
+  const handleBookingClick = (itemId: string) => {
+    const item = reservationItemsData?.find(
+      (item) => item.reservation_item_id === itemId
+    );
+    if (item) {
+      setSelectedItem(item);
+      setIsDialogOpen(true);
+    }
+  };
+
+  const handleConfirmBooking = () => {
+    console.log("預約確認完成:", {
+      item: selectedItem?.reservation_name,
+    });
+    // 預約成功後可以執行的操作，比如刷新數據等
+    alert(`預約成功！服務：${selectedItem?.reservation_name}`);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <SearchInput placeholder="搜尋服務..." />
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center text-gray-500">載入中...</div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <SearchInput placeholder="搜尋服務..." />
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center text-red-500">載入服務失敗</div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const reservationItems = reservationItemsData || [];
+
   return (
     <div className="space-y-4">
       <SearchInput placeholder="搜尋服務..." />
-
-      <div className="grid grid-cols-2 gap-4">
-        {services.map((service) => (
-          <ServiceCard
-            key={service.id}
-            icon={service.icon}
-            title={service.title}
-            description={service.description}
-            color={service.color}
-            onClick={() => console.log(`Selected service: ${service.title}`)}
-          />
-        ))}
-      </div>
-
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">推薦服務</CardTitle>
+          <CardTitle className="text-lg">
+            可預約服務 ({reservationItems.length})
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <FeaturedItem
-            id="featured-1"
-            name="深層清潔護理"
-            description="90分鐘 • 專業美容師"
-            price={1200}
-            rating={4.8}
-            reviewCount={128}
-            image="/placeholder.svg?height=60&width=60"
-            buttonText="預約"
-            onButtonClick={(id) => console.log(`Book service: ${id}`)}
-          />
+          {reservationItems.length === 0 ? (
+            <div className="text-center text-gray-500 py-4">暫無可預約服務</div>
+          ) : (
+            reservationItems.map((item) => {
+              // 檢查是否有額外付費選項
+              const hasPayableOptions = item.options.some(
+                (opt) => opt.price > 0
+              );
+
+              return (
+                <FeaturedItem
+                  key={item.reservation_item_id}
+                  id={item.reservation_item_id}
+                  name={item.reservation_name}
+                  description={
+                    item.reservation_description ||
+                    `${item.duration_minutes}分鐘`
+                  }
+                  price={item.price}
+                  priceLabel={hasPayableOptions ? "起" : undefined}
+                  buttonText="預約"
+                  onButtonClick={handleBookingClick}
+                />
+              );
+            })
+          )}
         </CardContent>
       </Card>
+
+      {/* 預約對話框 */}
+      {selectedItem && (
+        <BookingDialog
+          reservationItem={selectedItem}
+          isOpen={isDialogOpen}
+          onClose={() => {
+            setIsDialogOpen(false);
+            setSelectedItem(null);
+          }}
+          onConfirm={handleConfirmBooking}
+        />
+      )}
     </div>
   );
 }

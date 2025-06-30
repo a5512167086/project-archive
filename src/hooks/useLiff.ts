@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import liff from "@line/liff";
 import eruda from "eruda";
+import {
+  useGetBotInfoQuery,
+  useCustomerLoginMutation,
+} from "../store/api/reservationApi";
 
 interface LiffState {
   isInitialized: boolean;
@@ -17,6 +21,7 @@ interface LiffState {
 }
 
 export const useLiff = () => {
+  const [botUUID, setBotUUID] = useState<string | null>(null);
   const [state, setState] = useState<LiffState>({
     isInitialized: false,
     isLoggedIn: false,
@@ -26,19 +31,21 @@ export const useLiff = () => {
     isLoading: true,
   });
 
-  const log = (msg: string) => {
-    if (import.meta.env.DEV) {
-      console.log(msg);
-      const div = document.createElement("div");
-      div.textContent = msg;
-      div.style.cssText =
-        "padding:4px;border-bottom:1px solid #eee;font-size:12px;";
-      document.body.appendChild(div);
-    }
-  };
+  // Redux hooks - 只有當 botUUID 存在時才執行查詢
+  const {
+    data: botInfo,
+    error: botError,
+    isLoading: isBotLoading,
+  } = useGetBotInfoQuery(botUUID!, {
+    skip: !botUUID,
+  });
 
+  const [customerLogin, { isLoading: isLoginLoading }] =
+    useCustomerLoginMutation();
+
+  // 初次載入時取得 botUUID
   useEffect(() => {
-    const initializeLiff = async () => {
+    const initializeBotUUID = async () => {
       try {
         // 初始化 eruda (調試工具)
         if (import.meta.env.DEV) {
@@ -52,22 +59,22 @@ export const useLiff = () => {
 
         // 優先從 URL 取得 bot_uuid，沒有才從 localStorage 取得
         const urlParams = new URLSearchParams(window.location.search);
-        let botUUID = urlParams.get("bot_uuid");
+        let foundBotUUID = urlParams.get("bot_uuid");
 
         // 檢查 liff.state 參數
-        if (!botUUID) {
+        if (!foundBotUUID) {
           const liffState = urlParams.get("liff.state");
           if (liffState) {
             const stateParams = new URLSearchParams(
               liffState.startsWith("?") ? liffState : `?${liffState}`
             );
-            botUUID = stateParams.get("bot_uuid");
+            foundBotUUID = stateParams.get("bot_uuid");
           }
         }
 
         // 如果 URL 中有 bot_uuid，保存到 localStorage 並清理 URL
-        if (botUUID) {
-          localStorage.setItem("bot_uuid", botUUID);
+        if (foundBotUUID) {
+          localStorage.setItem("bot_uuid", foundBotUUID);
           // 清理 URL 參數
           const url = new URL(window.location.href);
           url.searchParams.delete("bot_uuid");
@@ -75,30 +82,43 @@ export const useLiff = () => {
           window.history.replaceState({}, "", url.toString());
         } else {
           // URL 中沒有才從 localStorage 取得
-          botUUID = localStorage.getItem("bot_uuid");
+          foundBotUUID = localStorage.getItem("bot_uuid");
         }
 
-        if (!botUUID) {
+        if (!foundBotUUID) {
           throw new Error("缺少 bot_uuid 參數");
         }
 
-        log(`📱 開始初始化 LIFF，bot_uuid: ${botUUID}`);
+        console.log(`📱 開始初始化 LIFF，bot_uuid: ${foundBotUUID}`);
+        setBotUUID(foundBotUUID);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        console.log(`❌ 錯誤: ${errorMessage}`);
+        setState((prev) => ({
+          ...prev,
+          error: errorMessage,
+          isLoading: false,
+        }));
+      }
+    };
 
-        // 取得 bot 資訊
-        const response = await fetch(`${API_BASE}/bots/${botUUID}`);
-        const data = await response.json();
+    initializeBotUUID();
+  }, []);
 
-        if (!response.ok) {
-          throw new Error(data.detail || data.message || JSON.stringify(data));
-        }
+  // 當 botInfo 可用時，初始化 LIFF
+  useEffect(() => {
+    if (!botInfo || !botUUID) return;
 
-        log(`✅ 成功取得 bot 資訊，liff_id: ${data.liff_id}`);
+    const initLiff = async () => {
+      try {
+        console.log(`✅ 成功取得 bot 資訊，liff_id: ${botInfo.liff_id}`);
 
         // 初始化 LIFF
         try {
-          await liff.init({ liffId: data.liff_id });
+          await liff.init({ liffId: botInfo.liff_id });
         } catch (err) {
-          log(
+          console.log(
             `❌ LIFF 初始化失敗: ${
               err instanceof Error ? err.message : String(err)
             }`
@@ -107,13 +127,12 @@ export const useLiff = () => {
         }
 
         if (!liff.isLoggedIn()) {
-          log("🔐 尚未登入，導向登入頁面...");
-
+          console.log("🔐 尚未登入，導向登入頁面...");
           liff.login();
           return;
         }
 
-        log("✅ 使用者已登入");
+        console.log("✅ 使用者已登入");
 
         // 取得用戶資訊
         const idToken = liff.getIDToken();
@@ -123,30 +142,27 @@ export const useLiff = () => {
           throw new Error("無法取得 ID Token");
         }
 
-        log(`✅ 成功取得用戶資訊: ${userProfile.displayName}`);
+        console.log(`✅ 成功取得用戶資訊: ${userProfile.displayName}`);
 
-        // 發送登入請求到後端
-        const loginResponse = await fetch(`${API_BASE}/users/customer-login`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            line_id_token: idToken,
-            bot_id: botUUID,
-          }),
+        // 使用 Redux mutation 登入
+        const loginResult = await customerLogin({
+          line_id_token: idToken,
+          bot_id: botUUID,
+        }).unwrap();
+
+        console.log("✅ 後端登入成功！");
+
+        // 儲存 access_token 和 refresh_token 到 localStorage
+        localStorage.setItem("access_token", loginResult.access_token);
+        localStorage.setItem("refresh_token", loginResult.refresh_token);
+
+        // 為了向後兼容，也保存到 token 鍵
+        localStorage.setItem("token", loginResult.access_token);
+
+        console.log("💾 Token 已儲存到 localStorage", {
+          access_token_length: loginResult.access_token.length,
+          refresh_token_length: loginResult.refresh_token.length,
         });
-
-        const loginData = await loginResponse.json();
-
-        if (!loginResponse.ok) {
-          throw new Error(
-            loginData.detail || loginData.message || JSON.stringify(loginData)
-          );
-        }
-
-        log("✅ 後端登入成功！");
-        localStorage.setItem("token", loginData.token);
 
         setState({
           isInitialized: true,
@@ -159,7 +175,7 @@ export const useLiff = () => {
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
-        log(`❌ 錯誤: ${errorMessage}`);
+        console.log(`❌ 錯誤: ${errorMessage}`);
         setState((prev) => ({
           ...prev,
           error: errorMessage,
@@ -168,8 +184,29 @@ export const useLiff = () => {
       }
     };
 
-    initializeLiff();
-  }, []);
+    initLiff();
+  }, [botInfo, botUUID, customerLogin]);
 
-  return state;
+  // 處理 bot 查詢錯誤
+  useEffect(() => {
+    if (botError) {
+      const errorMessage =
+        "status" in botError
+          ? `API 錯誤: ${botError.status}`
+          : botError.message || "未知錯誤";
+      console.log(`❌ 取得 bot 資訊失敗: ${errorMessage}`);
+      setState((prev) => ({
+        ...prev,
+        error: errorMessage,
+        isLoading: false,
+      }));
+    }
+  }, [botError]);
+
+  return {
+    ...state,
+    isLoading: state.isLoading || isBotLoading || isLoginLoading,
+    botInfo,
+    botUUID,
+  };
 };

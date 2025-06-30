@@ -71,8 +71,6 @@ function EcommerceContent() {
             name="膠原蛋白飲"
             description="30包裝 • 日本進口"
             price={1680}
-            rating={4.9}
-            reviewCount={256}
             image="/placeholder.svg?height=60&width=60"
             buttonText="立即購買"
             onButtonClick={(id) => console.log(`Buy now: ${id}`)}

@@ -8,46 +8,22 @@ import {
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { StatusItem } from "../components/StatusItem";
+import { useGetReservationsQuery } from "../store/api/reservationApi";
 
 export default function AppointmentsPage() {
   const [searchParams] = useSearchParams();
   const filter = searchParams.get("status") || "all";
 
-  // Mock data
-  const appointments = [
-    {
-      id: "1",
-      title: "深層清潔護理",
-      date: "2024-01-20 14:00",
-      description: "美容師：李小姐",
-      status: "已完成",
-      price: 1200,
-      statusColor: "green" as const,
-    },
-    {
-      id: "2",
-      title: "按摩服務",
-      date: "2024-01-25 16:00",
-      description: "按摩師：陳先生",
-      status: "已確認",
-      price: 800,
-      statusColor: "blue" as const,
-    },
-    {
-      id: "3",
-      title: "健身教練",
-      date: "2024-01-28 10:00",
-      description: "教練：張教練",
-      status: "待確認",
-      price: 1500,
-      statusColor: "orange" as const,
-    },
-  ];
+  // 使用 Redux Query 取得預約資料
+  const {
+    data: reservationsData,
+    error,
+    isLoading,
+  } = useGetReservationsQuery({
+    status: filter,
+  });
 
-  const filteredAppointments =
-    filter === "all"
-      ? appointments
-      : appointments.filter((appointment) => appointment.status === filter);
+  const appointments = reservationsData?.reservations || [];
 
   const statusFilters = [
     { key: "all", label: "全部", count: appointments.length },
@@ -67,6 +43,26 @@ export default function AppointmentsPage() {
       count: appointments.filter((a) => a.status === "已完成").length,
     },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center py-8">
+          <p>載入中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center py-8 text-red-500">
+          <p>載入預約時發生錯誤</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -111,8 +107,8 @@ export default function AppointmentsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {filteredAppointments.length > 0 ? (
-            filteredAppointments.map((appointment) => (
+          {appointments.length > 0 ? (
+            appointments.map((appointment) => (
               <StatusItem
                 key={appointment.id}
                 title={appointment.title}
