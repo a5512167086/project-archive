@@ -7,6 +7,7 @@ from sqlmodel import Session, func, select
 from models.class_model import SubClassView
 from models.reservation_model import (
     ReservationDetail,
+    ReservationItemDetail,
     ReservationItemListView,
     ReservationItemOption,
     ReservationItemSchedule,
@@ -230,3 +231,20 @@ def get_reservations_count_by_schedule_date_and_time(
             ReservationDetail.start_time == start_time,
         )
     ).one()
+
+
+def get_reservation_item_detail_by_id(
+    session: Session, reservation_item_id: UUID
+) -> ReservationItemDetail | None:
+    return session.get(ReservationItemDetail, reservation_item_id)
+
+
+def get_reservation_item_details_by_uuid(
+    session: Session, reservation_item_id: UUID
+) -> ReservationItemDetail | None:
+    """Get reservation item details including duration by UUID"""
+    return session.exec(
+        select(ReservationItemDetail).where(
+            ReservationItemDetail.reservation_item_id == reservation_item_id
+        )
+    ).first()

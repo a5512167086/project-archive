@@ -19,6 +19,7 @@ from queries.reservation_query import (
     get_reservation_class_id_by_bot_class_id,
     get_reservation_item_by_id,
     get_reservation_item_class_id_by_bot_class_id,
+    get_reservation_item_details_by_uuid,
     get_reservation_item_options_by_ids,
     get_reservation_item_schedule_by_date,
     get_reservation_items,
@@ -192,9 +193,21 @@ def create_user_reservation(
 
 
 def get_available_times_for_item(
-    session: Session, reservation_item_id: UUID, time_slot_duration_minutes: int = 30
+    session: Session, reservation_item_id: UUID
 ) -> List[DailyAvailableSlots]:
     """獲取預約項目的可用時間段，按天分組並拆分為小時間段"""
+
+    # 獲取預約項目詳情以取得持續時間
+    reservation_item_details = get_reservation_item_details_by_uuid(
+        session, reservation_item_id
+    )
+    if not reservation_item_details:
+        raise GlobalErrorException(
+            error_code=ErrorCode.RESERVATION_ITEM_NOT_FOUND,
+            error_message="Reservation item not found",
+        )
+
+    time_slot_duration_minutes = reservation_item_details.duration_minutes
 
     today = date.today()
     end_date = today + timedelta(days=30)  # 查詢未來30天

@@ -62,12 +62,8 @@ def update_reservation_item(
     "/items/{reservation_item_id}/available-times",
     response_model=List[DailyAvailableSlots],
 )
-def get_available_times(
-    reservation_item_id: UUID, session: SessionDep, time_slot_duration_minutes: int = 30
-):
-    return get_available_times_for_item(
-        session, reservation_item_id, time_slot_duration_minutes
-    )
+def get_available_times(reservation_item_id: UUID, session: SessionDep):
+    return get_available_times_for_item(session, reservation_item_id)
 
 
 @reservation_router.post("")
