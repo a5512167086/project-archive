@@ -13,11 +13,13 @@ import {
   InsertReservationItemRequest,
   ReservationItemsResponse,
   ReservationItemOptionUpdate,
-  ReservationItemScheduleUpdate
+  ReservationItemScheduleUpdate,
+  ReservationOptionGroupCreate,
+  ReservationItemOptionCreate,
+  ReservationItemScheduleCreate
 } from '@/store/apis/reservationApi'
 import { CustomTable } from '@/components/CustomTable'
 import { CustomDialog } from '@/components/CustomDialog'
-import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
@@ -25,6 +27,11 @@ import DialogActions from '@mui/material/DialogActions'
 import { useApiErrorHandler } from '@/hooks/useApiErrorHandler'
 import { OptionEditor } from './OptionEditor'
 import { ScheduleEditor } from './ScheduleEditor'
+import { OptionGroupEditor, OptionGroupData } from './OptionGroupEditor'
+import {
+  CreateScheduleEditor,
+  CreateScheduleData
+} from './CreateScheduleEditor'
 
 const TEXT = {
   title: 'serviceManagementPage.title',
@@ -33,132 +40,6 @@ const TEXT = {
   deleteMultiTitle: '刪除選取的服務？',
   deleteButtonText: '刪除已選取'
 } as const
-
-const createFields: FieldProps[] = [
-  {
-    id: 'reservation_name',
-    name: 'reservation_name',
-    label: '服務名稱',
-    type: 'text',
-    required: true
-  },
-  {
-    id: 'reservation_description',
-    name: 'reservation_description',
-    label: '描述',
-    type: 'text',
-    required: true
-  },
-  {
-    id: 'duration_minutes',
-    name: 'duration_minutes',
-    label: '時長（分鐘）',
-    type: 'number',
-    required: true
-  },
-  {
-    id: 'price',
-    name: 'price',
-    label: '價格',
-    type: 'number',
-    required: true
-  },
-  {
-    id: 'options',
-    name: 'options',
-    label: '選項',
-    type: 'array',
-    required: false,
-    fields: [
-      {
-        id: 'option_name',
-        name: 'option_name',
-        label: '名稱',
-        type: 'text',
-        required: true
-      },
-      {
-        id: 'option_description',
-        name: 'option_description',
-        label: '描述',
-        type: 'text',
-        required: false
-      },
-      {
-        id: 'price',
-        name: 'price',
-        label: '價格',
-        type: 'number',
-        required: true
-      },
-      {
-        id: 'type',
-        name: 'type',
-        label: '類型',
-        type: 'select',
-        required: true,
-        options: [
-          { value: 'text', label: '文字' },
-          { value: 'select', label: '選項' },
-          { value: 'number', label: '數字' }
-        ]
-      },
-      {
-        id: 'is_required',
-        name: 'is_required',
-        label: '是否必填',
-        type: 'checkbox',
-        required: false
-      }
-    ]
-  },
-  {
-    id: 'default_schedules',
-    name: 'default_schedules',
-    label: '預設時段',
-    type: 'array',
-    required: false,
-    fields: [
-      {
-        id: 'weekdays',
-        name: 'weekdays',
-        label: '星期',
-        type: 'multi-select',
-        options: [
-          { value: 0, label: '週日' },
-          { value: 1, label: '週一' },
-          { value: 2, label: '週二' },
-          { value: 3, label: '週三' },
-          { value: 4, label: '週四' },
-          { value: 5, label: '週五' },
-          { value: 6, label: '週六' }
-        ],
-        required: true
-      },
-      {
-        id: 'start_time',
-        name: 'start_time',
-        label: '開始時間',
-        type: 'time',
-        required: true
-      },
-      {
-        id: 'end_time',
-        name: 'end_time',
-        label: '結束時間',
-        type: 'time',
-        required: true
-      },
-      {
-        id: 'capacity',
-        name: 'capacity',
-        label: '人數上限',
-        type: 'number',
-        required: false
-      }
-    ]
-  }
-]
 
 const ServiceManagementPage = () => {
   const { t } = useTranslation()
@@ -178,6 +59,18 @@ const ServiceManagementPage = () => {
     null
   )
   const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [createOptionGroups, setCreateOptionGroups] = useState<
+    OptionGroupData[]
+  >([])
+  const [createFormData, setCreateFormData] = useState({
+    reservation_name: '',
+    reservation_description: '',
+    duration_minutes: 0,
+    price: 0
+  })
+  const [createSchedules, setCreateSchedules] = useState<CreateScheduleData[]>(
+    []
+  )
 
   const [getServices] = useLazyGetServicesQuery()
   const [insertService] = useInsertServiceMutation()
@@ -205,39 +98,39 @@ const ServiceManagementPage = () => {
   const handleCreateService = async (
     data: Omit<
       InsertReservationItemRequest,
-      'options' | 'default_schedules'
+      'option_groups' | 'default_schedules'
     > & {
-      options?: (NonNullable<
-        InsertReservationItemRequest['options']
-      >[number] & {
+      option_groups?: (ReservationOptionGroupCreate & {
         [key: string]: unknown
       })[]
       default_schedules?: ({
         weekdays: number[]
-      } & Omit<
-        NonNullable<InsertReservationItemRequest['default_schedules']>[number],
-        'weekday'
-      >)[]
+      } & Omit<ReservationItemScheduleCreate, 'schedule_type' | 'weekday'>)[]
     }
   ) => {
     try {
-      const options = (data.options || []).map(
-        (
-          option
-        ): NonNullable<InsertReservationItemRequest['options']>[number] => ({
-          option_name: option.option_name,
-          option_description: option.option_description || '',
-          price: Number(option.price),
-          type: option.type,
-          is_required: option.is_required === true,
-          is_active: true
+      const option_groups = (data.option_groups || []).map(
+        (group): ReservationOptionGroupCreate => ({
+          group_name: group.group_name,
+          group_description: group.group_description || null,
+          selection_type: group.selection_type as 'single' | 'multiple',
+          is_required: group.is_required === true,
+          display_order: Number(group.display_order) || 0,
+          is_active: true,
+          options: (group.options || []).map(
+            (option): ReservationItemOptionCreate => ({
+              option_name: option.option_name,
+              option_description: option.option_description || null,
+              price: Number(option.price) || 0,
+              display_order: Number(option.display_order) || 0,
+              is_active: true
+            })
+          )
         })
       )
 
-      const scheduleMap = new Map<
-        number,
-        NonNullable<InsertReservationItemRequest['default_schedules']>[number]
-      >()
+      // Convert weekdays array to individual schedule entries
+      const scheduleMap = new Map<number, ReservationItemScheduleCreate>()
 
       for (const schedule of data.default_schedules || []) {
         const weekdays = [...new Set(schedule.weekdays || [])] as number[]
@@ -245,11 +138,14 @@ const ServiceManagementPage = () => {
           scheduleMap.set(weekday, {
             schedule_type: 'weekly',
             weekday,
+            schedule_date: null,
             start_time: schedule.start_time,
             end_time: schedule.end_time,
             capacity: schedule.capacity ? Number(schedule.capacity) : 1,
             is_closed: false,
-            is_active: true
+            note: null,
+            is_active: true,
+            latest_reservation_time: null
           })
         })
       }
@@ -260,7 +156,7 @@ const ServiceManagementPage = () => {
         reservation_description: data.reservation_description,
         duration_minutes: Number(data.duration_minutes),
         price: Number(data.price),
-        options,
+        option_groups,
         default_schedules: Array.from(scheduleMap.values())
       }
 
@@ -447,15 +343,142 @@ const ServiceManagementPage = () => {
         onDelete={handleSingleDelete}
       />
 
-      <CustomDialog
-        fullScreen
-        maxWidth="xl"
+      {/* Create Dialog */}
+      <Dialog
         open={dialogs.create}
-        title="新增服務"
-        fields={createFields}
-        handleClose={() => setDialogs((d) => ({ ...d, create: false }))}
-        onSubmit={handleCreateService}
-      />
+        onClose={() => {
+          setDialogs((d) => ({ ...d, create: false }))
+          setCreateOptionGroups([])
+          setCreateSchedules([])
+          setCreateFormData({
+            reservation_name: '',
+            reservation_description: '',
+            duration_minutes: 0,
+            price: 0
+          })
+        }}
+        maxWidth="lg"
+        fullWidth
+      >
+        <DialogTitle>新增服務</DialogTitle>
+        <DialogContent dividers>
+          <Box
+            component="form"
+            sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}
+            onSubmit={(e) => {
+              e.preventDefault()
+              const data = {
+                ...createFormData,
+                bot_uuid: currentBot!.bot_detail_id,
+                option_groups:
+                  createOptionGroups as (ReservationOptionGroupCreate & {
+                    [key: string]: unknown
+                  })[],
+                default_schedules: createSchedules
+              }
+              handleCreateService(data)
+            }}
+          >
+            <TextField
+              label="服務名稱"
+              name="reservation_name"
+              value={createFormData.reservation_name}
+              onChange={(e) =>
+                setCreateFormData((prev) => ({
+                  ...prev,
+                  reservation_name: e.target.value
+                }))
+              }
+              required
+              fullWidth
+            />
+            <TextField
+              label="描述"
+              name="reservation_description"
+              value={createFormData.reservation_description}
+              onChange={(e) =>
+                setCreateFormData((prev) => ({
+                  ...prev,
+                  reservation_description: e.target.value
+                }))
+              }
+              required
+              fullWidth
+            />
+            <TextField
+              label="時長（分鐘）"
+              name="duration_minutes"
+              type="number"
+              value={createFormData.duration_minutes}
+              onChange={(e) =>
+                setCreateFormData((prev) => ({
+                  ...prev,
+                  duration_minutes: Number(e.target.value)
+                }))
+              }
+              required
+              fullWidth
+            />
+            <TextField
+              label="價格"
+              name="price"
+              type="number"
+              value={createFormData.price}
+              onChange={(e) =>
+                setCreateFormData((prev) => ({
+                  ...prev,
+                  price: Number(e.target.value)
+                }))
+              }
+              required
+              fullWidth
+            />
+
+            {/* Option Groups Editor */}
+            <OptionGroupEditor
+              optionGroups={createOptionGroups}
+              onChange={setCreateOptionGroups}
+            />
+
+            {/* Schedule Editor */}
+            <CreateScheduleEditor
+              schedules={createSchedules}
+              onChange={setCreateSchedules}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setDialogs((d) => ({ ...d, create: false }))
+              setCreateOptionGroups([])
+              setCreateSchedules([])
+              setCreateFormData({
+                reservation_name: '',
+                reservation_description: '',
+                duration_minutes: 0,
+                price: 0
+              })
+            }}
+          >
+            取消
+          </Button>
+          <Button
+            onClick={() => {
+              const form = document.querySelector('form')
+              if (form) {
+                form.dispatchEvent(
+                  new Event('submit', { bubbles: true, cancelable: true })
+                )
+              }
+            }}
+            variant="contained"
+            color="primary"
+          >
+            建立
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <CustomDialog
         open={dialogs.deleteSingle}

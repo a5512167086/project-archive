@@ -44,31 +44,45 @@ export type ReservationItemsResponse = {
   schedules: ReservationSchedule[]
 }
 
+export type ReservationItemOptionCreate = {
+  option_name: string
+  option_description?: string | null
+  price: number
+  display_order: number
+  is_active?: boolean
+}
+
+export type ReservationOptionGroupCreate = {
+  group_name: string
+  group_description?: string | null
+  selection_type: 'single' | 'multiple' // Based on SelectionType enum
+  is_required: boolean
+  display_order: number
+  is_active: boolean
+  options: ReservationItemOptionCreate[]
+}
+
+export type ReservationItemScheduleCreate = {
+  schedule_type: 'weekly' | 'specific'
+  weekday?: number | null // 0-6, optional for weekly type
+  schedule_date?: string | null // ISO date string for specific type
+  start_time: string // HH:MM format
+  end_time: string // HH:MM format
+  capacity?: number
+  is_closed?: boolean
+  note?: string | null
+  is_active?: boolean
+  latest_reservation_time?: string | null // ISO datetime string
+}
+
 export type InsertReservationItemRequest = {
   bot_uuid: string
   reservation_name: string
   reservation_description: string
   duration_minutes: number
   price: number
-  options?: {
-    option_name: string
-    option_description?: string
-    price: number
-    type: 'text' | 'select' | 'number'
-    is_required?: boolean
-    is_active?: boolean
-  }[]
-  default_schedules?: {
-    schedule_type: 'weekly' | 'specific'
-    weekday?: number
-    schedule_date?: string
-    start_time: string
-    end_time: string
-    capacity?: number
-    is_closed?: boolean
-    note?: string
-    is_active?: boolean
-  }[]
+  option_groups: ReservationOptionGroupCreate[]
+  default_schedules: ReservationItemScheduleCreate[]
 }
 
 type DeleteReservationRequest = {

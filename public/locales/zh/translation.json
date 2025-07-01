@@ -116,7 +116,24 @@
     "title": "預約管理"
   },
   "serviceManagementPage": {
-    "title": "服務管理"
+    "title": "服務管理",
+    "optionGroup": "選項群組",
+    "groupName": "群組名稱",
+    "groupDescription": "群組描述",
+    "selectionType": "選擇類型",
+    "singleSelection": "單選",
+    "multipleSelection": "多選",
+    "displayOrder": "顯示順序",
+    "optionName": "選項名稱",
+    "optionDescription": "選項描述",
+    "additionalPrice": "額外價格",
+    "scheduleType": "時段類型",
+    "weeklyRepeat": "每週重複",
+    "specificDate": "特定日期",
+    "weekday": "星期",
+    "specificDateLabel": "特定日期",
+    "note": "備註",
+    "latestReservationTime": "最晚預約時間"
   },
   "notFoundPage": {
     "title": "查無此頁面",

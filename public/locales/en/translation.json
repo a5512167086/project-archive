@@ -115,7 +115,24 @@
     "title": "Reservation Management"
   },
   "serviceManagementPage": {
-    "title": "Service Management"
+    "title": "Service Management",
+    "optionGroup": "Option Group",
+    "groupName": "Group Name",
+    "groupDescription": "Group Description",
+    "selectionType": "Selection Type",
+    "singleSelection": "Single Selection",
+    "multipleSelection": "Multiple Selection",
+    "displayOrder": "Display Order",
+    "optionName": "Option Name",
+    "optionDescription": "Option Description",
+    "additionalPrice": "Additional Price",
+    "scheduleType": "Schedule Type",
+    "weeklyRepeat": "Weekly Repeat",
+    "specificDate": "Specific Date",
+    "weekday": "Weekday",
+    "specificDateLabel": "Specific Date",
+    "note": "Note",
+    "latestReservationTime": "Latest Reservation Time"
   },
   "notFoundPage": {
     "title": "Page Not Found",
