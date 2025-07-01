@@ -132,7 +132,6 @@ class ReservationCreate(BaseModel):
     reservation_date: date
     start_time: time
     payment_method: Optional[PaymentMethod] = None
-    payment_status: Optional[PaymentStatus] = None
     option_values: Optional[List[OptionValue]] = None
     note: Optional[str] = None
 
@@ -169,6 +168,17 @@ class DailyAvailableSlots(BaseModel):
     times: List[TimeSlot]
 
 
+class ReservationSelectedOptionResponse(BaseModel):
+    option_id: UUID
+    option_name: str
+
+
+class ReservationSelectedOptionGroupResponse(BaseModel):
+    option_group_id: UUID
+    group_name: str
+    selected_options: List[ReservationSelectedOptionResponse] = []
+
+
 class ReservationOptionResponse(BaseModel):
     option_group_id: UUID
     group_name: str
@@ -179,7 +189,9 @@ class ReservationOptionResponse(BaseModel):
 class ReservationListResponse(BaseModel):
     reservation_id: UUID
     reservation_item_id: UUID
+    price: int
     service_name: str
+    notes: Optional[str]
     reservation_date: date
     start_time: time
     end_time: time
@@ -187,7 +199,7 @@ class ReservationListResponse(BaseModel):
     payment_method: Optional[str]
     payment_status: Optional[str]
     created_at: datetime
-    selected_options: List[ReservationOptionResponse] = []
+    selected_option_groups: List[ReservationSelectedOptionGroupResponse] = []
 
 
 class TempReservationItemPatch(BaseModel):

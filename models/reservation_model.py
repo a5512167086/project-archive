@@ -89,8 +89,11 @@ class ReservationListView(SQLModel, table=True):
 
     reservation_id: UUID = Field(primary_key=True)
     object_id: int
+    class_id: int
     reservation_item_id: UUID
+    price: int
     service_name: str
+    notes: Optional[str]
     reservation_date: date
     start_time: time
     end_time: time

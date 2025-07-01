@@ -11,6 +11,7 @@ from commands.reservation_command import (
     insert_reservation_item,
     update_reservation_item,
 )
+from constants.common import PaymentMethod, PaymentStatus
 from constants.config import TAIWAN_TZ
 from constants.error_code import ErrorCode
 from exception import GlobalErrorException
@@ -39,7 +40,8 @@ from schemas.reservation_schema import (
     ReservationItemCreate,
     ReservationItemPatch,
     ReservationListResponse,
-    ReservationOptionResponse,
+    ReservationSelectedOptionGroupResponse,
+    ReservationSelectedOptionResponse,
     TempReservationItemPatch,
     TimeSlot,
 )
@@ -226,6 +228,17 @@ def create_user_reservation(
     ).time()
 
     reservation_class_id = validate_reservation_class(session, bot.class_id)
+
+    # 根據付款方式決定付款狀態
+    payment_status = None
+    if reservation.payment_method:
+        if reservation.payment_method == PaymentMethod.cash:
+            # 現金付款不需要線上付款狀態追蹤，保持 None
+            payment_status = None
+        else:
+            # 其他付款方式（銀行轉帳等）預設為 unpaid，等待付款處理
+            payment_status = PaymentStatus.unpaid
+
     reservation_detail = insert_reservation(
         session,
         reservation_class_id=reservation_class_id,
@@ -237,7 +250,7 @@ def create_user_reservation(
         end_time=end_time,
         price=total_price,
         payment_method=reservation.payment_method,
-        payment_status=reservation.payment_status,
+        payment_status=payment_status,
         option_values=reservation.option_values,
         note=reservation.note,
     )
@@ -368,14 +381,14 @@ def get_bot_reservations_list(
 ) -> List[ReservationListResponse]:
     """Get all reservations for a bot (bot owner only)"""
     bot = validate_line_bot_exists(session, bot_uuid)
-    bot_group = validate_group_exist_in_bot(session, bot.class_id, "Users")
-    if not is_user_in_group(session, bot_group.group_id, current_user_id):
-        raise GlobalErrorException(
-            error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
-            error_message="User is not a member of this bot's group.",
-        )
+    # 檢查 bot 擁有者權限
+    validate_bot_ownership(session, current_user_id, bot.bot_detail_id)
+
+    # 獲取 reservation class_id
+    reservation_class_id = validate_reservation_class(session, bot.class_id)
+
     # 獲取所有預約
-    reservations = get_bot_reservations(session, bot.class_id)
+    reservations = get_bot_reservations(session, reservation_class_id)
 
     if not reservations:
         return []
@@ -387,16 +400,38 @@ def get_bot_reservations_list(
     # 構建回應
     result = []
     for reservation in reservations:
-        selected_options = []
+        selected_option_groups = []
         if reservation.object_id in options_map:
+            # 按 group 組織 options
+            groups_dict = {}
             for option_data in options_map[reservation.object_id]:
-                selected_options.append(ReservationOptionResponse(**option_data))
+                group_id = option_data["option_group_id"]
+                if group_id not in groups_dict:
+                    groups_dict[group_id] = {
+                        "option_group_id": group_id,
+                        "group_name": option_data["group_name"],
+                        "selected_options": [],
+                    }
+                groups_dict[group_id]["selected_options"].append(
+                    ReservationSelectedOptionResponse(
+                        option_id=option_data["option_id"],
+                        option_name=option_data["option_name"],
+                    )
+                )
+
+            # 轉換為 response 格式
+            for group_data in groups_dict.values():
+                selected_option_groups.append(
+                    ReservationSelectedOptionGroupResponse(**group_data)
+                )
 
         result.append(
             ReservationListResponse(
                 reservation_id=reservation.reservation_id,
                 reservation_item_id=reservation.reservation_item_id,
+                price=reservation.price,
                 service_name=reservation.service_name,
+                notes=reservation.notes,
                 reservation_date=reservation.reservation_date,
                 start_time=reservation.start_time,
                 end_time=reservation.end_time,
@@ -404,7 +439,7 @@ def get_bot_reservations_list(
                 payment_method=reservation.payment_method,
                 payment_status=reservation.payment_status,
                 created_at=reservation.created_at,
-                selected_options=selected_options,
+                selected_option_groups=selected_option_groups,
             )
         )
 
@@ -422,8 +457,13 @@ def get_user_reservations_in_bot_list(
             error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
             error_message="User is not a member of this bot's group.",
         )
+    # 獲取 reservation class_id
+    reservation_class_id = validate_reservation_class(session, bot.class_id)
+
     # 獲取用戶在該 bot 下的預約
-    reservations = get_user_reservations_in_bot(session, current_user_id, bot.class_id)
+    reservations = get_user_reservations_in_bot(
+        session, current_user_id, reservation_class_id
+    )
 
     if not reservations:
         return []
@@ -435,16 +475,38 @@ def get_user_reservations_in_bot_list(
     # 構建回應
     result = []
     for reservation in reservations:
-        selected_options = []
+        selected_option_groups = []
         if reservation.object_id in options_map:
+            # 按 group 組織 options
+            groups_dict = {}
             for option_data in options_map[reservation.object_id]:
-                selected_options.append(ReservationOptionResponse(**option_data))
+                group_id = option_data["option_group_id"]
+                if group_id not in groups_dict:
+                    groups_dict[group_id] = {
+                        "option_group_id": group_id,
+                        "group_name": option_data["group_name"],
+                        "selected_options": [],
+                    }
+                groups_dict[group_id]["selected_options"].append(
+                    ReservationSelectedOptionResponse(
+                        option_id=option_data["option_id"],
+                        option_name=option_data["option_name"],
+                    )
+                )
+
+            # 轉換為 response 格式
+            for group_data in groups_dict.values():
+                selected_option_groups.append(
+                    ReservationSelectedOptionGroupResponse(**group_data)
+                )
 
         result.append(
             ReservationListResponse(
                 reservation_id=reservation.reservation_id,
                 reservation_item_id=reservation.reservation_item_id,
+                price=reservation.price,
                 service_name=reservation.service_name,
+                notes=reservation.notes,
                 reservation_date=reservation.reservation_date,
                 start_time=reservation.start_time,
                 end_time=reservation.end_time,
@@ -452,7 +514,7 @@ def get_user_reservations_in_bot_list(
                 payment_method=reservation.payment_method,
                 payment_status=reservation.payment_status,
                 created_at=reservation.created_at,
-                selected_options=selected_options,
+                selected_option_groups=selected_option_groups,
             )
         )
 
