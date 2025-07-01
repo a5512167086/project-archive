@@ -67,10 +67,7 @@ class ReservationItemSchedule(SQLModel, table=True):
     start_time: time
     end_time: time
     capacity: int = 1
-    is_closed: bool = False
-    note: Optional[str] = None
     is_active: bool = True
-    latest_reservation_time: Optional[datetime] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -85,6 +82,22 @@ class ReservationItemListView(SQLModel, table=True):
     reservation_description: str
     duration_minutes: int
     price: int
+
+
+class ReservationListView(SQLModel, table=True):
+    __tablename__ = "vs_reservation_list"
+
+    reservation_id: UUID = Field(primary_key=True)
+    object_id: int
+    reservation_item_id: UUID
+    service_name: str
+    reservation_date: date
+    start_time: time
+    end_time: time
+    status: str
+    payment_method: Optional[str]
+    payment_status: Optional[str]
+    created_at: datetime
 
 
 class ReservationDetail(SQLModel, table=True):

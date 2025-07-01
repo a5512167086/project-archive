@@ -33,10 +33,7 @@ class ReservationItemScheduleCreate(BaseModel):
     start_time: time
     end_time: time
     capacity: Optional[int] = 1
-    is_closed: Optional[bool] = False
-    note: Optional[str] = None
     is_active: Optional[bool] = True
-    latest_reservation_time: Optional[datetime] = None
 
 
 class ReservationItemCreate(BaseModel):
@@ -74,7 +71,7 @@ class ReservationItemResponse(BaseModel):
 
 class ReservationItemDelete(BaseModel):
     bot_uuid: UUID
-    delete_object_list: List[int]
+    delete_reservation_item_list: List[UUID]
 
 
 class DetailUpdate(BaseModel):
@@ -113,14 +110,12 @@ class ScheduleUpdate(BaseModel):
     start_time: Optional[time] = None
     end_time: Optional[time] = None
     capacity: Optional[int] = None
-    is_closed: Optional[bool] = None
-    note: Optional[str] = None
     is_active: Optional[bool] = None
 
 
 class ReservationItemPatch(BaseModel):
     bot_uuid: UUID
-    object_id: int
+    reservation_item_id: UUID
     detail: Optional[DetailUpdate] = None
     option_groups: Optional[List[OptionGroupUpdate]] = None
     schedules: Optional[List[ScheduleUpdate]] = None
@@ -172,3 +167,32 @@ class TimeSlot(BaseModel):
 class DailyAvailableSlots(BaseModel):
     date: date
     times: List[TimeSlot]
+
+
+class ReservationOptionResponse(BaseModel):
+    option_group_id: UUID
+    group_name: str
+    option_id: UUID
+    option_name: str
+
+
+class ReservationListResponse(BaseModel):
+    reservation_id: UUID
+    reservation_item_id: UUID
+    service_name: str
+    reservation_date: date
+    start_time: time
+    end_time: time
+    status: str
+    payment_method: Optional[str]
+    payment_status: Optional[str]
+    created_at: datetime
+    selected_options: List[ReservationOptionResponse] = []
+
+
+class TempReservationItemPatch(BaseModel):
+    bot_uuid: UUID
+    object_id: int
+    detail: Optional[DetailUpdate] = None
+    option_groups: Optional[List[OptionGroupUpdate]] = None
+    schedules: Optional[List[ScheduleUpdate]] = None

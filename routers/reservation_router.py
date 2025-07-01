@@ -12,16 +12,19 @@ from schemas.reservation_schema import (
     ReservationItemDelete,
     ReservationItemPatch,
     ReservationItemResponse,
+    ReservationListResponse,
     ReservationResponse,
 )
 from services.reservation_service import (
     create_user_reservation,
-    delete_reservation_item_by_object_id,
+    delete_reservation_item_by_reservation_item_id,
     delete_user_reservation,
     get_available_times_for_item,
+    get_bot_reservations_list,
     get_reservation_items_by_bot_class_id,
+    get_user_reservations_in_bot_list,
     insert_new_reservation_item,
-    update_reservation_item_by_object_id,
+    update_reservation_item_by_reservation_item_id,
 )
 
 reservation_router = APIRouter(prefix="/reservations", tags=["reservations"])
@@ -36,27 +39,41 @@ def list_reservation_items(session: SessionDep, bot_uuid: UUID):
 
 @reservation_router.post("/items")
 def create_reservation_item(
-    session: SessionDep, reservation_item: ReservationItemCreate
+    session: SessionDep,
+    reservation_item: ReservationItemCreate,
+    current_user: Annotated[dict, Depends(get_current_user)],
 ):
-    insert_new_reservation_item(session, reservation_item)
+    user_id = current_user["user_id"]
+    insert_new_reservation_item(session, reservation_item, user_id)
     session.commit()
 
 
 @reservation_router.delete("/items")
 def delete_reservation_item(
-    session: SessionDep, delete_reservation: ReservationItemDelete
+    session: SessionDep,
+    delete_reservation: ReservationItemDelete,
+    current_user: Annotated[dict, Depends(get_current_user)],
 ):
-    delete_reservation_item_by_object_id(
-        session, delete_reservation.bot_uuid, delete_reservation.delete_object_list
+    user_id = current_user["user_id"]
+    delete_reservation_item_by_reservation_item_id(
+        session,
+        delete_reservation.bot_uuid,
+        delete_reservation.delete_reservation_item_list,
+        user_id,
     )
     session.commit()
 
 
 @reservation_router.patch("/items")
 def update_reservation_item(
-    session: SessionDep, reservation_item_patch: ReservationItemPatch
+    session: SessionDep,
+    reservation_item_patch: ReservationItemPatch,
+    current_user: Annotated[dict, Depends(get_current_user)],
 ):
-    update_reservation_item_by_object_id(session, reservation_item_patch)
+    user_id = current_user["user_id"]
+    update_reservation_item_by_reservation_item_id(
+        session, reservation_item_patch, user_id
+    )
     session.commit()
 
 
@@ -103,3 +120,29 @@ def delete_reservation(
     print(f"Deleting reservation {reservation_id} for user {user_id}")
     delete_user_reservation(session, reservation_id)
     session.commit()
+
+
+@reservation_router.get(
+    "/user/{bot_uuid}", response_model=List[ReservationListResponse]
+)
+def get_user_reservations_in_bot(
+    session: SessionDep,
+    bot_uuid: UUID,
+    current_user: Annotated[dict, Depends(get_current_user)],
+):
+    """Get user's reservations in a specific bot"""
+    user_id = current_user["user_id"]
+    reservations = get_user_reservations_in_bot_list(session, bot_uuid, user_id)
+    return reservations
+
+
+@reservation_router.get("/{bot_uuid}", response_model=List[ReservationListResponse])
+def get_bot_reservations(
+    session: SessionDep,
+    bot_uuid: UUID,
+    current_user: Annotated[dict, Depends(get_current_user)],
+):
+    """Get all reservations for a bot (bot owner only)"""
+    user_id = current_user["user_id"]
+    reservations = get_bot_reservations_list(session, bot_uuid, user_id)
+    return reservations

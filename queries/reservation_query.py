@@ -5,12 +5,16 @@ from uuid import UUID
 from sqlmodel import Session, func, select
 
 from models.class_model import SubClassView
+from models.class_object_relation_model import ClassObjectRelation
+from models.object_model import Object
 from models.reservation_model import (
     ReservationDetail,
     ReservationItemDetail,
     ReservationItemListView,
     ReservationItemOption,
     ReservationItemSchedule,
+    ReservationListView,
+    ReservationOption,
     ReservationOptionGroup,
 )
 from queries.entity_query import get_entity_id_by_name
@@ -341,8 +345,154 @@ def get_reservation_item_details_by_uuid(
     ).first()
 
 
+def get_object_ids_by_reservation_item_ids(
+    session: Session, reservation_item_ids: List[UUID]
+) -> List[int]:
+    """Get object_ids by reservation_item_ids"""
+    result = session.exec(
+        select(ReservationItemDetail.object_id).where(
+            ReservationItemDetail.reservation_item_id.in_(reservation_item_ids)
+        )
+    ).all()
+    return list(result)
+
+
+def get_object_id_by_reservation_item_id(
+    session: Session, reservation_item_id: UUID
+) -> int | None:
+    """Get object_id by reservation_item_id"""
+    result = session.exec(
+        select(ReservationItemDetail.object_id).where(
+            ReservationItemDetail.reservation_item_id == reservation_item_id
+        )
+    ).first()
+    return result
+
+
 def get_reservation_by_id(
     session: Session, reservation_id: UUID
 ) -> ReservationDetail | None:
     """Get reservation by ID"""
     return session.get(ReservationDetail, reservation_id)
+
+
+def get_bot_reservations(
+    session: Session, bot_class_id: int
+) -> List[ReservationListView]:
+    """Get all reservations for a bot (for bot owner)"""
+    # 獲取該 bot 下的所有預約項目的 object_ids
+    reservation_item_object_ids = session.exec(
+        select(ClassObjectRelation.object_id).where(
+            ClassObjectRelation.class_id == bot_class_id
+        )
+    ).all()
+
+    if not reservation_item_object_ids:
+        return []
+
+    # 獲取這些預約項目對應的 reservation_item_ids
+    reservation_item_ids = session.exec(
+        select(ReservationItemDetail.reservation_item_id).where(
+            ReservationItemDetail.object_id.in_(reservation_item_object_ids)
+        )
+    ).all()
+
+    if not reservation_item_ids:
+        return []
+
+    # 查詢所有相關的預約
+    reservations = session.exec(
+        select(ReservationListView)
+        .where(ReservationListView.reservation_item_id.in_(reservation_item_ids))
+        .order_by(ReservationListView.created_at.desc())
+    ).all()
+
+    return list(reservations)
+
+
+def get_user_reservations_in_bot(
+    session: Session, user_id: UUID, bot_class_id: int
+) -> List[ReservationListView]:
+    """Get user's reservations in a specific bot"""
+    # 獲取該 bot 下的所有預約項目的 object_ids
+    reservation_item_object_ids = session.exec(
+        select(ClassObjectRelation.object_id).where(
+            ClassObjectRelation.class_id == bot_class_id
+        )
+    ).all()
+
+    if not reservation_item_object_ids:
+        return []
+
+    # 獲取這些預約項目對應的 reservation_item_ids
+    reservation_item_ids = session.exec(
+        select(ReservationItemDetail.reservation_item_id).where(
+            ReservationItemDetail.object_id.in_(reservation_item_object_ids)
+        )
+    ).all()
+
+    if not reservation_item_ids:
+        return []
+
+    # 查詢該用戶在這個 bot 下的預約
+    user_reservation_object_ids = session.exec(
+        select(Object.object_id).where(Object.owner_id == str(user_id))
+    ).all()
+
+    if not user_reservation_object_ids:
+        return []
+
+    reservations = session.exec(
+        select(ReservationListView)
+        .where(
+            ReservationListView.reservation_item_id.in_(reservation_item_ids),
+            ReservationListView.object_id.in_(user_reservation_object_ids),
+        )
+        .order_by(ReservationListView.created_at.desc())
+    ).all()
+
+    return list(reservations)
+
+
+def get_reservation_selected_options(
+    session: Session, reservation_object_ids: List[int]
+) -> dict[int, List[dict]]:
+    """Get selected options for reservations"""
+    if not reservation_object_ids:
+        return {}
+
+    # 查詢選中的選項
+    selected_options = session.exec(
+        select(
+            ReservationOption.object_id,
+            ReservationOption.option_group_id,
+            ReservationOptionGroup.group_name,
+            ReservationOption.option_id,
+            ReservationItemOption.option_name,
+        )
+        .join(
+            ReservationOptionGroup,
+            ReservationOption.option_group_id == ReservationOptionGroup.option_group_id,
+        )
+        .join(
+            ReservationItemOption,
+            ReservationOption.option_id == ReservationItemOption.option_id,
+        )
+        .where(ReservationOption.object_id.in_(reservation_object_ids))
+    ).all()
+
+    # 按 object_id 分組
+    options_by_object_id = {}
+    for option in selected_options:
+        object_id = option[0]
+        if object_id not in options_by_object_id:
+            options_by_object_id[object_id] = []
+
+        options_by_object_id[object_id].append({
+            "option_group_id": option[1],
+            "group_name": option[2],
+            "option_id": option[3],
+            "option_name": option[4],
+        })
+
+    return options_by_object_id

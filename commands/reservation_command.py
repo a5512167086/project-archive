@@ -100,10 +100,7 @@ def insert_reservation_item(
             start_time=schedule.start_time,
             end_time=schedule.end_time,
             capacity=schedule.capacity,
-            is_closed=schedule.is_closed,
-            note=schedule.note,
             is_active=schedule.is_active,
-            latest_reservation_time=schedule.latest_reservation_time,
             created_at=now,
             updated_at=now,
         )
@@ -222,12 +219,16 @@ def update_reservation_item(
                 ReservationItemSchedule.object_id == object_id
             )
         )
-        new_schedules = [
-            ReservationItemSchedule(
-                object_id=object_id, **schedule.model_dump(exclude_unset=True)
-            )
-            for schedule in reservation_item_patch.schedules
-        ]
+        now = datetime.now(TAIWAN_TZ)
+        new_schedules = []
+        for schedule in reservation_item_patch.schedules:
+            schedule_data = schedule.model_dump(exclude_unset=True)
+            schedule_data.update({
+                "object_id": object_id,
+                "created_at": now,
+                "updated_at": now,
+            })
+            new_schedules.append(ReservationItemSchedule(**schedule_data))
         session.add_all(new_schedules)
 
 

@@ -17,7 +17,10 @@ from exception import GlobalErrorException
 from queries.group_query import is_user_in_group
 from queries.reservation_query import (
     get_available_schedules_for_item,
+    get_bot_reservations,
     get_concurrent_reservations_count,
+    get_object_id_by_reservation_item_id,
+    get_object_ids_by_reservation_item_ids,
     get_reservation_by_id,
     get_reservation_class_id_by_bot_class_id,
     get_reservation_item_by_id,
@@ -26,16 +29,21 @@ from queries.reservation_query import (
     get_reservation_item_options_by_ids,
     get_reservation_item_schedule_by_date,
     get_reservation_items,
+    get_reservation_selected_options,
     get_reservations_count_batch,
+    get_user_reservations_in_bot,
 )
 from schemas.reservation_schema import (
     DailyAvailableSlots,
     ReservationCreate,
     ReservationItemCreate,
     ReservationItemPatch,
+    ReservationListResponse,
+    ReservationOptionResponse,
+    TempReservationItemPatch,
     TimeSlot,
 )
-from services.bot_service import validate_line_bot_exists
+from services.bot_service import validate_bot_ownership, validate_line_bot_exists
 from services.group_service import validate_group_exist_in_bot
 
 
@@ -71,9 +79,11 @@ def get_reservation_items_by_bot_class_id(session: Session, bot_uuid: UUID):
 
 
 def insert_new_reservation_item(
-    session: Session, new_reservation_item: ReservationItemCreate
+    session: Session, new_reservation_item: ReservationItemCreate, current_user_id: UUID
 ):
     bot = validate_line_bot_exists(session, new_reservation_item.bot_uuid)
+    validate_bot_ownership(session, current_user_id, bot.bot_detail_id)
+
     reservation_item_class_id = validate_reservation_item_class(session, bot.class_id)
     insert_reservation_item(
         session=session,
@@ -87,20 +97,56 @@ def insert_new_reservation_item(
     )
 
 
-def delete_reservation_item_by_object_id(
-    session: Session, bot_uuid: UUID, object_id_list: list[int]
+def delete_reservation_item_by_reservation_item_id(
+    session: Session,
+    bot_uuid: UUID,
+    reservation_item_id_list: List[UUID],
+    current_user_id: UUID,
 ):
     bot = validate_line_bot_exists(session, bot_uuid)
+    validate_bot_ownership(session, current_user_id, bot.bot_detail_id)
+
     reservation_item_class_id = validate_reservation_item_class(session, bot.class_id)
+
+    # Convert reservation_item_ids to object_ids
+
+    object_id_list = get_object_ids_by_reservation_item_ids(
+        session, reservation_item_id_list
+    )
+
     delete_reservation_items(session, reservation_item_class_id, object_id_list)
 
 
-def update_reservation_item_by_object_id(
-    session: Session, reservation_item_patch: ReservationItemPatch
+def update_reservation_item_by_reservation_item_id(
+    session: Session,
+    reservation_item_patch: ReservationItemPatch,
+    current_user_id: UUID,
 ):
     bot = validate_line_bot_exists(session, reservation_item_patch.bot_uuid)
+    validate_bot_ownership(session, current_user_id, bot.bot_detail_id)
     validate_reservation_item_class(session, bot.class_id)
-    update_reservation_item(session, reservation_item_patch)
+
+    # Convert reservation_item_id to object_id
+
+    object_id = get_object_id_by_reservation_item_id(
+        session, reservation_item_patch.reservation_item_id
+    )
+
+    if not object_id:
+        raise GlobalErrorException(
+            error_code=ErrorCode.RESERVATION_ITEM_NOT_FOUND,
+            error_message="Reservation item not found",
+        )
+
+    object_patch = TempReservationItemPatch(
+        bot_uuid=reservation_item_patch.bot_uuid,
+        object_id=object_id,
+        detail=reservation_item_patch.detail,
+        option_groups=reservation_item_patch.option_groups,
+        schedules=reservation_item_patch.schedules,
+    )
+
+    update_reservation_item(session, object_patch)
 
 
 def create_user_reservation(
@@ -136,15 +182,6 @@ def create_user_reservation(
         raise GlobalErrorException(
             error_code=ErrorCode.RESERVATION_TIME_INVALID,
             error_message="Reservation time is outside of schedule",
-        )
-
-    if (
-        schedule.latest_reservation_time
-        and datetime.now(TAIWAN_TZ) > schedule.latest_reservation_time
-    ):
-        raise GlobalErrorException(
-            error_code=ErrorCode.RESERVATION_TIME_INVALID,
-            error_message="Booking window has closed",
         )
 
     concurrent_reservations = get_concurrent_reservations_count(
@@ -229,7 +266,7 @@ def get_available_times_for_item(
     specific_schedules = {}
 
     for schedule in all_schedules:
-        if schedule.is_closed:
+        if not schedule.is_active:
             continue
 
         if schedule.schedule_type == "weekly":
@@ -308,3 +345,99 @@ def delete_user_reservation(session: Session, reservation_id: UUID):
         )
 
     delete_reservation_by_id(session, reservation_id)
+
+
+def get_bot_reservations_list(
+    session: Session, bot_uuid: UUID, current_user_id: UUID
+) -> List[ReservationListResponse]:
+    """Get all reservations for a bot (bot owner only)"""
+    bot = validate_line_bot_exists(session, bot_uuid)
+    bot_group = validate_group_exist_in_bot(session, bot.class_id, "Users")
+    if not is_user_in_group(session, bot_group.group_id, current_user_id):
+        raise GlobalErrorException(
+            error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
+            error_message="User is not a member of this bot's group.",
+        )
+    # 獲取所有預約
+    reservations = get_bot_reservations(session, bot.class_id)
+
+    if not reservations:
+        return []
+
+    # 獲取所有預約的選項
+    reservation_object_ids = [r.object_id for r in reservations]
+    options_map = get_reservation_selected_options(session, reservation_object_ids)
+
+    # 構建回應
+    result = []
+    for reservation in reservations:
+        selected_options = []
+        if reservation.object_id in options_map:
+            for option_data in options_map[reservation.object_id]:
+                selected_options.append(ReservationOptionResponse(**option_data))
+
+        result.append(
+            ReservationListResponse(
+                reservation_id=reservation.reservation_id,
+                reservation_item_id=reservation.reservation_item_id,
+                service_name=reservation.service_name,
+                reservation_date=reservation.reservation_date,
+                start_time=reservation.start_time,
+                end_time=reservation.end_time,
+                status=reservation.status,
+                payment_method=reservation.payment_method,
+                payment_status=reservation.payment_status,
+                created_at=reservation.created_at,
+                selected_options=selected_options,
+            )
+        )
+
+    return result
+
+
+def get_user_reservations_in_bot_list(
+    session: Session, bot_uuid: UUID, current_user_id: UUID
+) -> List[ReservationListResponse]:
+    """Get user's reservations in a specific bot"""
+    bot = validate_line_bot_exists(session, bot_uuid)
+    bot_group = validate_group_exist_in_bot(session, bot.class_id, "Users")
+    if not is_user_in_group(session, bot_group.group_id, current_user_id):
+        raise GlobalErrorException(
+            error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
+            error_message="User is not a member of this bot's group.",
+        )
+    # 獲取用戶在該 bot 下的預約
+    reservations = get_user_reservations_in_bot(session, current_user_id, bot.class_id)
+
+    if not reservations:
+        return []
+
+    # 獲取所有預約的選項
+    reservation_object_ids = [r.object_id for r in reservations]
+    options_map = get_reservation_selected_options(session, reservation_object_ids)
+
+    # 構建回應
+    result = []
+    for reservation in reservations:
+        selected_options = []
+        if reservation.object_id in options_map:
+            for option_data in options_map[reservation.object_id]:
+                selected_options.append(ReservationOptionResponse(**option_data))
+
+        result.append(
+            ReservationListResponse(
+                reservation_id=reservation.reservation_id,
+                reservation_item_id=reservation.reservation_item_id,
+                service_name=reservation.service_name,
+                reservation_date=reservation.reservation_date,
+                start_time=reservation.start_time,
+                end_time=reservation.end_time,
+                status=reservation.status,
+                payment_method=reservation.payment_method,
+                payment_status=reservation.payment_status,
+                created_at=reservation.created_at,
+                selected_options=selected_options,
+            )
+        )
+
+    return result
