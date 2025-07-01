@@ -122,11 +122,10 @@ export interface CreateReservationPayload {
   bot_uuid: string;
   reservation_item_id: string;
   reservation_date: string; // YYYY-MM-DD 格式
-  start_time: string; // HH:mm:ss 格式 (時間部分，不包含日期)
-  payment_method: "cash" | "credit_card" | "bank_transfer";
-  payment_status: "paid" | "unpaid" | "pending";
+  start_time: string; // ISO 8601 格式或 HH:mm:ss 格式
+  payment_method: "cash" | "bank_transfer";
   option_values: CreateReservationOptionValue[];
-  note?: string;
+  notes?: string;
 }
 
 export interface CreateReservationResponse {
@@ -134,6 +133,37 @@ export interface CreateReservationResponse {
   status: string;
   message: string;
 }
+
+// 用戶預約記錄相關類型
+export interface UserReservationSelectedOption {
+  option_id: string;
+  option_name: string;
+  price?: number; // 選項價格
+}
+
+export interface UserReservationOptionGroup {
+  option_group_id: string;
+  group_name: string;
+  selected_options: UserReservationSelectedOption[];
+}
+
+export interface UserReservation {
+  reservation_id: string;
+  reservation_item_id: string;
+  service_name: string;
+  reservation_date: string; // YYYY-MM-DD 格式
+  start_time: string; // HH:mm:ss 格式
+  end_time: string; // HH:mm:ss 格式
+  status: "pending" | "confirmed" | "cancelled" | "completed";
+  payment_method: "cash" | "credit_card" | "bank_transfer";
+  payment_status: "paid" | "unpaid" | "pending" | null;
+  created_at: string; // ISO 8601 格式
+  selected_option_groups: UserReservationOptionGroup[];
+  price: number; // 預約總價格
+  notes?: string; // 備註
+}
+
+export type UserReservationsResponse = UserReservation[];
 
 export const reservationApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -199,7 +229,10 @@ export const reservationApi = baseApi.injectEndpoints({
         method: "POST",
         body: reservation,
       }),
-      invalidatesTags: ["Reservation"],
+      invalidatesTags: (result, error, { bot_uuid }) => [
+        "Reservation",
+        { type: "UserReservation", id: `user-${bot_uuid}` },
+      ],
     }),
 
     // 預約服務項目 endpoints
@@ -214,6 +247,18 @@ export const reservationApi = baseApi.injectEndpoints({
         `/reservations/items/${reservationItemId}/available-times`,
       providesTags: (result, error, reservationItemId) => [
         { type: "ReservationItem", id: `times-${reservationItemId}` },
+      ],
+    }),
+
+    // 用戶預約記錄 endpoints
+    getUserReservations: builder.query<UserReservationsResponse, string>({
+      query: (botUuid) => `/reservations/user/${botUuid}`,
+      providesTags: (result, error, botUuid) => [
+        { type: "UserReservation", id: `user-${botUuid}` },
+        ...(result || []).map((reservation) => ({
+          type: "UserReservation" as const,
+          id: reservation.reservation_id,
+        })),
       ],
     }),
 
@@ -242,6 +287,7 @@ export const {
   useCreateNewReservationMutation,
   useGetReservationItemsQuery,
   useGetAvailableTimesQuery,
+  useGetUserReservationsQuery,
   useGetBotInfoQuery,
   useCustomerLoginMutation,
 } = reservationApi;

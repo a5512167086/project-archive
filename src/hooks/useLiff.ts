@@ -22,6 +22,7 @@ interface LiffState {
 
 export const useLiff = () => {
   const [botUUID, setBotUUID] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [state, setState] = useState<LiffState>({
     isInitialized: false,
     isLoggedIn: false,
@@ -43,9 +44,9 @@ export const useLiff = () => {
   const [customerLogin, { isLoading: isLoginLoading }] =
     useCustomerLoginMutation();
 
-  // 初次載入時取得 botUUID
+  // 初次載入時檢查現有的 token 和 botUUID
   useEffect(() => {
-    const initializeBotUUID = async () => {
+    const initializeAuth = async () => {
       try {
         // 初始化 eruda (調試工具)
         if (import.meta.env.DEV) {
@@ -72,24 +73,51 @@ export const useLiff = () => {
           }
         }
 
-        // 如果 URL 中有 bot_uuid，保存到 localStorage 並清理 URL
-        if (foundBotUUID) {
+        const existingBotUUID = localStorage.getItem("bot_uuid");
+        const existingAccessToken = localStorage.getItem("access_token");
+
+        // 如果 URL 中有新的 bot_uuid，且與現有的不同，需要重新登入
+        if (foundBotUUID && foundBotUUID !== existingBotUUID) {
+          console.log(`🔄 Bot UUID 已更新: ${existingBotUUID} -> ${foundBotUUID}`);
+          // 清除舊的 tokens
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          localStorage.removeItem("token");
           localStorage.setItem("bot_uuid", foundBotUUID);
-          // 清理 URL 參數
+          setAccessToken(null);
+        } else if (foundBotUUID) {
+          // URL 中有相同的 bot_uuid，保存並清理 URL
+          localStorage.setItem("bot_uuid", foundBotUUID);
+        } else {
+          // URL 中沒有才從 localStorage 取得
+          foundBotUUID = existingBotUUID;
+        }
+
+        // 清理 URL 參數
+        if (urlParams.has("bot_uuid") || urlParams.has("liff.state")) {
           const url = new URL(window.location.href);
           url.searchParams.delete("bot_uuid");
           url.searchParams.delete("liff.state");
           window.history.replaceState({}, "", url.toString());
-        } else {
-          // URL 中沒有才從 localStorage 取得
-          foundBotUUID = localStorage.getItem("bot_uuid");
         }
 
         if (!foundBotUUID) {
           throw new Error("缺少 bot_uuid 參數");
         }
 
-        console.log(`📱 開始初始化 LIFF，bot_uuid: ${foundBotUUID}`);
+        // 檢查是否有有效的 access token
+        if (existingAccessToken && foundBotUUID === existingBotUUID) {
+          console.log("✅ 發現現有的 access token，跳過登入流程");
+          setAccessToken(existingAccessToken);
+          setState(prev => ({
+            ...prev,
+            isInitialized: true,
+            isLoggedIn: true,
+            isLoading: false,
+          }));
+        }
+
+        console.log(`📱 設置 bot_uuid: ${foundBotUUID}`);
         setBotUUID(foundBotUUID);
       } catch (error) {
         const errorMessage =
@@ -103,12 +131,12 @@ export const useLiff = () => {
       }
     };
 
-    initializeBotUUID();
+    initializeAuth();
   }, []);
 
-  // 當 botInfo 可用時，初始化 LIFF
+  // 當 botInfo 可用時，初始化 LIFF (只有在沒有 access token 時)
   useEffect(() => {
-    if (!botInfo || !botUUID) return;
+    if (!botInfo || !botUUID || accessToken) return;
 
     const initLiff = async () => {
       try {
@@ -164,6 +192,7 @@ export const useLiff = () => {
           refresh_token_length: loginResult.refresh_token.length,
         });
 
+        setAccessToken(loginResult.access_token);
         setState({
           isInitialized: true,
           isLoggedIn: true,
@@ -185,7 +214,7 @@ export const useLiff = () => {
     };
 
     initLiff();
-  }, [botInfo, botUUID, customerLogin]);
+  }, [botInfo, botUUID, customerLogin, accessToken]);
 
   // 處理 bot 查詢錯誤
   useEffect(() => {

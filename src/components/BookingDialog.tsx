@@ -43,6 +43,7 @@ export function BookingDialog({
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [step, setStep] = useState<BookingStep>("date");
   const [optionValues, setOptionValues] = useState<Record<string, string>>({});
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "bank_transfer">("cash");
   const [note, setNote] = useState<string>("");
   const [submissionStatus, setSubmissionStatus] = useState<
     "idle" | "success" | "error"
@@ -81,6 +82,7 @@ export function BookingDialog({
     setSelectedTime("");
     setStep("date");
     setOptionValues({});
+    setPaymentMethod("cash");
     setNote("");
     setSubmissionStatus("idle");
     setErrorMessage("");
@@ -123,10 +125,9 @@ export function BookingDialog({
         reservation_item_id: reservationItem.reservation_item_id,
         reservation_date: selectedDate,
         start_time: selectedTime, // 直接使用時間格式，不包含日期
-        payment_method: "cash" as const,
-        payment_status: "unpaid" as const,
+        payment_method: paymentMethod,
         option_values: optionValuesArray,
-        note: note.trim() || undefined,
+        notes: note.trim() || undefined,
       };
 
       await createReservation(reservationPayload).unwrap();
@@ -712,6 +713,36 @@ export function BookingDialog({
                       })}
                   </>
                 )}
+
+                {/* 付款方式選擇 */}
+                <hr className="my-2" />
+                <div className="space-y-2">
+                  <span className="font-medium">付款方式：</span>
+                  <div className="space-y-2">
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="payment_method"
+                        value="cash"
+                        checked={paymentMethod === "cash"}
+                        onChange={(e) => setPaymentMethod(e.target.value as "cash" | "bank_transfer")}
+                        className="text-blue-600"
+                      />
+                      <span>現金付款</span>
+                    </label>
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="payment_method"
+                        value="bank_transfer"
+                        checked={paymentMethod === "bank_transfer"}
+                        onChange={(e) => setPaymentMethod(e.target.value as "cash" | "bank_transfer")}
+                        className="text-blue-600"
+                      />
+                      <span>銀行轉帳</span>
+                    </label>
+                  </div>
+                </div>
 
                 {note && (
                   <>
