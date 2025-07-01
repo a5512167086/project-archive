@@ -48,30 +48,37 @@ export interface LoginResponse {
 // 預約服務項目相關類型 - 基於實際 API 回應結構
 export interface ReservationItemOption {
   option_id: string;
-  object_id: number;
+  option_group_id: string;
   option_name: string;
   option_description: string;
-  type: "text" | "select" | "number";
   price: number;
-  is_required: boolean;
+  display_order: number;
   is_active: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface ReservationItemOptionGroup {
+  option_group_id: string;
+  group_name: string;
+  group_description: string;
+  selection_type: "single" | "multiple";
+  is_required: boolean;
+  display_order: number;
+  is_active: boolean;
+  options: ReservationItemOption[];
 }
 
 export interface ReservationItemSchedule {
   reservation_item_schedule_id: string;
   object_id: number;
   schedule_type: "weekly" | "daily";
-  schedule_date: string | null;
   weekday: number; // 1=Monday, 2=Tuesday, etc.
+  schedule_date: string | null;
   start_time: string; // HH:mm:ss format
   end_time: string; // HH:mm:ss format
   capacity: number;
-  is_closed: boolean;
   is_active: boolean;
-  note: string | null;
-  latest_reservation_time: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -84,7 +91,7 @@ export interface ReservationItem {
   reservation_description: string;
   duration_minutes: number;
   price: number;
-  options: ReservationItemOption[];
+  option_groups: ReservationItemOptionGroup[];
   schedules: ReservationItemSchedule[];
 }
 

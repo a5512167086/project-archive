@@ -39,7 +39,7 @@ function BookingContent() {
       item: selectedItem?.reservation_name,
     });
     // 預約成功後可以執行的操作，比如刷新數據等
-    alert(`預約成功！服務：${selectedItem?.reservation_name}`);
+    // Toast 通知已經在 BookingDialog 中處理
   };
 
   if (isLoading) {
@@ -85,8 +85,8 @@ function BookingContent() {
           ) : (
             reservationItems.map((item) => {
               // 檢查是否有額外付費選項
-              const hasPayableOptions = item.options.some(
-                (opt) => opt.price > 0
+              const hasPayableOptions = item.option_groups.some((group) =>
+                group.options.some((opt) => opt.price > 0)
               );
 
               return (
