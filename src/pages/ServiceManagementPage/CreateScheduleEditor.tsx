@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   TextField,
@@ -27,20 +28,21 @@ interface CreateScheduleEditorProps {
   onChange: (schedules: CreateScheduleData[]) => void
 }
 
-const weekdayOptions = [
-  { value: 0, label: '週日' },
-  { value: 1, label: '週一' },
-  { value: 2, label: '週二' },
-  { value: 3, label: '週三' },
-  { value: 4, label: '週四' },
-  { value: 5, label: '週五' },
-  { value: 6, label: '週六' }
-]
-
 export const CreateScheduleEditor: React.FC<CreateScheduleEditorProps> = ({
   schedules,
   onChange
 }) => {
+  const { t } = useTranslation()
+
+  const weekdayOptions = [
+    { value: 0, label: t('serviceManagementPage.sunday') },
+    { value: 1, label: t('serviceManagementPage.monday') },
+    { value: 2, label: t('serviceManagementPage.tuesday') },
+    { value: 3, label: t('serviceManagementPage.wednesday') },
+    { value: 4, label: t('serviceManagementPage.thursday') },
+    { value: 5, label: t('serviceManagementPage.friday') },
+    { value: 6, label: t('serviceManagementPage.saturday') }
+  ]
   const handleAddSchedule = () => {
     const newSchedule: CreateScheduleData = {
       weekdays: [],
@@ -74,13 +76,15 @@ export const CreateScheduleEditor: React.FC<CreateScheduleEditorProps> = ({
         alignItems="center"
         mb={2}
       >
-        <Typography variant="h6">預設時段</Typography>
+        <Typography variant="h6">
+          {t('serviceManagementPage.defaultSchedule')}
+        </Typography>
         <Button
           startIcon={<AddIcon />}
           onClick={handleAddSchedule}
           variant="outlined"
         >
-          新增時段
+          {t('serviceManagementPage.addTimeSlot')}
         </Button>
       </Box>
 
@@ -92,7 +96,9 @@ export const CreateScheduleEditor: React.FC<CreateScheduleEditorProps> = ({
               alignItems="center"
               justifyContent="space-between"
             >
-              <Typography variant="subtitle2">時段 {index + 1}</Typography>
+              <Typography variant="subtitle2">
+                {t('serviceManagementPage.timeSlot')} {index + 1}
+              </Typography>
               <IconButton
                 size="small"
                 onClick={() => handleDeleteSchedule(index)}
@@ -102,7 +108,9 @@ export const CreateScheduleEditor: React.FC<CreateScheduleEditorProps> = ({
             </Box>
 
             <FormControl fullWidth>
-              <InputLabel>選擇星期</InputLabel>
+              <InputLabel>
+                {t('serviceManagementPage.selectWeekday')}
+              </InputLabel>
               <Select
                 multiple
                 value={schedule.weekdays}
@@ -113,7 +121,11 @@ export const CreateScheduleEditor: React.FC<CreateScheduleEditorProps> = ({
                     e.target.value as number[]
                   )
                 }
-                input={<OutlinedInput label="選擇星期" />}
+                input={
+                  <OutlinedInput
+                    label={t('serviceManagementPage.selectWeekday')}
+                  />
+                }
                 renderValue={(selected) => (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                     {selected.map((value) => {
@@ -137,7 +149,7 @@ export const CreateScheduleEditor: React.FC<CreateScheduleEditorProps> = ({
 
             <Box display="flex" gap={2}>
               <TextField
-                label="開始時間"
+                label={t('serviceManagementPage.startTime')}
                 type="time"
                 value={schedule.start_time}
                 onChange={(e) =>
@@ -147,7 +159,7 @@ export const CreateScheduleEditor: React.FC<CreateScheduleEditorProps> = ({
                 fullWidth
               />
               <TextField
-                label="結束時間"
+                label={t('serviceManagementPage.endTime')}
                 type="time"
                 value={schedule.end_time}
                 onChange={(e) =>
@@ -157,7 +169,7 @@ export const CreateScheduleEditor: React.FC<CreateScheduleEditorProps> = ({
                 fullWidth
               />
               <TextField
-                label="同時段最大人數"
+                label={t('serviceManagementPage.maxCapacity')}
                 type="number"
                 value={schedule.capacity || 1}
                 onChange={(e) =>

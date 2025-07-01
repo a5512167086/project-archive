@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Button,
@@ -68,6 +69,7 @@ const SortableOptionGroup: React.FC<{
   group: OptionGroupData
   groupIndex: number
   isExpanded: boolean
+  t: (key: string, options?: { [key: string]: string | number }) => string
   onToggleExpand: () => void
   onGroupChange: (
     field: keyof OptionGroupData,
@@ -85,6 +87,7 @@ const SortableOptionGroup: React.FC<{
   group,
   groupIndex,
   isExpanded,
+  t,
   onToggleExpand,
   onGroupChange,
   onDeleteGroup,
@@ -147,7 +150,8 @@ const SortableOptionGroup: React.FC<{
           <DragIcon fontSize="small" color="action" />
         </Box>
         <Typography sx={{ flexGrow: 1, fontWeight: 500 }}>
-          {group.group_name || `群組 ${groupIndex + 1}`}
+          {group.group_name ||
+            t('serviceManagementPage.groupNumber', { number: groupIndex + 1 })}
         </Typography>
         <IconButton
           size="small"
@@ -169,29 +173,34 @@ const SortableOptionGroup: React.FC<{
             }
           }}
         >
-          <Typography>編輯群組設定</Typography>
+          <Typography>
+            {t('serviceManagementPage.editGroupSettings')}
+          </Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Box display="flex" flexDirection="column" gap={2}>
             <TextField
-              label="群組名稱"
+              label={t('serviceManagementPage.groupName')}
               value={group.group_name}
               onChange={(e) => onGroupChange('group_name', e.target.value)}
               required
               fullWidth
             />
             <TextField
-              label="群組描述"
+              label={t('serviceManagementPage.groupDescription')}
               value={group.group_description || ''}
               onChange={(e) =>
                 onGroupChange('group_description', e.target.value)
               }
               fullWidth
             />
-            <FormControl>
-              <InputLabel>選擇類型</InputLabel>
+            <FormControl fullWidth>
+              <InputLabel>
+                {t('serviceManagementPage.selectionType')}
+              </InputLabel>
               <Select
                 value={group.selection_type}
+                label={t('serviceManagementPage.selectionType')}
                 onChange={(e) =>
                   onGroupChange(
                     'selection_type',
@@ -199,10 +208,15 @@ const SortableOptionGroup: React.FC<{
                   )
                 }
               >
-                <MenuItem value="single">單選</MenuItem>
-                <MenuItem value="multiple">多選</MenuItem>
+                <MenuItem value="single">
+                  {t('serviceManagementPage.singleSelection')}
+                </MenuItem>
+                <MenuItem value="multiple">
+                  {t('serviceManagementPage.multipleSelection')}
+                </MenuItem>
               </Select>
             </FormControl>
+
             <FormControlLabel
               control={
                 <Checkbox
@@ -212,7 +226,7 @@ const SortableOptionGroup: React.FC<{
                   }
                 />
               }
-              label="是否必填"
+              label={t('serviceManagementPage.isRequired')}
             />
 
             {/* 選項編輯 */}
@@ -223,13 +237,15 @@ const SortableOptionGroup: React.FC<{
                 alignItems="center"
                 mb={1}
               >
-                <Typography variant="subtitle1">選項</Typography>
+                <Typography variant="subtitle1">
+                  {t('serviceManagementPage.options')}
+                </Typography>
                 <Button
                   size="small"
                   startIcon={<AddIcon />}
                   onClick={onAddOption}
                 >
-                  新增選項
+                  {t('serviceManagementPage.addOption')}
                 </Button>
               </Box>
 
@@ -239,6 +255,7 @@ const SortableOptionGroup: React.FC<{
                   option={option}
                   optionIndex={optionIndex}
                   groupIndex={groupIndex}
+                  t={t}
                   onOptionChange={onOptionChange}
                   onDeleteOption={onDeleteOption}
                 />
@@ -256,13 +273,21 @@ const SortableOption: React.FC<{
   option: OptionData
   optionIndex: number
   groupIndex: number
+  t: (key: string, options?: { [key: string]: string | number }) => string
   onOptionChange: (
     optionIndex: number,
     field: keyof OptionData,
     value: string | number | boolean
   ) => void
   onDeleteOption: (optionIndex: number) => void
-}> = ({ option, optionIndex, groupIndex, onOptionChange, onDeleteOption }) => {
+}> = ({
+  option,
+  optionIndex,
+  groupIndex,
+  t,
+  onOptionChange,
+  onDeleteOption
+}) => {
   const {
     attributes,
     listeners,
@@ -312,7 +337,7 @@ const SortableOption: React.FC<{
           <DragIcon fontSize="small" color="action" />
         </Box>
         <TextField
-          label="選項名稱"
+          label={t('serviceManagementPage.optionName')}
           value={option.option_name}
           onChange={(e) =>
             onOptionChange(optionIndex, 'option_name', e.target.value)
@@ -321,7 +346,7 @@ const SortableOption: React.FC<{
           required
         />
         <TextField
-          label="選項描述"
+          label={t('serviceManagementPage.optionDescription')}
           value={option.option_description || ''}
           onChange={(e) =>
             onOptionChange(optionIndex, 'option_description', e.target.value)
@@ -329,7 +354,7 @@ const SortableOption: React.FC<{
           size="small"
         />
         <TextField
-          label="額外價格"
+          label={t('serviceManagementPage.additionalPrice')}
           type="number"
           value={option.price}
           onChange={(e) =>
@@ -350,6 +375,7 @@ export const OptionGroupEditor: React.FC<OptionGroupEditorProps> = ({
   optionGroups,
   onChange
 }) => {
+  const { t } = useTranslation()
   const [expandedGroup, setExpandedGroup] = useState<number | null>(null)
 
   const sensors = useSensors(
@@ -493,16 +519,12 @@ export const OptionGroupEditor: React.FC<OptionGroupEditorProps> = ({
     const activeId = active.id as string
     const overId = over.id as string
 
-    console.log('Drag end:', { activeId, overId })
-
     // 判断是群组拖拽还是选项拖拽
     if (activeId.startsWith('group-') && overId.startsWith('group-')) {
       // 群组拖拽
-      console.log('Handling group drag')
       handleDragEndGroup(event)
     } else if (activeId.startsWith('option-') && overId.startsWith('option-')) {
       // 选项拖拽 - 需要找到对应的群组
-      console.log('Handling option drag')
       const activeGroupIndex = parseInt(activeId.split('-')[1])
       handleDragEndOption(activeGroupIndex)(event)
     }
@@ -516,13 +538,15 @@ export const OptionGroupEditor: React.FC<OptionGroupEditorProps> = ({
         alignItems="center"
         mb={2}
       >
-        <Typography variant="h6">選項群組</Typography>
+        <Typography variant="h6">
+          {t('serviceManagementPage.optionGroup')}
+        </Typography>
         <Button
           startIcon={<AddIcon />}
           onClick={handleAddGroup}
           variant="outlined"
         >
-          新增群組
+          {t('serviceManagementPage.addOptionGroup')}
         </Button>
       </Box>
 
@@ -547,6 +571,7 @@ export const OptionGroupEditor: React.FC<OptionGroupEditorProps> = ({
               key={groupIndex}
               group={group}
               groupIndex={groupIndex}
+              t={t}
               isExpanded={expandedGroup === groupIndex}
               onToggleExpand={() =>
                 setExpandedGroup(

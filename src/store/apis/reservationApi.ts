@@ -10,9 +10,22 @@ type ReservationOption = {
   option_name: string
   option_description: string
   price: number
-  is_required: boolean
+  display_order: number
   is_active: boolean
-  type: string
+  created_at: string
+  updated_at: string
+}
+
+type ReservationOptionGroup = {
+  object_id: number
+  option_group_id: string
+  group_name: string
+  group_description: string
+  selection_type: 'single' | 'multiple'
+  is_required: boolean
+  display_order: number
+  is_active: boolean
+  options: ReservationOption[]
   created_at: string
   updated_at: string
 }
@@ -26,21 +39,20 @@ type ReservationSchedule = {
   start_time: string
   end_time: string
   capacity: number
-  is_closed: boolean
   is_active: boolean
-  note: string
   created_at: string
   updated_at: string
 }
 
 export type ReservationItemsResponse = {
+  reservation_item_id: string
   object_id: number
   class_id: number
   reservation_name: string
   reservation_description: string
   duration_minutes: number
   price: number
-  options: ReservationOption[]
+  option_groups: ReservationOptionGroup[]
   schedules: ReservationSchedule[]
 }
 
@@ -64,15 +76,12 @@ export type ReservationOptionGroupCreate = {
 
 export type ReservationItemScheduleCreate = {
   schedule_type: 'weekly' | 'specific'
-  weekday?: number | null // 0-6, optional for weekly type
-  schedule_date?: string | null // ISO date string for specific type
-  start_time: string // HH:MM format
-  end_time: string // HH:MM format
+  weekday?: number | null // 0-6, required for weekly type, null for specific
+  schedule_date?: string | null // ISO date string, required for specific type
+  start_time: string // Time format
+  end_time: string // Time format
   capacity?: number
-  is_closed?: boolean
-  note?: string | null
   is_active?: boolean
-  latest_reservation_time?: string | null // ISO datetime string
 }
 
 export type InsertReservationItemRequest = {
@@ -87,10 +96,10 @@ export type InsertReservationItemRequest = {
 
 type DeleteReservationRequest = {
   bot_uuid: string
-  delete_object_list: number[]
+  delete_reservation_item_list: string[]
 }
 
-// PATCH 請求細節型別
+// PATCH 請求細節型別 - 匹配後端 Pydantic schema
 export type ReservationItemDetailUpdate = {
   reservation_name?: string
   reservation_description?: string
@@ -99,40 +108,61 @@ export type ReservationItemDetailUpdate = {
   is_active?: boolean
 }
 
-export type ReservationItemOptionUpdate = {
-  option_id?: string // UUID
-  option_name?: string
-  option_description?: string
-  price?: number
-  type?: string
+export type ReservationItemOptionGroupUpdate = {
+  option_group_id?: string // UUID - 更新現有組時必須提供
+  group_name?: string
+  group_description?: string | null
+  selection_type?: 'single' | 'multiple'
   is_required?: boolean
+  display_order?: number
+  is_active?: boolean
+  options?: ReservationItemOptionUpdate[]
+}
+
+export type ReservationItemOptionUpdate = {
+  option_id?: string // UUID - 更新現有選項時必須提供
+  option_name?: string
+  option_description?: string | null
+  price?: number
+  display_order?: number
   is_active?: boolean
 }
 
 export type ReservationItemScheduleUpdate = {
-  reservation_item_schedule_id?: string // UUID
+  reservation_item_schedule_id?: string // UUID - 更新現有排程時必須提供
   schedule_type?: string
   weekday?: number
-  schedule_date?: string // ISO date string
-  start_time?: string // ISO time string
-  end_time?: string // ISO time string
+  schedule_date?: string // ISO date string for specific type
+  start_time?: string // Time format from backend
+  end_time?: string // Time format from backend
   capacity?: number
-  is_closed?: boolean
-  note?: string
   is_active?: boolean
 }
 
 export type PatchReservationItemRequest = {
   bot_uuid: string
-  object_id: number
+  reservation_item_id: string
   detail?: ReservationItemDetailUpdate
-  options?: ReservationItemOptionUpdate[]
+  option_groups?: ReservationItemOptionGroupUpdate[]
   schedules?: ReservationItemScheduleUpdate[]
 }
 
 export const reservationApi = createApi({
   reducerPath: 'reservationApi',
-  baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_BACKEND_URL }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: import.meta.env.VITE_BACKEND_URL,
+    prepareHeaders: (headers) => {
+      if (!headers.has('Authorization')) {
+        const token =
+          localStorage.getItem('access_token') ||
+          sessionStorage.getItem('access_token')
+        if (token) {
+          headers.set('Authorization', `Bearer ${token}`)
+        }
+      }
+      return headers
+    }
+  }),
   endpoints: (builder) => ({
     getServices: builder.query<
       ReservationItemsResponse[],

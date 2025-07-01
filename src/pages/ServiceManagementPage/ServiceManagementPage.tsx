@@ -13,6 +13,7 @@ import {
   InsertReservationItemRequest,
   ReservationItemsResponse,
   ReservationItemOptionUpdate,
+  ReservationItemOptionGroupUpdate,
   ReservationItemScheduleUpdate,
   ReservationOptionGroupCreate,
   ReservationItemOptionCreate,
@@ -25,7 +26,6 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import { useApiErrorHandler } from '@/hooks/useApiErrorHandler'
-import { OptionEditor } from './OptionEditor'
 import { ScheduleEditor } from './ScheduleEditor'
 import { OptionGroupEditor, OptionGroupData } from './OptionGroupEditor'
 import {
@@ -36,9 +36,9 @@ import {
 const TEXT = {
   title: 'serviceManagementPage.title',
   botPageTitle: 'botPage.myBot',
-  deleteSingleTitle: '刪除服務「{{name}}」？',
-  deleteMultiTitle: '刪除選取的服務？',
-  deleteButtonText: '刪除已選取'
+  deleteSingleTitle: 'serviceManagementPage.deleteSingleTitle',
+  deleteMultiTitle: 'serviceManagementPage.deleteMultiTitle',
+  deleteButtonText: 'serviceManagementPage.deleteButtonText'
 } as const
 
 const ServiceManagementPage = () => {
@@ -142,10 +142,7 @@ const ServiceManagementPage = () => {
             start_time: schedule.start_time,
             end_time: schedule.end_time,
             capacity: schedule.capacity ? Number(schedule.capacity) : 1,
-            is_closed: false,
-            note: null,
-            is_active: true,
-            latest_reservation_time: null
+            is_active: true
           })
         })
       }
@@ -169,11 +166,11 @@ const ServiceManagementPage = () => {
     }
   }
 
-  const handleDelete = async (objectIds: number[]) => {
+  const handleDelete = async (objectIds: string[]) => {
     try {
       await deleteServices({
         bot_uuid: currentBot!.bot_detail_id,
-        delete_object_list: objectIds
+        delete_reservation_item_list: objectIds
       }).unwrap()
 
       if (objectIds.length > 1) {
@@ -199,7 +196,9 @@ const ServiceManagementPage = () => {
     duration_minutes: number
     price: number
     is_active: boolean
-    options: ReservationItemOptionUpdate[]
+    option_groups: (ReservationItemOptionGroupUpdate & {
+      [key: string]: unknown
+    })[]
     schedules: ReservationItemScheduleUpdate[]
   }
 
@@ -208,37 +207,48 @@ const ServiceManagementPage = () => {
   // 編輯時初始化表單
   const handleEdit = (item: ReservationItemsResponse) => {
     setEditTarget(item)
+
+    // 處理 option_groups 結構
+    const convertedOptionGroups: ReservationItemOptionGroupUpdate[] = (
+      item.option_groups || []
+    ).map(
+      (group): ReservationItemOptionGroupUpdate => ({
+        option_group_id: group.option_group_id,
+        group_name: group.group_name ?? '',
+        group_description: group.group_description ?? '',
+        selection_type: group.selection_type ?? 'single',
+        is_required: group.is_required ?? false,
+        display_order: group.display_order ?? 0,
+        is_active: group.is_active ?? true,
+        options: (group.options || []).map(
+          (opt): ReservationItemOptionUpdate => ({
+            option_id: opt.option_id,
+            option_name: opt.option_name ?? '',
+            option_description: opt.option_description ?? '',
+            price: opt.price ?? 0,
+            display_order: opt.display_order ?? 0,
+            is_active: opt.is_active ?? true
+          })
+        )
+      })
+    )
+
     setEditForm({
       reservation_name: item.reservation_name ?? '',
       reservation_description: item.reservation_description ?? '',
       duration_minutes: item.duration_minutes ?? 0,
       price: item.price ?? 0,
       is_active: true,
-      options: (item.options || []).map(
-        (opt): ReservationItemOptionUpdate => ({
-          option_id: opt.option_id,
-          option_name: opt.option_name ?? '', // 保證 string
-          option_description: opt.option_description ?? '',
-          price: opt.price ?? 0,
-          type: opt.type ?? 'text',
-          is_required: opt.is_required ?? false,
-          is_active: opt.is_active ?? true
-        })
-      ),
+      option_groups: convertedOptionGroups,
       schedules: (item.schedules || []).map(
         (sch): ReservationItemScheduleUpdate => ({
           reservation_item_schedule_id: sch.reservation_item_schedule_id,
-          schedule_type:
-            sch.schedule_type === 'weekly' || sch.schedule_type === 'specific'
-              ? sch.schedule_type
-              : 'weekly', // fallback 預設
+          schedule_type: sch.schedule_type,
           weekday: sch.weekday,
           schedule_date: sch.schedule_date ?? undefined,
           start_time: sch.start_time ?? '',
           end_time: sch.end_time ?? '',
           capacity: sch.capacity ?? 1,
-          is_closed: sch.is_closed ?? false,
-          note: sch.note ?? '',
           is_active: sch.is_active ?? true
         })
       )
@@ -261,53 +271,62 @@ const ServiceManagementPage = () => {
   // 編輯送出
   const handleEditSubmit = async () => {
     if (!editTarget || !editForm) return
-    try {
-      const fixedOptions = editForm.options.map(
-        (opt: ReservationItemOptionUpdate): ReservationItemOptionUpdate => ({
-          ...opt,
-          option_id:
-            typeof opt.option_id === 'string' ? opt.option_id : undefined
-        })
-      )
-      const fixedSchedules = editForm.schedules.map(
-        (
-          sch: ReservationItemScheduleUpdate
-        ): ReservationItemScheduleUpdate => ({
-          ...sch,
-          reservation_item_schedule_id:
-            typeof sch.reservation_item_schedule_id === 'string'
-              ? sch.reservation_item_schedule_id
-              : undefined
-        })
-      )
+    const fixedOptionGroups = editForm.option_groups.map(
+      (
+        group: ReservationItemOptionGroupUpdate
+      ): ReservationItemOptionGroupUpdate => ({
+        ...group,
+        option_group_id:
+          typeof group.option_group_id === 'string'
+            ? group.option_group_id
+            : undefined,
+        options: (group.options || []).map(
+          (opt): ReservationItemOptionUpdate => ({
+            ...opt,
+            option_id:
+              typeof opt.option_id === 'string' ? opt.option_id : undefined
+          })
+        )
+      })
+    )
 
-      await patchReservationItem({
-        bot_uuid: currentBot!.bot_detail_id,
-        object_id: editTarget.object_id,
-        detail: {
-          reservation_name: editForm.reservation_name,
-          reservation_description: editForm.reservation_description,
-          duration_minutes: Number(editForm.duration_minutes),
-          price: Number(editForm.price),
-          is_active: editForm.is_active
-        },
-        options: fixedOptions,
-        schedules: fixedSchedules
-      }).unwrap()
+    const fixedSchedules = editForm.schedules.map(
+      (sch: ReservationItemScheduleUpdate): ReservationItemScheduleUpdate => ({
+        ...sch,
+        reservation_item_schedule_id:
+          typeof sch.reservation_item_schedule_id === 'string'
+            ? sch.reservation_item_schedule_id
+            : undefined
+      })
+    )
 
-      setEditDialogOpen(false)
-      setEditTarget(null)
-      getServices({ bot_uuid: currentBot!.bot_detail_id })
-    } catch {
-      alert('更新失敗')
-    }
+    await patchReservationItem({
+      bot_uuid: currentBot!.bot_detail_id,
+      reservation_item_id: editTarget.reservation_item_id,
+      detail: {
+        reservation_name: editForm.reservation_name,
+        reservation_description: editForm.reservation_description,
+        duration_minutes: Number(editForm.duration_minutes),
+        price: Number(editForm.price),
+        is_active: editForm.is_active
+      },
+      option_groups: fixedOptionGroups,
+      schedules: fixedSchedules
+    }).unwrap()
+
+    setEditDialogOpen(false)
+    setEditTarget(null)
+    getServices({ bot_uuid: currentBot!.bot_detail_id })
   }
 
   const columns = [
-    { id: 'reservation_name', label: '服務名稱' },
-    { id: 'price', label: '價格' },
-    { id: 'duration_minutes', label: '時長' },
-    { id: 'reservation_description', label: '描述' }
+    { id: 'reservation_name', label: t('serviceManagementPage.serviceName') },
+    { id: 'price', label: t('common.price') },
+    {
+      id: 'duration_minutes',
+      label: t('serviceManagementPage.durationMinutes')
+    },
+    { id: 'reservation_description', label: t('common.description') }
   ]
 
   return (
@@ -322,14 +341,14 @@ const ServiceManagementPage = () => {
               color="error"
               onClick={() => setDialogs((d) => ({ ...d, deleteMulti: true }))}
             >
-              {TEXT.deleteButtonText}
+              {t(TEXT.deleteButtonText)}
             </Button>
           )}
           <Button
             variant="contained"
             onClick={() => setDialogs((d) => ({ ...d, create: true }))}
           >
-            新增服務
+            {t('serviceManagementPage.addService')}
           </Button>
         </Box>
       </Box>
@@ -360,7 +379,7 @@ const ServiceManagementPage = () => {
         maxWidth="lg"
         fullWidth
       >
-        <DialogTitle>新增服務</DialogTitle>
+        <DialogTitle>{t('serviceManagementPage.addService')}</DialogTitle>
         <DialogContent dividers>
           <Box
             component="form"
@@ -380,7 +399,7 @@ const ServiceManagementPage = () => {
             }}
           >
             <TextField
-              label="服務名稱"
+              label={t('serviceManagementPage.serviceName')}
               name="reservation_name"
               value={createFormData.reservation_name}
               onChange={(e) =>
@@ -393,7 +412,7 @@ const ServiceManagementPage = () => {
               fullWidth
             />
             <TextField
-              label="描述"
+              label={t('common.description')}
               name="reservation_description"
               value={createFormData.reservation_description}
               onChange={(e) =>
@@ -406,7 +425,7 @@ const ServiceManagementPage = () => {
               fullWidth
             />
             <TextField
-              label="時長（分鐘）"
+              label={t('serviceManagementPage.durationMinutes')}
               name="duration_minutes"
               type="number"
               value={createFormData.duration_minutes}
@@ -420,7 +439,7 @@ const ServiceManagementPage = () => {
               fullWidth
             />
             <TextField
-              label="價格"
+              label={t('common.price')}
               name="price"
               type="number"
               value={createFormData.price}
@@ -461,7 +480,7 @@ const ServiceManagementPage = () => {
               })
             }}
           >
-            取消
+            {t('common.cancel')}
           </Button>
           <Button
             onClick={() => {
@@ -475,7 +494,7 @@ const ServiceManagementPage = () => {
             variant="contained"
             color="primary"
           >
-            建立
+            {t('common.create')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -487,7 +506,7 @@ const ServiceManagementPage = () => {
         })}
         handleClose={() => setDialogs((d) => ({ ...d, deleteSingle: false }))}
         onSubmit={() => {
-          handleDelete([deleteTarget!.object_id])
+          handleDelete([deleteTarget!.reservation_item_id])
           setDialogs((d) => ({ ...d, deleteSingle: false }))
           setDeleteTarget(null)
         }}
@@ -499,7 +518,7 @@ const ServiceManagementPage = () => {
         handleClose={() => setDialogs((d) => ({ ...d, deleteMulti: false }))}
         onSubmit={() => {
           const ids = selected
-            .map((i) => reservationItems[i]?.object_id)
+            .map((i) => reservationItems[i]?.reservation_item_id)
             .filter(Boolean)
           handleDelete(ids)
           setSelected([])
@@ -514,7 +533,9 @@ const ServiceManagementPage = () => {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>編輯預約資料</DialogTitle>
+        <DialogTitle>
+          {t('serviceManagementPage.editReservationData')}
+        </DialogTitle>
         <DialogContent dividers>
           {editForm && (
             <Box
@@ -522,7 +543,7 @@ const ServiceManagementPage = () => {
               sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
             >
               <TextField
-                label="服務名稱"
+                label={t('serviceManagementPage.serviceName')}
                 value={editForm.reservation_name}
                 onChange={(e) =>
                   handleEditFormChange('reservation_name', e.target.value)
@@ -530,7 +551,7 @@ const ServiceManagementPage = () => {
                 fullWidth
               />
               <TextField
-                label="描述"
+                label={t('common.description')}
                 value={editForm.reservation_description}
                 onChange={(e) =>
                   handleEditFormChange(
@@ -541,7 +562,7 @@ const ServiceManagementPage = () => {
                 fullWidth
               />
               <TextField
-                label="價格"
+                label={t('common.price')}
                 type="number"
                 value={editForm.price}
                 onChange={(e) =>
@@ -549,7 +570,7 @@ const ServiceManagementPage = () => {
                 }
               />
               <TextField
-                label="時長（分鐘）"
+                label={t('serviceManagementPage.durationMinutes')}
                 type="number"
                 value={editForm.duration_minutes}
                 onChange={(e) =>
@@ -559,15 +580,54 @@ const ServiceManagementPage = () => {
                   )
                 }
               />
-              <Typography variant="subtitle1" sx={{ mt: 2 }}>
-                選項
-              </Typography>
-              <OptionEditor
-                options={editForm.options}
-                onChange={(opts) => handleEditFormChange('options', opts)}
+
+              <OptionGroupEditor
+                optionGroups={editForm.option_groups.map(
+                  (group): OptionGroupData => ({
+                    group_name: group.group_name || '',
+                    group_description: group.group_description || '',
+                    selection_type:
+                      (group.selection_type as 'single' | 'multiple') ||
+                      'single',
+                    is_required: group.is_required || false,
+                    display_order: group.display_order || 0,
+                    is_active: group.is_active !== false,
+                    options: (group.options || []).map((opt) => ({
+                      option_name: opt.option_name || '',
+                      option_description: opt.option_description || '',
+                      price: opt.price || 0,
+                      display_order: opt.display_order || 0,
+                      is_active: opt.is_active !== false
+                    }))
+                  })
+                )}
+                onChange={(groups) =>
+                  handleEditFormChange(
+                    'option_groups',
+                    groups.map(
+                      (group): ReservationItemOptionGroupUpdate => ({
+                        group_name: group.group_name,
+                        group_description: group.group_description,
+                        selection_type: group.selection_type,
+                        is_required: group.is_required,
+                        display_order: group.display_order,
+                        is_active: group.is_active,
+                        options: group.options.map(
+                          (opt): ReservationItemOptionUpdate => ({
+                            option_name: opt.option_name,
+                            option_description: opt.option_description,
+                            price: opt.price,
+                            display_order: opt.display_order,
+                            is_active: opt.is_active
+                          })
+                        )
+                      })
+                    )
+                  )
+                }
               />
               <Typography variant="subtitle1" sx={{ mt: 2 }}>
-                預設時段
+                {t('serviceManagementPage.defaultSchedule')}
               </Typography>
               <ScheduleEditor
                 schedules={editForm.schedules}
@@ -579,13 +639,13 @@ const ServiceManagementPage = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleEditDialogClose}>取消</Button>
+          <Button onClick={handleEditDialogClose}>{t('common.cancel')}</Button>
           <Button
             onClick={handleEditSubmit}
             variant="contained"
             color="primary"
           >
-            儲存
+            {t('common.save')}
           </Button>
         </DialogActions>
       </Dialog>

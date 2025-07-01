@@ -73,7 +73,7 @@ const BotSettingPage = () => {
     }
 
     const wrappedUpdateBot = wrapApiCall(updateBot, {
-      showSuccessMessage: 'success.bot_updated_success',
+      showSuccessMessage: 'success.bot_updated',
       onSuccess: () => {
         getBots()
       }
@@ -84,7 +84,7 @@ const BotSettingPage = () => {
 
   const handleBotDelete = async () => {
     const wrappedDeleteBot = wrapApiCall(deleteBot, {
-      showSuccessMessage: 'success.bot_deleted_success',
+      showSuccessMessage: 'success.bot_deleted',
       onSuccess: () => {
         navigate(PAGE_PATHS.BOT_LIST)
       }
