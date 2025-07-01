@@ -168,17 +168,29 @@ def create_user_reservation(
             error_code=ErrorCode.RESERVATION_ITEM_NOT_FOUND,
             error_message="Reservation item not found",
         )
-
     schedule = get_reservation_item_schedule_by_date(
         session, reservation_item.object_id, reservation.reservation_date
     )
+
     if not schedule or not schedule.is_active:
         raise GlobalErrorException(
             error_code=ErrorCode.RESERVATION_SCHEDULE_NOT_FOUND,
             error_message="Reservation schedule not found or not active for the given date",
         )
 
-    if not (schedule.start_time <= reservation.start_time <= schedule.end_time):
+    # 檢查預約時間是否在排程時間範圍內（處理跨日情況）
+    if schedule.end_time < schedule.start_time:
+        # 跨日情況：例如 5:58 PM 到 12:03 AM
+        # 有效時間範圍是 start_time 到 23:59:59 或 00:00:00 到 end_time
+        valid_time = (
+            reservation.start_time >= schedule.start_time
+            or reservation.start_time <= schedule.end_time
+        )
+    else:
+        # 正常情況：同一天內的時間範圍
+        valid_time = schedule.start_time <= reservation.start_time <= schedule.end_time
+
+    if not valid_time:
         raise GlobalErrorException(
             error_code=ErrorCode.RESERVATION_TIME_INVALID,
             error_message="Reservation time is outside of schedule",
@@ -286,15 +298,19 @@ def get_available_times_for_item(
 
         applicable_schedules = []
 
-        if weekday in weekly_schedules:
-            applicable_schedules.extend(weekly_schedules[weekday])
-
+        # 優先使用 specific 排程，如果該日期有 specific 排程則不使用 weekly 排程
         if single_date in specific_schedules:
             applicable_schedules.extend(specific_schedules[single_date])
+        elif weekday in weekly_schedules:
+            applicable_schedules.extend(weekly_schedules[weekday])
 
         for schedule in applicable_schedules:
             current_time = datetime.combine(single_date, schedule.start_time)
             end_time = datetime.combine(single_date, schedule.end_time)
+
+            # 處理跨日的情況：如果結束時間小於開始時間，表示跨越午夜
+            if schedule.end_time < schedule.start_time:
+                end_time = end_time + timedelta(days=1)
 
             while current_time < end_time:
                 slot_end_time = current_time + timedelta(
