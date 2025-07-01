@@ -16,7 +16,7 @@ from queries.knowledge_query import (
     get_knowledge_class_id_by_bot_class_id,
 )
 from schemas.knowledge_schema import InsertKnowledgeRequest
-from services.bot_service import validate_line_bot_exists
+from services.bot_service import validate_bot_ownership, validate_line_bot_exists
 
 
 def validate_knowledge_class(session: Session, bot_class_id: int) -> int:
@@ -48,15 +48,23 @@ def validate_csv_file(file: UploadFile):
     return knowledge_list
 
 
-def insert_single_knowledge(session: Session, body: InsertKnowledgeRequest):
+def insert_single_knowledge(
+    session: Session, body: InsertKnowledgeRequest, current_user_id: UUID
+):
     bot = validate_line_bot_exists(session, body.bot_uuid)
+    validate_bot_ownership(session, current_user_id, bot.bot_detail_id)
+
     knowledge_class_id = validate_knowledge_class(session, bot.class_id)
     insert_knowledge_item(session, knowledge_class_id, body.question, body.answer)
 
 
-def insert_knowledges_by_csv(session: Session, bot_uuid: UUID, csv_file: UploadFile):
+def insert_knowledges_by_csv(
+    session: Session, bot_uuid: UUID, csv_file: UploadFile, current_user_id: UUID
+):
     knowledge_list = validate_csv_file(csv_file)
     bot = validate_line_bot_exists(session, bot_uuid)
+    validate_bot_ownership(session, current_user_id, bot.bot_detail_id)
+
     knowledge_class_id = validate_knowledge_class(session, bot.class_id)
     insert_knowledge_items(session, knowledge_class_id, knowledge_list)
 
@@ -68,9 +76,11 @@ def get_all_knowledge_list(session: Session, bot_uuid: UUID):
 
 
 def delete_knowledges_by_bot_class_id(
-    session: Session, bot_uuid: UUID, deleted_id_list: list
+    session: Session, bot_uuid: UUID, deleted_id_list: list, current_user_id: UUID
 ):
     bot = validate_line_bot_exists(session, bot_uuid)
+    validate_bot_ownership(session, current_user_id, bot.bot_detail_id)
+
     knowledge_class_id = validate_knowledge_class(session, bot.class_id)
     if not deleted_id_list:
         raise GlobalErrorException(

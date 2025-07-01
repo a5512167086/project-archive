@@ -1,9 +1,10 @@
-from typing import List
+from typing import Annotated, List
 from uuid import UUID
 
-from fastapi import APIRouter, File, Form, UploadFile
+from fastapi import APIRouter, Depends, File, Form, UploadFile
 
 from database import SessionDep
+from dependencies import get_current_user
 from models.object_model import KnowledgeListView
 from schemas.knowledge_schema import DeleteKnowledgeRequest, InsertKnowledgeRequest
 from services.knowledge_service import (
@@ -22,20 +23,36 @@ def get_all_knowledges(session: SessionDep, bot_uuid: UUID):
 
 
 @knowledge_router.post("")
-def insert_knowledge(session: SessionDep, body: InsertKnowledgeRequest):
-    insert_single_knowledge(session, body)
+def insert_knowledge(
+    session: SessionDep,
+    body: InsertKnowledgeRequest,
+    current_user: Annotated[dict, Depends(get_current_user)],
+):
+    user_id = current_user["user_id"]
+    insert_single_knowledge(session, body, user_id)
     session.commit()
 
 
 @knowledge_router.post("/upload")
 def insert_knowledge_by_file(
-    session: SessionDep, bot_uuid: UUID = Form(), csv_file: UploadFile = File()
+    session: SessionDep,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    bot_uuid: UUID = Form(),
+    csv_file: UploadFile = File(),
 ):
-    insert_knowledges_by_csv(session, bot_uuid, csv_file)
+    user_id = current_user["user_id"]
+    insert_knowledges_by_csv(session, bot_uuid, csv_file, user_id)
     session.commit()
 
 
 @knowledge_router.delete("")
-def delete_knowledges(session: SessionDep, body: DeleteKnowledgeRequest):
-    delete_knowledges_by_bot_class_id(session, body.bot_uuid, body.deleted_id_list)
+def delete_knowledges(
+    session: SessionDep,
+    body: DeleteKnowledgeRequest,
+    current_user: Annotated[dict, Depends(get_current_user)],
+):
+    user_id = current_user["user_id"]
+    delete_knowledges_by_bot_class_id(
+        session, body.bot_uuid, body.deleted_id_list, user_id
+    )
     session.commit()
