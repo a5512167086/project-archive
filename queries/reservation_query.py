@@ -115,6 +115,7 @@ def get_reservation_items(
             reservation_description=item.reservation_description,
             duration_minutes=item.duration_minutes,
             price=item.price,
+            is_active=item.item_is_active,
             option_groups=option_group_map[item.object_id],
             schedules=schedule_map[item.object_id],
         )
@@ -182,6 +183,7 @@ def get_reservation_item_by_id(
         reservation_description=item.reservation_description,
         duration_minutes=item.duration_minutes,
         price=item.price,
+        is_active=item.item_is_active,
         option_groups=option_group_responses,
         schedules=schedules,
     )

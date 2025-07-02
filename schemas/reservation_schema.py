@@ -65,6 +65,7 @@ class ReservationItemResponse(BaseModel):
     reservation_description: str
     duration_minutes: int
     price: int
+    is_active: bool
     option_groups: List[ReservationOptionGroupResponse]
     schedules: List[ReservationItemSchedule]
 

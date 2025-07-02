@@ -82,6 +82,9 @@ class ReservationItemListView(SQLModel, table=True):
     reservation_description: str
     duration_minutes: int
     price: int
+    item_is_active: bool
+    item_created_at: datetime
+    item_updated_at: datetime
 
 
 class ReservationListView(SQLModel, table=True):
