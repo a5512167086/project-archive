@@ -112,7 +112,29 @@
     "uploadCSV": "Upload CSV File"
   },
   "reservationManagementPage": {
-    "title": "Reservation Management"
+    "title": "Reservation Management",
+    "reservationDetails": "Reservation Details",
+    "basicInfo": "Basic Information",
+    "serviceName": "Service Name",
+    "reservationDate": "Reservation Date",
+    "startTime": "Start Time",
+    "statusAndPayment": "Status & Payment",
+    "status": "Status",
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "cancelled": "Cancelled",
+    "completed": "Completed",
+    "paymentMethod": "Payment Method",
+    "cash": "Cash",
+    "bankTransfer": "Bank Transfer",
+    "creditCard": "Credit Card",
+    "paymentStatus": "Payment Status",
+    "paid": "Paid",
+    "unpaid": "Unpaid",
+    "refunded": "Refunded",
+    "selectedOptions": "Selected Options",
+    "notes": "Notes",
+    "notesPlaceholder": "Enter notes here..."
   },
   "serviceManagementPage": {
     "title": "Service Management",

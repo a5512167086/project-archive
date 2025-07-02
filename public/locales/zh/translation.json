@@ -113,7 +113,29 @@
     "uploadCSV": "上傳CSV檔案"
   },
   "reservationManagementPage": {
-    "title": "預約管理"
+    "title": "預約管理",
+    "reservationDetails": "預約詳情",
+    "basicInfo": "基本資訊",
+    "serviceName": "服務名稱",
+    "reservationDate": "預約日期",
+    "startTime": "開始時間",
+    "statusAndPayment": "狀態與付款",
+    "status": "狀態",
+    "pending": "待確認",
+    "confirmed": "已確認",
+    "cancelled": "已取消",
+    "completed": "已完成",
+    "paymentMethod": "付款方式",
+    "cash": "現金",
+    "bankTransfer": "銀行轉帳",
+    "creditCard": "信用卡",
+    "paymentStatus": "付款狀態",
+    "paid": "已付款",
+    "unpaid": "未付款",
+    "refunded": "已退款",
+    "selectedOptions": "已選選項",
+    "notes": "備註",
+    "notesPlaceholder": "在此輸入備註..."
   },
   "serviceManagementPage": {
     "title": "服務管理",

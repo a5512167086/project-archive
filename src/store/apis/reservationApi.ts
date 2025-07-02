@@ -32,6 +32,18 @@ type GetReservationsRequest = {
   bot_uuid: string
 }
 
+// 更新預約的請求類型
+export type UpdateReservationRequest = {
+  bot_uuid: string
+  reservation_id: string
+  reservation_date?: string
+  start_time?: string
+  payment_method?: 'cash' | 'bank_transfer' | 'credit_card'
+  payment_status?: 'paid' | 'unpaid' | 'refunded'
+  status?: string
+  note?: string
+}
+
 type ReservationOption = {
   object_id: number
   option_id: string
@@ -201,13 +213,17 @@ export const reservationApi = createApi({
         method: 'GET'
       })
     }),
-    getReservations: builder.query<
-      ReservationData[],
-      GetReservationsRequest
-    >({
+    getReservations: builder.query<ReservationData[], GetReservationsRequest>({
       query: (data) => ({
         url: `reservations/${data.bot_uuid}`,
         method: 'GET'
+      })
+    }),
+    updateReservation: builder.mutation<void, UpdateReservationRequest>({
+      query: (data) => ({
+        url: 'reservations',
+        method: 'PATCH',
+        body: data
       })
     }),
     insertService: builder.mutation<void, InsertReservationItemRequest>({
@@ -240,5 +256,6 @@ export const {
   useDeleteReservationItemsMutation,
   usePatchReservationItemMutation,
   useGetReservationsQuery,
-  useLazyGetReservationsQuery
+  useLazyGetReservationsQuery,
+  useUpdateReservationMutation
 } = reservationApi
