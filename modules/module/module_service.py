@@ -2,7 +2,6 @@ from uuid import UUID
 
 from sqlmodel import Session
 
-from exception import GlobalErrorException
 from modules.bot.bot_service import validate_bot_ownership, validate_line_bot_exists
 from modules.module.module_command import insert_module_setting, update_module_setting
 from modules.module.module_query import (
@@ -11,6 +10,7 @@ from modules.module.module_query import (
     get_single_module_setting,
 )
 from shared.constants.error_code import ErrorCode
+from shared.exception import GlobalErrorException
 
 
 def validate_setting_class(session: Session, bot_class_id: int) -> int:

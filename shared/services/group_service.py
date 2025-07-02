@@ -1,7 +1,7 @@
 from sqlmodel import Session
 
-from exception import GlobalErrorException
 from shared.constants.error_code import ErrorCode
+from shared.exception import GlobalErrorException
 from shared.queries.group_query import get_group_by_bot_class_id_and_group_name
 
 

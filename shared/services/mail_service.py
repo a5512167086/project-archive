@@ -5,9 +5,9 @@ from email.mime.text import MIMEText
 
 from jinja2 import Template
 
-from exception import GlobalErrorException
 from shared.constants.config import EMAIL, EMAIL_APP_PASSWORD, FRONTEND_URL
 from shared.constants.error_code import ErrorCode
+from shared.exception import GlobalErrorException
 
 
 def send_reset_email(email: str, token: str):

@@ -5,7 +5,6 @@ from typing import Any, Dict, List
 import bcrypt
 import requests
 
-from exception import GlobalErrorException
 from shared.constants.config import (
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
@@ -15,6 +14,7 @@ from shared.constants.config import (
     LINE_REDIRECT_URI,
 )
 from shared.constants.error_code import ErrorCode
+from shared.exception import GlobalErrorException
 
 
 def get_line_image(message_id: str, access_token: str) -> bytes:

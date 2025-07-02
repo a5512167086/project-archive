@@ -4,8 +4,6 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Header, Request
 from linebot.v3.messaging import Configuration
 
-from database import SessionDep
-from dependencies import get_current_user
 from modules.bot.bot_model import BotListView, BotListWithCredentialView
 from modules.bot.bot_schema import (
     BotBodies,
@@ -23,6 +21,8 @@ from modules.bot.bot_service import (
     update_current_bot,
 )
 from modules.bot.webhook_service import custom_webhook
+from shared.database import SessionDep
+from shared.dependencies import get_current_user
 
 bot_router = APIRouter(prefix="/bots", tags=["bots"])
 

@@ -5,13 +5,13 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 from modules.reservation.reservation_model import (
-    ReservationItemOption,
-    ReservationItemSchedule,
+    ServiceOption,
+    ServiceSchedule,
 )
 from shared.constants.common import PaymentMethod, PaymentStatus, SelectionType
 
 
-class ReservationItemOptionCreate(BaseModel):
+class ServiceOptionCreate(BaseModel):
     option_name: str
     option_description: Optional[str] = None
     price: int = 0
@@ -19,17 +19,17 @@ class ReservationItemOptionCreate(BaseModel):
     is_active: Optional[bool] = True
 
 
-class ReservationOptionGroupCreate(BaseModel):
+class ServiceOptionGroupCreate(BaseModel):
     group_name: str
     group_description: Optional[str] = None
     selection_type: SelectionType
     is_required: bool = False
     display_order: int = 0
     is_active: bool = True
-    options: List[ReservationItemOptionCreate] = []
+    options: List[ServiceOptionCreate] = []
 
 
-class ReservationItemScheduleCreate(BaseModel):
+class ServiceScheduleCreate(BaseModel):
     schedule_type: str = Field(pattern="^(weekly|specific)$")
     weekday: Optional[int] = Field(default=None, ge=0, le=6)
     schedule_date: Optional[date] = None
@@ -39,17 +39,17 @@ class ReservationItemScheduleCreate(BaseModel):
     is_active: Optional[bool] = True
 
 
-class ReservationItemCreate(BaseModel):
+class ServiceCreate(BaseModel):
     bot_uuid: UUID
-    reservation_name: str
-    reservation_description: str
+    service_name: str
+    service_description: str
     duration_minutes: int
     price: int
-    option_groups: List[ReservationOptionGroupCreate] = []
-    default_schedules: List[ReservationItemScheduleCreate] = []
+    option_groups: List[ServiceOptionGroupCreate] = []
+    default_schedules: List[ServiceScheduleCreate] = []
 
 
-class ReservationOptionGroupResponse(BaseModel):
+class ServiceOptionGroupResponse(BaseModel):
     option_group_id: UUID
     group_name: str
     group_description: Optional[str] = None
@@ -57,30 +57,30 @@ class ReservationOptionGroupResponse(BaseModel):
     is_required: bool
     display_order: int
     is_active: bool
-    options: List[ReservationItemOption]
+    options: List[ServiceOption]
 
 
-class ReservationItemResponse(BaseModel):
-    reservation_item_id: UUID
+class ServiceResponse(BaseModel):
+    service_id: UUID
     object_id: int
     class_id: int
-    reservation_name: str
-    reservation_description: str
+    service_name: str
+    service_description: str
     duration_minutes: int
     price: int
     is_active: bool
-    option_groups: List[ReservationOptionGroupResponse]
-    schedules: List[ReservationItemSchedule]
+    option_groups: List[ServiceOptionGroupResponse]
+    schedules: List[ServiceSchedule]
 
 
-class ReservationItemDelete(BaseModel):
+class ServiceDelete(BaseModel):
     bot_uuid: UUID
-    delete_reservation_item_list: List[UUID]
+    delete_service_list: List[UUID]
 
 
 class DetailUpdate(BaseModel):
-    reservation_name: Optional[str] = None
-    reservation_description: Optional[str] = None
+    service_name: Optional[str] = None
+    service_description: Optional[str] = None
     duration_minutes: Optional[int] = None
     price: Optional[int] = None
     is_active: Optional[bool] = None
@@ -107,7 +107,7 @@ class OptionGroupUpdate(BaseModel):
 
 
 class ScheduleUpdate(BaseModel):
-    reservation_item_schedule_id: Optional[UUID] = None
+    reservation_service_schedule_id: Optional[UUID] = None
     schedule_type: Optional[str] = None
     weekday: Optional[int] = None
     schedule_date: Optional[date] = None
@@ -117,9 +117,9 @@ class ScheduleUpdate(BaseModel):
     is_active: Optional[bool] = None
 
 
-class ReservationItemPatch(BaseModel):
+class ServicePatch(BaseModel):
     bot_uuid: UUID
-    reservation_item_id: UUID
+    service_id: UUID
     detail: Optional[DetailUpdate] = None
     option_groups: Optional[List[OptionGroupUpdate]] = None
     schedules: Optional[List[ScheduleUpdate]] = None
@@ -132,7 +132,7 @@ class OptionValue(BaseModel):
 
 class ReservationCreate(BaseModel):
     bot_uuid: UUID
-    reservation_item_id: UUID
+    service_id: UUID
     reservation_date: date
     start_time: time
     payment_method: Optional[PaymentMethod] = None
@@ -153,7 +153,7 @@ class ReservationPatch(BaseModel):
 
 class ReservationResponse(BaseModel):
     reservation_id: UUID
-    reservation_item_id: UUID
+    service_id: UUID
     reservation_date: date
     start_time: time
     end_time: time
@@ -203,7 +203,7 @@ class ReservationOptionResponse(BaseModel):
 
 class ReservationListResponse(BaseModel):
     reservation_id: UUID
-    reservation_item_id: UUID
+    service_id: UUID
     price: int
     service_name: str
     notes: Optional[str]
@@ -214,10 +214,11 @@ class ReservationListResponse(BaseModel):
     payment_method: Optional[str]
     payment_status: Optional[str]
     created_at: datetime
+    updated_at: datetime
     selected_option_groups: List[ReservationSelectedOptionGroupResponse] = []
 
 
-class TempReservationItemPatch(BaseModel):
+class TempServicePatch(BaseModel):
     bot_uuid: UUID
     object_id: int
     detail: Optional[DetailUpdate] = None

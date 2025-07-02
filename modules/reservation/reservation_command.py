@@ -6,17 +6,17 @@ from sqlmodel import Session, delete, select
 
 from modules.reservation.reservation_model import (
     ReservationDetail,
-    ReservationItemDetail,
-    ReservationItemOption,
-    ReservationItemSchedule,
     ReservationOption,
-    ReservationOptionGroup,
+    ServiceDetail,
+    ServiceOption,
+    ServiceOptionGroup,
+    ServiceSchedule,
 )
 from modules.reservation.reservation_schema import (
     OptionValue,
-    ReservationItemPatch,
-    ReservationItemScheduleCreate,
-    ReservationOptionGroupCreate,
+    ServiceOptionGroupCreate,
+    ServicePatch,
+    ServiceScheduleCreate,
 )
 from shared.constants.config import TAIWAN_TZ
 from shared.models.class_object_relation_model import ClassObjectRelation
@@ -31,8 +31,8 @@ def insert_reservation_item(
     reservation_item_description: str,
     reservation_duration_minutes: int,
     reservation_price: int,
-    option_group_list: List[ReservationOptionGroupCreate],
-    schedule_list: List[ReservationItemScheduleCreate],
+    option_group_list: List[ServiceOptionGroupCreate],
+    schedule_list: List[ServiceScheduleCreate],
 ):
     now = datetime.now(TAIWAN_TZ)
 
@@ -54,7 +54,7 @@ def insert_reservation_item(
     )
 
     session.add(
-        ReservationItemDetail(
+        ServiceDetail(
             object_id=new_object.object_id,
             duration_minutes=reservation_duration_minutes,
             price=reservation_price,
@@ -64,7 +64,7 @@ def insert_reservation_item(
     )
 
     for group in option_group_list:
-        option_group = ReservationOptionGroup(
+        option_group = ServiceOptionGroup(
             object_id=new_object.object_id,
             group_name=group.group_name,
             group_description=group.group_description,
@@ -79,7 +79,7 @@ def insert_reservation_item(
         session.flush()
 
         for option in group.options:
-            option_model = ReservationItemOption(
+            option_model = ServiceOption(
                 option_group_id=option_group.option_group_id,
                 option_name=option.option_name,
                 option_description=option.option_description,
@@ -92,7 +92,7 @@ def insert_reservation_item(
             session.add(option_model)
 
     schedule_models = [
-        ReservationItemSchedule(
+        ServiceSchedule(
             object_id=new_object.object_id,
             schedule_type=schedule.schedule_type,
             weekday=schedule.weekday,
@@ -137,47 +137,41 @@ def delete_reservation_items(
     session.exec(delete(Object).where(Object.object_id.in_(valid_object_ids)))
 
 
-def update_reservation_item(
-    session: Session, reservation_item_patch: ReservationItemPatch
-):
+def update_reservation_item(session: Session, reservation_item_patch: ServicePatch):
     object_id = reservation_item_patch.object_id
 
     if reservation_item_patch.detail:
         detail = session.exec(
-            select(ReservationItemDetail).where(
-                ReservationItemDetail.object_id == object_id
-            )
+            select(ServiceDetail).where(ServiceDetail.object_id == object_id)
         ).first()
         if detail:
             for field, value in reservation_item_patch.detail.dict(
                 exclude_unset=True
             ).items():
-                if field not in ["reservation_name", "reservation_description"]:
+                if field not in ["service_name", "service_description"]:
                     setattr(detail, field, value)
 
         obj = session.exec(select(Object).where(Object.object_id == object_id)).first()
         if obj:
-            if reservation_item_patch.detail.reservation_name is not None:
-                obj.chinese_name = reservation_item_patch.detail.reservation_name
-            if reservation_item_patch.detail.reservation_description is not None:
+            if reservation_item_patch.detail.service_name is not None:
+                obj.chinese_name = reservation_item_patch.detail.service_name
+            if reservation_item_patch.detail.service_description is not None:
                 obj.chinese_description = (
-                    reservation_item_patch.detail.reservation_description
+                    reservation_item_patch.detail.service_description
                 )
 
     if reservation_item_patch.option_groups is not None:
         session.exec(
-            delete(ReservationItemOption).where(
-                ReservationItemOption.option_group_id.in_(
-                    select(ReservationOptionGroup.option_group_id).where(
-                        ReservationOptionGroup.object_id == object_id
+            delete(ServiceOption).where(
+                ServiceOption.option_group_id.in_(
+                    select(ServiceOptionGroup.option_group_id).where(
+                        ServiceOptionGroup.object_id == object_id
                     )
                 )
             )
         )
         session.exec(
-            delete(ReservationOptionGroup).where(
-                ReservationOptionGroup.object_id == object_id
-            )
+            delete(ServiceOptionGroup).where(ServiceOptionGroup.object_id == object_id)
         )
 
         now = datetime.now(TAIWAN_TZ)
@@ -185,7 +179,7 @@ def update_reservation_item(
             if group_update.option_group_id:
                 pass
 
-            option_group = ReservationOptionGroup(
+            option_group = ServiceOptionGroup(
                 object_id=object_id,
                 group_name=group_update.group_name,
                 group_description=group_update.group_description,
@@ -201,7 +195,7 @@ def update_reservation_item(
 
             if group_update.options:
                 for option_update in group_update.options:
-                    option_model = ReservationItemOption(
+                    option_model = ServiceOption(
                         option_group_id=option_group.option_group_id,
                         option_name=option_update.option_name,
                         option_description=option_update.option_description,
@@ -215,9 +209,7 @@ def update_reservation_item(
 
     if reservation_item_patch.schedules is not None:
         session.exec(
-            delete(ReservationItemSchedule).where(
-                ReservationItemSchedule.object_id == object_id
-            )
+            delete(ServiceSchedule).where(ServiceSchedule.object_id == object_id)
         )
         now = datetime.now(TAIWAN_TZ)
         new_schedules = []
@@ -228,7 +220,7 @@ def update_reservation_item(
                 "created_at": now,
                 "updated_at": now,
             })
-            new_schedules.append(ReservationItemSchedule(**schedule_data))
+            new_schedules.append(ServiceSchedule(**schedule_data))
         session.add_all(new_schedules)
 
 
@@ -236,8 +228,8 @@ def insert_reservation(
     session: Session,
     reservation_class_id: int,
     user_id: str,
-    reservation_item_id: int,
-    reservation_item_schedule_id: int,
+    service_id: int,
+    service_schedule_id: int,
     reservation_date: date,
     start_time: time,
     end_time: time,
@@ -266,8 +258,8 @@ def insert_reservation(
     now = datetime.now(TAIWAN_TZ)
     reservation_detail = ReservationDetail(
         object_id=new_object.object_id,
-        reservation_item_id=reservation_item_id,
-        reservation_item_schedule_id=reservation_item_schedule_id,
+        service_id=service_id,
+        service_schedule_id=service_schedule_id,
         reservation_date=reservation_date,
         start_time=start_time,
         end_time=end_time,
@@ -285,9 +277,7 @@ def insert_reservation(
         for option in option_values:
             # 獲取選項對應的 option_group_id
             option_info = session.exec(
-                select(ReservationItemOption).where(
-                    ReservationItemOption.option_id == option.option_id
-                )
+                select(ServiceOption).where(ServiceOption.option_id == option.option_id)
             ).first()
 
             if option_info:
@@ -357,9 +347,8 @@ def update_reservation(
         # 如果更新了開始時間，需要重新計算結束時間
         # 首先取得 reservation_item 的 duration
         reservation_item = session.exec(
-            select(ReservationItemDetail).where(
-                ReservationItemDetail.reservation_item_id
-                == reservation.reservation_item_id
+            select(ServiceDetail).where(
+                ServiceDetail.service_id == reservation.service_id
             )
         ).first()
 

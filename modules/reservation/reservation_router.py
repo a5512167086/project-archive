@@ -3,88 +3,84 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
-from database import SessionDep
-from dependencies import get_current_user
 from modules.reservation.reservation_schema import (
     DailyAvailableSlots,
     ReservationCreate,
-    ReservationItemCreate,
-    ReservationItemDelete,
-    ReservationItemPatch,
-    ReservationItemResponse,
     ReservationListResponse,
     ReservationPatch,
     ReservationResponse,
+    ServiceCreate,
+    ServiceDelete,
+    ServicePatch,
+    ServiceResponse,
 )
 from modules.reservation.reservation_service import (
     create_user_reservation,
-    delete_reservation_item_by_reservation_item_id,
+    delete_service_by_service_id,
     delete_user_reservation,
-    get_available_times_for_item,
+    get_available_times_for_service,
     get_bot_reservations_list,
-    get_reservation_items_by_bot_class_id,
+    get_services_by_bot_class_id,
     get_user_reservations_in_bot_list,
-    insert_new_reservation_item,
+    insert_new_service,
     update_reservation_by_owner,
-    update_reservation_item_by_reservation_item_id,
+    update_service_by_service_id,
 )
+from shared.database import SessionDep
+from shared.dependencies import get_current_user
 
 reservation_router = APIRouter(prefix="/reservations", tags=["reservations"])
+service_router = APIRouter(prefix="/services", tags=["services"])
 
 
-@reservation_router.get(
-    "/items/{bot_uuid}", response_model=List[ReservationItemResponse]
-)
-def list_reservation_items(session: SessionDep, bot_uuid: UUID):
-    return get_reservation_items_by_bot_class_id(session, bot_uuid)
+@service_router.get("/{bot_uuid}", response_model=List[ServiceResponse])
+def list_services(session: SessionDep, bot_uuid: UUID):
+    return get_services_by_bot_class_id(session, bot_uuid)
 
 
-@reservation_router.post("/items")
-def create_reservation_item(
+@service_router.post("")
+def create_service(
     session: SessionDep,
-    reservation_item: ReservationItemCreate,
+    service: ServiceCreate,
     current_user: Annotated[dict, Depends(get_current_user)],
 ):
     user_id = current_user["user_id"]
-    insert_new_reservation_item(session, reservation_item, user_id)
+    insert_new_service(session, service, user_id)
     session.commit()
 
 
-@reservation_router.delete("/items")
-def delete_reservation_item(
+@service_router.delete("")
+def delete_service(
     session: SessionDep,
-    delete_reservation: ReservationItemDelete,
+    delete_service: ServiceDelete,
     current_user: Annotated[dict, Depends(get_current_user)],
 ):
     user_id = current_user["user_id"]
-    delete_reservation_item_by_reservation_item_id(
+    delete_service_by_service_id(
         session,
-        delete_reservation.bot_uuid,
-        delete_reservation.delete_reservation_item_list,
+        delete_service.bot_uuid,
+        delete_service.delete_service_list,
         user_id,
     )
     session.commit()
 
 
-@reservation_router.patch("/items")
-def update_reservation_item(
+@service_router.patch("")
+def update_service(
     session: SessionDep,
-    reservation_item_patch: ReservationItemPatch,
+    service_patch: ServicePatch,
     current_user: Annotated[dict, Depends(get_current_user)],
 ):
     user_id = current_user["user_id"]
-    update_reservation_item_by_reservation_item_id(
-        session, reservation_item_patch, user_id
-    )
+    update_service_by_service_id(session, service_patch, user_id)
     session.commit()
 
 
-@reservation_router.get(
-    "/items/{reservation_item_id}/available-times",
-    response_model=List[DailyAvailableSlots],
+@service_router.get(
+    "/{service_id}/available-times", response_model=List[DailyAvailableSlots]
 )
-def get_available_times(reservation_item_id: UUID, session: SessionDep):
-    return get_available_times_for_item(session, reservation_item_id)
+def get_available_times(service_id: UUID, session: SessionDep):
+    return get_available_times_for_service(session, service_id)
 
 
 @reservation_router.post("", response_model=ReservationResponse)
@@ -99,7 +95,7 @@ def create_reservation(
 
     return ReservationResponse(
         reservation_id=reservation_detail.reservation_id,
-        reservation_item_id=reservation_detail.reservation_item_id,
+        service_id=reservation_detail.service_id,
         reservation_date=reservation_detail.reservation_date,
         start_time=reservation_detail.start_time,
         end_time=reservation_detail.end_time,
@@ -165,7 +161,7 @@ def update_reservation(
 
     return ReservationResponse(
         reservation_id=updated_reservation.reservation_id,
-        reservation_item_id=updated_reservation.reservation_item_id,
+        service_id=updated_reservation.service_id,
         reservation_date=updated_reservation.reservation_date,
         start_time=updated_reservation.start_time,
         end_time=updated_reservation.end_time,

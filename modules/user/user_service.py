@@ -3,7 +3,6 @@ from datetime import timedelta
 
 from sqlmodel import Session
 
-from exception import GlobalErrorException
 from modules.bot.bot_service import validate_line_bot_exists
 from modules.user.auth_service import create_jwt_token, generate_token_pair
 from modules.user.user_command import create_oauth, create_user, update_user_password
@@ -24,6 +23,7 @@ from modules.user.user_schema import (
 from shared.commands.group_command import insert_group_member
 from shared.constants.config import ACCESS_TOKEN_EXPIRE_SECONDS, JWT_RESET_SECRET
 from shared.constants.error_code import ErrorCode
+from shared.exception import GlobalErrorException
 from shared.services.group_service import validate_group_exist_in_bot
 from shared.services.mail_service import send_reset_email
 from shared.utils.common import (

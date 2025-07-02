@@ -2,8 +2,6 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from database import SessionDep
-from dependencies import get_current_user, get_reset_user
 from modules.user.user_schema import (
     ChangePasswordRequest,
     CustomerLoginRequest,
@@ -29,6 +27,8 @@ from modules.user.user_service import (
     oauth_login,
     reset_password,
 )
+from shared.database import SessionDep
+from shared.dependencies import get_current_user, get_reset_user
 
 user_router = APIRouter(prefix="/users", tags=["users"])
 

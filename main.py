@@ -3,12 +3,12 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from exception import add_global_exception_handler
 from modules.bot.bot_router import bot_router
 from modules.knowledge.knowledge_router import knowledge_router
 from modules.module.module_router import module_router
-from modules.reservation.reservation_router import reservation_router
+from modules.reservation.reservation_router import reservation_router, service_router
 from modules.user.user_router import user_router
+from shared.exception import add_global_exception_handler
 from shared.models import *  # noqa: F403
 from shared.schemas.common_schema import ErrorResponse
 
@@ -38,6 +38,7 @@ app.include_router(knowledge_router)
 app.include_router(module_router)
 app.include_router(bot_router)
 app.include_router(reservation_router)
+app.include_router(service_router)
 
 
 @app.exception_handler(RequestValidationError)

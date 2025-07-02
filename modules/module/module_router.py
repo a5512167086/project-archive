@@ -3,13 +3,13 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
-from database import SessionDep
-from dependencies import get_current_user
 from modules.module.module_schema import InsertModuleSettingRequest, Module
 from modules.module.module_service import (
     get_all_module_settings,
     insert_new_module_setting,
 )
+from shared.database import SessionDep
+from shared.dependencies import get_current_user
 
 module_router = APIRouter(prefix="/modules", tags=["modules"])
 

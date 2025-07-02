@@ -4,7 +4,6 @@ import pandas as pd
 from fastapi import UploadFile
 from sqlmodel import Session
 
-from exception import GlobalErrorException
 from modules.bot.bot_service import validate_bot_ownership, validate_line_bot_exists
 from modules.knowledge.knowledge_command import (
     delete_knowledge_items,
@@ -17,6 +16,7 @@ from modules.knowledge.knowledge_query import (
 )
 from modules.knowledge.knowledge_schema import InsertKnowledgeRequest
 from shared.constants.error_code import ErrorCode
+from shared.exception import GlobalErrorException
 
 
 def validate_knowledge_class(session: Session, bot_class_id: int) -> int:

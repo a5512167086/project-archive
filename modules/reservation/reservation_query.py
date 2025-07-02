@@ -6,17 +6,17 @@ from sqlmodel import Session, func, select
 
 from modules.reservation.reservation_model import (
     ReservationDetail,
-    ReservationItemDetail,
-    ReservationItemListView,
-    ReservationItemOption,
-    ReservationItemSchedule,
     ReservationListView,
     ReservationOption,
-    ReservationOptionGroup,
+    ServiceDetail,
+    ServiceListView,
+    ServiceOption,
+    ServiceOptionGroup,
+    ServiceSchedule,
 )
 from modules.reservation.reservation_schema import (
-    ReservationItemResponse,
-    ReservationOptionGroupResponse,
+    ServiceOptionGroupResponse,
+    ServiceResponse,
 )
 from shared.models.class_model import SubClassView
 from shared.models.object_model import Object
@@ -36,7 +36,7 @@ def get_reservation_class_id_by_bot_class_id(
     return result
 
 
-def get_reservation_item_class_id_by_bot_class_id(
+def get_service_class_id_by_bot_class_id(
     session: Session, bot_class_id: int
 ) -> int | None:
     entity_id = get_entity_id_by_name(session, "服務")
@@ -49,13 +49,9 @@ def get_reservation_item_class_id_by_bot_class_id(
     return result
 
 
-def get_reservation_items(
-    session: Session, reservation_item_class_id: int
-) -> List[ReservationItemResponse]:
+def get_services(session: Session, service_class_id: int) -> List[ServiceResponse]:
     items = session.exec(
-        select(ReservationItemListView).where(
-            ReservationItemListView.class_id == reservation_item_class_id
-        )
+        select(ServiceListView).where(ServiceListView.class_id == service_class_id)
     ).all()
 
     object_ids = [i.object_id for i in items]
@@ -63,24 +59,18 @@ def get_reservation_items(
         return []
 
     option_groups = session.exec(
-        select(ReservationOptionGroup).where(
-            ReservationOptionGroup.object_id.in_(object_ids)
-        )
+        select(ServiceOptionGroup).where(ServiceOptionGroup.object_id.in_(object_ids))
     ).all()
 
     group_ids = [og.option_group_id for og in option_groups]
     options = []
     if group_ids:
         options = session.exec(
-            select(ReservationItemOption).where(
-                ReservationItemOption.option_group_id.in_(group_ids)
-            )
+            select(ServiceOption).where(ServiceOption.option_group_id.in_(group_ids))
         ).all()
 
     schedules = session.exec(
-        select(ReservationItemSchedule).where(
-            ReservationItemSchedule.object_id.in_(object_ids)
-        )
+        select(ServiceSchedule).where(ServiceSchedule.object_id.in_(object_ids))
     ).all()
 
     option_group_map = {oid: [] for oid in object_ids}
@@ -91,7 +81,7 @@ def get_reservation_items(
         options_by_group[opt.option_group_id].append(opt)
 
     for group in option_groups:
-        group_response = ReservationOptionGroupResponse(
+        group_response = ServiceOptionGroupResponse(
             option_group_id=group.option_group_id,
             group_name=group.group_name,
             group_description=group.group_description,
@@ -107,15 +97,15 @@ def get_reservation_items(
         schedule_map[sch.object_id].append(sch)
 
     return [
-        ReservationItemResponse(
-            reservation_item_id=item.reservation_item_id,
+        ServiceResponse(
+            service_id=item.service_id,
             object_id=item.object_id,
             class_id=item.class_id,
-            reservation_name=item.reservation_name,
-            reservation_description=item.reservation_description,
+            service_name=item.service_name,
+            service_description=item.service_description,
             duration_minutes=item.duration_minutes,
             price=item.price,
-            is_active=item.item_is_active,
+            is_active=item.service_is_active,
             option_groups=option_group_map[item.object_id],
             schedules=schedule_map[item.object_id],
         )
@@ -123,13 +113,13 @@ def get_reservation_items(
     ]
 
 
-def get_reservation_item_by_id(
-    session: Session, reservation_item_class_id, reservation_item_id: int
-) -> ReservationItemResponse | None:
+def get_service_by_id(
+    session: Session, service_class_id, service_id: int
+) -> ServiceResponse | None:
     item = session.exec(
-        select(ReservationItemListView).where(
-            ReservationItemListView.reservation_item_id == reservation_item_id,
-            ReservationItemListView.class_id == reservation_item_class_id,
+        select(ServiceListView).where(
+            ServiceListView.service_id == service_id,
+            ServiceListView.class_id == service_class_id,
         )
     ).first()
 
@@ -137,18 +127,14 @@ def get_reservation_item_by_id(
         return None
 
     option_groups = session.exec(
-        select(ReservationOptionGroup).where(
-            ReservationOptionGroup.object_id == item.object_id
-        )
+        select(ServiceOptionGroup).where(ServiceOptionGroup.object_id == item.object_id)
     ).all()
 
     group_ids = [og.option_group_id for og in option_groups]
     options = []
     if group_ids:
         options = session.exec(
-            select(ReservationItemOption).where(
-                ReservationItemOption.option_group_id.in_(group_ids)
-            )
+            select(ServiceOption).where(ServiceOption.option_group_id.in_(group_ids))
         ).all()
 
     options_by_group = {gid: [] for gid in group_ids}
@@ -157,7 +143,7 @@ def get_reservation_item_by_id(
 
     option_group_responses = []
     for group in option_groups:
-        group_response = ReservationOptionGroupResponse(
+        group_response = ServiceOptionGroupResponse(
             option_group_id=group.option_group_id,
             group_name=group.group_name,
             group_description=group.group_description,
@@ -170,29 +156,27 @@ def get_reservation_item_by_id(
         option_group_responses.append(group_response)
 
     schedules = session.exec(
-        select(ReservationItemSchedule).where(
-            ReservationItemSchedule.object_id == item.object_id
-        )
+        select(ServiceSchedule).where(ServiceSchedule.object_id == item.object_id)
     ).all()
 
-    return ReservationItemResponse(
-        reservation_item_id=item.reservation_item_id,
+    return ServiceResponse(
+        service_id=item.service_id,
         object_id=item.object_id,
         class_id=item.class_id,
-        reservation_name=item.reservation_name,
-        reservation_description=item.reservation_description,
+        service_name=item.service_name,
+        service_description=item.service_description,
         duration_minutes=item.duration_minutes,
         price=item.price,
-        is_active=item.item_is_active,
+        is_active=item.service_is_active,
         option_groups=option_group_responses,
         schedules=schedules,
     )
 
 
-def get_reservation_item_schedule_by_id(
+def get_service_schedule_by_id(
     session: Session, schedule_id: UUID
-) -> ReservationItemSchedule | None:
-    return session.get(ReservationItemSchedule, schedule_id)
+) -> ServiceSchedule | None:
+    return session.get(ServiceSchedule, schedule_id)
 
 
 def get_concurrent_reservations_count(
@@ -200,32 +184,30 @@ def get_concurrent_reservations_count(
 ) -> int:
     return session.exec(
         select(func.count(ReservationDetail.reservation_id)).where(
-            ReservationDetail.reservation_item_schedule_id == schedule_id,
+            ReservationDetail.service_schedule_id == schedule_id,
             ReservationDetail.reservation_date == reservation_date,
             ReservationDetail.start_time == start_time,
         )
     ).one()
 
 
-def get_reservation_item_options_by_ids(
+def get_service_options_by_ids(
     session: Session, option_ids: List[UUID]
-) -> List[ReservationItemOption]:
+) -> List[ServiceOption]:
     return session.exec(
-        select(ReservationItemOption).where(
-            ReservationItemOption.option_id.in_(option_ids)
-        )
+        select(ServiceOption).where(ServiceOption.option_id.in_(option_ids))
     ).all()
 
 
-def get_reservation_item_schedule_by_date(
+def get_service_schedule_by_date(
     session: Session, object_id: int, reservation_date: date
-) -> ReservationItemSchedule | None:
+) -> ServiceSchedule | None:
     specific_schedule = session.exec(
-        select(ReservationItemSchedule).where(
-            ReservationItemSchedule.object_id == object_id,
-            ReservationItemSchedule.schedule_type == "specific",
-            ReservationItemSchedule.schedule_date == reservation_date,
-            ReservationItemSchedule.is_active,
+        select(ServiceSchedule).where(
+            ServiceSchedule.object_id == object_id,
+            ServiceSchedule.schedule_type == "specific",
+            ServiceSchedule.schedule_date == reservation_date,
+            ServiceSchedule.is_active,
         )
     ).first()
     if specific_schedule:
@@ -233,32 +215,30 @@ def get_reservation_item_schedule_by_date(
 
     weekday = (reservation_date.weekday() + 1) % 7
     weekly_schedule = session.exec(
-        select(ReservationItemSchedule).where(
-            ReservationItemSchedule.object_id == object_id,
-            ReservationItemSchedule.schedule_type == "weekly",
-            ReservationItemSchedule.weekday == weekday,
-            ReservationItemSchedule.is_active,
+        select(ServiceSchedule).where(
+            ServiceSchedule.object_id == object_id,
+            ServiceSchedule.schedule_type == "weekly",
+            ServiceSchedule.weekday == weekday,
+            ServiceSchedule.is_active,
         )
     ).first()
     return weekly_schedule
 
 
-def get_available_schedules_for_item(
-    session: Session, reservation_item_id: UUID
-) -> List[ReservationItemSchedule]:
+def get_available_schedules_for_service(
+    session: Session, service_id: UUID
+) -> List[ServiceSchedule]:
     item = session.exec(
-        select(ReservationItemListView).where(
-            ReservationItemListView.reservation_item_id == reservation_item_id
-        )
+        select(ServiceListView).where(ServiceListView.service_id == service_id)
     ).first()
 
     if not item:
         return []
 
     return session.exec(
-        select(ReservationItemSchedule).where(
-            ReservationItemSchedule.object_id == item.object_id,
-            ReservationItemSchedule.is_active,
+        select(ServiceSchedule).where(
+            ServiceSchedule.object_id == item.object_id,
+            ServiceSchedule.is_active,
         )
     ).all()
 
@@ -269,7 +249,7 @@ def get_reservations_count_by_schedule_and_date(
     """獲取特定時間表和日期的預約數量"""
     return session.exec(
         select(func.count(ReservationDetail.reservation_id)).where(
-            ReservationDetail.reservation_item_schedule_id == schedule_id,
+            ReservationDetail.service_schedule_id == schedule_id,
             ReservationDetail.reservation_date == reservation_date,
         )
     ).one()
@@ -281,7 +261,7 @@ def get_reservations_count_by_schedule_date_and_time(
     """獲取特定時間表、日期和時間的預約數量"""
     return session.exec(
         select(func.count(ReservationDetail.reservation_id)).where(
-            ReservationDetail.reservation_item_schedule_id == schedule_id,
+            ReservationDetail.service_schedule_id == schedule_id,
             ReservationDetail.reservation_date == reservation_date,
             ReservationDetail.start_time == start_time,
         )
@@ -300,18 +280,18 @@ def get_reservations_count_batch(
 
     reservations = session.exec(
         select(
-            ReservationDetail.reservation_item_schedule_id,
+            ReservationDetail.service_schedule_id,
             ReservationDetail.reservation_date,
             ReservationDetail.start_time,
             func.count(ReservationDetail.reservation_id).label("count"),
         )
         .where(
-            ReservationDetail.reservation_item_schedule_id.in_(schedule_ids),
+            ReservationDetail.service_schedule_id.in_(schedule_ids),
             ReservationDetail.reservation_date >= start_date,
             ReservationDetail.reservation_date <= end_date,
         )
         .group_by(
-            ReservationDetail.reservation_item_schedule_id,
+            ReservationDetail.service_schedule_id,
             ReservationDetail.reservation_date,
             ReservationDetail.start_time,
         )
@@ -320,7 +300,7 @@ def get_reservations_count_batch(
     result = {}
     for reservation in reservations:
         key = (
-            reservation.reservation_item_schedule_id,
+            reservation.service_schedule_id,
             reservation.reservation_date,
             reservation.start_time,
         )
@@ -329,43 +309,35 @@ def get_reservations_count_batch(
     return result
 
 
-def get_reservation_item_detail_by_id(
-    session: Session, reservation_item_id: UUID
-) -> ReservationItemDetail | None:
-    return session.get(ReservationItemDetail, reservation_item_id)
+def get_service_detail_by_id(
+    session: Session, service_id: UUID
+) -> ServiceDetail | None:
+    return session.get(ServiceDetail, service_id)
 
 
-def get_reservation_item_details_by_uuid(
-    session: Session, reservation_item_id: UUID
-) -> ReservationItemDetail | None:
-    """Get reservation item details including duration by UUID"""
+def get_service_details_by_uuid(
+    session: Session, service_id: UUID
+) -> ServiceDetail | None:
+    """Get service details including duration by UUID"""
     return session.exec(
-        select(ReservationItemDetail).where(
-            ReservationItemDetail.reservation_item_id == reservation_item_id
-        )
+        select(ServiceDetail).where(ServiceDetail.service_id == service_id)
     ).first()
 
 
-def get_object_ids_by_reservation_item_ids(
-    session: Session, reservation_item_ids: List[UUID]
+def get_object_ids_by_service_ids(
+    session: Session, service_ids: List[UUID]
 ) -> List[int]:
-    """Get object_ids by reservation_item_ids"""
+    """Get object_ids by service_ids"""
     result = session.exec(
-        select(ReservationItemDetail.object_id).where(
-            ReservationItemDetail.reservation_item_id.in_(reservation_item_ids)
-        )
+        select(ServiceDetail.object_id).where(ServiceDetail.service_id.in_(service_ids))
     ).all()
     return list(result)
 
 
-def get_object_id_by_reservation_item_id(
-    session: Session, reservation_item_id: UUID
-) -> int | None:
-    """Get object_id by reservation_item_id"""
+def get_object_id_by_service_id(session: Session, service_id: UUID) -> int | None:
+    """Get object_id by service_id"""
     result = session.exec(
-        select(ReservationItemDetail.object_id).where(
-            ReservationItemDetail.reservation_item_id == reservation_item_id
-        )
+        select(ServiceDetail.object_id).where(ServiceDetail.service_id == service_id)
     ).first()
     return result
 
@@ -428,17 +400,17 @@ def get_reservation_selected_options(
         select(
             ReservationOption.object_id,
             ReservationOption.option_group_id,
-            ReservationOptionGroup.group_name,
+            ServiceOptionGroup.group_name,
             ReservationOption.option_id,
-            ReservationItemOption.option_name,
+            ServiceOption.option_name,
         )
         .join(
-            ReservationOptionGroup,
-            ReservationOption.option_group_id == ReservationOptionGroup.option_group_id,
+            ServiceOptionGroup,
+            ReservationOption.option_group_id == ServiceOptionGroup.option_group_id,
         )
         .join(
-            ReservationItemOption,
-            ReservationOption.option_id == ReservationItemOption.option_id,
+            ServiceOption,
+            ReservationOption.option_id == ServiceOption.option_id,
         )
         .where(ReservationOption.object_id.in_(reservation_object_ids))
     ).all()

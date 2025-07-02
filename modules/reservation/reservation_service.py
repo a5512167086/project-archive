@@ -4,7 +4,6 @@ from uuid import UUID
 
 from sqlmodel import Session, select
 
-from exception import GlobalErrorException
 from modules.bot.bot_service import validate_bot_ownership, validate_line_bot_exists
 from modules.reservation.reservation_command import (
     delete_reservation_by_id,
@@ -14,54 +13,53 @@ from modules.reservation.reservation_command import (
     update_reservation,
     update_reservation_item,
 )
-from modules.reservation.reservation_model import ReservationItemDetail
+from modules.reservation.reservation_model import ServiceDetail
 from modules.reservation.reservation_query import (
-    get_available_schedules_for_item,
+    get_available_schedules_for_service,
     get_bot_reservations,
     get_concurrent_reservations_count,
-    get_object_id_by_reservation_item_id,
-    get_object_ids_by_reservation_item_ids,
+    get_object_id_by_service_id,
+    get_object_ids_by_service_ids,
     get_reservation_by_id,
     get_reservation_class_id_by_bot_class_id,
-    get_reservation_item_by_id,
-    get_reservation_item_class_id_by_bot_class_id,
-    get_reservation_item_details_by_uuid,
-    get_reservation_item_options_by_ids,
-    get_reservation_item_schedule_by_date,
-    get_reservation_items,
     get_reservation_selected_options,
     get_reservations_count_batch,
+    get_service_by_id,
+    get_service_class_id_by_bot_class_id,
+    get_service_details_by_uuid,
+    get_service_options_by_ids,
+    get_service_schedule_by_date,
+    get_services,
     get_user_reservations_in_bot,
 )
 from modules.reservation.reservation_schema import (
     DailyAvailableSlots,
     ReservationCreate,
-    ReservationItemCreate,
-    ReservationItemPatch,
     ReservationListResponse,
     ReservationPatch,
     ReservationSelectedOptionGroupResponse,
     ReservationSelectedOptionResponse,
-    TempReservationItemPatch,
+    ServiceCreate,
+    ServicePatch,
+    TempServicePatch,
     TimeSlot,
 )
 from shared.constants.common import PaymentMethod, PaymentStatus
 from shared.constants.config import TAIWAN_TZ
 from shared.constants.error_code import ErrorCode
+from shared.exception import GlobalErrorException
 from shared.queries.group_query import is_user_in_group
 from shared.services.group_service import validate_group_exist_in_bot
 
 
-def validate_reservation_item_class(session: Session, bot_class_id: int) -> int:
-    reservation_item_class_id = get_reservation_item_class_id_by_bot_class_id(
-        session, bot_class_id
-    )
-    if not reservation_item_class_id:
+def validate_service_class(session: Session, bot_class_id: int) -> int:
+    service_class_id = get_service_class_id_by_bot_class_id(session, bot_class_id)
+    if not service_class_id:
         raise GlobalErrorException(
-            error_code=ErrorCode.RESERVATION_ITEM_CLASS_NOT_FOUND,
-            error_message="Reservation item class not found for the given bot class",
+            error_code=ErrorCode.SERVICE_CLASS_NOT_FOUND,
+            error_message="Service class not found for the given bot class",
         )
-    return reservation_item_class_id
+    return service_class_id
 
 
 def validate_reservation_class(session: Session, bot_class_id: int) -> int:
@@ -76,79 +74,75 @@ def validate_reservation_class(session: Session, bot_class_id: int) -> int:
     return reservation_class_id
 
 
-def get_reservation_items_by_bot_class_id(session: Session, bot_uuid: UUID):
+def get_services_by_bot_class_id(session: Session, bot_uuid: UUID):
     bot = validate_line_bot_exists(session, bot_uuid)
-    reservation_item_class_id = validate_reservation_item_class(session, bot.class_id)
+    service_class_id = validate_service_class(session, bot.class_id)
 
-    return get_reservation_items(session, reservation_item_class_id)
+    return get_services(session, service_class_id)
 
 
-def insert_new_reservation_item(
-    session: Session, new_reservation_item: ReservationItemCreate, current_user_id: UUID
+def insert_new_service(
+    session: Session, new_service: ServiceCreate, current_user_id: UUID
 ):
-    bot = validate_line_bot_exists(session, new_reservation_item.bot_uuid)
+    bot = validate_line_bot_exists(session, new_service.bot_uuid)
     validate_bot_ownership(session, current_user_id, bot.bot_detail_id)
 
-    reservation_item_class_id = validate_reservation_item_class(session, bot.class_id)
+    service_class_id = validate_service_class(session, bot.class_id)
     insert_reservation_item(
         session=session,
-        reservation_item_class_id=reservation_item_class_id,
-        reservation_item_name=new_reservation_item.reservation_name,
-        reservation_item_description=new_reservation_item.reservation_description,
-        reservation_duration_minutes=new_reservation_item.duration_minutes,
-        reservation_price=new_reservation_item.price,
-        option_group_list=new_reservation_item.option_groups,
-        schedule_list=new_reservation_item.default_schedules,
+        reservation_item_class_id=service_class_id,
+        reservation_item_name=new_service.service_name,
+        reservation_item_description=new_service.service_description,
+        reservation_duration_minutes=new_service.duration_minutes,
+        reservation_price=new_service.price,
+        option_group_list=new_service.option_groups,
+        schedule_list=new_service.default_schedules,
     )
 
 
-def delete_reservation_item_by_reservation_item_id(
+def delete_service_by_service_id(
     session: Session,
     bot_uuid: UUID,
-    reservation_item_id_list: List[UUID],
+    service_id_list: List[UUID],
     current_user_id: UUID,
 ):
     bot = validate_line_bot_exists(session, bot_uuid)
     validate_bot_ownership(session, current_user_id, bot.bot_detail_id)
 
-    reservation_item_class_id = validate_reservation_item_class(session, bot.class_id)
+    reservation_item_class_id = validate_service_class(session, bot.class_id)
 
-    # Convert reservation_item_ids to object_ids
+    # Convert service_ids to object_ids
 
-    object_id_list = get_object_ids_by_reservation_item_ids(
-        session, reservation_item_id_list
-    )
+    object_id_list = get_object_ids_by_service_ids(session, service_id_list)
 
     delete_reservation_items(session, reservation_item_class_id, object_id_list)
 
 
-def update_reservation_item_by_reservation_item_id(
+def update_service_by_service_id(
     session: Session,
-    reservation_item_patch: ReservationItemPatch,
+    service_patch: ServicePatch,
     current_user_id: UUID,
 ):
-    bot = validate_line_bot_exists(session, reservation_item_patch.bot_uuid)
+    bot = validate_line_bot_exists(session, service_patch.bot_uuid)
     validate_bot_ownership(session, current_user_id, bot.bot_detail_id)
-    validate_reservation_item_class(session, bot.class_id)
+    validate_service_class(session, bot.class_id)
 
-    # Convert reservation_item_id to object_id
+    # Convert service_id to object_id
 
-    object_id = get_object_id_by_reservation_item_id(
-        session, reservation_item_patch.reservation_item_id
-    )
+    object_id = get_object_id_by_service_id(session, service_patch.service_id)
 
     if not object_id:
         raise GlobalErrorException(
-            error_code=ErrorCode.RESERVATION_ITEM_NOT_FOUND,
-            error_message="Reservation item not found",
+            error_code=ErrorCode.SERVICE_NOT_FOUND,
+            error_message="Service not found",
         )
 
-    object_patch = TempReservationItemPatch(
-        bot_uuid=reservation_item_patch.bot_uuid,
+    object_patch = TempServicePatch(
+        bot_uuid=service_patch.bot_uuid,
         object_id=object_id,
-        detail=reservation_item_patch.detail,
-        option_groups=reservation_item_patch.option_groups,
-        schedules=reservation_item_patch.schedules,
+        detail=service_patch.detail,
+        option_groups=service_patch.option_groups,
+        schedules=service_patch.schedules,
     )
 
     update_reservation_item(session, object_patch)
@@ -164,17 +158,15 @@ def create_user_reservation(
             error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
             error_message="User is not a member of this bot's group.",
         )
-    reservation_item_class_id = validate_reservation_item_class(session, bot.class_id)
-    reservation_item = get_reservation_item_by_id(
-        session, reservation_item_class_id, reservation.reservation_item_id
-    )
-    if not reservation_item:
+    service_class_id = validate_service_class(session, bot.class_id)
+    service = get_service_by_id(session, service_class_id, reservation.service_id)
+    if not service:
         raise GlobalErrorException(
-            error_code=ErrorCode.RESERVATION_ITEM_NOT_FOUND,
-            error_message="Reservation item not found",
+            error_code=ErrorCode.SERVICE_NOT_FOUND,
+            error_message="Service not found",
         )
-    schedule = get_reservation_item_schedule_by_date(
-        session, reservation_item.object_id, reservation.reservation_date
+    schedule = get_service_schedule_by_date(
+        session, service.object_id, reservation.reservation_date
     )
 
     if not schedule or not schedule.is_active:
@@ -203,7 +195,7 @@ def create_user_reservation(
 
     concurrent_reservations = get_concurrent_reservations_count(
         session,
-        schedule.reservation_item_schedule_id,
+        schedule.service_schedule_id,
         reservation.reservation_date,
         reservation.start_time,
     )
@@ -213,10 +205,10 @@ def create_user_reservation(
             error_message="Reservation capacity exceeded",
         )
 
-    total_price = reservation_item.price
+    total_price = service.price
     if reservation.option_values:
         option_ids = [opt.option_id for opt in reservation.option_values]
-        options = get_reservation_item_options_by_ids(session, option_ids)
+        options = get_service_options_by_ids(session, option_ids)
         if len(options) != len(option_ids):
             raise GlobalErrorException(
                 error_code=ErrorCode.RESERVATION_OPTION_INVALID,
@@ -227,7 +219,7 @@ def create_user_reservation(
 
     end_time = (
         datetime.combine(reservation.reservation_date, reservation.start_time)
-        + timedelta(minutes=reservation_item.duration_minutes)
+        + timedelta(minutes=service.duration_minutes)
     ).time()
 
     reservation_class_id = validate_reservation_class(session, bot.class_id)
@@ -246,8 +238,8 @@ def create_user_reservation(
         session,
         reservation_class_id=reservation_class_id,
         user_id=user_id,
-        reservation_item_id=reservation.reservation_item_id,
-        reservation_item_schedule_id=schedule.reservation_item_schedule_id,
+        service_id=reservation.service_id,
+        service_schedule_id=schedule.service_schedule_id,
         reservation_date=reservation.reservation_date,
         start_time=reservation.start_time,
         end_time=end_time,
@@ -261,29 +253,27 @@ def create_user_reservation(
     return reservation_detail
 
 
-def get_available_times_for_item(
-    session: Session, reservation_item_id: UUID
+def get_available_times_for_service(
+    session: Session, service_id: UUID
 ) -> List[DailyAvailableSlots]:
-    reservation_item_details = get_reservation_item_details_by_uuid(
-        session, reservation_item_id
-    )
-    if not reservation_item_details:
+    service_details = get_service_details_by_uuid(session, service_id)
+    if not service_details:
         raise GlobalErrorException(
-            error_code=ErrorCode.RESERVATION_ITEM_NOT_FOUND,
-            error_message="Reservation item not found",
+            error_code=ErrorCode.SERVICE_NOT_FOUND,
+            error_message="Service not found",
         )
 
-    time_slot_duration_minutes = reservation_item_details.duration_minutes
+    time_slot_duration_minutes = service_details.duration_minutes
 
     today = datetime.now(TAIWAN_TZ).date()
     end_date = today + timedelta(days=30)
 
-    all_schedules = get_available_schedules_for_item(session, reservation_item_id)
+    all_schedules = get_available_schedules_for_service(session, service_id)
 
     if not all_schedules:
         return []
 
-    schedule_ids = [schedule.reservation_item_schedule_id for schedule in all_schedules]
+    schedule_ids = [schedule.service_schedule_id for schedule in all_schedules]
     reservations_count_map = get_reservations_count_batch(
         session, schedule_ids, today, end_date
     )
@@ -336,7 +326,7 @@ def get_available_times_for_item(
                     slot_end_time = end_time
 
                 key = (
-                    schedule.reservation_item_schedule_id,
+                    schedule.service_schedule_id,
                     single_date,
                     current_time.time(),
                 )
@@ -372,7 +362,7 @@ def delete_user_reservation(session: Session, reservation_id: UUID):
     reservation = get_reservation_by_id(session, reservation_id)
     if not reservation:
         raise GlobalErrorException(
-            error_code=ErrorCode.RESERVATION_ITEM_NOT_FOUND,
+            error_code=ErrorCode.RESERVATION_NOT_FOUND,
             error_message="Reservation not found",
         )
 
@@ -431,7 +421,7 @@ def get_bot_reservations_list(
         result.append(
             ReservationListResponse(
                 reservation_id=reservation.reservation_id,
-                reservation_item_id=reservation.reservation_item_id,
+                service_id=reservation.service_id,
                 price=reservation.price,
                 service_name=reservation.service_name,
                 notes=reservation.notes,
@@ -442,6 +432,7 @@ def get_bot_reservations_list(
                 payment_method=reservation.payment_method,
                 payment_status=reservation.payment_status,
                 created_at=reservation.created_at,
+                updated_at=reservation.updated_at,
                 selected_option_groups=selected_option_groups,
             )
         )
@@ -506,7 +497,7 @@ def get_user_reservations_in_bot_list(
         result.append(
             ReservationListResponse(
                 reservation_id=reservation.reservation_id,
-                reservation_item_id=reservation.reservation_item_id,
+                service_id=reservation.service_id,
                 price=reservation.price,
                 service_name=reservation.service_name,
                 notes=reservation.notes,
@@ -517,6 +508,7 @@ def get_user_reservations_in_bot_list(
                 payment_method=reservation.payment_method,
                 payment_status=reservation.payment_status,
                 created_at=reservation.created_at,
+                updated_at=reservation.updated_at,
                 selected_option_groups=selected_option_groups,
             )
         )
@@ -532,7 +524,7 @@ def update_reservation_by_owner(
     reservation = get_reservation_by_id(session, reservation_patch.reservation_id)
     if not reservation:
         raise GlobalErrorException(
-            error_code=ErrorCode.RESERVATION_ITEM_NOT_FOUND,
+            error_code=ErrorCode.RESERVATION_NOT_FOUND,
             error_message="Reservation not found",
         )
 
@@ -546,16 +538,15 @@ def update_reservation_by_owner(
         new_start_time = reservation_patch.start_time or reservation.start_time
 
         # 檢查排程是否存在且有效
-        reservation_item = session.exec(
-            select(ReservationItemDetail).where(
-                ReservationItemDetail.reservation_item_id
-                == reservation.reservation_item_id
+        service_item = session.exec(
+            select(ServiceDetail).where(
+                ServiceDetail.service_id == reservation.service_id
             )
         ).first()
 
-        if reservation_item:
-            schedule = get_reservation_item_schedule_by_date(
-                session, reservation_item.object_id, new_date
+        if service_item:
+            schedule = get_service_schedule_by_date(
+                session, service_item.object_id, new_date
             )
 
             if not schedule or not schedule.is_active:
@@ -582,7 +573,7 @@ def update_reservation_by_owner(
             # 檢查容量（排除目前這筆預約）
             concurrent_reservations = get_concurrent_reservations_count(
                 session,
-                schedule.reservation_item_schedule_id,
+                schedule.service_schedule_id,
                 new_date,
                 new_start_time,
             )

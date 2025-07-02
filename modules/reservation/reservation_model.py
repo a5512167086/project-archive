@@ -13,10 +13,10 @@ from shared.constants.common import (
 )
 
 
-class ReservationItemDetail(SQLModel, table=True):
-    __tablename__ = "reservation_item_details"
+class ServiceDetail(SQLModel, table=True):
+    __tablename__ = "service_details"
 
-    reservation_item_id: UUID = Field(default_factory=uuid4, primary_key=True)
+    service_id: UUID = Field(default_factory=uuid4, primary_key=True)
     object_id: int = Field(foreign_key="objects.object_id")
     duration_minutes: int
     price: int
@@ -25,8 +25,8 @@ class ReservationItemDetail(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
-class ReservationOptionGroup(SQLModel, table=True):
-    __tablename__ = "reservation_option_groups"
+class ServiceOptionGroup(SQLModel, table=True):
+    __tablename__ = "service_option_groups"
 
     option_group_id: UUID = Field(default_factory=uuid4, primary_key=True)
     object_id: int = Field(foreign_key="objects.object_id")
@@ -40,13 +40,11 @@ class ReservationOptionGroup(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
-class ReservationItemOption(SQLModel, table=True):
-    __tablename__ = "reservation_item_options"
+class ServiceOption(SQLModel, table=True):
+    __tablename__ = "service_options"
 
     option_id: UUID = Field(default_factory=uuid4, primary_key=True)
-    option_group_id: UUID = Field(
-        foreign_key="reservation_option_groups.option_group_id"
-    )
+    option_group_id: UUID = Field(foreign_key="service_option_groups.option_group_id")
     option_name: str
     option_description: Optional[str] = None
     price: int = 0
@@ -56,10 +54,10 @@ class ReservationItemOption(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
-class ReservationItemSchedule(SQLModel, table=True):
-    __tablename__ = "reservation_item_schedules"
+class ServiceSchedule(SQLModel, table=True):
+    __tablename__ = "service_schedules"
 
-    reservation_item_schedule_id: UUID = Field(default_factory=uuid4, primary_key=True)
+    service_schedule_id: UUID = Field(default_factory=uuid4, primary_key=True)
     object_id: int = Field(foreign_key="objects.object_id")
     schedule_type: ScheduleType
     weekday: Optional[int] = Field(default=None, ge=0, le=6)
@@ -72,19 +70,19 @@ class ReservationItemSchedule(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
-class ReservationItemListView(SQLModel, table=True):
-    __tablename__ = "vs_reservation_item_list"
+class ServiceListView(SQLModel, table=True):
+    __tablename__ = "vs_service_list"
 
-    reservation_item_id: UUID = Field(primary_key=True)
+    service_id: UUID = Field(primary_key=True)
     object_id: int
     class_id: int
-    reservation_name: str
-    reservation_description: str
+    service_name: str
+    service_description: str
     duration_minutes: int
     price: int
-    item_is_active: bool
-    item_created_at: datetime
-    item_updated_at: datetime
+    service_is_active: bool
+    service_created_at: datetime
+    service_updated_at: datetime
 
 
 class ReservationListView(SQLModel, table=True):
@@ -93,7 +91,7 @@ class ReservationListView(SQLModel, table=True):
     reservation_id: UUID = Field(primary_key=True)
     object_id: int
     class_id: int
-    reservation_item_id: UUID
+    service_id: UUID
     price: int
     service_name: str
     notes: Optional[str]
@@ -104,6 +102,7 @@ class ReservationListView(SQLModel, table=True):
     payment_method: Optional[str]
     payment_status: Optional[str]
     created_at: datetime
+    updated_at: datetime
 
 
 class ReservationDetail(SQLModel, table=True):
@@ -111,11 +110,9 @@ class ReservationDetail(SQLModel, table=True):
 
     reservation_id: UUID = Field(default_factory=uuid4, primary_key=True)
     object_id: int = Field(foreign_key="objects.object_id")
-    reservation_item_id: UUID = Field(
-        foreign_key="reservation_item_details.reservation_item_id"
-    )
-    reservation_item_schedule_id: UUID = Field(
-        foreign_key="reservation_item_schedules.reservation_item_schedule_id"
+    service_id: UUID = Field(foreign_key="service_details.service_id")
+    service_schedule_id: UUID = Field(
+        foreign_key="service_schedules.service_schedule_id"
     )
     reservation_date: date
     start_time: time
@@ -126,6 +123,7 @@ class ReservationDetail(SQLModel, table=True):
     payment_status: Optional[PaymentStatus] = None
     notes: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class ReservationOption(SQLModel, table=True):
@@ -133,9 +131,7 @@ class ReservationOption(SQLModel, table=True):
 
     object_id: int = Field(foreign_key="objects.object_id", primary_key=True)
     option_group_id: UUID = Field(
-        foreign_key="reservation_option_groups.option_group_id", primary_key=True
+        foreign_key="service_option_groups.option_group_id", primary_key=True
     )
-    option_id: UUID = Field(
-        foreign_key="reservation_item_options.option_id", primary_key=True
-    )
+    option_id: UUID = Field(foreign_key="service_options.option_id", primary_key=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

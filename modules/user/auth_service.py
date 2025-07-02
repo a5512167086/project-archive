@@ -7,9 +7,9 @@ from fastapi import Depends, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt import DecodeError, ExpiredSignatureError, InvalidTokenError
 
-from exception import GlobalErrorException
 from shared.constants.config import JWT_ALGORITHM, JWT_REFRESH_SECRET, JWT_SECRET
 from shared.constants.error_code import ErrorCode
+from shared.exception import GlobalErrorException
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

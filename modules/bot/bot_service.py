@@ -15,7 +15,6 @@ from linebot.v3.messaging import (
 )
 from sqlmodel import Session
 
-from exception import GlobalErrorException
 from modules.bot.bot_command import delete_bot_by_id, insert_new_bot, update_bot_by_id
 from modules.bot.bot_model import BotListWithCredentialView
 from modules.bot.bot_query import (
@@ -26,6 +25,7 @@ from modules.bot.bot_query import (
 )
 from modules.bot.bot_schema import InsertBotRequest, UpdateBotRequest
 from shared.constants.error_code import ErrorCode
+from shared.exception import GlobalErrorException
 from shared.utils.api import create_liff_app, get_channel_access_token
 
 logging.basicConfig(
@@ -154,7 +154,7 @@ def init_rich_menu(line_access_token: str, liff_id: str, bot_uuid: str):
         logger.info(f"Rich menu created with ID: {rich_menu_id}")
 
         image_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../assets/rich_menu.png")
+            os.path.join(os.path.dirname(__file__), "../../assets/rich_menu.png")
         )
         with open(image_path, "rb") as image:
             line_bot_blob_api.set_rich_menu_image(
