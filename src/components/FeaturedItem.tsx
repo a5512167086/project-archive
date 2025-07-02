@@ -9,6 +9,7 @@ interface FeaturedItemProps {
   priceLabel?: string; // 例如 "起" 表示有額外選項
   image?: string;
   buttonText: string;
+  disabled?: boolean; // 新增禁用狀態
   onButtonClick?: (id: string) => void;
 }
 
@@ -20,10 +21,13 @@ export function FeaturedItem({
   priceLabel,
   image,
   buttonText,
+  disabled = false,
   onButtonClick,
 }: FeaturedItemProps) {
   return (
-    <div className="flex items-center space-x-3">
+    <div
+      className={`flex items-center space-x-3 ${disabled ? "opacity-60" : ""}`}
+    >
       <img
         src={image || placeholder}
         alt={name}
@@ -34,6 +38,7 @@ export function FeaturedItem({
       <div className="flex-1">
         <h4 className="font-medium">{name}</h4>
         <p className="text-sm text-muted-foreground">{description}</p>
+        {disabled && <p className="text-xs text-red-500 mt-1">暫停服務</p>}
       </div>
       <div className="text-right">
         <p className="font-medium">
@@ -44,8 +49,12 @@ export function FeaturedItem({
             </span>
           )}
         </p>
-        <Button size="sm" onClick={() => onButtonClick?.(id)}>
-          {buttonText}
+        <Button
+          size="sm"
+          disabled={disabled}
+          onClick={() => onButtonClick?.(id)}
+        >
+          {disabled ? "暫停服務" : buttonText}
         </Button>
       </div>
     </div>

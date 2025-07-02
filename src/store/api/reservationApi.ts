@@ -91,6 +91,7 @@ export interface ReservationItem {
   reservation_description: string;
   duration_minutes: number;
   price: number;
+  is_active: boolean;
   option_groups: ReservationItemOptionGroup[];
   schedules: ReservationItemSchedule[];
 }

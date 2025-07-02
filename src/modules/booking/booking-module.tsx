@@ -29,6 +29,25 @@ function BookingContent() {
       (item) => item.reservation_item_id === itemId
     );
     if (item) {
+      // 檢查項目的 is_active 狀態
+      // 如果項目本身是 inactive，或者所有必需的選項組都是 inactive，則禁用項目
+      const hasActiveRequiredOptionGroups = item.option_groups
+        .filter((group) => group.is_required)
+        .every(
+          (group) =>
+            group.is_active && group.options.some((opt) => opt.is_active)
+        );
+
+      const isItemDisabled =
+        !item.is_active ||
+        (item.option_groups.some((group) => group.is_required) &&
+          !hasActiveRequiredOptionGroups);
+
+      // 如果項目被禁用，則不執行任何操作
+      if (isItemDisabled) {
+        return;
+      }
+
       setSelectedItem(item);
       setIsDialogOpen(true);
     }
@@ -89,6 +108,21 @@ function BookingContent() {
                 group.options.some((opt) => opt.price > 0)
               );
 
+              // 檢查項目的 is_active 狀態
+              // 如果項目本身是 inactive，或者所有必需的選項組都是 inactive，則禁用項目
+              const hasActiveRequiredOptionGroups = item.option_groups
+                .filter((group) => group.is_required)
+                .every(
+                  (group) =>
+                    group.is_active &&
+                    group.options.some((opt) => opt.is_active)
+                );
+
+              const isItemDisabled =
+                !item.is_active ||
+                (item.option_groups.some((group) => group.is_required) &&
+                  !hasActiveRequiredOptionGroups);
+
               return (
                 <FeaturedItem
                   key={item.reservation_item_id}
@@ -101,6 +135,7 @@ function BookingContent() {
                   price={item.price}
                   priceLabel={hasPayableOptions ? "起" : undefined}
                   buttonText="預約"
+                  disabled={isItemDisabled}
                   onButtonClick={handleBookingClick}
                 />
               );
