@@ -43,7 +43,9 @@ export function BookingDialog({
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [step, setStep] = useState<BookingStep>("date");
   const [optionValues, setOptionValues] = useState<Record<string, string>>({});
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "bank_transfer">("cash");
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "bank_transfer">(
+    "cash"
+  );
   const [note, setNote] = useState<string>("");
   const [submissionStatus, setSubmissionStatus] = useState<
     "idle" | "success" | "error"
@@ -481,7 +483,8 @@ export function BookingDialog({
                         : "text-muted-foreground"
                     }`}
                     onClick={() =>
-                      dayInfo.isAvailable && handleDateSelect(dayInfo.dateString)
+                      dayInfo.isAvailable &&
+                      handleDateSelect(dayInfo.dateString)
                     }
                     disabled={!dayInfo.isAvailable}
                   >
@@ -572,12 +575,24 @@ export function BookingDialog({
                               }`}
                               onClick={() => {
                                 if (group.selection_type === "single") {
-                                  // 清除同組的其他選項
+                                  // 單選邏輯
                                   const newValues = { ...optionValues };
-                                  group.options.forEach((opt) => {
-                                    delete newValues[opt.option_id];
-                                  });
-                                  newValues[option.option_id] = "selected";
+
+                                  // 如果點擊的是已選中的選項且該組不是必填的，則取消選擇
+                                  if (
+                                    optionValues[option.option_id] ===
+                                      "selected" &&
+                                    !group.is_required
+                                  ) {
+                                    delete newValues[option.option_id];
+                                  } else {
+                                    // 清除同組的其他選項
+                                    group.options.forEach((opt) => {
+                                      delete newValues[opt.option_id];
+                                    });
+                                    newValues[option.option_id] = "selected";
+                                  }
+
                                   setOptionValues(newValues);
                                 } else {
                                   // 多選邏輯
@@ -725,7 +740,11 @@ export function BookingDialog({
                         name="payment_method"
                         value="cash"
                         checked={paymentMethod === "cash"}
-                        onChange={(e) => setPaymentMethod(e.target.value as "cash" | "bank_transfer")}
+                        onChange={(e) =>
+                          setPaymentMethod(
+                            e.target.value as "cash" | "bank_transfer"
+                          )
+                        }
                         className="text-blue-600"
                       />
                       <span>現金付款</span>
@@ -736,7 +755,11 @@ export function BookingDialog({
                         name="payment_method"
                         value="bank_transfer"
                         checked={paymentMethod === "bank_transfer"}
-                        onChange={(e) => setPaymentMethod(e.target.value as "cash" | "bank_transfer")}
+                        onChange={(e) =>
+                          setPaymentMethod(
+                            e.target.value as "cash" | "bank_transfer"
+                          )
+                        }
                         className="text-blue-600"
                       />
                       <span>銀行轉帳</span>
