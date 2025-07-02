@@ -325,3 +325,66 @@ def delete_reservation_by_id(session: Session, reservation_id: UUID):
     )
 
     session.exec(delete(Object).where(Object.object_id == object_id))
+
+
+def update_reservation(
+    session: Session,
+    reservation_id: UUID,
+    reservation_date: date = None,
+    start_time: time = None,
+    payment_method=None,
+    payment_status=None,
+    status=None,
+    note: str = None,
+):
+    """Update reservation details"""
+    # 取得現有的 reservation
+    reservation = session.exec(
+        select(ReservationDetail).where(
+            ReservationDetail.reservation_id == reservation_id
+        )
+    ).first()
+
+    if not reservation:
+        return None
+
+    # 更新有提供的欄位
+    if reservation_date is not None:
+        reservation.reservation_date = reservation_date
+
+    if start_time is not None:
+        reservation.start_time = start_time
+        # 如果更新了開始時間，需要重新計算結束時間
+        # 首先取得 reservation_item 的 duration
+        reservation_item = session.exec(
+            select(ReservationItemDetail).where(
+                ReservationItemDetail.reservation_item_id
+                == reservation.reservation_item_id
+            )
+        ).first()
+
+        if reservation_item:
+            from datetime import datetime, timedelta
+
+            end_time = (
+                datetime.combine(reservation.reservation_date, start_time)
+                + timedelta(minutes=reservation_item.duration_minutes)
+            ).time()
+            reservation.end_time = end_time
+
+    if payment_method is not None:
+        reservation.payment_method = payment_method
+
+    if payment_status is not None:
+        reservation.payment_status = payment_status
+
+    if status is not None:
+        reservation.status = status
+
+    if note is not None:
+        reservation.notes = note
+
+    session.add(reservation)
+    session.flush()
+
+    return reservation

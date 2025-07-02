@@ -2,19 +2,21 @@ from datetime import datetime, timedelta
 from typing import List
 from uuid import UUID
 
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from commands.reservation_command import (
     delete_reservation_by_id,
     delete_reservation_items,
     insert_reservation,
     insert_reservation_item,
+    update_reservation,
     update_reservation_item,
 )
 from constants.common import PaymentMethod, PaymentStatus
 from constants.config import TAIWAN_TZ
 from constants.error_code import ErrorCode
 from exception import GlobalErrorException
+from models.reservation_model import ReservationItemDetail
 from queries.group_query import is_user_in_group
 from queries.reservation_query import (
     get_available_schedules_for_item,
@@ -40,6 +42,7 @@ from schemas.reservation_schema import (
     ReservationItemCreate,
     ReservationItemPatch,
     ReservationListResponse,
+    ReservationPatch,
     ReservationSelectedOptionGroupResponse,
     ReservationSelectedOptionResponse,
     TempReservationItemPatch,
@@ -519,3 +522,99 @@ def get_user_reservations_in_bot_list(
         )
 
     return result
+
+
+def update_reservation_by_owner(
+    session: Session, user_id: UUID, reservation_patch: ReservationPatch
+):
+    """Update reservation (reservation owner or bot owner can update)"""
+    # 檢查 reservation 是否存在
+    reservation = get_reservation_by_id(session, reservation_patch.reservation_id)
+    if not reservation:
+        raise GlobalErrorException(
+            error_code=ErrorCode.RESERVATION_ITEM_NOT_FOUND,
+            error_message="Reservation not found",
+        )
+
+    # 檢查是否為 bot 擁有者
+    bot = validate_line_bot_exists(session, reservation_patch.bot_uuid)
+    validate_bot_ownership(session, user_id, bot.bot_detail_id)
+
+    # 如果要更新時間相關欄位，需要重新檢查排程和容量
+    if reservation_patch.reservation_date or reservation_patch.start_time:
+        new_date = reservation_patch.reservation_date or reservation.reservation_date
+        new_start_time = reservation_patch.start_time or reservation.start_time
+
+        # 檢查排程是否存在且有效
+        reservation_item = session.exec(
+            select(ReservationItemDetail).where(
+                ReservationItemDetail.reservation_item_id
+                == reservation.reservation_item_id
+            )
+        ).first()
+
+        if reservation_item:
+            schedule = get_reservation_item_schedule_by_date(
+                session, reservation_item.object_id, new_date
+            )
+
+            if not schedule or not schedule.is_active:
+                raise GlobalErrorException(
+                    error_code=ErrorCode.RESERVATION_SCHEDULE_NOT_FOUND,
+                    error_message="Reservation schedule not found or not active for the given date",
+                )
+
+            # 檢查時間是否在排程範圍內（處理跨日情況）
+            if schedule.end_time < schedule.start_time:
+                valid_time = (
+                    new_start_time >= schedule.start_time
+                    or new_start_time <= schedule.end_time
+                )
+            else:
+                valid_time = schedule.start_time <= new_start_time <= schedule.end_time
+
+            if not valid_time:
+                raise GlobalErrorException(
+                    error_code=ErrorCode.RESERVATION_TIME_INVALID,
+                    error_message="Reservation time is outside of schedule",
+                )
+
+            # 檢查容量（排除目前這筆預約）
+            concurrent_reservations = get_concurrent_reservations_count(
+                session,
+                schedule.reservation_item_schedule_id,
+                new_date,
+                new_start_time,
+            )
+            # 如果是修改同一個時間，不需要檢查容量
+            if (
+                new_date != reservation.reservation_date
+                or new_start_time != reservation.start_time
+            ):
+                if concurrent_reservations >= schedule.capacity:
+                    raise GlobalErrorException(
+                        error_code=ErrorCode.RESERVATION_CAPACITY_EXCEEDED,
+                        error_message="Reservation capacity exceeded",
+                    )
+
+    # 如果修改付款方式，自動調整付款狀態
+    payment_status = reservation_patch.payment_status
+    if reservation_patch.payment_method:
+        if reservation_patch.payment_method == PaymentMethod.cash:
+            payment_status = None
+        elif payment_status is None:
+            payment_status = PaymentStatus.unpaid
+
+    # 更新 reservation
+    updated_reservation = update_reservation(
+        session,
+        reservation_patch.reservation_id,
+        reservation_date=reservation_patch.reservation_date,
+        start_time=reservation_patch.start_time,
+        payment_method=reservation_patch.payment_method,
+        payment_status=payment_status,
+        status=reservation_patch.status,
+        note=reservation_patch.note,
+    )
+
+    return updated_reservation

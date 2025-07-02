@@ -136,6 +136,17 @@ class ReservationCreate(BaseModel):
     note: Optional[str] = None
 
 
+class ReservationPatch(BaseModel):
+    bot_uuid: UUID
+    reservation_id: UUID
+    reservation_date: Optional[date] = None
+    start_time: Optional[time] = None
+    payment_method: Optional[PaymentMethod] = None
+    payment_status: Optional[PaymentStatus] = None
+    status: Optional[str] = None
+    note: Optional[str] = None
+
+
 class ReservationResponse(BaseModel):
     reservation_id: UUID
     reservation_item_id: UUID

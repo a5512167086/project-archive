@@ -13,6 +13,7 @@ from schemas.reservation_schema import (
     ReservationItemPatch,
     ReservationItemResponse,
     ReservationListResponse,
+    ReservationPatch,
     ReservationResponse,
 )
 from services.reservation_service import (
@@ -24,6 +25,7 @@ from services.reservation_service import (
     get_reservation_items_by_bot_class_id,
     get_user_reservations_in_bot_list,
     insert_new_reservation_item,
+    update_reservation_by_owner,
     update_reservation_item_by_reservation_item_id,
 )
 
@@ -146,3 +148,31 @@ def get_bot_reservations(
     user_id = current_user["user_id"]
     reservations = get_bot_reservations_list(session, bot_uuid, user_id)
     return reservations
+
+
+@reservation_router.patch("", response_model=ReservationResponse)
+def update_reservation(
+    session: SessionDep,
+    reservation_patch: ReservationPatch,
+    current_user: Annotated[dict, Depends(get_current_user)],
+):
+    """Update a reservation"""
+    user_id = current_user["user_id"]
+    updated_reservation = update_reservation_by_owner(
+        session, user_id, reservation_patch
+    )
+    session.commit()
+
+    return ReservationResponse(
+        reservation_id=updated_reservation.reservation_id,
+        reservation_item_id=updated_reservation.reservation_item_id,
+        reservation_date=updated_reservation.reservation_date,
+        start_time=updated_reservation.start_time,
+        end_time=updated_reservation.end_time,
+        price=updated_reservation.price,
+        status=updated_reservation.status,
+        payment_method=updated_reservation.payment_method,
+        payment_status=updated_reservation.payment_status,
+        note=updated_reservation.notes,
+        created_at=updated_reservation.created_at,
+    )
