@@ -29,7 +29,7 @@ const SignUpPage = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
-  const { wrapApiCall } = useApiErrorHandler()
+  const { handleError, showSuccess } = useApiErrorHandler()
   const [registerUser] = useRegisterUserMutation()
   const [isLoading, setIsLoading] = useState(false)
   const [email, setEmail] = useState('')
@@ -78,15 +78,12 @@ const SignUpPage = () => {
     setPasswordError(false)
     setIsLoading(true)
 
-    const wrappedRegisterUser = wrapApiCall(registerUser, {
-      showSuccessMessage: 'success.account_created_success',
-      onSuccess: () => {
-        navigate(PAGE_PATHS.SIGN_IN)
-      }
-    })
-
     try {
-      await wrappedRegisterUser({ email, username: name, password })
+      await registerUser({ email, username: name, password }).unwrap()
+      showSuccess('success.account_created_success')
+      navigate(PAGE_PATHS.SIGN_IN)
+    } catch (error) {
+      handleError(error)
     } finally {
       setIsLoading(false)
     }
