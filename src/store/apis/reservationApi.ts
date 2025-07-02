@@ -92,6 +92,7 @@ export type ReservationItemsResponse = {
   reservation_description: string
   duration_minutes: number
   price: number
+  is_active: boolean
   option_groups: ReservationOptionGroup[]
   schedules: ReservationSchedule[]
 }

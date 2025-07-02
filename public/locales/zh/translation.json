@@ -143,6 +143,7 @@
     "editService": "編輯服務",
     "editReservationData": "編輯預約資料",
     "serviceName": "服務名稱",
+    "serviceStatus": "服務狀態",
     "durationMinutes": "時長（分鐘）",
     "optionGroup": "選項群組",
     "defaultSchedule": "預設時段",
@@ -198,6 +199,8 @@
   },
   "common": {
     "uploaded": "已上傳",
+    "active": "啟用中",
+    "inactive": "未啟用",
     "action": "操作",
     "url": "網址",
     "loading": "載入中...",

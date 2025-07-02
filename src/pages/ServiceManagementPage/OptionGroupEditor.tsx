@@ -15,7 +15,8 @@ import {
   Paper,
   Accordion,
   AccordionSummary,
-  AccordionDetails
+  AccordionDetails,
+  Switch
 } from '@mui/material'
 import {
   Add as AddIcon,
@@ -217,17 +218,40 @@ const SortableOptionGroup: React.FC<{
               </Select>
             </FormControl>
 
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={group.is_required}
-                  onChange={(e) =>
-                    onGroupChange('is_required', e.target.checked)
-                  }
-                />
-              }
-              label={t('serviceManagementPage.isRequired')}
-            />
+            {/* Group Settings Row */}
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
+            >
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={group.is_required}
+                    onChange={(e) =>
+                      onGroupChange('is_required', e.target.checked)
+                    }
+                  />
+                }
+                label={t('serviceManagementPage.isRequired')}
+              />
+
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={group.is_active}
+                    onChange={(e) =>
+                      onGroupChange('is_active', e.target.checked)
+                    }
+                  />
+                }
+                label={
+                  group.is_active ? t('common.active') : t('common.inactive')
+                }
+              />
+            </Box>
 
             {/* 選項編輯 */}
             <Box>
@@ -362,6 +386,19 @@ const SortableOption: React.FC<{
           }
           size="small"
           sx={{ width: 120 }}
+        />
+        <FormControlLabel
+          control={
+            <Switch
+              checked={option.is_active}
+              onChange={(e) =>
+                onOptionChange(optionIndex, 'is_active', e.target.checked)
+              }
+              size="small"
+            />
+          }
+          label={option.is_active ? t('common.active') : t('common.inactive')}
+          sx={{ minWidth: 100 }}
         />
         <IconButton size="small" onClick={() => onDeleteOption(optionIndex)}>
           <DeleteIcon />

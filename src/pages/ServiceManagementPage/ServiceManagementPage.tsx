@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Box, Button, Typography, TextField } from '@mui/material'
+import {
+  Box,
+  Button,
+  Typography,
+  TextField,
+  Switch,
+  FormControlLabel
+} from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useAppSelector } from '@/utils/hook'
 import { PAGE_PATHS } from '@/routes'
@@ -238,7 +245,7 @@ const ServiceManagementPage = () => {
       reservation_description: item.reservation_description ?? '',
       duration_minutes: item.duration_minutes ?? 0,
       price: item.price ?? 0,
-      is_active: true,
+      is_active: item.is_active ?? true,
       option_groups: convertedOptionGroups,
       schedules: (item.schedules || []).map(
         (sch): ReservationItemScheduleUpdate => ({
@@ -580,6 +587,30 @@ const ServiceManagementPage = () => {
                   )
                 }
               />
+
+              {/* Service Active Status */}
+              <Box
+                sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}
+              >
+                <Typography variant="subtitle1">
+                  {t('serviceManagementPage.serviceStatus')}:
+                </Typography>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={editForm.is_active}
+                      onChange={(e) =>
+                        handleEditFormChange('is_active', e.target.checked)
+                      }
+                    />
+                  }
+                  label={
+                    editForm.is_active
+                      ? t('common.active')
+                      : t('common.inactive')
+                  }
+                />
+              </Box>
 
               <OptionGroupEditor
                 optionGroups={editForm.option_groups.map(

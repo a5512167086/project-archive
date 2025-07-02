@@ -142,6 +142,7 @@
     "editService": "Edit Service",
     "editReservationData": "Edit Reservation Data",
     "serviceName": "Service Name",
+    "serviceStatus": "Service Status",
     "durationMinutes": "Duration (minutes)",
     "optionGroup": "Option Group",
     "defaultSchedule": "Default Schedule",
@@ -197,6 +198,8 @@
   },
   "common": {
     "uploaded": "Uploaded",
+    "active": "Active",
+    "inactive": "Inactive",
     "action": "Action",
     "url": "URL",
     "loading": "Loading...",
