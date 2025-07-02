@@ -4,13 +4,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from exception import add_global_exception_handler
-from models import *  # noqa: F403
-from routers.bot_router import bot_router
-from routers.knowledge_router import knowledge_router
-from routers.module_router import module_router
-from routers.reservation_router import reservation_router
-from routers.user_router import user_router
-from schemas.common_schema import ErrorResponse
+from modules.bot.bot_router import bot_router
+from modules.knowledge.knowledge_router import knowledge_router
+from modules.module.module_router import module_router
+from modules.reservation.reservation_router import reservation_router
+from modules.user.user_router import user_router
+from shared.models import *  # noqa: F403
+from shared.schemas.common_schema import ErrorResponse
 
 app = FastAPI(responses={status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse}})
 

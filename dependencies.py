@@ -1,8 +1,8 @@
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from constants.config import JWT_RESET_SECRET, JWT_SECRET
-from services.auth_service import verify_jwt_token
+from modules.user.auth_service import verify_jwt_token
+from shared.constants.config import JWT_RESET_SECRET, JWT_SECRET
 
 security = HTTPBearer()
 
