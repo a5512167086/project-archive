@@ -119,8 +119,8 @@ SELECT fs_insert_class(
     ) INTO _new_class_id;
 
 -- 插入對應 object
-INSERT INTO objects(chinese_name, owner_id)
-VALUES (_bot_name, _owner_id)
+INSERT INTO objects(chinese_name, entity_id, owner_id)
+VALUES (_bot_name, _bot_entity_id, _owner_id)
 RETURNING objects.object_id INTO _new_object_id;
 
 -- 插入 bot 詳細資料

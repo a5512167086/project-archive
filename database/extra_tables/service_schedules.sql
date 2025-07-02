@@ -1,5 +1,5 @@
-CREATE TABLE IF NOT EXISTS reservation_item_schedules (
-    reservation_item_schedule_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS service_schedules (
+    service_schedule_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     object_id INT NOT NULL,
     schedule_type TEXT NOT NULL CHECK (schedule_type IN ('weekly', 'specific')),
     weekday SMALLINT CHECK (
@@ -14,4 +14,4 @@ CREATE TABLE IF NOT EXISTS reservation_item_schedules (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX IF NOT EXISTS idx_reservation_item_schedules_object_id ON reservation_item_schedules(object_id);
+CREATE INDEX IF NOT EXISTS idx_service_schedules_object_id ON service_schedules(object_id);

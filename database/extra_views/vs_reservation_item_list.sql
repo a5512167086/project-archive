@@ -1,14 +1,14 @@
-CREATE OR REPLACE VIEW vs_reservation_item_list AS
-SELECT rd.reservation_item_id,
+CREATE OR REPLACE VIEW vs_service_list AS
+SELECT sd.service_id,
     o.object_id,
     co.class_id,
-    o.chinese_name AS reservation_name,
-    o.chinese_description AS reservation_description,
-    rd.duration_minutes,
-    rd.price,
-    rd.is_active AS item_is_active,
-    rd.created_at AS item_created_at,
-    rd.updated_at AS item_updated_at
+    o.chinese_name AS service_name,
+    o.chinese_description AS service_description,
+    sd.duration_minutes,
+    sd.price,
+    sd.is_active AS service_is_active,
+    sd.created_at AS service_created_at,
+    sd.updated_at AS service_updated_at
 FROM objects o
-    JOIN reservation_item_details rd ON o.object_id = rd.object_id
+    JOIN service_details sd ON o.object_id = sd.object_id
     JOIN class_object_relations co ON co.object_id = o.object_id;

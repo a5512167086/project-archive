@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS reservation_option_groups (
+CREATE TABLE IF NOT EXISTS service_option_groups (
     option_group_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     object_id INT NOT NULL,
     group_name TEXT NOT NULL,
@@ -12,4 +12,4 @@ CREATE TABLE IF NOT EXISTS reservation_option_groups (
     FOREIGN KEY (object_id) REFERENCES objects(object_id) ON DELETE CASCADE
 );
 
-CREATE INDEX IF NOT EXISTS idx_reservation_option_groups_object_id ON reservation_option_groups(object_id);
+CREATE INDEX IF NOT EXISTS idx_service_option_groups_object_id ON service_option_groups(object_id);

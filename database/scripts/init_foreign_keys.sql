@@ -175,59 +175,58 @@ END IF;
 
 COMMENT ON TABLE permissions IS '權限與類別的對應關係表';
 
--- reservation_item_details
+-- service_details
 IF NOT EXISTS (
     SELECT 1
     FROM pg_constraint
-    WHERE conname = 'fk_reservation_item_details_object_id'
+    WHERE conname = 'fk_service_details_object_id'
 ) THEN
-ALTER TABLE reservation_item_details
-ADD CONSTRAINT fk_reservation_item_details_object_id FOREIGN KEY(object_id) REFERENCES objects(object_id) ON DELETE CASCADE;
+ALTER TABLE service_details
+ADD CONSTRAINT fk_service_details_object_id FOREIGN KEY(object_id) REFERENCES objects(object_id) ON DELETE CASCADE;
 
 END IF;
 
-COMMENT ON TABLE reservation_item_details IS '預約服務細節表';
+COMMENT ON TABLE service_details IS '服務細節表';
 
--- reservation_item_schedules
+-- service_schedules
 IF NOT EXISTS (
     SELECT 1
     FROM pg_constraint
-    WHERE conname = 'fk_reservation_item_schedules_object_id'
+    WHERE conname = 'fk_service_schedules_object_id'
 ) THEN
-ALTER TABLE reservation_item_schedules
-ADD CONSTRAINT fk_reservation_item_schedules_object_id FOREIGN KEY(object_id) REFERENCES objects(object_id) ON DELETE CASCADE;
+ALTER TABLE service_schedules
+ADD CONSTRAINT fk_service_schedules_object_id FOREIGN KEY(object_id) REFERENCES objects(object_id) ON DELETE CASCADE;
 
 END IF;
 
-COMMENT ON TABLE reservation_item_schedules IS '預約可用時段表';
+COMMENT ON TABLE service_schedules IS '服務可用時段表';
 
--- reservation_option_groups
+-- service_option_groups
 IF NOT EXISTS (
     SELECT 1
     FROM pg_constraint
-    WHERE conname = 'fk_reservation_option_groups_object_id'
+    WHERE conname = 'fk_service_option_groups_object_id'
 ) THEN
-ALTER TABLE reservation_option_groups
-ADD CONSTRAINT fk_reservation_option_groups_object_id FOREIGN KEY(object_id) REFERENCES objects(object_id) ON DELETE CASCADE;
+ALTER TABLE service_option_groups
+ADD CONSTRAINT fk_service_option_groups_object_id FOREIGN KEY(object_id) REFERENCES objects(object_id) ON DELETE CASCADE;
 
 END IF;
 
-COMMENT ON TABLE reservation_option_groups IS '預約選項組表';
+COMMENT ON TABLE service_option_groups IS '服務選項組表';
 
--- reservation_item_options
+-- service_options
 IF NOT EXISTS (
     SELECT 1
     FROM pg_constraint
-    WHERE conname = 'fk_reservation_item_options_option_group_id'
+    WHERE conname = 'fk_service_options_option_group_id'
 ) THEN
-ALTER TABLE reservation_item_options
-ADD CONSTRAINT fk_reservation_item_options_option_group_id FOREIGN KEY(option_group_id) REFERENCES reservation_option_groups(option_group_id) ON DELETE CASCADE;
+ALTER TABLE service_options
+ADD CONSTRAINT fk_service_options_option_group_id FOREIGN KEY(option_group_id) REFERENCES service_option_groups(option_group_id) ON DELETE CASCADE;
 
 END IF;
 
-COMMENT ON TABLE reservation_item_options IS '預約項目選項表';
+COMMENT ON TABLE service_options IS '服務選項表';
 
--- reservation_options
 IF NOT EXISTS (
     SELECT 1
     FROM pg_constraint
@@ -244,7 +243,7 @@ IF NOT EXISTS (
     WHERE conname = 'fk_reservation_options_option_group_id'
 ) THEN
 ALTER TABLE reservation_options
-ADD CONSTRAINT fk_reservation_options_option_group_id FOREIGN KEY(option_group_id) REFERENCES reservation_option_groups(option_group_id) ON DELETE CASCADE;
+ADD CONSTRAINT fk_reservation_options_option_group_id FOREIGN KEY(option_group_id) REFERENCES service_option_groups(option_group_id) ON DELETE CASCADE;
 
 END IF;
 
@@ -254,13 +253,12 @@ IF NOT EXISTS (
     WHERE conname = 'fk_reservation_options_option_id'
 ) THEN
 ALTER TABLE reservation_options
-ADD CONSTRAINT fk_reservation_options_option_id FOREIGN KEY(option_id) REFERENCES reservation_item_options(option_id) ON DELETE CASCADE;
+ADD CONSTRAINT fk_reservation_options_option_id FOREIGN KEY(option_id) REFERENCES service_options(option_id) ON DELETE CASCADE;
 
 END IF;
 
 COMMENT ON TABLE reservation_options IS '預約選項表';
 
--- reservation_details
 IF NOT EXISTS (
     SELECT 1
     FROM pg_constraint
@@ -274,20 +272,20 @@ END IF;
 IF NOT EXISTS (
     SELECT 1
     FROM pg_constraint
-    WHERE conname = 'fk_reservation_details_schedule_id'
+    WHERE conname = 'fk_reservation_details_service_id'
 ) THEN
 ALTER TABLE reservation_details
-ADD CONSTRAINT fk_reservation_details_schedule_id FOREIGN KEY(reservation_item_schedule_id) REFERENCES reservation_item_schedules(reservation_item_schedule_id) ON DELETE CASCADE;
+ADD CONSTRAINT fk_reservation_details_service_id FOREIGN KEY(service_id) REFERENCES service_details(service_id) ON DELETE CASCADE;
 
 END IF;
 
 IF NOT EXISTS (
     SELECT 1
     FROM pg_constraint
-    WHERE conname = 'fk_reservation_details_reservation_item_id'
+    WHERE conname = 'fk_reservation_details_service_schedule_id'
 ) THEN
 ALTER TABLE reservation_details
-ADD CONSTRAINT fk_reservation_details_reservation_item_id FOREIGN KEY(reservation_item_id) REFERENCES reservation_item_details(reservation_item_id) ON DELETE CASCADE;
+ADD CONSTRAINT fk_reservation_details_service_schedule_id FOREIGN KEY(service_schedule_id) REFERENCES service_schedules(service_schedule_id) ON DELETE CASCADE;
 
 END IF;
 
