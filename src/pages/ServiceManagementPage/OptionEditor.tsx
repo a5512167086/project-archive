@@ -80,7 +80,7 @@ export const OptionEditor = ({ options, onChange }: OptionEditorProps) => {
         </Box>
       ))}
       <Button onClick={handleAdd} size="small" variant="outlined">
-        新增選項
+        {t('serviceManagementPage.addOption')}
       </Button>
     </Box>
   )

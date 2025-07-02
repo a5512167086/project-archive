@@ -4,6 +4,34 @@ type GetReservationItemsRequest = {
   bot_uuid: string
 }
 
+// 新增：预约数据类型定义
+export type ReservationData = {
+  reservation_id: string
+  reservation_item_id: string
+  price: number
+  service_name: string
+  notes: string | null
+  reservation_date: string
+  start_time: string
+  end_time: string
+  status: string
+  payment_method: string
+  payment_status: string | null
+  created_at: string
+  selected_option_groups: {
+    option_group_id: string
+    group_name: string
+    selected_options: {
+      option_id: string
+      option_name: string
+    }[]
+  }[]
+}
+
+type GetReservationsRequest = {
+  bot_uuid: string
+}
+
 type ReservationOption = {
   object_id: number
   option_id: string
@@ -173,6 +201,15 @@ export const reservationApi = createApi({
         method: 'GET'
       })
     }),
+    getReservations: builder.query<
+      ReservationData[],
+      GetReservationsRequest
+    >({
+      query: (data) => ({
+        url: `reservations/${data.bot_uuid}`,
+        method: 'GET'
+      })
+    }),
     insertService: builder.mutation<void, InsertReservationItemRequest>({
       query: (data) => ({
         url: `reservations/items`,
@@ -201,5 +238,7 @@ export const {
   useLazyGetServicesQuery,
   useInsertServiceMutation,
   useDeleteReservationItemsMutation,
-  usePatchReservationItemMutation
+  usePatchReservationItemMutation,
+  useGetReservationsQuery,
+  useLazyGetReservationsQuery
 } = reservationApi
