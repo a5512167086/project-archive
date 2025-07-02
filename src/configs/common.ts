@@ -48,9 +48,9 @@ export const ERROR_CODE_MESSAGE_MAPPING = {
   SETTING_CLASS_NOT_FOUND: 'error.setting_class_not_found',
 
   // Reservation related errors
-  RESERVATION_ITEM_CLASS_NOT_FOUND: 'error.reservation_item_class_not_found',
+  SERVICE_CLASS_NOT_FOUND: 'error.service_class_not_found',
   RESERVATION_CLASS_NOT_FOUND: 'error.reservation_class_not_found',
-  RESERVATION_ITEM_NOT_FOUND: 'error.reservation_item_not_found',
+  SERVICE_NOT_FOUND: 'error.service_not_found',
   RESERVATION_SCHEDULE_NOT_FOUND: 'error.reservation_schedule_not_found',
   RESERVATION_TIME_INVALID: 'error.reservation_time_invalid',
   RESERVATION_CAPACITY_EXCEEDED: 'error.reservation_capacity_exceeded',

@@ -1,13 +1,13 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
-type GetReservationItemsRequest = {
+type GetServicesRequest = {
   bot_uuid: string
 }
 
 // 新增：预约数据类型定义
 export type ReservationData = {
   reservation_id: string
-  reservation_item_id: string
+  service_id: string
   price: number
   service_name: string
   notes: string | null
@@ -44,9 +44,9 @@ export type UpdateReservationRequest = {
   note?: string
 }
 
-type ReservationOption = {
-  object_id: number
+type ServiceOption = {
   option_id: string
+  option_group_id: string
   option_name: string
   option_description: string
   price: number
@@ -56,8 +56,7 @@ type ReservationOption = {
   updated_at: string
 }
 
-type ReservationOptionGroup = {
-  object_id: number
+type ServiceOptionGroup = {
   option_group_id: string
   group_name: string
   group_description: string
@@ -65,17 +64,15 @@ type ReservationOptionGroup = {
   is_required: boolean
   display_order: number
   is_active: boolean
-  options: ReservationOption[]
-  created_at: string
-  updated_at: string
+  options: ServiceOption[]
 }
 
-type ReservationSchedule = {
+type ServiceSchedule = {
+  service_schedule_id: string
   object_id: number
-  reservation_item_schedule_id: string
   schedule_type: string
-  schedule_date: string | null
   weekday: number
+  schedule_date: string | null
   start_time: string
   end_time: string
   capacity: number
@@ -84,20 +81,20 @@ type ReservationSchedule = {
   updated_at: string
 }
 
-export type ReservationItemsResponse = {
-  reservation_item_id: string
+export type ServiceResponse = {
+  service_id: string
   object_id: number
   class_id: number
-  reservation_name: string
-  reservation_description: string
+  service_name: string
+  service_description: string
   duration_minutes: number
   price: number
   is_active: boolean
-  option_groups: ReservationOptionGroup[]
-  schedules: ReservationSchedule[]
+  option_groups: ServiceOptionGroup[]
+  schedules: ServiceSchedule[]
 }
 
-export type ReservationItemOptionCreate = {
+export type ServiceOptionCreate = {
   option_name: string
   option_description?: string | null
   price: number
@@ -105,17 +102,17 @@ export type ReservationItemOptionCreate = {
   is_active?: boolean
 }
 
-export type ReservationOptionGroupCreate = {
+export type ServiceOptionGroupCreate = {
   group_name: string
   group_description?: string | null
-  selection_type: 'single' | 'multiple' // Based on SelectionType enum
+  selection_type: 'single' | 'multiple'
   is_required: boolean
   display_order: number
   is_active: boolean
-  options: ReservationItemOptionCreate[]
+  options: ServiceOptionCreate[]
 }
 
-export type ReservationItemScheduleCreate = {
+export type ServiceScheduleCreate = {
   schedule_type: 'weekly' | 'specific'
   weekday?: number | null // 0-6, required for weekly type, null for specific
   schedule_date?: string | null // ISO date string, required for specific type
@@ -125,31 +122,31 @@ export type ReservationItemScheduleCreate = {
   is_active?: boolean
 }
 
-export type InsertReservationItemRequest = {
+export type InsertServiceRequest = {
   bot_uuid: string
-  reservation_name: string
-  reservation_description: string
+  service_name: string
+  service_description: string
   duration_minutes: number
   price: number
-  option_groups: ReservationOptionGroupCreate[]
-  default_schedules: ReservationItemScheduleCreate[]
+  option_groups: ServiceOptionGroupCreate[]
+  default_schedules: ServiceScheduleCreate[]
 }
 
-type DeleteReservationRequest = {
+type DeleteServicesRequest = {
   bot_uuid: string
-  delete_reservation_item_list: string[]
+  delete_service_list: string[]
 }
 
 // PATCH 請求細節型別 - 匹配後端 Pydantic schema
-export type ReservationItemDetailUpdate = {
-  reservation_name?: string
-  reservation_description?: string
+export type ServiceDetailUpdate = {
+  service_name?: string
+  service_description?: string
   duration_minutes?: number
   price?: number
   is_active?: boolean
 }
 
-export type ReservationItemOptionGroupUpdate = {
+export type ServiceOptionGroupUpdate = {
   option_group_id?: string // UUID - 更新現有組時必須提供
   group_name?: string
   group_description?: string | null
@@ -157,10 +154,10 @@ export type ReservationItemOptionGroupUpdate = {
   is_required?: boolean
   display_order?: number
   is_active?: boolean
-  options?: ReservationItemOptionUpdate[]
+  options?: ServiceOptionUpdate[]
 }
 
-export type ReservationItemOptionUpdate = {
+export type ServiceOptionUpdate = {
   option_id?: string // UUID - 更新現有選項時必須提供
   option_name?: string
   option_description?: string | null
@@ -169,8 +166,8 @@ export type ReservationItemOptionUpdate = {
   is_active?: boolean
 }
 
-export type ReservationItemScheduleUpdate = {
-  reservation_item_schedule_id?: string // UUID - 更新現有排程時必須提供
+export type ServiceScheduleUpdate = {
+  reservation_service_schedule_id?: string // UUID - 更新現有排程時必須提供
   schedule_type?: string
   weekday?: number
   schedule_date?: string // ISO date string for specific type
@@ -180,12 +177,12 @@ export type ReservationItemScheduleUpdate = {
   is_active?: boolean
 }
 
-export type PatchReservationItemRequest = {
+export type PatchServiceRequest = {
   bot_uuid: string
-  reservation_item_id: string
-  detail?: ReservationItemDetailUpdate
-  option_groups?: ReservationItemOptionGroupUpdate[]
-  schedules?: ReservationItemScheduleUpdate[]
+  service_id: string
+  detail?: ServiceDetailUpdate
+  option_groups?: ServiceOptionGroupUpdate[]
+  schedules?: ServiceScheduleUpdate[]
 }
 
 export const reservationApi = createApi({
@@ -205,12 +202,9 @@ export const reservationApi = createApi({
     }
   }),
   endpoints: (builder) => ({
-    getServices: builder.query<
-      ReservationItemsResponse[],
-      GetReservationItemsRequest
-    >({
+    getServices: builder.query<ServiceResponse[], GetServicesRequest>({
       query: (data) => ({
-        url: `reservations/items/${data.bot_uuid}`,
+        url: `services/${data.bot_uuid}`,
         method: 'GET'
       })
     }),
@@ -227,23 +221,23 @@ export const reservationApi = createApi({
         body: data
       })
     }),
-    insertService: builder.mutation<void, InsertReservationItemRequest>({
+    insertService: builder.mutation<void, InsertServiceRequest>({
       query: (data) => ({
-        url: `reservations/items`,
+        url: `services`,
         method: 'POST',
         body: data
       })
     }),
-    deleteReservationItems: builder.mutation<void, DeleteReservationRequest>({
+    deleteServices: builder.mutation<void, DeleteServicesRequest>({
       query: (data) => ({
-        url: 'reservations/items',
+        url: 'services',
         method: 'DELETE',
         body: data
       })
     }),
-    patchReservationItem: builder.mutation<void, PatchReservationItemRequest>({
+    patchService: builder.mutation<void, PatchServiceRequest>({
       query: (body) => ({
-        url: '/reservations/items',
+        url: 'services',
         method: 'PATCH',
         body
       })
@@ -254,8 +248,8 @@ export const reservationApi = createApi({
 export const {
   useLazyGetServicesQuery,
   useInsertServiceMutation,
-  useDeleteReservationItemsMutation,
-  usePatchReservationItemMutation,
+  useDeleteServicesMutation,
+  usePatchServiceMutation,
   useGetReservationsQuery,
   useLazyGetReservationsQuery,
   useUpdateReservationMutation

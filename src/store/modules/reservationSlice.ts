@@ -1,21 +1,18 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { CustomError } from '@/configs/type'
-import {
-  reservationApi,
-  ReservationItemsResponse
-} from '../apis/reservationApi'
+import { reservationApi, ServiceResponse } from '../apis/reservationApi'
 
 interface ReservationState {
-  reservationItems: ReservationItemsResponse[]
-  currentReservationItemObjectId: number | null
+  services: ServiceResponse[]
+  currentServiceObjectId: number | null
   errorCode: string
   errorMessage: string
   status: 'idle' | 'loading' | 'succeeded' | 'failed'
 }
 
 const initialState: ReservationState = {
-  reservationItems: [],
-  currentReservationItemObjectId: null,
+  services: [],
+  currentServiceObjectId: null,
   errorCode: '',
   errorMessage: '',
   status: 'idle'
@@ -25,11 +22,8 @@ export const reservationSlice = createSlice({
   name: 'reservation',
   initialState,
   reducers: {
-    setCurrentReservationItemObjectId(
-      state,
-      action: PayloadAction<number | null>
-    ) {
-      state.currentReservationItemObjectId = action.payload
+    setCurrentServiceObjectId(state, action: PayloadAction<number | null>) {
+      state.currentServiceObjectId = action.payload
     },
     clearReservationError: (state) => {
       state.errorCode = ''
@@ -49,9 +43,9 @@ export const reservationSlice = createSlice({
       )
       .addMatcher(
         reservationApi.endpoints.getServices.matchFulfilled,
-        (state, action: PayloadAction<ReservationItemsResponse[]>) => {
+        (state, action: PayloadAction<ServiceResponse[]>) => {
           state.status = 'succeeded'
-          state.reservationItems = action.payload
+          state.services = action.payload
         }
       )
       .addMatcher(
@@ -73,7 +67,7 @@ export const reservationSlice = createSlice({
         }
       )
       .addMatcher(
-        reservationApi.endpoints.patchReservationItem.matchRejected,
+        reservationApi.endpoints.patchService.matchRejected,
         (state, action) => {
           const error = action.payload!.data as CustomError
           state.status = 'failed'
@@ -82,7 +76,7 @@ export const reservationSlice = createSlice({
         }
       )
       .addMatcher(
-        reservationApi.endpoints.deleteReservationItems.matchRejected,
+        reservationApi.endpoints.deleteServices.matchRejected,
         (state, action) => {
           const error = action.payload!.data as CustomError
           state.status = 'failed'
@@ -93,7 +87,7 @@ export const reservationSlice = createSlice({
   }
 })
 
-export const { setCurrentReservationItemObjectId, clearReservationError } =
+export const { setCurrentServiceObjectId, clearReservationError } =
   reservationSlice.actions
 
 export default reservationSlice.reducer

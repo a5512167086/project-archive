@@ -1,19 +1,19 @@
 import { Box, TextField, IconButton, Checkbox, Button } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { useTranslation } from 'react-i18next'
-import { ReservationItemOptionUpdate } from '@/store/apis/reservationApi'
+import { ServiceOptionUpdate } from '@/store/apis/reservationApi'
 
 interface OptionEditorProps {
-  options: ReservationItemOptionUpdate[]
-  onChange: (options: ReservationItemOptionUpdate[]) => void
+  options: ServiceOptionUpdate[]
+  onChange: (options: ServiceOptionUpdate[]) => void
 }
 
 export const OptionEditor = ({ options, onChange }: OptionEditorProps) => {
   const { t } = useTranslation()
-  const handleChange = <K extends keyof ReservationItemOptionUpdate>(
+  const handleChange = <K extends keyof ServiceOptionUpdate>(
     idx: number,
     field: K,
-    value: ReservationItemOptionUpdate[K]
+    value: ServiceOptionUpdate[K]
   ) => {
     const newOptions = [...options]
     newOptions[idx] = { ...newOptions[idx], [field]: value }

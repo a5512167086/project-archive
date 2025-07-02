@@ -271,8 +271,10 @@
     "setting_class_not_found": "設定類別未找到。",
 
     "reservation_item_class_not_found": "預約項目類別未找到。",
+    "service_class_not_found": "服務類別未找到。",
     "reservation_class_not_found": "預約類別未找到。",
     "reservation_item_not_found": "預約項目未找到。",
+    "service_not_found": "服務未找到。",
     "reservation_schedule_not_found": "預約時程未找到。",
     "reservation_time_invalid": "無效的預約時間。",
     "reservation_capacity_exceeded": "預約容量已滿。",

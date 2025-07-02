@@ -8,11 +8,11 @@ import {
 } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { useTranslation } from 'react-i18next'
-import { ReservationItemScheduleUpdate } from '@/store/apis/reservationApi'
+import { ServiceScheduleUpdate } from '@/store/apis/reservationApi'
 
 interface ScheduleEditorProps {
-  schedules: ReservationItemScheduleUpdate[]
-  onChange: (schedules: ReservationItemScheduleUpdate[]) => void
+  schedules: ServiceScheduleUpdate[]
+  onChange: (schedules: ServiceScheduleUpdate[]) => void
 }
 
 export const ScheduleEditor = ({
@@ -30,10 +30,10 @@ export const ScheduleEditor = ({
     { value: 5, label: t('serviceManagementPage.friday') },
     { value: 6, label: t('serviceManagementPage.saturday') }
   ]
-  const handleChange = <K extends keyof ReservationItemScheduleUpdate>(
+  const handleChange = <K extends keyof ServiceScheduleUpdate>(
     idx: number,
     field: K,
-    value: ReservationItemScheduleUpdate[K]
+    value: ServiceScheduleUpdate[K]
   ) => {
     const newSchedules = [...schedules]
     newSchedules[idx] = { ...newSchedules[idx], [field]: value }
@@ -64,7 +64,7 @@ export const ScheduleEditor = ({
     <Box>
       {schedules.map((sch, idx) => (
         <Box
-          key={`${sch.reservation_item_schedule_id ?? ''}_${idx}`}
+          key={`${sch.reservation_service_schedule_id ?? ''}_${idx}`}
           display="flex"
           gap={1}
           alignItems="center"

@@ -15,16 +15,16 @@ import { StyledServiceManagementPage } from './ServiceManagementPage.style'
 import {
   useLazyGetServicesQuery,
   useInsertServiceMutation,
-  useDeleteReservationItemsMutation,
-  usePatchReservationItemMutation,
-  InsertReservationItemRequest,
-  ReservationItemsResponse,
-  ReservationItemOptionUpdate,
-  ReservationItemOptionGroupUpdate,
-  ReservationItemScheduleUpdate,
-  ReservationOptionGroupCreate,
-  ReservationItemOptionCreate,
-  ReservationItemScheduleCreate
+  useDeleteServicesMutation,
+  usePatchServiceMutation,
+  InsertServiceRequest,
+  ServiceResponse,
+  ServiceOptionUpdate,
+  ServiceOptionGroupUpdate,
+  ServiceScheduleUpdate,
+  ServiceOptionGroupCreate,
+  ServiceOptionCreate,
+  ServiceScheduleCreate
 } from '@/store/apis/reservationApi'
 import { CustomTable } from '@/components/CustomTable'
 import { CustomDialog } from '@/components/CustomDialog'
@@ -52,26 +52,23 @@ const ServiceManagementPage = () => {
   const { t } = useTranslation()
   const { handleError, showSuccess } = useApiErrorHandler()
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
-  const { reservationItems } = useAppSelector((state) => state.reservation)
+  const { services } = useAppSelector((state) => state.reservation)
 
   const [selected, setSelected] = useState<number[]>([])
-  const [deleteTarget, setDeleteTarget] =
-    useState<ReservationItemsResponse | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<ServiceResponse | null>(null)
   const [dialogs, setDialogs] = useState({
     create: false,
     deleteSingle: false,
     deleteMulti: false
   })
-  const [editTarget, setEditTarget] = useState<ReservationItemsResponse | null>(
-    null
-  )
+  const [editTarget, setEditTarget] = useState<ServiceResponse | null>(null)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [createOptionGroups, setCreateOptionGroups] = useState<
     OptionGroupData[]
   >([])
   const [createFormData, setCreateFormData] = useState({
-    reservation_name: '',
-    reservation_description: '',
+    service_name: '',
+    service_description: '',
     duration_minutes: 0,
     price: 0
   })
@@ -81,8 +78,8 @@ const ServiceManagementPage = () => {
 
   const [getServices] = useLazyGetServicesQuery()
   const [insertService] = useInsertServiceMutation()
-  const [deleteServices] = useDeleteReservationItemsMutation()
-  const [patchReservationItem] = usePatchReservationItemMutation()
+  const [deleteServices] = useDeleteServicesMutation()
+  const [patchService] = usePatchServiceMutation()
 
   const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
 
@@ -103,21 +100,18 @@ const ServiceManagementPage = () => {
   ]
 
   const handleCreateService = async (
-    data: Omit<
-      InsertReservationItemRequest,
-      'option_groups' | 'default_schedules'
-    > & {
-      option_groups?: (ReservationOptionGroupCreate & {
+    data: Omit<InsertServiceRequest, 'option_groups' | 'default_schedules'> & {
+      option_groups?: (ServiceOptionGroupCreate & {
         [key: string]: unknown
       })[]
       default_schedules?: ({
         weekdays: number[]
-      } & Omit<ReservationItemScheduleCreate, 'schedule_type' | 'weekday'>)[]
+      } & Omit<ServiceScheduleCreate, 'schedule_type' | 'weekday'>)[]
     }
   ) => {
     try {
       const option_groups = (data.option_groups || []).map(
-        (group): ReservationOptionGroupCreate => ({
+        (group): ServiceOptionGroupCreate => ({
           group_name: group.group_name,
           group_description: group.group_description || null,
           selection_type: group.selection_type as 'single' | 'multiple',
@@ -125,7 +119,7 @@ const ServiceManagementPage = () => {
           display_order: Number(group.display_order) || 0,
           is_active: true,
           options: (group.options || []).map(
-            (option): ReservationItemOptionCreate => ({
+            (option): ServiceOptionCreate => ({
               option_name: option.option_name,
               option_description: option.option_description || null,
               price: Number(option.price) || 0,
@@ -137,7 +131,7 @@ const ServiceManagementPage = () => {
       )
 
       // Convert weekdays array to individual schedule entries
-      const scheduleMap = new Map<number, ReservationItemScheduleCreate>()
+      const scheduleMap = new Map<number, ServiceScheduleCreate>()
 
       for (const schedule of data.default_schedules || []) {
         const weekdays = [...new Set(schedule.weekdays || [])] as number[]
@@ -154,10 +148,10 @@ const ServiceManagementPage = () => {
         })
       }
 
-      const payload: InsertReservationItemRequest = {
+      const payload: InsertServiceRequest = {
         bot_uuid: currentBot!.bot_detail_id,
-        reservation_name: data.reservation_name,
-        reservation_description: data.reservation_description,
+        service_name: data.service_name,
+        service_description: data.service_description,
         duration_minutes: Number(data.duration_minutes),
         price: Number(data.price),
         option_groups,
@@ -177,7 +171,7 @@ const ServiceManagementPage = () => {
     try {
       await deleteServices({
         bot_uuid: currentBot!.bot_detail_id,
-        delete_reservation_item_list: objectIds
+        delete_service_list: objectIds
       }).unwrap()
 
       if (objectIds.length > 1) {
@@ -192,34 +186,34 @@ const ServiceManagementPage = () => {
     }
   }
 
-  const handleSingleDelete = (item: ReservationItemsResponse) => {
+  const handleSingleDelete = (item: ServiceResponse) => {
     setDeleteTarget(item)
     setDialogs((prev) => ({ ...prev, deleteSingle: true }))
   }
 
   type EditFormType = {
-    reservation_name: string
-    reservation_description: string
+    service_name: string
+    service_description: string
     duration_minutes: number
     price: number
     is_active: boolean
-    option_groups: (ReservationItemOptionGroupUpdate & {
+    option_groups: (ServiceOptionGroupUpdate & {
       [key: string]: unknown
     })[]
-    schedules: ReservationItemScheduleUpdate[]
+    schedules: ServiceScheduleUpdate[]
   }
 
   const [editForm, setEditForm] = useState<EditFormType | null>(null)
 
   // 編輯時初始化表單
-  const handleEdit = (item: ReservationItemsResponse) => {
+  const handleEdit = (item: ServiceResponse) => {
     setEditTarget(item)
 
     // 處理 option_groups 結構
-    const convertedOptionGroups: ReservationItemOptionGroupUpdate[] = (
+    const convertedOptionGroups: ServiceOptionGroupUpdate[] = (
       item.option_groups || []
     ).map(
-      (group): ReservationItemOptionGroupUpdate => ({
+      (group): ServiceOptionGroupUpdate => ({
         option_group_id: group.option_group_id,
         group_name: group.group_name ?? '',
         group_description: group.group_description ?? '',
@@ -228,7 +222,7 @@ const ServiceManagementPage = () => {
         display_order: group.display_order ?? 0,
         is_active: group.is_active ?? true,
         options: (group.options || []).map(
-          (opt): ReservationItemOptionUpdate => ({
+          (opt): ServiceOptionUpdate => ({
             option_id: opt.option_id,
             option_name: opt.option_name ?? '',
             option_description: opt.option_description ?? '',
@@ -241,15 +235,15 @@ const ServiceManagementPage = () => {
     )
 
     setEditForm({
-      reservation_name: item.reservation_name ?? '',
-      reservation_description: item.reservation_description ?? '',
+      service_name: item.service_name ?? '',
+      service_description: item.service_description ?? '',
       duration_minutes: item.duration_minutes ?? 0,
       price: item.price ?? 0,
       is_active: item.is_active ?? true,
       option_groups: convertedOptionGroups,
       schedules: (item.schedules || []).map(
-        (sch): ReservationItemScheduleUpdate => ({
-          reservation_item_schedule_id: sch.reservation_item_schedule_id,
+        (sch): ServiceScheduleUpdate => ({
+          reservation_service_schedule_id: sch.service_schedule_id,
           schedule_type: sch.schedule_type,
           weekday: sch.weekday,
           schedule_date: sch.schedule_date ?? undefined,
@@ -279,16 +273,14 @@ const ServiceManagementPage = () => {
   const handleEditSubmit = async () => {
     if (!editTarget || !editForm) return
     const fixedOptionGroups = editForm.option_groups.map(
-      (
-        group: ReservationItemOptionGroupUpdate
-      ): ReservationItemOptionGroupUpdate => ({
+      (group: ServiceOptionGroupUpdate): ServiceOptionGroupUpdate => ({
         ...group,
         option_group_id:
           typeof group.option_group_id === 'string'
             ? group.option_group_id
             : undefined,
         options: (group.options || []).map(
-          (opt): ReservationItemOptionUpdate => ({
+          (opt): ServiceOptionUpdate => ({
             ...opt,
             option_id:
               typeof opt.option_id === 'string' ? opt.option_id : undefined
@@ -298,21 +290,21 @@ const ServiceManagementPage = () => {
     )
 
     const fixedSchedules = editForm.schedules.map(
-      (sch: ReservationItemScheduleUpdate): ReservationItemScheduleUpdate => ({
+      (sch: ServiceScheduleUpdate): ServiceScheduleUpdate => ({
         ...sch,
-        reservation_item_schedule_id:
-          typeof sch.reservation_item_schedule_id === 'string'
-            ? sch.reservation_item_schedule_id
+        reservation_service_schedule_id:
+          typeof sch.reservation_service_schedule_id === 'string'
+            ? sch.reservation_service_schedule_id
             : undefined
       })
     )
 
-    await patchReservationItem({
+    await patchService({
       bot_uuid: currentBot!.bot_detail_id,
-      reservation_item_id: editTarget.reservation_item_id,
+      service_id: editTarget.service_id,
       detail: {
-        reservation_name: editForm.reservation_name,
-        reservation_description: editForm.reservation_description,
+        service_name: editForm.service_name,
+        service_description: editForm.service_description,
         duration_minutes: Number(editForm.duration_minutes),
         price: Number(editForm.price),
         is_active: editForm.is_active
@@ -327,13 +319,13 @@ const ServiceManagementPage = () => {
   }
 
   const columns = [
-    { id: 'reservation_name', label: t('serviceManagementPage.serviceName') },
+    { id: 'service_name', label: t('serviceManagementPage.serviceName') },
     { id: 'price', label: t('common.price') },
     {
       id: 'duration_minutes',
       label: t('serviceManagementPage.durationMinutes')
     },
-    { id: 'reservation_description', label: t('common.description') }
+    { id: 'service_description', label: t('common.description') }
   ]
 
   return (
@@ -361,7 +353,7 @@ const ServiceManagementPage = () => {
       </Box>
 
       <CustomTable
-        data={reservationItems}
+        data={services}
         columns={columns}
         selected={selected}
         setSelected={setSelected}
@@ -377,8 +369,8 @@ const ServiceManagementPage = () => {
           setCreateOptionGroups([])
           setCreateSchedules([])
           setCreateFormData({
-            reservation_name: '',
-            reservation_description: '',
+            service_name: '',
+            service_description: '',
             duration_minutes: 0,
             price: 0
           })
@@ -397,7 +389,7 @@ const ServiceManagementPage = () => {
                 ...createFormData,
                 bot_uuid: currentBot!.bot_detail_id,
                 option_groups:
-                  createOptionGroups as (ReservationOptionGroupCreate & {
+                  createOptionGroups as (ServiceOptionGroupCreate & {
                     [key: string]: unknown
                   })[],
                 default_schedules: createSchedules
@@ -407,12 +399,12 @@ const ServiceManagementPage = () => {
           >
             <TextField
               label={t('serviceManagementPage.serviceName')}
-              name="reservation_name"
-              value={createFormData.reservation_name}
+              name="service_name"
+              value={createFormData.service_name}
               onChange={(e) =>
                 setCreateFormData((prev) => ({
                   ...prev,
-                  reservation_name: e.target.value
+                  service_name: e.target.value
                 }))
               }
               required
@@ -420,12 +412,12 @@ const ServiceManagementPage = () => {
             />
             <TextField
               label={t('common.description')}
-              name="reservation_description"
-              value={createFormData.reservation_description}
+              name="service_description"
+              value={createFormData.service_description}
               onChange={(e) =>
                 setCreateFormData((prev) => ({
                   ...prev,
-                  reservation_description: e.target.value
+                  service_description: e.target.value
                 }))
               }
               required
@@ -480,8 +472,8 @@ const ServiceManagementPage = () => {
               setCreateOptionGroups([])
               setCreateSchedules([])
               setCreateFormData({
-                reservation_name: '',
-                reservation_description: '',
+                service_name: '',
+                service_description: '',
                 duration_minutes: 0,
                 price: 0
               })
@@ -509,11 +501,11 @@ const ServiceManagementPage = () => {
       <CustomDialog
         open={dialogs.deleteSingle}
         title={t(TEXT.deleteSingleTitle, {
-          name: deleteTarget?.reservation_name ?? ''
+          name: deleteTarget?.service_name ?? ''
         })}
         handleClose={() => setDialogs((d) => ({ ...d, deleteSingle: false }))}
         onSubmit={() => {
-          handleDelete([deleteTarget!.reservation_item_id])
+          handleDelete([deleteTarget!.service_id])
           setDialogs((d) => ({ ...d, deleteSingle: false }))
           setDeleteTarget(null)
         }}
@@ -525,7 +517,7 @@ const ServiceManagementPage = () => {
         handleClose={() => setDialogs((d) => ({ ...d, deleteMulti: false }))}
         onSubmit={() => {
           const ids = selected
-            .map((i) => reservationItems[i]?.reservation_item_id)
+            .map((i) => services[i]?.service_id)
             .filter(Boolean)
           handleDelete(ids)
           setSelected([])
@@ -551,20 +543,17 @@ const ServiceManagementPage = () => {
             >
               <TextField
                 label={t('serviceManagementPage.serviceName')}
-                value={editForm.reservation_name}
+                value={editForm.service_name}
                 onChange={(e) =>
-                  handleEditFormChange('reservation_name', e.target.value)
+                  handleEditFormChange('service_name', e.target.value)
                 }
                 fullWidth
               />
               <TextField
                 label={t('common.description')}
-                value={editForm.reservation_description}
+                value={editForm.service_description}
                 onChange={(e) =>
-                  handleEditFormChange(
-                    'reservation_description',
-                    e.target.value
-                  )
+                  handleEditFormChange('service_description', e.target.value)
                 }
                 fullWidth
               />
@@ -636,7 +625,7 @@ const ServiceManagementPage = () => {
                   handleEditFormChange(
                     'option_groups',
                     groups.map(
-                      (group): ReservationItemOptionGroupUpdate => ({
+                      (group): ServiceOptionGroupUpdate => ({
                         group_name: group.group_name,
                         group_description: group.group_description,
                         selection_type: group.selection_type,
@@ -644,7 +633,7 @@ const ServiceManagementPage = () => {
                         display_order: group.display_order,
                         is_active: group.is_active,
                         options: group.options.map(
-                          (opt): ReservationItemOptionUpdate => ({
+                          (opt): ServiceOptionUpdate => ({
                             option_name: opt.option_name,
                             option_description: opt.option_description,
                             price: opt.price,
