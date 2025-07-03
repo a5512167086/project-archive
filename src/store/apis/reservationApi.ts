@@ -39,7 +39,7 @@ export type UpdateReservationRequest = {
   reservation_date?: string
   start_time?: string
   payment_method?: 'cash' | 'bank_transfer' | 'credit_card'
-  payment_status?: 'paid' | 'unpaid' | 'refunded'
+  payment_status?: 'paid' | 'unpaid' | 'refunded' | null
   status?: string
   note?: string
 }

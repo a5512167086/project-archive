@@ -92,7 +92,16 @@ const ReservationManagementPage = () => {
     field: keyof UpdateReservationRequest,
     value: string
   ) => {
-    setEditForm((prev) => ({ ...prev, [field]: value }))
+    setEditForm((prev) => {
+      const updated = { ...prev, [field]: value }
+
+      // If payment method is changed to cash, clear payment status
+      if (field === 'payment_method' && value === 'cash') {
+        updated.payment_status = null
+      }
+
+      return updated
+    })
   }
 
   // Handle form submit
@@ -100,7 +109,13 @@ const ReservationManagementPage = () => {
     if (!editForm.bot_uuid || !editForm.reservation_id) return
 
     try {
-      await updateReservation(editForm as UpdateReservationRequest).unwrap()
+      // Prepare the update data, ensuring payment_status is null when payment_method is cash
+      const updateData = { ...editForm } as UpdateReservationRequest
+      if (updateData.payment_method === 'cash') {
+        updateData.payment_status = null
+      }
+
+      await updateReservation(updateData).unwrap()
       showSuccess('success.data_updated')
       setDialogOpen(false)
       // Refresh reservations
@@ -195,6 +210,7 @@ const ReservationManagementPage = () => {
           eventColor={theme.palette.primary.main}
           eventBorderColor={theme.palette.secondary.main}
           editable={false}
+          allDaySlot={false}
           events={calendarEvents}
           eventClick={(info) => {
             // Handle event click - show modal with reservation details
@@ -320,36 +336,35 @@ const ReservationManagementPage = () => {
                       <MenuItem value="bank_transfer">
                         {t('reservationManagementPage.bankTransfer')}
                       </MenuItem>
-                      <MenuItem value="credit_card">
-                        {t('reservationManagementPage.creditCard')}
-                      </MenuItem>
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid item xs={12} sm={4}>
-                  <FormControl fullWidth>
-                    <InputLabel>
-                      {t('reservationManagementPage.paymentStatus')}
-                    </InputLabel>
-                    <Select
-                      value={editForm.payment_status || ''}
-                      label={t('reservationManagementPage.paymentStatus')}
-                      onChange={(e) =>
-                        handleFormChange('payment_status', e.target.value)
-                      }
-                    >
-                      <MenuItem value="paid">
-                        {t('reservationManagementPage.paid')}
-                      </MenuItem>
-                      <MenuItem value="unpaid">
-                        {t('reservationManagementPage.unpaid')}
-                      </MenuItem>
-                      <MenuItem value="refunded">
-                        {t('reservationManagementPage.refunded')}
-                      </MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
+                {editForm.payment_method !== 'cash' && (
+                  <Grid item xs={12} sm={4}>
+                    <FormControl fullWidth>
+                      <InputLabel>
+                        {t('reservationManagementPage.paymentStatus')}
+                      </InputLabel>
+                      <Select
+                        value={editForm.payment_status || ''}
+                        label={t('reservationManagementPage.paymentStatus')}
+                        onChange={(e) =>
+                          handleFormChange('payment_status', e.target.value)
+                        }
+                      >
+                        <MenuItem value="paid">
+                          {t('reservationManagementPage.paid')}
+                        </MenuItem>
+                        <MenuItem value="unpaid">
+                          {t('reservationManagementPage.unpaid')}
+                        </MenuItem>
+                        <MenuItem value="refunded">
+                          {t('reservationManagementPage.refunded')}
+                        </MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                )}
               </Grid>
 
               <Divider sx={{ my: 2 }} />
