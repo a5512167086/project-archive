@@ -28,14 +28,14 @@ const paymentStatusMap = {
 };
 
 // 詳情彈窗組件
-function ReservationDetailModal({ 
-  reservation, 
-  isOpen, 
-  onClose 
-}: { 
-  reservation: UserReservation; 
-  isOpen: boolean; 
-  onClose: () => void; 
+function ReservationDetailModal({
+  reservation,
+  isOpen,
+  onClose,
+}: {
+  reservation: UserReservation;
+  isOpen: boolean;
+  onClose: () => void;
 }) {
   if (!isOpen) return null;
 
@@ -66,9 +66,15 @@ function ReservationDetailModal({
           {/* 服務資訊 */}
           <div className="space-y-3">
             <div>
-              <h3 className="font-medium text-lg">{reservation.service_name}</h3>
+              <h3 className="font-medium text-lg">
+                {reservation.service_name}
+              </h3>
               <p className="text-gray-600">
-                {formatDateTime(reservation.reservation_date, reservation.start_time, reservation.end_time)}
+                {formatDateTime(
+                  reservation.reservation_date,
+                  reservation.start_time,
+                  reservation.end_time
+                )}
               </p>
             </div>
 
@@ -77,18 +83,33 @@ function ReservationDetailModal({
               <span className="text-gray-700">預約狀態：</span>
               <Badge
                 variant={
-                  reservation.status === "confirmed" ? "default" :
-                  reservation.status === "completed" ? "secondary" :
-                  reservation.status === "cancelled" ? "destructive" :
-                  "outline"
+                  reservation.status === "confirmed"
+                    ? "default"
+                    : reservation.status === "completed"
+                    ? "secondary"
+                    : reservation.status === "cancelled"
+                    ? "destructive"
+                    : "outline"
                 }
                 className={`
-                  ${reservation.status === "pending" ? "bg-orange-50 text-orange-700 border-orange-200" : ""}
-                  ${reservation.status === "confirmed" ? "bg-blue-50 text-blue-700 border-blue-200" : ""}
-                  ${reservation.status === "completed" ? "bg-green-50 text-green-700 border-green-200" : ""}
+                  ${
+                    reservation.status === "pending"
+                      ? "bg-orange-50 text-orange-700 border-orange-200"
+                      : ""
+                  }
+                  ${
+                    reservation.status === "confirmed"
+                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                      : ""
+                  }
+                  ${
+                    reservation.status === "completed"
+                      ? "bg-green-50 text-green-700 border-green-200"
+                      : ""
+                  }
                 `}
               >
-                {statusMap[reservation.status]?.label || reservation.status}
+                {statusMap[reservation.status as keyof typeof statusMap]?.label || reservation.status}
               </Badge>
             </div>
 
@@ -96,15 +117,27 @@ function ReservationDetailModal({
             {reservation.payment_method !== "cash" && (
               <div className="flex items-center justify-between">
                 <span className="text-gray-700">付款狀態：</span>
-                <Badge 
-                  variant="outline" 
+                <Badge
+                  variant="outline"
                   className={`
-                    ${reservation.payment_status === "paid" ? "bg-green-50 text-green-700 border-green-200" : ""}
-                    ${reservation.payment_status === "unpaid" ? "bg-red-50 text-red-700 border-red-200" : ""}
-                    ${reservation.payment_status === "pending" ? "bg-yellow-50 text-yellow-700 border-yellow-200" : ""}
+                    ${
+                      reservation.payment_status === "paid"
+                        ? "bg-green-50 text-green-700 border-green-200"
+                        : ""
+                    }
+                    ${
+                      reservation.payment_status === "unpaid"
+                        ? "bg-red-50 text-red-700 border-red-200"
+                        : ""
+                    }
+                    ${
+                      reservation.payment_status === "pending"
+                        ? "bg-yellow-50 text-yellow-700 border-yellow-200"
+                        : ""
+                    }
                   `}
                 >
-                  {paymentStatusMap[reservation.payment_status || "unpaid"]}
+                  {paymentStatusMap[(reservation.payment_status || "unpaid") as keyof typeof paymentStatusMap]}
                 </Badge>
               </div>
             )}
@@ -113,9 +146,11 @@ function ReservationDetailModal({
             <div className="flex items-center justify-between">
               <span className="text-gray-700">付款方式：</span>
               <span className="text-gray-900">
-                {reservation.payment_method === "cash" ? "現金" : 
-                 reservation.payment_method === "bank_transfer" ? "銀行轉帳" : 
-                 reservation.payment_method}
+                {reservation.payment_method === "cash"
+                  ? "現金"
+                  : reservation.payment_method === "bank_transfer"
+                  ? "銀行轉帳"
+                  : reservation.payment_method}
               </span>
             </div>
 
@@ -124,25 +159,35 @@ function ReservationDetailModal({
               <h4 className="font-medium text-gray-700">價格資訊：</h4>
               <div className="bg-gray-50 p-3 rounded-md space-y-2">
                 {/* 顯示有價格的選項 */}
-                {reservation.selected_option_groups && 
-                 reservation.selected_option_groups.some(group => 
-                   group.selected_options.some(option => option.price && option.price > 0)
-                 ) && (
-                  <div className="space-y-1">
-                    <span className="text-gray-600 text-sm">附加選項：</span>
-                    {reservation.selected_option_groups.map((group, groupIndex) => 
-                      group.selected_options.map((option, optionIndex) => 
-                        option.price && option.price > 0 ? (
-                          <div key={`${groupIndex}-${optionIndex}`} className="flex items-center justify-between text-sm ml-2">
-                            <span className="text-gray-600">• {option.option_name}：</span>
-                            <span className="font-medium">${option.price}</span>
-                          </div>
-                        ) : null
-                      )
-                    )}
-                  </div>
-                )}
-                
+                {reservation.selected_option_groups &&
+                  reservation.selected_option_groups.some((group) =>
+                    group.selected_options.some(
+                      (option) => option.price && option.price > 0
+                    )
+                  ) && (
+                    <div className="space-y-1">
+                      <span className="text-gray-600 text-sm">附加選項：</span>
+                      {reservation.selected_option_groups.map(
+                        (group, groupIndex) =>
+                          group.selected_options.map((option, optionIndex) =>
+                            option.price && option.price > 0 ? (
+                              <div
+                                key={`${groupIndex}-${optionIndex}`}
+                                className="flex items-center justify-between text-sm ml-2"
+                              >
+                                <span className="text-gray-600">
+                                  • {option.option_name}：
+                                </span>
+                                <span className="font-medium">
+                                  ${option.price}
+                                </span>
+                              </div>
+                            ) : null
+                          )
+                      )}
+                    </div>
+                  )}
+
                 {reservation.price && (
                   <div className="flex items-center justify-between text-base font-semibold border-t pt-2">
                     <span className="text-gray-800">總計：</span>
@@ -153,28 +198,36 @@ function ReservationDetailModal({
             </div>
 
             {/* 選項詳情 */}
-            {reservation.selected_option_groups && reservation.selected_option_groups.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="font-medium text-gray-700">選擇項目：</h4>
+            {reservation.selected_option_groups &&
+              reservation.selected_option_groups.length > 0 && (
                 <div className="space-y-2">
-                  {reservation.selected_option_groups.map((group, index) => (
-                    <div key={index} className="bg-gray-50 p-3 rounded-md">
-                      <h5 className="font-medium text-sm text-gray-800">{group.group_name}</h5>
-                      <div className="mt-1 space-y-1">
-                        {group.selected_options.map((option, optionIndex) => (
-                          <div key={optionIndex} className="text-sm text-gray-600 flex items-center justify-between">
-                            <span>• {option.option_name}</span>
-                            {option.price && option.price > 0 && (
-                              <span className="text-xs text-gray-500">+${option.price}</span>
-                            )}
-                          </div>
-                        ))}
+                  <h4 className="font-medium text-gray-700">選擇項目：</h4>
+                  <div className="space-y-2">
+                    {reservation.selected_option_groups.map((group, index) => (
+                      <div key={index} className="bg-gray-50 p-3 rounded-md">
+                        <h5 className="font-medium text-sm text-gray-800">
+                          {group.group_name}
+                        </h5>
+                        <div className="mt-1 space-y-1">
+                          {group.selected_options.map((option, optionIndex) => (
+                            <div
+                              key={optionIndex}
+                              className="text-sm text-gray-600 flex items-center justify-between"
+                            >
+                              <span>• {option.option_name}</span>
+                              {option.price && option.price > 0 && (
+                                <span className="text-xs text-gray-500">
+                                  +${option.price}
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* 備註 */}
             {reservation.notes && (
@@ -188,7 +241,8 @@ function ReservationDetailModal({
 
             {/* 預約時間 */}
             <div className="text-xs text-gray-500 pt-2 border-t">
-              預約建立時間：{new Date(reservation.created_at).toLocaleString("zh-TW")}
+              預約建立時間：
+              {new Date(reservation.created_at).toLocaleString("zh-TW")}
             </div>
           </div>
 
@@ -206,7 +260,8 @@ function ReservationDetailModal({
 
 export default function AppointmentsPage() {
   const [searchParams] = useSearchParams();
-  const [selectedReservation, setSelectedReservation] = useState<UserReservation | null>(null);
+  const [selectedReservation, setSelectedReservation] =
+    useState<UserReservation | null>(null);
   const filter = searchParams.get("status") || "all";
   const { botUUID } = useLiff();
 
@@ -221,16 +276,22 @@ export default function AppointmentsPage() {
 
   // 按時間排序（最近的在前）
   const sortedReservations = [...reservations].sort((a, b) => {
-    const dateTimeA = new Date(`${a.reservation_date}T${a.start_time}`).getTime();
-    const dateTimeB = new Date(`${b.reservation_date}T${b.start_time}`).getTime();
+    const dateTimeA = new Date(
+      `${a.reservation_date}T${a.start_time}`
+    ).getTime();
+    const dateTimeB = new Date(
+      `${b.reservation_date}T${b.start_time}`
+    ).getTime();
     return dateTimeB - dateTimeA; // 降序排列，最近的在前
   });
 
   // 根據篩選條件過濾預約
-  const filteredReservations = 
-    filter === "all" 
-      ? sortedReservations 
-      : sortedReservations.filter((reservation) => reservation.status === filter);
+  const filteredReservations =
+    filter === "all"
+      ? sortedReservations
+      : sortedReservations.filter(
+          (reservation) => reservation.status === filter
+        );
 
   const statusFilters = [
     { key: "all", label: "全部", count: sortedReservations.length },
@@ -301,7 +362,11 @@ export default function AppointmentsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">
-            {filter === "all" ? "所有預約" : `${statusMap[filter as keyof typeof statusMap]?.label || filter}預約`}
+            {filter === "all"
+              ? "所有預約"
+              : `${
+                  statusMap[filter as keyof typeof statusMap]?.label || filter
+                }預約`}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -323,7 +388,10 @@ export default function AppointmentsPage() {
               };
 
               return (
-                <div key={reservation.reservation_id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div
+                  key={reservation.reservation_id}
+                  className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                >
                   <div className="flex items-center justify-between">
                     {/* 左側：預約資訊 */}
                     <div className="flex-1 space-y-2">
@@ -337,7 +405,11 @@ export default function AppointmentsPage() {
                           📅 {formatDate(reservation.reservation_date)}
                         </p>
                         <p className="text-sm text-gray-600">
-                          🕒 {formatTime(reservation.start_time, reservation.end_time)}
+                          🕒{" "}
+                          {formatTime(
+                            reservation.start_time,
+                            reservation.end_time
+                          )}
                         </p>
                       </div>
                     </div>
@@ -346,23 +418,39 @@ export default function AppointmentsPage() {
                     <div className="flex flex-col items-end space-y-3 ml-6">
                       <Badge
                         variant={
-                          reservation.status === "confirmed" ? "default" :
-                          reservation.status === "completed" ? "secondary" :
-                          reservation.status === "cancelled" ? "destructive" :
-                          "outline"
+                          reservation.status === "confirmed"
+                            ? "default"
+                            : reservation.status === "completed"
+                            ? "secondary"
+                            : reservation.status === "cancelled"
+                            ? "destructive"
+                            : "outline"
                         }
                         className={`
                           text-xs px-3 py-1
-                          ${reservation.status === "pending" ? "bg-orange-50 text-orange-700 border-orange-200" : ""}
-                          ${reservation.status === "confirmed" ? "bg-blue-50 text-blue-700 border-blue-200" : ""}
-                          ${reservation.status === "completed" ? "bg-green-50 text-green-700 border-green-200" : ""}
+                          ${
+                            reservation.status === "pending"
+                              ? "bg-orange-50 text-orange-700 border-orange-200"
+                              : ""
+                          }
+                          ${
+                            reservation.status === "confirmed"
+                              ? "bg-blue-50 text-blue-700 border-blue-200"
+                              : ""
+                          }
+                          ${
+                            reservation.status === "completed"
+                              ? "bg-green-50 text-green-700 border-green-200"
+                              : ""
+                          }
                         `}
                       >
-                        {statusMap[reservation.status]?.label || reservation.status}
+                        {statusMap[reservation.status as keyof typeof statusMap]?.label ||
+                          reservation.status}
                       </Badge>
-                      
-                      <Button 
-                        variant="outline" 
+
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => setSelectedReservation(reservation)}
                         className="text-xs px-3 py-1 h-8"

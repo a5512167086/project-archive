@@ -70,13 +70,13 @@ export interface ReservationItemOptionGroup {
 }
 
 export interface ReservationItemSchedule {
-  reservation_item_schedule_id: string;
+  service_schedule_id: string;
   object_id: number;
   schedule_type: "weekly" | "daily";
   weekday: number; // 1=Monday, 2=Tuesday, etc.
   schedule_date: string | null;
-  start_time: string; // HH:mm:ss format
-  end_time: string; // HH:mm:ss format
+  start_time: string; // Time format
+  end_time: string; // Time format
   capacity: number;
   is_active: boolean;
   created_at: string;
@@ -84,11 +84,11 @@ export interface ReservationItemSchedule {
 }
 
 export interface ReservationItem {
-  reservation_item_id: string;
+  service_id: string;
   object_id: number;
   class_id: number;
-  reservation_name: string;
-  reservation_description: string;
+  service_name: string;
+  service_description: string;
   duration_minutes: number;
   price: number;
   is_active: boolean;
@@ -121,12 +121,12 @@ export interface CreateReservationOptionValue {
 
 export interface CreateReservationPayload {
   bot_uuid: string;
-  reservation_item_id: string;
+  service_id: string;
   reservation_date: string; // YYYY-MM-DD 格式
   start_time: string; // ISO 8601 格式或 HH:mm:ss 格式
   payment_method: "cash" | "bank_transfer";
   option_values: CreateReservationOptionValue[];
-  notes?: string;
+  note?: string;
 }
 
 export interface CreateReservationResponse {
@@ -150,18 +150,18 @@ export interface UserReservationOptionGroup {
 
 export interface UserReservation {
   reservation_id: string;
-  reservation_item_id: string;
+  service_id: string;
   service_name: string;
+  price: number;
+  notes: string;
   reservation_date: string; // YYYY-MM-DD 格式
-  start_time: string; // HH:mm:ss 格式
-  end_time: string; // HH:mm:ss 格式
-  status: "pending" | "confirmed" | "cancelled" | "completed";
-  payment_method: "cash" | "credit_card" | "bank_transfer";
-  payment_status: "paid" | "unpaid" | "pending" | null;
+  start_time: string; // ISO 8601 格式
+  end_time: string; // ISO 8601 格式
+  status: string;
+  payment_method: string;
+  payment_status: string;
   created_at: string; // ISO 8601 格式
   selected_option_groups: UserReservationOptionGroup[];
-  price: number; // 預約總價格
-  notes?: string; // 備註
 }
 
 export type UserReservationsResponse = UserReservation[];
@@ -236,18 +236,17 @@ export const reservationApi = baseApi.injectEndpoints({
       ],
     }),
 
-    // 預約服務項目 endpoints
+    // 服務項目 endpoints
     getReservationItems: builder.query<ReservationItemsResponse, string>({
-      query: (botUuid) => `/reservations/items/${botUuid}`,
+      query: (botUuid) => `/services/${botUuid}`,
       providesTags: (result, error, botUuid) => [
         { type: "ReservationItem", id: `items-${botUuid}` },
       ],
     }),
     getAvailableTimes: builder.query<AvailableTimesResponse, string>({
-      query: (reservationItemId) =>
-        `/reservations/items/${reservationItemId}/available-times`,
-      providesTags: (result, error, reservationItemId) => [
-        { type: "ReservationItem", id: `times-${reservationItemId}` },
+      query: (serviceId) => `/services/${serviceId}/available-times`,
+      providesTags: (result, error, serviceId) => [
+        { type: "ReservationItem", id: `times-${serviceId}` },
       ],
     }),
 

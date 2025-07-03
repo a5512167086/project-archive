@@ -56,7 +56,7 @@ export function BookingDialog({
     data: availableTimes,
     isLoading,
     error,
-  } = useGetAvailableTimesQuery(reservationItem.reservation_item_id, {
+  } = useGetAvailableTimesQuery(reservationItem.service_id, {
     skip: !isOpen,
     refetchOnMountOrArgChange: true, // 每次打開都重新獲取
   });
@@ -124,19 +124,20 @@ export function BookingDialog({
 
       const reservationPayload = {
         bot_uuid: botUUID,
-        reservation_item_id: reservationItem.reservation_item_id,
+        service_id: reservationItem.service_id,
         reservation_date: selectedDate,
         start_time: selectedTime, // 直接使用時間格式，不包含日期
         payment_method: paymentMethod,
         option_values: optionValuesArray,
-        notes: note.trim() || undefined,
+        note: note.trim() || undefined,
       };
 
       await createReservation(reservationPayload).unwrap();
       setSubmissionStatus("success");
+      setStep("result"); // 設置步驟為結果頁面
 
       // 顯示成功 toast
-      toast.success(`預約成功！服務：${reservationItem.reservation_name}`);
+      toast.success(`預約成功！服務：${reservationItem.service_name}`);
 
       // 延遲關閉對話框並調用成功回調
       setTimeout(() => {
@@ -146,6 +147,7 @@ export function BookingDialog({
     } catch (error) {
       console.error("預約失敗:", error);
       setSubmissionStatus("error");
+      setStep("result"); // 設置步驟為結果頁面
       const errorMessage =
         error && typeof error === "object" && "data" in error
           ? (error.data as { message?: string })?.message || "預約失敗，請重試"
@@ -402,7 +404,7 @@ export function BookingDialog({
           <h2 className="text-lg font-semibold">{stepInfo.title}</h2>
         </div>
         <div className="text-sm text-muted-foreground mt-1">
-          <p className="font-medium">{reservationItem.reservation_name}</p>
+          <p className="font-medium">{reservationItem.service_name}</p>
           <p>
             {reservationItem.duration_minutes}分鐘 • ${reservationItem.price}
           </p>
@@ -672,7 +674,7 @@ export function BookingDialog({
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span>服務項目：</span>
-                  <span>{reservationItem.reservation_name}</span>
+                  <span>{reservationItem.service_name}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>預約日期：</span>

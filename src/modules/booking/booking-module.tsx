@@ -26,7 +26,7 @@ function BookingContent() {
 
   const handleBookingClick = (itemId: string) => {
     const item = reservationItemsData?.find(
-      (item) => item.reservation_item_id === itemId
+      (item) => item.service_id === itemId
     );
     if (item) {
       // 檢查項目的 is_active 狀態
@@ -55,7 +55,7 @@ function BookingContent() {
 
   const handleConfirmBooking = () => {
     console.log("預約確認完成:", {
-      item: selectedItem?.reservation_name,
+      item: selectedItem?.service_name,
     });
     // 預約成功後可以執行的操作，比如刷新數據等
     // Toast 通知已經在 BookingDialog 中處理
@@ -125,12 +125,11 @@ function BookingContent() {
 
               return (
                 <FeaturedItem
-                  key={item.reservation_item_id}
-                  id={item.reservation_item_id}
-                  name={item.reservation_name}
+                  key={item.service_id}
+                  id={item.service_id}
+                  name={item.service_name}
                   description={
-                    item.reservation_description ||
-                    `${item.duration_minutes}分鐘`
+                    item.service_description || `${item.duration_minutes}分鐘`
                   }
                   price={item.price}
                   priceLabel={hasPayableOptions ? "起" : undefined}
