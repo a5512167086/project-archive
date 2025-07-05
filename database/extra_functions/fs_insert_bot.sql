@@ -36,6 +36,10 @@ _message_entity_id int;
 
 _product_entity_id int;
 
+_category_entity_id int;
+
+_brand_entity_id int;
+
 _knowledge_entity_id int;
 
 _order_entity_id int;
@@ -78,14 +82,24 @@ FROM entities e
 WHERE e.chinese_name = '訊息紀錄'
 LIMIT 1;
 
+SELECT entity_id INTO _knowledge_entity_id
+FROM entities e
+WHERE e.chinese_name = '知識'
+LIMIT 1;
+
 SELECT entity_id INTO _product_entity_id
 FROM entities e
 WHERE e.chinese_name = '產品'
 LIMIT 1;
 
-SELECT entity_id INTO _knowledge_entity_id
+SELECT entity_id INTO _category_entity_id
 FROM entities e
-WHERE e.chinese_name = '知識'
+WHERE e.chinese_name = '類別'
+LIMIT 1;
+
+SELECT entity_id INTO _brand_entity_id
+FROM entities e
+WHERE e.chinese_name = '品牌'
 LIMIT 1;
 
 SELECT entity_id INTO _order_entity_id
@@ -103,15 +117,9 @@ FROM entities e
 WHERE e.chinese_name = '服務'
 LIMIT 1;
 
-SELECT sc.class_id INTO _main_bot_class_id
-FROM vs_sub_class sc
-WHERE sc.parent_class_id = 1
-    AND sc.entity_id = _bot_entity_id
-LIMIT 1;
-
 -- 插入主 class
 SELECT fs_insert_class(
-        _main_bot_class_id,
+        1,
         _bot_entity_id,
         '',
         '用戶創建的機器人',
@@ -184,7 +192,7 @@ PERFORM fs_insert_class(
     _new_class_id,
     _setting_entity_id,
     '設定',
-    '跟Module功能有關的設定',
+    '模組功能的設定',
     _owner_id
 );
 
@@ -192,7 +200,15 @@ PERFORM fs_insert_class(
     _new_class_id,
     _message_entity_id,
     '訊息紀錄',
-    '訊息紀錄',
+    '機器人的訊息紀錄',
+    _owner_id
+);
+
+PERFORM fs_insert_class(
+    _new_class_id,
+    _knowledge_entity_id,
+    '知識',
+    '問答功能的知識',
     _owner_id
 );
 
@@ -206,9 +222,17 @@ PERFORM fs_insert_class(
 
 PERFORM fs_insert_class(
     _new_class_id,
-    _knowledge_entity_id,
-    '知識',
-    '問答功能的知識',
+    _category_entity_id,
+    '類別',
+    '電商功能的類別',
+    _owner_id
+);
+
+PERFORM fs_insert_class(
+    _new_class_id,
+    _brand_entity_id,
+    '品牌',
+    '電商功能的品牌',
     _owner_id
 );
 

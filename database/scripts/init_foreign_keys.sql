@@ -304,4 +304,43 @@ END IF;
 
 COMMENT ON TABLE module_settings IS '模組設定表';
 
+-- products_details
+IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'fk_products_details_object_id'
+) THEN
+ALTER TABLE products_details
+ADD CONSTRAINT fk_products_details_object_id FOREIGN KEY(object_id) REFERENCES objects(object_id) ON DELETE CASCADE;
+
+END IF;
+
+COMMENT ON TABLE products_details IS '商品詳細資訊表';
+
+-- product_images
+IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'fk_product_images_object_id'
+) THEN
+ALTER TABLE product_images
+ADD CONSTRAINT fk_product_images_object_id FOREIGN KEY(object_id) REFERENCES objects(object_id) ON DELETE CASCADE;
+
+END IF;
+
+COMMENT ON TABLE product_images IS '商品圖片表';
+
+-- bot_details
+IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'fk_bot_details_object_id'
+) THEN
+ALTER TABLE bot_details
+ADD CONSTRAINT fk_bot_details_object_id FOREIGN KEY(object_id) REFERENCES objects(object_id) ON DELETE CASCADE;
+
+END IF;
+
+COMMENT ON TABLE bot_details IS '機器人詳細資訊表';
+
 END $$ LANGUAGE plpgsql;

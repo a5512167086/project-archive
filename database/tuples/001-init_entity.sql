@@ -70,4 +70,20 @@ IF NOT EXISTS(
 
 END IF;
 
+IF NOT EXISTS(
+    SELECT 1
+    FROM entities
+    WHERE chinese_name = '類別'
+) THEN CALL sp_insert_entity('類別', 'Category', TRUE);
+
+END IF;
+
+IF NOT EXISTS(
+    SELECT 1
+    FROM entities
+    WHERE chinese_name = '品牌'
+) THEN CALL sp_insert_entity('品牌', 'Brand', TRUE);
+
+END IF;
+
 END $$;

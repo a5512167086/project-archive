@@ -8,3 +8,6 @@ CREATE TABLE IF NOT EXISTS entities(
     PRIMARY KEY (entity_id)
 );
 
+CREATE INDEX IF NOT EXISTS idx_entities_chinese_name ON entities(chinese_name);
+
+CREATE INDEX IF NOT EXISTS idx_entities_english_name ON entities(english_name);

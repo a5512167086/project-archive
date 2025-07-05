@@ -20,9 +20,9 @@ INSERT INTO classes(
     )
 SELECT _entity_id,
     '根目錄',
-    '初始的根目錄，之後的所有Class都會掛在根目錄底下',
+    '初始的根目錄',
     'Root',
-    'Initial root, all subsequent Classes will mount under the root',
+    'Initial root',
     '1',
     '根目錄',
     1
@@ -32,21 +32,5 @@ WHERE NOT EXISTS (
         WHERE entity_id = _entity_id
             AND chinese_name = '根目錄'
     );
-
--- 重新取得「機器人」的 entity_id
-SELECT entity_id INTO _entity_id
-FROM entities
-WHERE chinese_name = '機器人'
-LIMIT 1;
-
--- 如果尚未存在「機器人」的 class，就插入
-IF NOT EXISTS (
-    SELECT 1
-    FROM classes
-    WHERE chinese_name = '機器人'
-        AND entity_id = _entity_id
-) THEN PERFORM fs_insert_class(1, _entity_id, '機器人', '機器人Class', NULL);
-
-END IF;
 
 END $$ LANGUAGE plpgsql;
