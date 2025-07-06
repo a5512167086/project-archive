@@ -1,12 +1,13 @@
-DROP TABLE IF EXISTS products_details;
-
-CREATE TABLE products_details (
+CREATE TABLE IF NOT EXISTS product_details (
     product_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     brand_id INT,
     object_id int NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
+    sku_code VARCHAR(64) UNIQUE NOT NULL,
+    price INT NOT NULL,
+    stock INT DEFAULT 0 NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX IF NOT EXISTS idx_product_details_object_id ON products_details(object_id);
+CREATE INDEX IF NOT EXISTS idx_product_details_object_id ON product_details(object_id);

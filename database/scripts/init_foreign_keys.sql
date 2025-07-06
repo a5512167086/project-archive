@@ -304,18 +304,28 @@ END IF;
 
 COMMENT ON TABLE module_settings IS '模組設定表';
 
--- products_details
+-- product_details
 IF NOT EXISTS (
     SELECT 1
     FROM pg_constraint
-    WHERE conname = 'fk_products_details_object_id'
+    WHERE conname = 'fk_product_details_brand_id'
 ) THEN
-ALTER TABLE products_details
-ADD CONSTRAINT fk_products_details_object_id FOREIGN KEY(object_id) REFERENCES objects(object_id) ON DELETE CASCADE;
+ALTER TABLE product_details
+ADD CONSTRAINT fk_product_details_brand_id FOREIGN KEY(brand_id) REFERENCES objects(object_id) ON DELETE CASCADE;
 
 END IF;
 
-COMMENT ON TABLE products_details IS '商品詳細資訊表';
+IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'fk_product_details_object_id'
+) THEN
+ALTER TABLE product_details
+ADD CONSTRAINT fk_product_details_object_id FOREIGN KEY(object_id) REFERENCES objects(object_id) ON DELETE CASCADE;
+
+END IF;
+
+COMMENT ON TABLE product_details IS '商品詳細資訊表';
 
 -- product_images
 IF NOT EXISTS (
@@ -342,5 +352,18 @@ ADD CONSTRAINT fk_bot_details_object_id FOREIGN KEY(object_id) REFERENCES object
 END IF;
 
 COMMENT ON TABLE bot_details IS '機器人詳細資訊表';
+
+-- product_variants
+IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'fk_product_variants_object_id'
+) THEN
+ALTER TABLE product_variants
+ADD CONSTRAINT fk_product_variants_object_id FOREIGN KEY(object_id) REFERENCES objects(object_id) ON DELETE CASCADE;
+
+END IF;
+
+COMMENT ON TABLE product_variants IS '商品變體表';
 
 END $$ LANGUAGE plpgsql;
