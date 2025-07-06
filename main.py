@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from modules.bot.bot_router import bot_router
-from modules.ecomm.ecomm_router import brand_router
+from modules.ecomm.ecomm_router import brand_router, category_router
 from modules.knowledge.knowledge_router import knowledge_router
 from modules.module.module_router import module_router
 from modules.reservation.reservation_router import reservation_router, service_router
@@ -34,13 +34,20 @@ app.add_middleware(
 
 add_global_exception_handler(app)
 
+# User module routers
 app.include_router(user_router)
+# Knowledge module routers
 app.include_router(knowledge_router)
+# Module setting routers
 app.include_router(module_router)
+# Bot module routers
 app.include_router(bot_router)
+# Reservation module routers
 app.include_router(reservation_router)
 app.include_router(service_router)
+# E-commerce module routers
 app.include_router(brand_router)
+app.include_router(category_router)
 
 
 @app.exception_handler(RequestValidationError)
