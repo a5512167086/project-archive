@@ -31,7 +31,7 @@ from modules.ecomm.ecomm_service import (
     update_category_by_id,
     update_product_by_id,
 )
-from shared.database import SessionDep
+from shared.clients.database import SessionDep
 from shared.dependencies import get_current_user
 
 brand_router = APIRouter(prefix="/brands", tags=["brands"])

@@ -26,7 +26,7 @@ from modules.reservation.reservation_service import (
     update_reservation_by_owner,
     update_service_by_service_id,
 )
-from shared.database import SessionDep
+from shared.clients.database import SessionDep
 from shared.dependencies import get_current_user
 
 reservation_router = APIRouter(prefix="/reservations", tags=["reservations"])

@@ -14,7 +14,7 @@ from modules.knowledge.knowledge_service import (
     insert_knowledges_by_csv,
     insert_single_knowledge,
 )
-from shared.database import SessionDep
+from shared.clients.database import SessionDep
 from shared.dependencies import get_current_user
 
 knowledge_router = APIRouter(prefix="/knowledges", tags=["knowledges"])

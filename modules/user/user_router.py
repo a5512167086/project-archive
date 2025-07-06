@@ -27,7 +27,7 @@ from modules.user.user_service import (
     oauth_login,
     reset_password,
 )
-from shared.database import SessionDep
+from shared.clients.database import SessionDep
 from shared.dependencies import get_current_user, get_reset_user
 
 user_router = APIRouter(prefix="/users", tags=["users"])
