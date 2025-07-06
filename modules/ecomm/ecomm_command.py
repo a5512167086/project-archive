@@ -1,8 +1,11 @@
 import logging
+from datetime import datetime
 from typing import List, Optional
+from uuid import UUID
 
 from sqlmodel import Session, delete, select, text
 
+from modules.ecomm.ecomm_model import ProductDetail, ProductImage, ProductVariant
 from shared.models.class_model import Class
 from shared.models.class_object_relation_model import ClassObjectRelation
 from shared.models.inheritance_model import Inheritance
@@ -193,5 +196,213 @@ def update_category(
                 child_class_id=class_id,
             )
             session.add(inheritance)
+
+    return True
+
+
+# Product command functions
+def insert_product(
+    session: Session,
+    product_class_id: int,
+    product_name: str,
+    product_description: str,
+    brand_id: Optional[int],
+    sku_code: str,
+    price: int,
+    stock: int,
+    is_active: bool,
+    images: List[dict],
+    variants: List[dict],
+    owner_id: Optional[str] = None,
+) -> int:
+    """建立產品"""
+    product_entity_id = get_entity_id_by_name(session, "產品")
+
+    # 建立 Object
+    new_product_object = Object(
+        chinese_name=product_name,
+        chinese_description=product_description,
+        english_name=product_name,
+        english_description=product_description,
+        entity_id=product_entity_id,
+        owner_id=owner_id,
+    )
+    session.add(new_product_object)
+    session.flush()
+
+    # 建立 ClassObjectRelation
+    relation = ClassObjectRelation(
+        class_id=product_class_id, object_id=new_product_object.object_id
+    )
+    session.add(relation)
+
+    # 建立 ProductDetail
+    product_detail = ProductDetail(
+        brand_id=brand_id,
+        object_id=new_product_object.object_id,
+        is_active=is_active,
+        sku_code=sku_code,
+        price=price,
+        stock=stock,
+    )
+    session.add(product_detail)
+    session.flush()
+
+    # 建立產品圖片
+    for img in images:
+        product_image = ProductImage(
+            image_url=img["image_url"],
+            object_id=new_product_object.object_id,
+            display_order=img.get("display_order", 0),
+        )
+        session.add(product_image)
+
+    # 建立產品變體
+    for variant in variants:
+        product_variant = ProductVariant(
+            object_id=new_product_object.object_id,
+            variant_name=variant["variant_name"],
+            sku_code=variant.get("sku_code"),
+            price=variant.get("price"),
+            stock=variant.get("stock", 0),
+        )
+        session.add(product_variant)
+
+    return new_product_object.object_id
+
+
+def delete_products(session: Session, product_class_id: int, product_ids: List[UUID]):
+    """刪除產品"""
+    # 先取得相關的 object_ids
+    product_details = session.exec(
+        select(ProductDetail).where(ProductDetail.product_id.in_(product_ids))
+    ).all()
+
+    object_ids = [pd.object_id for pd in product_details]
+
+    if object_ids:
+        # 刪除產品圖片
+        session.exec(delete(ProductImage).where(ProductImage.object_id.in_(object_ids)))
+
+        # 刪除產品變體
+        session.exec(
+            delete(ProductVariant).where(ProductVariant.object_id.in_(object_ids))
+        )
+
+        # 刪除產品詳細資訊
+        session.exec(
+            delete(ProductDetail).where(ProductDetail.product_id.in_(product_ids))
+        )
+
+        # 刪除 ClassObjectRelation
+        session.exec(
+            delete(ClassObjectRelation).where(
+                ClassObjectRelation.class_id == product_class_id,
+                ClassObjectRelation.object_id.in_(object_ids),
+            )
+        )
+
+        # 刪除 Object
+        session.exec(delete(Object).where(Object.object_id.in_(object_ids)))
+
+
+def update_product(
+    session: Session,
+    product_id: UUID,
+    product_name: Optional[str] = None,
+    product_description: Optional[str] = None,
+    brand_id: Optional[int] = None,
+    sku_code: Optional[str] = None,
+    price: Optional[int] = None,
+    stock: Optional[int] = None,
+    is_active: Optional[bool] = None,
+    images: Optional[List[dict]] = None,
+    variants: Optional[List[dict]] = None,
+    category_id: Optional[int] = None,
+) -> bool:
+    """更新產品"""
+    # 取得產品詳細資訊
+    product_detail = session.get(ProductDetail, product_id)
+    if not product_detail:
+        return False
+
+    # 更新 Object
+    product_object = session.get(Object, product_detail.object_id)
+    if product_object:
+        if product_name is not None:
+            product_object.chinese_name = product_name
+            product_object.english_name = product_name
+        if product_description is not None:
+            product_object.chinese_description = product_description
+            product_object.english_description = product_description
+        session.add(product_object)
+
+    # 更新 ProductDetail
+    if brand_id is not None:
+        product_detail.brand_id = brand_id
+    if sku_code is not None:
+        product_detail.sku_code = sku_code
+    if price is not None:
+        product_detail.price = price
+    if stock is not None:
+        product_detail.stock = stock
+    if is_active is not None:
+        product_detail.is_active = is_active
+
+    product_detail.updated_at = datetime.utcnow()
+    session.add(product_detail)
+
+    # 更新類別關係
+    if category_id is not None:
+        # 刪除現有的類別關係
+        session.exec(
+            delete(ClassObjectRelation).where(
+                ClassObjectRelation.object_id == product_detail.object_id
+            )
+        )
+
+        # 建立新的類別關係
+        new_relation = ClassObjectRelation(
+            class_id=category_id, object_id=product_detail.object_id
+        )
+        session.add(new_relation)
+
+    # 更新圖片
+    if images is not None:
+        # 刪除現有圖片
+        session.exec(
+            delete(ProductImage).where(
+                ProductImage.object_id == product_detail.object_id
+            )
+        )
+
+        # 新增新圖片
+        for img in images:
+            product_image = ProductImage(
+                image_url=img["image_url"],
+                object_id=product_detail.object_id,
+                display_order=img.get("display_order", 0),
+            )
+            session.add(product_image)
+
+    # 更新變體
+    if variants is not None:
+        # 刪除現有變體
+        session.exec(
+            delete(ProductVariant).where(
+                ProductVariant.object_id == product_detail.object_id
+            )
+        )
+
+        # 新增新變體
+        for variant in variants:
+            product_variant = ProductVariant(
+                object_id=product_detail.object_id,
+                variant_name=variant["variant_name"],
+                sku_code=variant.get("sku_code"),
+                price=variant.get("price"),
+                stock=variant.get("stock", 0),
+            )
+            session.add(product_variant)
 
     return True

@@ -1,10 +1,18 @@
 import logging
 from typing import List
+from uuid import UUID
 
 from sqlmodel import Session, select
 
-from modules.ecomm.ecomm_model import BrandListView, CategoryListView
+from modules.ecomm.ecomm_model import (
+    BrandListView,
+    CategoryListView,
+    ProductDetail,
+    ProductImage,
+    ProductVariant,
+)
 from shared.models.class_model import SubClassView
+from shared.models.object_model import Object
 from shared.queries.entity_query import get_entity_id_by_name
 
 logging.basicConfig(
@@ -152,3 +160,92 @@ def check_category_hierarchy_valid(
         current_parent = parent_result
 
     return True
+
+
+# Product query functions
+def get_product_class_id_by_bot_class_id(
+    session: Session, bot_class_id: int
+) -> int | None:
+    product_entity_id = get_entity_id_by_name(session, "產品")
+    result = session.exec(
+        select(SubClassView.class_id).where(
+            SubClassView.parent_class_id == bot_class_id,
+            SubClassView.entity_id == product_entity_id,
+        )
+    ).first()
+
+    return result
+
+
+def get_product_by_object_id(session: Session, object_id: int) -> ProductDetail | None:
+    """根據 object_id 取得產品詳細資訊"""
+    return session.exec(
+        select(ProductDetail).where(ProductDetail.object_id == object_id)
+    ).first()
+
+
+def get_product_images_by_object_id(
+    session: Session, object_id: int
+) -> List[ProductImage]:
+    """根據 object_id 取得產品圖片"""
+    return session.exec(
+        select(ProductImage)
+        .where(ProductImage.object_id == object_id)
+        .order_by(ProductImage.display_order)
+    ).all()
+
+
+def get_product_variants_by_object_id(
+    session: Session, object_id: int
+) -> List[ProductVariant]:
+    """根據 object_id 取得產品變體"""
+    return session.exec(
+        select(ProductVariant).where(ProductVariant.object_id == object_id)
+    ).all()
+
+
+def check_product_sku_exists(session: Session, sku_code: str) -> bool:
+    """檢查 SKU 是否已存在"""
+    result = session.exec(
+        select(ProductDetail).where(ProductDetail.sku_code == sku_code)
+    ).first()
+    return result is not None
+
+
+def check_product_sku_exists_exclude_self(
+    session: Session, sku_code: str, exclude_product_id: UUID
+) -> bool:
+    """檢查 SKU 是否已存在（排除自己）"""
+    result = session.exec(
+        select(ProductDetail).where(
+            ProductDetail.sku_code == sku_code,
+            ProductDetail.product_id != exclude_product_id,
+        )
+    ).first()
+    return result is not None
+
+
+def get_products_by_class_id(session: Session, class_id: int) -> List[dict]:
+    """根據 class_id 取得所有產品"""
+    # 先取得該類別下的所有 objects
+    objects = session.exec(
+        select(Object)
+        .join(SubClassView, Object.entity_id == SubClassView.entity_id)
+        .where(SubClassView.class_id == class_id)
+    ).all()
+
+    products = []
+    for obj in objects:
+        product_detail = get_product_by_object_id(session, obj.object_id)
+        if product_detail:
+            images = get_product_images_by_object_id(session, obj.object_id)
+            variants = get_product_variants_by_object_id(session, obj.object_id)
+
+            products.append({
+                "product_detail": product_detail,
+                "object": obj,
+                "images": images,
+                "variants": variants,
+            })
+
+    return products

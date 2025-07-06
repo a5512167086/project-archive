@@ -7,10 +7,13 @@ from modules.bot.bot_service import validate_bot_ownership, validate_line_bot_ex
 from modules.ecomm.ecomm_command import (
     delete_brands,
     delete_categories,
+    delete_products,
     insert_brand,
     insert_category,
+    insert_product,
     update_brand,
     update_category,
+    update_product,
 )
 from modules.ecomm.ecomm_model import BrandListView, CategoryListView
 from modules.ecomm.ecomm_query import (
@@ -20,18 +23,25 @@ from modules.ecomm.ecomm_query import (
     check_category_name_exists,
     check_category_name_exists_exclude_self,
     check_parent_category_exists,
+    check_product_sku_exists,
+    check_product_sku_exists_exclude_self,
     get_all_brands_by_class_id,
     get_all_categories_by_class_id,
     get_brand_class_id_by_bot_class_id,
     get_category_class_id_by_bot_class_id,
+    get_product_class_id_by_bot_class_id,
+    get_products_by_class_id,
 )
 from modules.ecomm.ecomm_schema import (
     DeleteBrandRequest,
     DeleteCategoryRequest,
+    DeleteProductRequest,
     InsertBrandRequest,
     InsertCategoryRequest,
+    InsertProductRequest,
     UpdateBrandRequest,
     UpdateCategoryRequest,
+    UpdateProductRequest,
 )
 from shared.constants.error_code import ErrorCode
 from shared.exception import GlobalErrorException
@@ -55,6 +65,16 @@ def validate_category_class(session: Session, bot_class_id: int) -> int:
             error_message="Category class not found for the given bot class",
         )
     return category_class_id
+
+
+def validate_product_class(session: Session, bot_class_id: int) -> int:
+    product_class_id = get_product_class_id_by_bot_class_id(session, bot_class_id)
+    if not product_class_id:
+        raise GlobalErrorException(
+            error_code=ErrorCode.PRODUCT_CLASS_NOT_FOUND,
+            error_message="Product class not found for the given bot class",
+        )
+    return product_class_id
 
 
 def insert_single_brand(
@@ -244,4 +264,115 @@ def update_category_by_id(
         raise GlobalErrorException(
             error_code=ErrorCode.CATEGORY_CLASS_NOT_FOUND,
             error_message="Category not found or does not belong to this bot",
+        )
+
+
+# Product service functions
+def get_all_products(session: Session, bot_uuid: UUID) -> List[dict]:
+    """取得所有產品"""
+    bot = validate_line_bot_exists(session, bot_uuid)
+    product_class_id = validate_product_class(session, bot.class_id)
+    return get_products_by_class_id(session, product_class_id)
+
+
+def insert_single_product(session: Session, body: InsertProductRequest, user_id: str):
+    """建立單一產品"""
+    bot = validate_line_bot_exists(session, body.bot_uuid)
+    validate_bot_ownership(session, user_id, bot.bot_detail_id)
+
+    # 如果沒有提供 category_id，使用主 Category class
+    if body.category_id is None:
+        product_class_id = validate_category_class(session, bot.class_id)
+    else:
+        # 如果提供了 category_id，使用指定的類別
+        product_class_id = body.category_id
+
+    # 檢查 SKU 是否已存在
+    if check_product_sku_exists(session, body.sku_code):
+        raise GlobalErrorException(
+            error_code=ErrorCode.PRODUCT_SKU_ALREADY_EXISTS,
+            error_message=f"SKU '{body.sku_code}' already exists",
+        )
+
+    # 建立產品
+    insert_product(
+        session=session,
+        product_class_id=product_class_id,
+        product_name=body.product_name,
+        product_description=body.product_description,
+        brand_id=body.brand_id,
+        sku_code=body.sku_code,
+        price=body.price,
+        stock=body.stock,
+        is_active=body.is_active,
+        images=[img.dict() for img in body.images],
+        variants=[variant.dict() for variant in body.variants],
+        owner_id=user_id,
+    )
+
+
+def delete_products_by_ids(session: Session, body: DeleteProductRequest, user_id: str):
+    """刪除產品"""
+    bot = validate_line_bot_exists(session, body.bot_uuid)
+    validate_bot_ownership(session, user_id, bot.bot_detail_id)
+    product_class_id = validate_product_class(session, bot.class_id)
+
+    delete_products(session, product_class_id, body.product_ids)
+
+
+def update_product_by_id(session: Session, body: UpdateProductRequest, user_id: str):
+    """更新產品"""
+    bot = validate_line_bot_exists(session, body.bot_uuid)
+    validate_bot_ownership(session, user_id, bot.bot_detail_id)
+    validate_product_class(session, bot.class_id)
+
+    # 如果更新 SKU，檢查是否重複（排除自己）
+    if body.sku_code is not None:
+        if check_product_sku_exists_exclude_self(
+            session, body.sku_code, body.product_id
+        ):
+            raise GlobalErrorException(
+                error_code=ErrorCode.PRODUCT_SKU_ALREADY_EXISTS,
+                error_message=f"SKU '{body.sku_code}' already exists",
+            )
+
+    # 執行更新
+    images_dict = None
+    variants_dict = None
+
+    if body.images is not None:
+        images_dict = [img.dict() for img in body.images]
+
+    if body.variants is not None:
+        variants_dict = [variant.dict() for variant in body.variants]
+
+    # 處理 category_id，如果是 None 則使用主 Category class
+    category_id_to_use = None
+    if body.category_id is not None:
+        if body.category_id == 0:
+            # 如果 category_id 是 0，使用主 Category class
+            category_id_to_use = validate_category_class(session, bot.class_id)
+        else:
+            # 使用指定的類別
+            category_id_to_use = body.category_id
+
+    success = update_product(
+        session=session,
+        product_id=body.product_id,
+        product_name=body.product_name,
+        product_description=body.product_description,
+        brand_id=body.brand_id,
+        sku_code=body.sku_code,
+        price=body.price,
+        stock=body.stock,
+        is_active=body.is_active,
+        images=images_dict,
+        variants=variants_dict,
+        category_id=category_id_to_use,
+    )
+
+    if not success:
+        raise GlobalErrorException(
+            error_code=ErrorCode.PRODUCT_NOT_FOUND,
+            error_message="Product not found",
         )

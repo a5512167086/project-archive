@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from modules.bot.bot_router import bot_router
-from modules.ecomm.ecomm_router import brand_router, category_router
+from modules.ecomm.ecomm_router import brand_router, category_router, product_router
 from modules.knowledge.knowledge_router import knowledge_router
 from modules.module.module_router import module_router
 from modules.reservation.reservation_router import reservation_router, service_router
@@ -48,6 +48,7 @@ app.include_router(service_router)
 # E-commerce module routers
 app.include_router(brand_router)
 app.include_router(category_router)
+app.include_router(product_router)
 
 
 @app.exception_handler(RequestValidationError)
