@@ -1,4 +1,4 @@
-name: Deploy to Easybot Master Self-Hosted VM
+name: Deploy to Easybot Cluster
 
 on:
   push:
@@ -6,9 +6,10 @@ on:
       - main
 
 jobs:
-  deploy:
-    runs-on: self-hosted
-    environment: prod # ✅ 指定你建立的 Environment
+  deploy-master:
+    name: Deploy to Easybot Master
+    runs-on: [self-hosted, master]
+    environment: prod
 
     steps:
       - name: Checkout code
@@ -22,7 +23,54 @@ jobs:
       - name: Build Docker image
         run: docker build -t fastapi-app .
 
-      - name: Write .env file from GitHub Environments
+      - name: Write .env file
+        run: |
+          echo "DB_HOST=${{ vars.DB_HOST }}" >> .env
+          echo "DB_PORT=${{ vars.DB_PORT }}" >> .env
+          echo "DB_NAME=${{ vars.DB_NAME }}" >> .env
+          echo "DB_USER=${{ vars.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          echo "JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}" >> .env
+          echo "JWT_RESET_SECRET=${{ secrets.JWT_RESET_SECRET }}" >> .env
+          echo "JWT_ALGORITHM=${{ vars.JWT_ALGORITHM }}" >> .env
+          echo "EMAIL=${{ vars.EMAIL }}" >> .env
+          echo "EMAIL_APP_PASSWORD=${{ secrets.EMAIL_APP_PASSWORD }}" >> .env
+          echo "FRONTEND_URL=${{ vars.FRONTEND_URL }}" >> .env
+          echo "LINE_CLIENT_ID=${{ vars.LINE_CLIENT_ID }}" >> .env
+          echo "LINE_CLIENT_SECRET=${{ secrets.LINE_CLIENT_SECRET }}" >> .env
+          echo "LINE_REDIRECT_URI=${{ vars.LINE_REDIRECT_URI }}" >> .env
+          echo "GOOGLE_CLIENT_ID=${{ vars.GOOGLE_CLIENT_ID }}" >> .env
+          echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
+          echo "GOOGLE_REDIRECT_URI=${{ vars.GOOGLE_REDIRECT_URI }}" >> .env
+          echo "ENV=production" >> .env
+
+      - name: Run new container
+        run: |
+          docker run -d \
+            --name fastapi-app \
+            --env-file .env \
+            -p 8000:80 \
+            fastapi-app
+
+  deploy-slave:
+    name: Deploy to Easybot Slave
+    runs-on: [self-hosted, slave]
+    environment: prod
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Stop old container
+        run: |
+          docker stop fastapi-app || true
+          docker rm fastapi-app || true
+
+      - name: Build Docker image
+        run: docker build -t fastapi-app .
+
+      - name: Write .env file
         run: |
           echo "DB_HOST=${{ vars.DB_HOST }}" >> .env
           echo "DB_PORT=${{ vars.DB_PORT }}" >> .env
