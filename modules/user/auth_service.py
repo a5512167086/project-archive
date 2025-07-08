@@ -7,7 +7,7 @@ from fastapi import Depends, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt import DecodeError, ExpiredSignatureError, InvalidTokenError
 
-from shared.constants.config import JWT_ALGORITHM, JWT_REFRESH_SECRET, JWT_SECRET
+from shared.constants.config import JWT_REFRESH_SECRET, JWT_SECRET
 from shared.constants.error_code import ErrorCode
 from shared.exception import GlobalErrorException
 
@@ -26,7 +26,7 @@ def create_jwt_token(
     expire = datetime.now(timezone.utc) + expires_delta
     to_encode.update({"exp": expire})
 
-    token = jwt.encode(to_encode, secret, algorithm=JWT_ALGORITHM)
+    token = jwt.encode(to_encode, secret, algorithm="HS256")
     logger.info(f"JWT created with exp: {expire}")
     return token
 
@@ -55,7 +55,7 @@ def verify_jwt_token(
 ) -> Dict[str, Any]:
     token = credentials.credentials
     try:
-        payload = jwt.decode(token, secret, algorithms=[JWT_ALGORITHM])
+        payload = jwt.decode(token, secret, algorithms=["HS256"])
         user_id = payload.get("sub")
         email = payload.get("email")
 

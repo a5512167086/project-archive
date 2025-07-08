@@ -8,10 +8,9 @@ import requests
 from shared.constants.config import (
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
-    GOOGLE_REDIRECT_URI,
     LINE_CLIENT_ID,
     LINE_CLIENT_SECRET,
-    LINE_REDIRECT_URI,
+    OAUTH_REDIRECT_URI,
 )
 from shared.constants.error_code import ErrorCode
 from shared.exception import GlobalErrorException
@@ -39,7 +38,7 @@ def google_code_to_token(code: str):
         "client_secret": GOOGLE_CLIENT_SECRET,
         "code": code,
         "grant_type": "authorization_code",
-        "redirect_uri": GOOGLE_REDIRECT_URI,
+        "redirect_uri": OAUTH_REDIRECT_URI,
     }
 
     response = requests.post(token_url, data=data)
@@ -86,7 +85,7 @@ def line_code_to_token(auth_code: str):
         "code": auth_code,
         "client_id": LINE_CLIENT_ID,
         "client_secret": LINE_CLIENT_SECRET,
-        "redirect_uri": LINE_REDIRECT_URI,
+        "redirect_uri": OAUTH_REDIRECT_URI,
     }
 
     response = requests.post(token_url, data=data)

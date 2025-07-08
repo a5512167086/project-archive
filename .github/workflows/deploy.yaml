@@ -33,16 +33,20 @@ jobs:
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
           echo "JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}" >> .env
           echo "JWT_RESET_SECRET=${{ secrets.JWT_RESET_SECRET }}" >> .env
-          echo "JWT_ALGORITHM=${{ vars.JWT_ALGORITHM }}" >> .env
           echo "EMAIL=${{ vars.EMAIL }}" >> .env
           echo "EMAIL_APP_PASSWORD=${{ secrets.EMAIL_APP_PASSWORD }}" >> .env
           echo "FRONTEND_URL=${{ vars.FRONTEND_URL }}" >> .env
           echo "LINE_CLIENT_ID=${{ vars.LINE_CLIENT_ID }}" >> .env
           echo "LINE_CLIENT_SECRET=${{ secrets.LINE_CLIENT_SECRET }}" >> .env
-          echo "LINE_REDIRECT_URI=${{ vars.LINE_REDIRECT_URI }}" >> .env
           echo "GOOGLE_CLIENT_ID=${{ vars.GOOGLE_CLIENT_ID }}" >> .env
           echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
-          echo "GOOGLE_REDIRECT_URI=${{ vars.GOOGLE_REDIRECT_URI }}" >> .env
+          echo "OAUTH_REDIRECT_URI=${{ vars.OAUTH_REDIRECT_URI }}" >> .env
+          echo "REDIS_HOST=${{ vars.REDIS_HOST }}" >> .env
+          echo "REDIS_PORT=${{ vars.REDIS_PORT }}" >> .env
+          echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
+          echo "MINIO_ENDPOINT=${{ vars.MINIO_ENDPOINT }}" >> .env
+          echo "MINIO_ACCESS_KEY=${{ vars.MINIO_ACCESS_KEY }}" >> .env
+          echo "MINIO_SECRET_KEY=${{ secrets.MINIO_SECRET_KEY }}" >> .env
           echo "ENV=production" >> .env
 
       - name: Run new container
@@ -80,16 +84,20 @@ jobs:
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
           echo "JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}" >> .env
           echo "JWT_RESET_SECRET=${{ secrets.JWT_RESET_SECRET }}" >> .env
-          echo "JWT_ALGORITHM=${{ vars.JWT_ALGORITHM }}" >> .env
           echo "EMAIL=${{ vars.EMAIL }}" >> .env
           echo "EMAIL_APP_PASSWORD=${{ secrets.EMAIL_APP_PASSWORD }}" >> .env
           echo "FRONTEND_URL=${{ vars.FRONTEND_URL }}" >> .env
           echo "LINE_CLIENT_ID=${{ vars.LINE_CLIENT_ID }}" >> .env
           echo "LINE_CLIENT_SECRET=${{ secrets.LINE_CLIENT_SECRET }}" >> .env
-          echo "LINE_REDIRECT_URI=${{ vars.LINE_REDIRECT_URI }}" >> .env
           echo "GOOGLE_CLIENT_ID=${{ vars.GOOGLE_CLIENT_ID }}" >> .env
           echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
-          echo "GOOGLE_REDIRECT_URI=${{ vars.GOOGLE_REDIRECT_URI }}" >> .env
+          echo "OAUTH_REDIRECT_URI=${{ vars.OAUTH_REDIRECT_URI }}" >> .env
+          echo "REDIS_HOST=${{ vars.REDIS_HOST }}" >> .env
+          echo "REDIS_PORT=${{ vars.REDIS_PORT }}" >> .env
+          echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
+          echo "MINIO_ENDPOINT=${{ vars.MINIO_ENDPOINT }}" >> .env
+          echo "MINIO_ACCESS_KEY=${{ vars.MINIO_ACCESS_KEY }}" >> .env
+          echo "MINIO_SECRET_KEY=${{ secrets.MINIO_SECRET_KEY }}" >> .env
           echo "ENV=production" >> .env
 
       - name: Run new container
