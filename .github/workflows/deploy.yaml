@@ -52,6 +52,7 @@ jobs:
       - name: Run new container
         run: |
           docker run -d \
+            --restart=unless-stopped \
             --name fastapi-app \
             --env-file .env \
             -p 8000:80 \
@@ -103,6 +104,7 @@ jobs:
       - name: Run new container
         run: |
           docker run -d \
+            --restart=unless-stopped \
             --name fastapi-app \
             --env-file .env \
             -p 8000:80 \

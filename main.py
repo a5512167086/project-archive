@@ -13,7 +13,10 @@ from shared.exception import add_global_exception_handler
 from shared.models import *  # noqa: F403
 from shared.schemas.common_schema import ErrorResponse
 
-app = FastAPI(responses={status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse}})
+app = FastAPI(
+    responses={status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse}},
+    root_path="/easybot-api",
+)
 
 
 app.add_middleware(
