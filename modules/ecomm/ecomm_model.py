@@ -28,7 +28,7 @@ class CategoryListView(SQLModel, table=True):
 
 # Product models
 class ProductDetail(SQLModel, table=True):
-    __tablename__ = "products_details"
+    __tablename__ = "product_details"
 
     product_id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
     brand_id: Optional[int] = None

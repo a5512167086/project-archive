@@ -8,6 +8,7 @@ from modules.ecomm.ecomm_router import brand_router, category_router, product_ro
 from modules.knowledge.knowledge_router import knowledge_router
 from modules.module.module_router import module_router
 from modules.reservation.reservation_router import reservation_router, service_router
+from modules.shared.image_router import image_router
 from modules.user.user_router import user_router
 from shared.exception import add_global_exception_handler
 from shared.models import *  # noqa: F403
@@ -52,6 +53,8 @@ app.include_router(service_router)
 app.include_router(brand_router)
 app.include_router(category_router)
 app.include_router(product_router)
+# Image proxy router
+app.include_router(image_router)
 
 
 @app.exception_handler(RequestValidationError)

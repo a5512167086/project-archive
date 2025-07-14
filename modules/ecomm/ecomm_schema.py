@@ -67,6 +67,19 @@ class ProductImageRequest(BaseModel):
     display_order: int = 0
 
 
+class InsertProductWithImagesRequest(BaseModel):
+    bot_uuid: UUID
+    product_name: str
+    product_description: str
+    category_id: Optional[int] = None
+    brand_id: Optional[int] = None
+    sku_code: str
+    price: int
+    stock: int = 0
+    is_active: bool = True
+    variants: List["ProductVariantRequest"] = []
+
+
 class ProductVariantRequest(BaseModel):
     variant_name: str
     sku_code: Optional[str] = None

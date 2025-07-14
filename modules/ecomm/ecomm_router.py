@@ -1,7 +1,7 @@
 from typing import Annotated, List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, File, Form, UploadFile
 
 from modules.ecomm.ecomm_schema import (
     BrandResponse,
@@ -24,6 +24,7 @@ from modules.ecomm.ecomm_service import (
     get_all_brands,
     get_all_categories,
     get_all_products,
+    insert_product_with_images,
     insert_single_brand,
     insert_single_category,
     insert_single_product,
@@ -176,6 +177,83 @@ def create_product(
 ):
     user_id = current_user["user_id"]
     insert_single_product(session, product, user_id)
+    session.commit()
+
+
+@product_router.post("/with-images")
+def create_product_with_images(
+    session: SessionDep,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    bot_uuid: UUID = Form(...),
+    product_name: str = Form(...),
+    product_description: str = Form(...),
+    sku_code: str = Form(...),
+    price: int = Form(...),
+    stock: str = Form("", description="庫存數量，留空則預設為0"),
+    is_active: bool = Form(True, description="是否啟用產品"),
+    category_id: str = Form("", description="分類ID，留空則使用根分類"),
+    brand_id: str = Form("", description="品牌ID，可選"),
+    images: List[UploadFile] = File([], description="產品圖片檔案"),
+):
+    """創建產品並上傳圖片到 MinIO"""
+    user_id = current_user["user_id"]
+
+    # 處理可選的整數參數
+    parsed_category_id = None
+    parsed_brand_id = None
+    parsed_stock = 0  # 預設庫存為 0
+
+    if category_id and category_id.strip():
+        try:
+            parsed_category_id = int(category_id)
+        except ValueError:
+            from shared.constants.error_code import ErrorCode
+            from shared.exception import GlobalErrorException
+
+            raise GlobalErrorException(
+                error_code=ErrorCode.INVALID_INPUT,
+                error_message="Invalid category_id format",
+            )
+
+    if brand_id and brand_id.strip():
+        try:
+            parsed_brand_id = int(brand_id)
+        except ValueError:
+            from shared.constants.error_code import ErrorCode
+            from shared.exception import GlobalErrorException
+
+            raise GlobalErrorException(
+                error_code=ErrorCode.INVALID_INPUT,
+                error_message="Invalid brand_id format",
+            )
+
+    if stock and stock.strip():
+        try:
+            parsed_stock = int(stock)
+        except ValueError:
+            from shared.constants.error_code import ErrorCode
+            from shared.exception import GlobalErrorException
+
+            raise GlobalErrorException(
+                error_code=ErrorCode.INVALID_INPUT,
+                error_message="Invalid stock format",
+            )
+
+    # 使用新的 service 函數來處理產品創建和圖片上傳
+    insert_product_with_images(
+        session=session,
+        bot_uuid=bot_uuid,
+        product_name=product_name,
+        product_description=product_description,
+        category_id=parsed_category_id,
+        brand_id=parsed_brand_id,
+        sku_code=sku_code,
+        price=price,
+        stock=parsed_stock,
+        is_active=is_active,
+        images=images,
+        user_id=user_id,
+    )
     session.commit()
 
 

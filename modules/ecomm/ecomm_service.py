@@ -1,6 +1,7 @@
 from typing import List
 from uuid import UUID
 
+from fastapi import UploadFile
 from sqlmodel import Session
 
 from modules.bot.bot_service import validate_bot_ownership, validate_line_bot_exists
@@ -280,7 +281,7 @@ def insert_single_product(session: Session, body: InsertProductRequest, user_id:
     bot = validate_line_bot_exists(session, body.bot_uuid)
     validate_bot_ownership(session, user_id, bot.bot_detail_id)
 
-    # 如果沒有提供 category_id，使用主 Category class
+    # 如果沒有提供 category_id，使用根 Category class
     if body.category_id is None:
         product_class_id = validate_category_class(session, bot.class_id)
     else:
@@ -307,6 +308,65 @@ def insert_single_product(session: Session, body: InsertProductRequest, user_id:
         is_active=body.is_active,
         images=[img.dict() for img in body.images],
         variants=[variant.dict() for variant in body.variants],
+        owner_id=user_id,
+    )
+
+
+def insert_product_with_images(
+    session: Session,
+    bot_uuid: UUID,
+    product_name: str,
+    product_description: str,
+    sku_code: str,
+    price: int,
+    stock: int,
+    is_active: bool,
+    images: List[UploadFile],
+    user_id: str,
+    category_id: int = None,
+    brand_id: int = None,
+):
+    """建立單一產品並上傳圖片到 MinIO"""
+    bot = validate_line_bot_exists(session, bot_uuid)
+    validate_bot_ownership(session, user_id, bot.bot_detail_id)
+
+    # 如果沒有提供 category_id，使用根 Category class
+    if category_id is None:
+        product_class_id = validate_category_class(session, bot.class_id)
+    else:
+        # 如果提供了 category_id，使用指定的類別
+        product_class_id = category_id
+
+    # 檢查 SKU 是否已存在
+    if check_product_sku_exists(session, sku_code):
+        raise GlobalErrorException(
+            error_code=ErrorCode.PRODUCT_SKU_ALREADY_EXISTS,
+            error_message=f"SKU '{sku_code}' already exists",
+        )
+
+    # 在確定要創建產品時，才上傳圖片到 MinIO
+    uploaded_images = []
+    if images and len(images) > 0:
+        # 檢查是否有實際的圖片檔案（不是空檔案）
+        valid_images = [img for img in images if img.filename and img.size > 0]
+        if valid_images:
+            from shared.services.minio_service import upload_product_images
+
+            uploaded_images = upload_product_images(valid_images)
+
+    # 建立產品
+    insert_product(
+        session=session,
+        product_class_id=product_class_id,
+        product_name=product_name,
+        product_description=product_description,
+        brand_id=brand_id,
+        sku_code=sku_code,
+        price=price,
+        stock=stock,
+        is_active=is_active,
+        images=uploaded_images,
+        variants=[],  # 暫時不處理 variants
         owner_id=user_id,
     )
 
