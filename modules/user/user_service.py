@@ -1,24 +1,24 @@
 import logging
 from datetime import timedelta
 
+import jwt
+from jwt.exceptions import (
+    DecodeError,
+    ExpiredSignatureError,
+    InvalidTokenError,
+)
 from sqlmodel import Session
 
-from modules.bot.bot_service import validate_line_bot_exists
+from modules.bot.bot_service import BotService
 from modules.user.auth_service import create_jwt_token, generate_token_pair
-from modules.user.user_command import create_oauth, create_user, update_user_password
-from modules.user.user_query import (
-    get_oauth_by_oauth_user_id,
-    get_oauth_by_user_id,
-    get_user_by_email,
-    get_user_by_id,
-)
+from modules.user.user_command import UserCommand
+from modules.user.user_query import UserQuery
 from modules.user.user_schema import (
     CustomerLoginRequest,
     ForgotPasswordRequest,
     LoginRequest,
     OAuthBindRequest,
     OAuthLoginRequest,
-    RegisterRequest,
 )
 from shared.commands.group_command import insert_group_member
 from shared.constants.config import ACCESS_TOKEN_EXPIRE_SECONDS, JWT_RESET_SECRET
@@ -41,238 +41,245 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def create_new_user(session: Session, username: str, email: str, password: str) -> str:
-    existed_user = get_user_by_email(session, email)
-    if existed_user:
-        raise GlobalErrorException(
-            error_code=ErrorCode.USER_ALREADY_EXISTS,
-            error_message="The provided email is already registered.",
+class UserService:
+    def __init__(self, session: Session):
+        self.session = session
+        self.command = UserCommand(session)
+        self.query = UserQuery(session)
+        self.bot_service = BotService(session)
+
+    def create_new_user(self, username: str, email: str, password: str) -> str:
+        existing_user = self.query.get_user_by_email(email)
+        if existing_user:
+            raise GlobalErrorException(
+                error_code=ErrorCode.USER_ALREADY_EXISTS,
+                error_message="User with this email already exists",
+            )
+
+        hashed_password = hash_password(password)
+        new_user = self.command.create_user(username, email, hashed_password)
+        return new_user.user_id
+
+    def get_user_profile(self, user_id: str):
+        user = self.query.get_user_by_id(user_id)
+        if not user:
+            raise GlobalErrorException(
+                error_code=ErrorCode.USER_NOT_EXISTS,
+                error_message="User not found",
+            )
+        return {
+            "user_id": user.user_id,
+            "username": user.username,
+            "email": user.email,
+        }
+
+    def get_user_info_by_oauth_code(self, provider: str, code: str) -> dict:
+        if provider == "google":
+            return authenticate_with_google(code)
+        elif provider == "line":
+            return authenticate_with_line(code)
+        else:
+            raise GlobalErrorException(
+                error_code=ErrorCode.OAUTH_PROVIDER_NOT_SUPPORTED,
+                error_message=f"Unsupported OAuth provider: {provider}",
+            )
+
+    def login(self, user: LoginRequest):
+        db_user = self.query.get_user_by_email(user.email)
+        if not db_user or not verify_password(user.password, db_user.password):
+            raise GlobalErrorException(
+                error_code=ErrorCode.PASSWORD_NOT_MATCH,
+                error_message="Invalid email or password",
+            )
+
+        return generate_token_pair(db_user.user_id, db_user.email, user.remember)
+
+    def handle_new_oauth_user(self, oauth_user_info, provider):
+        random_password = generate_random_password()
+        hashed_password = hash_password(random_password)
+
+        new_user = self.command.create_user(
+            oauth_user_info["name"], oauth_user_info["email"], hashed_password
         )
 
-    register_data = RegisterRequest(
-        username=username, email=email, password=hash_password(password)
-    )
+        self.command.create_oauth(new_user.user_id, provider, oauth_user_info["id"])
 
-    new_user = create_user(session, register_data)
-    if not new_user:
-        raise GlobalErrorException(
-            error_code=ErrorCode.USER_CREATION_FAILED,
-            error_message="An error occurred while creating the user.",
+        token = generate_token_pair(new_user.user_id, new_user.email)
+
+        return token
+
+    def handle_existed_oauth_user(self, provider: str, oauth_user_id: str):
+        oauth_record = self.query.get_oauth_by_oauth_user_id(provider, oauth_user_id)
+        if oauth_record:
+            user = self.query.get_user_by_id(oauth_record.user_id)
+            return generate_token_pair(user.user_id, user.email)
+        return "USER_ALREADY_EXISTS"
+
+    def oauth_login(self, oauth: OAuthLoginRequest):
+        oauth_user_info = self.get_user_info_by_oauth_code(oauth.provider, oauth.code)
+
+        existing_user = self.query.get_user_by_email(oauth_user_info["email"])
+        if not existing_user:
+            return self.handle_new_oauth_user(oauth_user_info, oauth.provider)
+
+        token_or_status = self.handle_existed_oauth_user(
+            oauth.provider, oauth_user_info["id"]
+        )
+        if token_or_status == "USER_ALREADY_EXISTS":
+            raise GlobalErrorException(
+                ErrorCode.USER_ALREADY_EXISTS,
+                "User already exists, please login and bind.",
+            )
+
+        return token_or_status
+
+    def oauth_bind(self, user_id: str, oauth: OAuthBindRequest):
+        oauth_user_info = self.get_user_info_by_oauth_code(oauth.provider, oauth.code)
+
+        existing_oauth = self.query.get_oauth_by_oauth_user_id(
+            oauth.provider, oauth_user_info["id"]
+        )
+        if existing_oauth:
+            raise GlobalErrorException(
+                ErrorCode.OAUTH_ALREADY_EXISTS,
+                "This OAuth account is already bound to another user",
+            )
+
+        self.command.create_oauth(user_id, oauth.provider, oauth_user_info["id"])
+
+    def check_oauth_status(self, user_id: str):
+        oauth_accounts = self.query.get_oauth_by_user_id(user_id)
+
+        status = {}
+        for oauth in oauth_accounts:
+            status[oauth.oauth_provider] = True
+
+        return {
+            "google": status.get("google", False),
+            "line": status.get("line", False),
+        }
+
+    def forgot_password(self, forgot_request: ForgotPasswordRequest):
+        user = self.query.get_user_by_email(forgot_request.email)
+        if not user:
+            raise GlobalErrorException(
+                error_code=ErrorCode.USER_NOT_EXISTS,
+                error_message="User not found with this email",
+            )
+
+        reset_token = create_jwt_token(
+            {"sub": str(user.user_id), "email": user.email},
+            JWT_RESET_SECRET,
+            timedelta(seconds=ACCESS_TOKEN_EXPIRE_SECONDS),
         )
 
-    return new_user.user_id
+        send_reset_email(user.email, reset_token)
 
+    def reset_password(self, user_id: str, new_password: str):
+        user = self.query.get_user_by_id(user_id)
+        if not user:
+            raise GlobalErrorException(
+                error_code=ErrorCode.USER_NOT_EXISTS,
+                error_message="User not found",
+            )
 
-def get_user_profile(session: Session, user_id: str):
-    user = get_user_by_id(session, user_id)
-    if not user:
-        raise GlobalErrorException(
-            error_code=ErrorCode.USER_NOT_EXISTS,
-            error_message="User not found.",
-        )
+        hashed_password = hash_password(new_password)
+        self.command.update_user_password(user_id, hashed_password)
 
-    return user
+    def reset_password_with_token(self, reset_token: str, new_password: str):
+        """Reset password using reset token from email"""
+        try:
+            # Decode the reset token
+            payload = jwt.decode(reset_token, JWT_RESET_SECRET, algorithms=["HS256"])
+            user_id = payload.get("sub")
 
+            if not user_id:
+                raise GlobalErrorException(
+                    error_code=ErrorCode.TOKEN_PAYLOAD_INVALID,
+                    error_message="Invalid reset token payload",
+                )
 
-def get_user_info_by_oauth_code(provider: str, code: str) -> dict:
-    if provider == "google":
-        return authenticate_with_google(code)
-    elif provider == "line":
-        return authenticate_with_line(code)
-    else:
-        raise GlobalErrorException(
-            ErrorCode.OAUTH_PROVIDER_NOT_SUPPORTED,
-            f"Provider {provider} is not supported.",
-        )
+            # Verify user exists
+            user = self.query.get_user_by_id(user_id)
+            if not user:
+                raise GlobalErrorException(
+                    error_code=ErrorCode.USER_NOT_EXISTS,
+                    error_message="User not found",
+                )
 
+            # Update password
+            hashed_password = hash_password(new_password)
+            self.command.update_user_password(user_id, hashed_password)
 
-def login(session: Session, user: LoginRequest):
-    login_user = get_user_by_email(session, user.email)
-    if not login_user:
-        raise GlobalErrorException(
-            error_code=ErrorCode.USER_NOT_EXISTS,
-            error_message="Can't find user by email.",
-        )
-    if not verify_password(user.password, login_user.password):
-        raise GlobalErrorException(
-            error_code=ErrorCode.PASSWORD_NOT_MATCH,
-            error_message="Password is incorrect.",
-        )
+        except ExpiredSignatureError:
+            raise GlobalErrorException(
+                error_code=ErrorCode.TOKEN_EXPIRED,
+                error_message="Reset token has expired",
+            )
+        except (DecodeError, InvalidTokenError):
+            raise GlobalErrorException(
+                error_code=ErrorCode.TOKEN_INVALID,
+                error_message="Invalid reset token",
+            )
 
-    return generate_token_pair(login_user.user_id, login_user.email, user.remember)
+    def customer_login(self, customer: CustomerLoginRequest):
+        bot = self.bot_service.validate_line_bot_exists(customer.bot_id)
+        group = validate_group_exist_in_bot(self.session, bot.class_id, "Users")
 
+        user_info = get_line_oauth_info(customer.line_id_token, bot.login_channel_id)
 
-def handle_new_oauth_user(session, oauth_user_info, provider):
-    random_password = generate_random_password()
-    new_user_id = create_new_user(
-        session, oauth_user_info["name"], oauth_user_info["email"], random_password
-    )
-    create_oauth(session, new_user_id, provider, oauth_user_info["id"])
-    token = generate_token_pair(new_user_id, oauth_user_info["email"], is_remember=True)
+        user = self.query.get_user_by_email(user_info["email"])
+        if not user:
+            # For new users, we need to create them and add to the bot's Users group
+            random_password = generate_random_password()
+            hashed_password = hash_password(random_password)
 
-    return {
-        "user_id": new_user_id,
-        "token": token,
-    }
+            new_user = self.command.create_user(
+                user_info["name"], user_info["email"], hashed_password
+            )
 
+            self.command.create_oauth(new_user.user_id, "line", user_info["id"])
 
-def handle_existed_oauth_user(session, provider: str, oauth_user_id: str):
-    oauth_data = get_oauth_by_oauth_user_id(session, provider, oauth_user_id)
-    if not oauth_data:
-        raise GlobalErrorException(
-            ErrorCode.USER_ALREADY_EXISTS, "OAuth data not found for the user."
-        )
-    user_data = get_user_by_id(session, oauth_data.user_id)
-    if not user_data:
-        raise GlobalErrorException(
-            ErrorCode.USER_NOT_EXISTS, "User not found for the given OAuth data."
-        )
+            # Add to the bot's Users group
+            insert_group_member(
+                self.session, group.group_id, new_user.user_id, 2, None, True
+            )
 
-    return generate_token_pair(oauth_data.user_id, user_data.email, is_remember=True)
+            # Generate and return token
+            token = generate_token_pair(new_user.user_id, new_user.email)
+            return token
 
+        oauth_user_info = self.handle_existed_oauth_user("line", user_info["id"])
+        if oauth_user_info == "USER_ALREADY_EXISTS":
+            raise GlobalErrorException(
+                ErrorCode.USER_ALREADY_EXISTS,
+                "User already exists, please login and bind.",
+            )
 
-def oauth_login(session: Session, oauth: OAuthLoginRequest):
-    if oauth.provider == "google":
-        user_info = authenticate_with_google(oauth.code)
-    elif oauth.provider == "line":
-        user_info = authenticate_with_line(oauth.code)
-    else:
-        raise GlobalErrorException(
-            ErrorCode.OAUTH_PROVIDER_NOT_SUPPORTED,
-            f"Provider {oauth.provider} is not supported.",
-        )
+        insert_group_member(self.session, group.group_id, user.user_id, 2, None, True)
+        return oauth_user_info
 
-    user = get_user_by_email(session, user_info["email"])
-    if not user:
-        new_user = handle_new_oauth_user(session, user_info, oauth.provider)
-        return new_user["token"]
+    def change_password(self, email: str, old_password: str, new_password: str):
+        """Change user password by verifying old password"""
+        user = self.query.get_user_by_email(email)
+        if not user:
+            raise GlobalErrorException(
+                error_code=ErrorCode.USER_NOT_EXISTS,
+                error_message="User not found",
+            )
 
-    oauth_user_info = handle_existed_oauth_user(
-        session, oauth.provider, user_info["id"]
-    )
-    if oauth_user_info == "USER_ALREADY_EXISTS":
-        raise GlobalErrorException(
-            ErrorCode.USER_ALREADY_EXISTS, "User already exists, please login."
-        )
-    return oauth_user_info
+        # Verify old password
+        if not verify_password(old_password, user.password):
+            raise GlobalErrorException(
+                error_code=ErrorCode.PASSWORD_NOT_MATCH,
+                error_message="Current password is incorrect",
+            )
 
-
-def oauth_bind(session: Session, user_id: str, oauth: OAuthBindRequest):
-    user = get_user_by_id(session, user_id)
-    if not user:
-        raise GlobalErrorException(
-            ErrorCode.USER_NOT_EXISTS, "User not found in database."
-        )
-
-    oauth_status = check_oauth_status(session, user_id)
-
-    if oauth_status["google"] is True and oauth.provider == "google":
-        raise GlobalErrorException(
-            ErrorCode.USER_ALREADY_BINDED, "User already binded with Google OAuth."
-        )
-    if oauth_status["line"] is True and oauth.provider == "line":
-        raise GlobalErrorException(
-            ErrorCode.USER_ALREADY_BINDED, "User already binded with Line OAuth."
-        )
-
-    if oauth.provider == "google":
-        user_info = authenticate_with_google(oauth.code)
-    elif oauth.provider == "line":
-        user_info = authenticate_with_line(oauth.code)
-    else:
-        raise GlobalErrorException(
-            ErrorCode.OAUTH_PROVIDER_NOT_SUPPORTED,
-            f"Provider {oauth.provider} is not supported.",
-        )
-
-    if not user_info:
-        raise GlobalErrorException(
-            ErrorCode.USER_LOOKUP_FAILED, "Failed to retrieve user information."
-        )
-
-    user_oauths = get_oauth_by_oauth_user_id(session, oauth.provider, user_info["id"])
-    if user_oauths:
-        raise GlobalErrorException(
-            ErrorCode.OAUTH_ALREADY_EXISTS, "OAuth already bound to the user."
-        )
-
-    create_oauth(session, user_id, oauth.provider, user_info["id"])
-
-
-def check_oauth_status(session: Session, user_id: str):
-    oauth_data = get_oauth_by_user_id(session, user_id)
-    oauth_status = {"google": False, "line": False}
-    for oauth in oauth_data:
-        provider = oauth.oauth_provider
-        if provider in oauth_status:
-            oauth_status[provider] = True
-    return oauth_status
-
-
-def forgot_password(session: Session, user_email: ForgotPasswordRequest):
-    forgot_user_data = get_user_by_email(session, user_email)
-    if not forgot_user_data:
-        raise GlobalErrorException(
-            error_code=ErrorCode.USER_NOT_EXISTS,
-            error_message="Can't find user by email.",
-        )
-
-    token = create_jwt_token(
-        {
-            "sub": str(forgot_user_data.user_id),
-            "email": forgot_user_data.email,
-            "is_remember": False,
-        },
-        JWT_RESET_SECRET,
-        timedelta(seconds=ACCESS_TOKEN_EXPIRE_SECONDS),
-    )
-    send_reset_email(user_email, token)
-
-
-def reset_password(session: Session, user_id: str, new_password: str):
-    update_user_data = get_user_by_id(session, user_id)
-    if not update_user_data:
-        raise GlobalErrorException(
-            error_code=ErrorCode.USER_NOT_EXISTS,
-            error_message="Can't find user by ID.",
-        )
-
-    update_user_password(session, user_id, hash_password(new_password))
-
-
-def change_password(session, user_email: str, old_password: str, new_password: str):
-    user_data = get_user_by_email(session, user_email)
-
-    if user_data == "USER_NOT_EXISTS":
-        raise GlobalErrorException(
-            error_code=ErrorCode.USER_NOT_EXISTS,
-            error_message="Can't find user by email.",
-        )
-    if not verify_password(old_password, user_data.password):
-        raise GlobalErrorException(
-            error_code=ErrorCode.PASSWORD_NOT_MATCH,
-            error_message="Password is incorrect.",
-        )
-
-    update_user_password(session, user_data.user_id, hash_password(new_password))
+        # Hash and update new password
+        hashed_password = hash_password(new_password)
+        self.command.update_user_password(user.user_id, hashed_password)
 
 
 def customer_login(session: Session, customer: CustomerLoginRequest):
-    bot = validate_line_bot_exists(session, customer.bot_id)
-    group = validate_group_exist_in_bot(session, bot.class_id, "Users")
-
-    user_info = get_line_oauth_info(customer.line_id_token, bot.login_channel_id)
-
-    user = get_user_by_email(session, user_info["email"])
-    if not user:
-        new_user = handle_new_oauth_user(session, user_info, "line")
-        insert_group_member(session, group.group_id, new_user["user_id"], 2, None, True)
-        return new_user["token"]
-    oauth_user_info = handle_existed_oauth_user(session, "line", user_info["id"])
-    if oauth_user_info == "USER_ALREADY_EXISTS":
-        raise GlobalErrorException(
-            ErrorCode.USER_ALREADY_EXISTS, "User already exists, please login and bind."
-        )
-    insert_group_member(session, group.group_id, user.user_id, 2, None, True)
-
-    return oauth_user_info
+    service = UserService(session)
+    return service.customer_login(customer)

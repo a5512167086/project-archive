@@ -2,36 +2,11 @@ from datetime import datetime, timedelta
 from typing import List
 from uuid import UUID
 
-from sqlmodel import Session, select
+from sqlmodel import Session
 
-from modules.bot.bot_service import validate_bot_ownership, validate_line_bot_exists
-from modules.reservation.reservation_command import (
-    delete_reservation_by_id,
-    delete_reservation_items,
-    insert_reservation,
-    insert_reservation_item,
-    update_reservation,
-    update_reservation_item,
-)
-from modules.reservation.reservation_model import ServiceDetail
-from modules.reservation.reservation_query import (
-    get_available_schedules_for_service,
-    get_bot_reservations,
-    get_concurrent_reservations_count,
-    get_object_id_by_service_id,
-    get_object_ids_by_service_ids,
-    get_reservation_by_id,
-    get_reservation_class_id_by_bot_class_id,
-    get_reservation_selected_options,
-    get_reservations_count_batch,
-    get_service_by_id,
-    get_service_class_id_by_bot_class_id,
-    get_service_details_by_uuid,
-    get_service_options_by_ids,
-    get_service_schedule_by_date,
-    get_services,
-    get_user_reservations_in_bot,
-)
+from modules.bot.bot_service import BotService
+from modules.reservation.reservation_command import ReservationCommand
+from modules.reservation.reservation_query import ReservationQuery
 from modules.reservation.reservation_schema import (
     DailyAvailableSlots,
     ReservationCreate,
@@ -49,563 +24,518 @@ from shared.constants.config import TAIWAN_TZ
 from shared.constants.error_code import ErrorCode
 from shared.exception import GlobalErrorException
 from shared.queries.group_query import is_user_in_group
-from shared.services.group_service import validate_group_exist_in_bot
+from shared.services.group_service import GroupService
 
 
-def validate_service_class(session: Session, bot_class_id: int) -> int:
-    service_class_id = get_service_class_id_by_bot_class_id(session, bot_class_id)
-    if not service_class_id:
-        raise GlobalErrorException(
-            error_code=ErrorCode.SERVICE_CLASS_NOT_FOUND,
-            error_message="Service class not found for the given bot class",
-        )
-    return service_class_id
+class ReservationService:
+    def __init__(self, session: Session):
+        self.session = session
+        self.command = ReservationCommand(session)
+        self.query = ReservationQuery(session)
+        self.bot_service = BotService(session)
+        self.group_service = GroupService(session)
 
-
-def validate_reservation_class(session: Session, bot_class_id: int) -> int:
-    reservation_class_id = get_reservation_class_id_by_bot_class_id(
-        session, bot_class_id
-    )
-    if not reservation_class_id:
-        raise GlobalErrorException(
-            error_code=ErrorCode.RESERVATION_CLASS_NOT_FOUND,
-            error_message="Reservation class not found for the given bot class",
-        )
-    return reservation_class_id
-
-
-def get_services_by_bot_class_id(session: Session, bot_uuid: UUID):
-    bot = validate_line_bot_exists(session, bot_uuid)
-    service_class_id = validate_service_class(session, bot.class_id)
-
-    return get_services(session, service_class_id)
-
-
-def insert_new_service(
-    session: Session, new_service: ServiceCreate, current_user_id: UUID
-):
-    bot = validate_line_bot_exists(session, new_service.bot_uuid)
-    validate_bot_ownership(session, current_user_id, bot.bot_detail_id)
-
-    service_class_id = validate_service_class(session, bot.class_id)
-    insert_reservation_item(
-        session=session,
-        reservation_item_class_id=service_class_id,
-        reservation_item_name=new_service.service_name,
-        reservation_item_description=new_service.service_description,
-        reservation_duration_minutes=new_service.duration_minutes,
-        reservation_price=new_service.price,
-        option_group_list=new_service.option_groups,
-        schedule_list=new_service.default_schedules,
-    )
-
-
-def delete_service_by_service_id(
-    session: Session,
-    bot_uuid: UUID,
-    service_id_list: List[UUID],
-    current_user_id: UUID,
-):
-    bot = validate_line_bot_exists(session, bot_uuid)
-    validate_bot_ownership(session, current_user_id, bot.bot_detail_id)
-
-    reservation_item_class_id = validate_service_class(session, bot.class_id)
-
-    # Convert service_ids to object_ids
-
-    object_id_list = get_object_ids_by_service_ids(session, service_id_list)
-
-    delete_reservation_items(session, reservation_item_class_id, object_id_list)
-
-
-def update_service_by_service_id(
-    session: Session,
-    service_patch: ServicePatch,
-    current_user_id: UUID,
-):
-    bot = validate_line_bot_exists(session, service_patch.bot_uuid)
-    validate_bot_ownership(session, current_user_id, bot.bot_detail_id)
-    validate_service_class(session, bot.class_id)
-
-    # Convert service_id to object_id
-
-    object_id = get_object_id_by_service_id(session, service_patch.service_id)
-
-    if not object_id:
-        raise GlobalErrorException(
-            error_code=ErrorCode.SERVICE_NOT_FOUND,
-            error_message="Service not found",
-        )
-
-    object_patch = TempServicePatch(
-        bot_uuid=service_patch.bot_uuid,
-        object_id=object_id,
-        detail=service_patch.detail,
-        option_groups=service_patch.option_groups,
-        schedules=service_patch.schedules,
-    )
-
-    update_reservation_item(session, object_patch)
-
-
-def create_user_reservation(
-    session: Session, user_id: UUID, reservation: ReservationCreate
-):
-    bot = validate_line_bot_exists(session, reservation.bot_uuid)
-    bot_group = validate_group_exist_in_bot(session, bot.class_id, "Users")
-    if not is_user_in_group(session, bot_group.group_id, user_id):
-        raise GlobalErrorException(
-            error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
-            error_message="User is not a member of this bot's group.",
-        )
-    service_class_id = validate_service_class(session, bot.class_id)
-    service = get_service_by_id(session, service_class_id, reservation.service_id)
-    if not service:
-        raise GlobalErrorException(
-            error_code=ErrorCode.SERVICE_NOT_FOUND,
-            error_message="Service not found",
-        )
-    schedule = get_service_schedule_by_date(
-        session, service.object_id, reservation.reservation_date
-    )
-
-    if not schedule or not schedule.is_active:
-        raise GlobalErrorException(
-            error_code=ErrorCode.RESERVATION_SCHEDULE_NOT_FOUND,
-            error_message="Reservation schedule not found or not active for the given date",
-        )
-
-    # 檢查預約時間是否在排程時間範圍內（處理跨日情況）
-    if schedule.end_time < schedule.start_time:
-        # 跨日情況：例如 5:58 PM 到 12:03 AM
-        # 有效時間範圍是 start_time 到 23:59:59 或 00:00:00 到 end_time
-        valid_time = (
-            reservation.start_time >= schedule.start_time
-            or reservation.start_time <= schedule.end_time
-        )
-    else:
-        # 正常情況：同一天內的時間範圍
-        valid_time = schedule.start_time <= reservation.start_time <= schedule.end_time
-
-    if not valid_time:
-        raise GlobalErrorException(
-            error_code=ErrorCode.RESERVATION_TIME_INVALID,
-            error_message="Reservation time is outside of schedule",
-        )
-
-    concurrent_reservations = get_concurrent_reservations_count(
-        session,
-        schedule.service_schedule_id,
-        reservation.reservation_date,
-        reservation.start_time,
-    )
-    if concurrent_reservations >= schedule.capacity:
-        raise GlobalErrorException(
-            error_code=ErrorCode.RESERVATION_CAPACITY_EXCEEDED,
-            error_message="Reservation capacity exceeded",
-        )
-
-    total_price = service.price
-    if reservation.option_values:
-        option_ids = [opt.option_id for opt in reservation.option_values]
-        options = get_service_options_by_ids(session, option_ids)
-        if len(options) != len(option_ids):
+    def validate_service_class(self, bot_class_id: int) -> int:
+        service_class_id = self.query.get_service_class_id_by_bot_class_id(bot_class_id)
+        if not service_class_id:
             raise GlobalErrorException(
-                error_code=ErrorCode.RESERVATION_OPTION_INVALID,
-                error_message="Invalid option selected",
+                error_code=ErrorCode.SERVICE_CLASS_NOT_FOUND,
+                error_message="Service class not found for the given bot class",
             )
-        for option in options:
-            total_price += option.price
+        return service_class_id
 
-    end_time = (
-        datetime.combine(reservation.reservation_date, reservation.start_time)
-        + timedelta(minutes=service.duration_minutes)
-    ).time()
+    def validate_reservation_class(self, bot_class_id: int) -> int:
+        reservation_class_id = self.query.get_reservation_class_id_by_bot_class_id(
+            bot_class_id
+        )
+        if not reservation_class_id:
+            raise GlobalErrorException(
+                error_code=ErrorCode.RESERVATION_CLASS_NOT_FOUND,
+                error_message="Reservation class not found for the given bot class",
+            )
+        return reservation_class_id
 
-    reservation_class_id = validate_reservation_class(session, bot.class_id)
+    def get_services_by_bot_class_id(self, bot_uuid: UUID):
+        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
+        service_class_id = self.validate_service_class(bot.class_id)
+        return self.query.get_services(service_class_id)
 
-    # 根據付款方式決定付款狀態
-    payment_status = None
-    if reservation.payment_method:
-        if reservation.payment_method == PaymentMethod.cash:
-            # 現金付款不需要線上付款狀態追蹤，保持 None
-            payment_status = None
-        else:
-            # 其他付款方式（銀行轉帳等）預設為 unpaid，等待付款處理
-            payment_status = PaymentStatus.unpaid
+    def insert_new_service(self, new_service: ServiceCreate, current_user_id: UUID):
+        bot = self.bot_service.validate_line_bot_exists(new_service.bot_uuid)
+        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
 
-    reservation_detail = insert_reservation(
-        session,
-        reservation_class_id=reservation_class_id,
-        user_id=user_id,
-        service_id=reservation.service_id,
-        service_schedule_id=schedule.service_schedule_id,
-        reservation_date=reservation.reservation_date,
-        start_time=reservation.start_time,
-        end_time=end_time,
-        price=total_price,
-        payment_method=reservation.payment_method,
-        payment_status=payment_status,
-        option_values=reservation.option_values,
-        note=reservation.note,
-    )
-
-    return reservation_detail
-
-
-def get_available_times_for_service(
-    session: Session, service_id: UUID
-) -> List[DailyAvailableSlots]:
-    service_details = get_service_details_by_uuid(session, service_id)
-    if not service_details:
-        raise GlobalErrorException(
-            error_code=ErrorCode.SERVICE_NOT_FOUND,
-            error_message="Service not found",
+        service_class_id = self.validate_service_class(bot.class_id)
+        self.command.insert_reservation_item(
+            service_class_id=service_class_id,
+            service_name=new_service.service_name,
+            service_description=new_service.service_description,
+            service_duration_minutes=new_service.duration_minutes,
+            service_price=new_service.price,
+            option_group_list=new_service.option_groups,
+            schedule_list=new_service.default_schedules,
         )
 
-    time_slot_duration_minutes = service_details.duration_minutes
-
-    today = datetime.now(TAIWAN_TZ).date()
-    end_date = today + timedelta(days=30)
-
-    all_schedules = get_available_schedules_for_service(session, service_id)
-
-    if not all_schedules:
-        return []
-
-    schedule_ids = [schedule.service_schedule_id for schedule in all_schedules]
-    reservations_count_map = get_reservations_count_batch(
-        session, schedule_ids, today, end_date
-    )
-
-    daily_slots_map = {}
-
-    weekly_schedules = {}
-    specific_schedules = {}
-
-    for schedule in all_schedules:
-        if not schedule.is_active:
-            continue
-
-        if schedule.schedule_type == "weekly":
-            if schedule.weekday not in weekly_schedules:
-                weekly_schedules[schedule.weekday] = []
-            weekly_schedules[schedule.weekday].append(schedule)
-        elif schedule.schedule_type == "specific":
-            if schedule.schedule_date not in specific_schedules:
-                specific_schedules[schedule.schedule_date] = []
-            specific_schedules[schedule.schedule_date].append(schedule)
-
-    for single_date in (
-        today + timedelta(days=n) for n in range((end_date - today).days + 1)
+    def delete_service_by_service_id(
+        self, bot_uuid: UUID, service_id_list: List[UUID], current_user_id: UUID
     ):
-        weekday = (single_date.weekday() + 1) % 7
-        daily_time_slots = []
+        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
+        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
 
-        applicable_schedules = []
+        service_class_id = self.validate_service_class(bot.class_id)
+        # Get object_ids from service_ids first
+        object_id_list = []
+        for service_id in service_id_list:
+            object_id = self.query.get_object_id_by_service_id(service_id)
+            if object_id:
+                object_id_list.append(object_id)
 
-        # 優先使用 specific 排程，如果該日期有 specific 排程則不使用 weekly 排程
-        if single_date in specific_schedules:
-            applicable_schedules.extend(specific_schedules[single_date])
-        elif weekday in weekly_schedules:
-            applicable_schedules.extend(weekly_schedules[weekday])
+        self.command.delete_reservation_items(service_class_id, object_id_list)
 
-        for schedule in applicable_schedules:
-            current_time = datetime.combine(single_date, schedule.start_time)
-            end_time = datetime.combine(single_date, schedule.end_time)
+    def update_service_by_service_id(
+        self, service_patch: ServicePatch, current_user_id: UUID
+    ):
+        bot = self.bot_service.validate_line_bot_exists(service_patch.bot_uuid)
+        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
+        self.validate_service_class(bot.class_id)
 
-            # 處理跨日的情況：如果結束時間小於開始時間，表示跨越午夜
-            if schedule.end_time < schedule.start_time:
-                end_time = end_time + timedelta(days=1)
+        object_id = self.query.get_object_id_by_service_id(service_patch.service_id)
 
-            while current_time < end_time:
-                slot_end_time = current_time + timedelta(
-                    minutes=time_slot_duration_minutes
+        if not object_id:
+            raise GlobalErrorException(
+                error_code=ErrorCode.SERVICE_NOT_FOUND,
+                error_message="Service not found",
+            )
+
+        object_patch = TempServicePatch(
+            bot_uuid=service_patch.bot_uuid,
+            object_id=object_id,
+            detail=service_patch.detail,
+            option_groups=service_patch.option_groups,
+            schedules=service_patch.schedules,
+        )
+
+        self.command.update_reservation_item(object_patch)
+
+    def create_user_reservation(self, user_id: UUID, reservation: ReservationCreate):
+        bot = self.bot_service.validate_line_bot_exists(reservation.bot_uuid)
+        bot_group = self.group_service.validate_group_exist_in_bot(
+            bot.class_id, "Users"
+        )
+
+        if not is_user_in_group(self.session, bot_group.group_id, user_id):
+            raise GlobalErrorException(
+                error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
+                error_message="User is not a member of this bot's group.",
+            )
+
+        service_class_id = self.validate_service_class(bot.class_id)
+        service = self.query.get_service_by_id(service_class_id, reservation.service_id)
+
+        if not service:
+            raise GlobalErrorException(
+                error_code=ErrorCode.SERVICE_NOT_FOUND,
+                error_message="Service not found",
+            )
+
+        # Get schedule using query method - this needs to be implemented
+        schedules = self.query.get_service_schedules_by_object_id(
+            service.object_id, reservation.reservation_date
+        )
+
+        schedule = None
+        for sched in schedules:
+            if sched.is_active:
+                schedule = sched
+                break
+
+        if not schedule:
+            raise GlobalErrorException(
+                error_code=ErrorCode.RESERVATION_SCHEDULE_NOT_FOUND,
+                error_message="Reservation schedule not found or not active for the given date",
+            )
+
+        # Calculate end time
+        end_time = (
+            datetime.combine(reservation.reservation_date, reservation.start_time)
+            + timedelta(minutes=service.duration_minutes)
+        ).time()
+
+        # Check capacity - this needs to be implemented properly
+        concurrent_reservations = self.query.get_concurrent_reservations_count(
+            reservation.service_id,
+            reservation.reservation_date,
+            reservation.start_time,
+            end_time,
+        )
+
+        if concurrent_reservations >= schedule.capacity:
+            raise GlobalErrorException(
+                error_code=ErrorCode.RESERVATION_CAPACITY_EXCEEDED,
+                error_message="Reservation capacity exceeded",
+            )
+
+        total_price = service.price
+        if reservation.option_values:
+            option_ids = [opt.option_id for opt in reservation.option_values]
+            options = self.query.get_service_options_by_ids(option_ids)
+            if len(options) != len(option_ids):
+                raise GlobalErrorException(
+                    error_code=ErrorCode.RESERVATION_OPTION_INVALID,
+                    error_message="Invalid option selected",
                 )
-                if slot_end_time > end_time:
-                    slot_end_time = end_time
+            for option in options:
+                total_price += option.price
 
-                key = (
-                    schedule.service_schedule_id,
-                    single_date,
-                    current_time.time(),
+        reservation_class_id = self.validate_reservation_class(bot.class_id)
+
+        # Determine payment status based on payment method
+        payment_status = PaymentStatus.unpaid.value
+        if reservation.payment_method == PaymentMethod.cash.value:
+            payment_status = PaymentStatus.unpaid.value
+        elif reservation.payment_method == PaymentMethod.bank_transfer.value:
+            payment_status = PaymentStatus.unpaid.value
+
+        reservation_detail = self.command.insert_reservation(
+            reservation_class_id=reservation_class_id,
+            user_id=str(user_id),
+            service_id=service.service_id,
+            service_schedule_id=schedule.service_schedule_id,
+            reservation_date=reservation.reservation_date,
+            start_time=reservation.start_time,
+            end_time=end_time,
+            price=total_price,
+            payment_method=reservation.payment_method,
+            payment_status=payment_status,
+            option_values=reservation.option_values,
+            note=reservation.note,
+        )
+
+        return reservation_detail
+
+    def get_available_times_for_service(
+        self, service_id: UUID
+    ) -> List[DailyAvailableSlots]:
+        service_details = self.query.get_service_details_by_uuid(service_id)
+        if not service_details:
+            raise GlobalErrorException(
+                error_code=ErrorCode.SERVICE_NOT_FOUND,
+                error_message="Service not found",
+            )
+
+        time_slot_duration_minutes = service_details.duration_minutes
+
+        today = datetime.now(TAIWAN_TZ).date()
+        end_date = today + timedelta(days=30)
+
+        all_schedules = self.query.get_available_schedules_for_service(service_id)
+
+        if not all_schedules:
+            return []
+
+        # Get actual reservation counts for the date range
+        reservations_count_map = self.query.get_reservations_count_map_for_service(
+            service_id, today, end_date
+        )
+
+        daily_slots_map = {}
+
+        weekly_schedules = {}
+        specific_schedules = {}
+
+        for schedule in all_schedules:
+            if not schedule.is_active:
+                continue
+
+            if schedule.schedule_type == "weekly":
+                if schedule.weekday not in weekly_schedules:
+                    weekly_schedules[schedule.weekday] = []
+                weekly_schedules[schedule.weekday].append(schedule)
+            elif schedule.schedule_type == "specific":
+                if schedule.schedule_date not in specific_schedules:
+                    specific_schedules[schedule.schedule_date] = []
+                specific_schedules[schedule.schedule_date].append(schedule)
+
+        # Process each day
+        current_date = today
+        while current_date <= end_date:
+            daily_slots = []
+
+            # Check for specific schedules first
+            if current_date in specific_schedules:
+                schedules_for_day = specific_schedules[current_date]
+            else:
+                # Use weekly schedules
+                weekday = (current_date.weekday() + 1) % 7
+                schedules_for_day = weekly_schedules.get(weekday, [])
+
+            for schedule in schedules_for_day:
+                start_time = datetime.combine(current_date, schedule.start_time)
+                end_time = datetime.combine(current_date, schedule.end_time)
+
+                # Generate time slots
+                current_slot_time = start_time
+                while (
+                    current_slot_time + timedelta(minutes=time_slot_duration_minutes)
+                    <= end_time
+                ):
+                    slot_key = (
+                        current_date,
+                        current_slot_time.time(),
+                    )
+                    reserved_count = reservations_count_map.get(slot_key, 0)
+                    available_spots = schedule.capacity - reserved_count
+
+                    if available_spots > 0:
+                        time_slot = TimeSlot(
+                            start_time=current_slot_time.time(),
+                            end_time=(
+                                current_slot_time
+                                + timedelta(minutes=time_slot_duration_minutes)
+                            ).time(),
+                            available_capacity=available_spots,
+                        )
+                        daily_slots.append(time_slot)
+
+                    current_slot_time += timedelta(minutes=time_slot_duration_minutes)
+
+            if daily_slots:
+                daily_slots_map[current_date] = DailyAvailableSlots(
+                    date=current_date, times=daily_slots
                 )
-                existing_reservations = reservations_count_map.get(key, 0)
 
-                remaining = schedule.capacity - existing_reservations
+            current_date += timedelta(days=1)
 
-                if remaining > 0:
-                    daily_time_slots.append(
-                        TimeSlot(
-                            start_time=current_time.time(),
-                            end_time=slot_end_time.time(),
-                            available_capacity=remaining,
+        return list(daily_slots_map.values())
+
+    def delete_user_reservation(self, reservation_id: UUID):
+        """Delete a user's reservation"""
+        self.command.delete_reservation_by_id(reservation_id)
+
+    def get_bot_reservations_list(
+        self, bot_uuid: UUID, current_user_id: UUID
+    ) -> List[ReservationListResponse]:
+        """Get all reservations for a bot (bot owner only)"""
+        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
+        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
+        reservation_class_id = self.validate_reservation_class(bot.class_id)
+        reservations = self.query.get_bot_reservations(reservation_class_id)
+
+        if not reservations:
+            return []
+
+        # 獲取所有預約的選項
+        reservation_object_ids = [r.object_id for r in reservations]
+        options_map = self.query.get_service_option_groups_with_selected_options(
+            reservation_object_ids
+        )
+
+        # 構建回應
+        result = []
+        for reservation in reservations:
+            selected_option_groups = []
+            if reservation.object_id in options_map:
+                for group_data in options_map[reservation.object_id]:
+                    selected_options = []
+                    for option_data in group_data["selected_options"]:
+                        selected_options.append(
+                            ReservationSelectedOptionResponse(
+                                option_id=option_data["option_id"],
+                                option_name=option_data["option_name"],
+                            )
+                        )
+                    
+                    selected_option_groups.append(
+                        ReservationSelectedOptionGroupResponse(
+                            option_group_id=group_data["option_group_id"],
+                            group_name=group_data["group_name"],
+                            selected_options=selected_options,
                         )
                     )
 
-                current_time = slot_end_time
+            result.append(
+                ReservationListResponse(
+                    reservation_id=reservation.reservation_id,
+                    object_id=reservation.object_id,
+                    service_id=reservation.service_id,
+                    service_name=reservation.service_name,
+                    reservation_date=reservation.reservation_date,
+                    start_time=reservation.start_time,
+                    end_time=reservation.end_time,
+                    price=reservation.price,
+                    status=reservation.status,
+                    notes=reservation.notes,
+                    payment_method=reservation.payment_method,
+                    payment_status=reservation.payment_status,
+                    selected_option_groups=selected_option_groups,
+                    created_at=reservation.created_at,
+                    updated_at=reservation.updated_at,
+                )
+            )
 
-        if daily_time_slots:
-            daily_slots_map[single_date] = daily_time_slots
+        return result
 
-    result = []
-    for date_key in sorted(daily_slots_map.keys()):
-        result.append(
-            DailyAvailableSlots(date=date_key, times=daily_slots_map[date_key])
+    def get_user_reservations_in_bot_list(
+        self, bot_uuid: UUID, current_user_id: UUID
+    ) -> List[ReservationListResponse]:
+        """Get user's reservations in a specific bot"""
+        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
+        bot_group = self.group_service.validate_group_exist_in_bot(
+            bot.class_id, "Users"
+        )
+        reservation_class_id = self.validate_reservation_class(bot.class_id)
+        if not is_user_in_group(self.session, bot_group.group_id, current_user_id):
+            raise GlobalErrorException(
+                error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
+                error_message="User is not a member of this bot's group.",
+            )
+
+        # 獲取用戶在該 bot 下的預約
+        reservations = self.query.get_user_reservations_in_bot(
+            current_user_id, reservation_class_id
         )
 
-    return result
+        if not reservations:
+            return []
 
-
-def delete_user_reservation(session: Session, reservation_id: UUID):
-    """Delete a user's reservation"""
-    reservation = get_reservation_by_id(session, reservation_id)
-    if not reservation:
-        raise GlobalErrorException(
-            error_code=ErrorCode.RESERVATION_NOT_FOUND,
-            error_message="Reservation not found",
+        # 獲取所有預約的選項
+        reservation_object_ids = [r.object_id for r in reservations]
+        options_map = self.query.get_service_option_groups_with_selected_options(
+            reservation_object_ids
         )
 
-    delete_reservation_by_id(session, reservation_id)
-
-
-def get_bot_reservations_list(
-    session: Session, bot_uuid: UUID, current_user_id: UUID
-) -> List[ReservationListResponse]:
-    """Get all reservations for a bot (bot owner only)"""
-    bot = validate_line_bot_exists(session, bot_uuid)
-    # 檢查 bot 擁有者權限
-    validate_bot_ownership(session, current_user_id, bot.bot_detail_id)
-
-    # 獲取 reservation class_id
-    reservation_class_id = validate_reservation_class(session, bot.class_id)
-
-    # 獲取所有預約
-    reservations = get_bot_reservations(session, reservation_class_id)
-
-    if not reservations:
-        return []
-
-    # 獲取所有預約的選項
-    reservation_object_ids = [r.object_id for r in reservations]
-    options_map = get_reservation_selected_options(session, reservation_object_ids)
-
-    # 構建回應
-    result = []
-    for reservation in reservations:
-        selected_option_groups = []
-        if reservation.object_id in options_map:
-            # 按 group 組織 options
-            groups_dict = {}
-            for option_data in options_map[reservation.object_id]:
-                group_id = option_data["option_group_id"]
-                if group_id not in groups_dict:
-                    groups_dict[group_id] = {
-                        "option_group_id": group_id,
-                        "group_name": option_data["group_name"],
-                        "selected_options": [],
-                    }
-                groups_dict[group_id]["selected_options"].append(
-                    ReservationSelectedOptionResponse(
-                        option_id=option_data["option_id"],
-                        option_name=option_data["option_name"],
+        # 構建回應
+        result = []
+        for reservation in reservations:
+            selected_option_groups = []
+            if reservation.object_id in options_map:
+                for group_data in options_map[reservation.object_id]:
+                    selected_options = []
+                    for option_data in group_data["selected_options"]:
+                        selected_options.append(
+                            ReservationSelectedOptionResponse(
+                                option_id=option_data["option_id"],
+                                option_name=option_data["option_name"],
+                            )
+                        )
+                    
+                    selected_option_groups.append(
+                        ReservationSelectedOptionGroupResponse(
+                            option_group_id=group_data["option_group_id"],
+                            group_name=group_data["group_name"],
+                            selected_options=selected_options,
+                        )
                     )
+
+            result.append(
+                ReservationListResponse(
+                    reservation_id=reservation.reservation_id,
+                    object_id=reservation.object_id,
+                    service_id=reservation.service_id,
+                    service_name=reservation.service_name,
+                    reservation_date=reservation.reservation_date,
+                    start_time=reservation.start_time,
+                    end_time=reservation.end_time,
+                    price=reservation.price,
+                    status=reservation.status,
+                    notes=reservation.notes,
+                    payment_method=reservation.payment_method,
+                    payment_status=reservation.payment_status,
+                    selected_option_groups=selected_option_groups,
+                    created_at=reservation.created_at,
+                    updated_at=reservation.updated_at,
                 )
-
-            # 轉換為 response 格式
-            for group_data in groups_dict.values():
-                selected_option_groups.append(
-                    ReservationSelectedOptionGroupResponse(**group_data)
-                )
-
-        result.append(
-            ReservationListResponse(
-                reservation_id=reservation.reservation_id,
-                service_id=reservation.service_id,
-                price=reservation.price,
-                service_name=reservation.service_name,
-                notes=reservation.notes,
-                reservation_date=reservation.reservation_date,
-                start_time=reservation.start_time,
-                end_time=reservation.end_time,
-                status=reservation.status,
-                payment_method=reservation.payment_method,
-                payment_status=reservation.payment_status,
-                created_at=reservation.created_at,
-                updated_at=reservation.updated_at,
-                selected_option_groups=selected_option_groups,
-            )
-        )
-
-    return result
-
-
-def get_user_reservations_in_bot_list(
-    session: Session, bot_uuid: UUID, current_user_id: UUID
-) -> List[ReservationListResponse]:
-    """Get user's reservations in a specific bot"""
-    bot = validate_line_bot_exists(session, bot_uuid)
-    bot_group = validate_group_exist_in_bot(session, bot.class_id, "Users")
-    if not is_user_in_group(session, bot_group.group_id, current_user_id):
-        raise GlobalErrorException(
-            error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
-            error_message="User is not a member of this bot's group.",
-        )
-    # 獲取 reservation class_id
-    reservation_class_id = validate_reservation_class(session, bot.class_id)
-
-    # 獲取用戶在該 bot 下的預約
-    reservations = get_user_reservations_in_bot(
-        session, current_user_id, reservation_class_id
-    )
-
-    if not reservations:
-        return []
-
-    # 獲取所有預約的選項
-    reservation_object_ids = [r.object_id for r in reservations]
-    options_map = get_reservation_selected_options(session, reservation_object_ids)
-
-    # 構建回應
-    result = []
-    for reservation in reservations:
-        selected_option_groups = []
-        if reservation.object_id in options_map:
-            # 按 group 組織 options
-            groups_dict = {}
-            for option_data in options_map[reservation.object_id]:
-                group_id = option_data["option_group_id"]
-                if group_id not in groups_dict:
-                    groups_dict[group_id] = {
-                        "option_group_id": group_id,
-                        "group_name": option_data["group_name"],
-                        "selected_options": [],
-                    }
-                groups_dict[group_id]["selected_options"].append(
-                    ReservationSelectedOptionResponse(
-                        option_id=option_data["option_id"],
-                        option_name=option_data["option_name"],
-                    )
-                )
-
-            # 轉換為 response 格式
-            for group_data in groups_dict.values():
-                selected_option_groups.append(
-                    ReservationSelectedOptionGroupResponse(**group_data)
-                )
-
-        result.append(
-            ReservationListResponse(
-                reservation_id=reservation.reservation_id,
-                service_id=reservation.service_id,
-                price=reservation.price,
-                service_name=reservation.service_name,
-                notes=reservation.notes,
-                reservation_date=reservation.reservation_date,
-                start_time=reservation.start_time,
-                end_time=reservation.end_time,
-                status=reservation.status,
-                payment_method=reservation.payment_method,
-                payment_status=reservation.payment_status,
-                created_at=reservation.created_at,
-                updated_at=reservation.updated_at,
-                selected_option_groups=selected_option_groups,
-            )
-        )
-
-    return result
-
-
-def update_reservation_by_owner(
-    session: Session, user_id: UUID, reservation_patch: ReservationPatch
-):
-    """Update reservation (reservation owner or bot owner can update)"""
-    # 檢查 reservation 是否存在
-    reservation = get_reservation_by_id(session, reservation_patch.reservation_id)
-    if not reservation:
-        raise GlobalErrorException(
-            error_code=ErrorCode.RESERVATION_NOT_FOUND,
-            error_message="Reservation not found",
-        )
-
-    # 檢查是否為 bot 擁有者
-    bot = validate_line_bot_exists(session, reservation_patch.bot_uuid)
-    validate_bot_ownership(session, user_id, bot.bot_detail_id)
-
-    # 如果要更新時間相關欄位，需要重新檢查排程和容量
-    if reservation_patch.reservation_date or reservation_patch.start_time:
-        new_date = reservation_patch.reservation_date or reservation.reservation_date
-        new_start_time = reservation_patch.start_time or reservation.start_time
-
-        # 檢查排程是否存在且有效
-        service_item = session.exec(
-            select(ServiceDetail).where(
-                ServiceDetail.service_id == reservation.service_id
-            )
-        ).first()
-
-        if service_item:
-            schedule = get_service_schedule_by_date(
-                session, service_item.object_id, new_date
             )
 
-            if not schedule or not schedule.is_active:
-                raise GlobalErrorException(
-                    error_code=ErrorCode.RESERVATION_SCHEDULE_NOT_FOUND,
-                    error_message="Reservation schedule not found or not active for the given date",
-                )
+        return result
 
-            # 檢查時間是否在排程範圍內（處理跨日情況）
-            if schedule.end_time < schedule.start_time:
-                valid_time = (
-                    new_start_time >= schedule.start_time
-                    or new_start_time <= schedule.end_time
-                )
-            else:
-                valid_time = schedule.start_time <= new_start_time <= schedule.end_time
-
-            if not valid_time:
-                raise GlobalErrorException(
-                    error_code=ErrorCode.RESERVATION_TIME_INVALID,
-                    error_message="Reservation time is outside of schedule",
-                )
-
-            # 檢查容量（排除目前這筆預約）
-            concurrent_reservations = get_concurrent_reservations_count(
-                session,
-                schedule.service_schedule_id,
-                new_date,
-                new_start_time,
+    def update_reservation_by_owner(
+        self, user_id: UUID, reservation_patch: ReservationPatch
+    ):
+        """Update reservation (reservation owner or bot owner can update)"""
+        # 檢查 reservation 是否存在
+        reservation = self.query.get_reservation_by_id(reservation_patch.reservation_id)
+        if not reservation:
+            raise GlobalErrorException(
+                error_code=ErrorCode.RESERVATION_NOT_FOUND,
+                error_message="Reservation not found",
             )
-            # 如果是修改同一個時間，不需要檢查容量
-            if (
-                new_date != reservation.reservation_date
-                or new_start_time != reservation.start_time
-            ):
-                if concurrent_reservations >= schedule.capacity:
+
+        # 檢查是否為 bot 擁有者
+        bot = self.bot_service.validate_line_bot_exists(reservation_patch.bot_uuid)
+        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+
+        # 如果要更新時間相關欄位，需要重新檢查排程和容量
+        if reservation_patch.reservation_date or reservation_patch.start_time:
+            new_date = (
+                reservation_patch.reservation_date or reservation.reservation_date
+            )
+            new_start_time = reservation_patch.start_time or reservation.start_time
+
+            # 檢查排程是否存在且有效
+            service_item = self.query.get_service_details_by_uuid(
+                reservation.service_id
+            )
+
+            if service_item:
+                schedule = self.query.get_service_schedule_by_date(
+                    service_item.object_id, new_date
+                )
+
+                if not schedule or not schedule.is_active:
                     raise GlobalErrorException(
-                        error_code=ErrorCode.RESERVATION_CAPACITY_EXCEEDED,
-                        error_message="Reservation capacity exceeded",
+                        error_code=ErrorCode.RESERVATION_SCHEDULE_NOT_FOUND,
+                        error_message="Reservation schedule not found or not active for the given date",
                     )
 
-    # 如果修改付款方式，自動調整付款狀態
-    payment_status = reservation_patch.payment_status
-    if reservation_patch.payment_method:
-        if reservation_patch.payment_method == PaymentMethod.cash:
-            payment_status = None
-        elif payment_status is None:
-            payment_status = PaymentStatus.unpaid
+                # 檢查時間是否在排程範圍內（處理跨日情況）
+                if schedule.end_time < schedule.start_time:
+                    valid_time = (
+                        new_start_time >= schedule.start_time
+                        or new_start_time <= schedule.end_time
+                    )
+                else:
+                    valid_time = (
+                        schedule.start_time <= new_start_time <= schedule.end_time
+                    )
 
-    # 更新 reservation
-    updated_reservation = update_reservation(
-        session,
-        reservation_patch.reservation_id,
-        reservation_date=reservation_patch.reservation_date,
-        start_time=reservation_patch.start_time,
-        payment_method=reservation_patch.payment_method,
-        payment_status=payment_status,
-        status=reservation_patch.status,
-        note=reservation_patch.note,
-    )
+                if not valid_time:
+                    raise GlobalErrorException(
+                        error_code=ErrorCode.RESERVATION_TIME_INVALID,
+                        error_message="Reservation time is outside of schedule",
+                    )                # 檢查容量（排除目前這筆預約）
+                concurrent_reservations = self.query.get_concurrent_reservations_count_by_schedule(
+                    schedule.service_schedule_id,
+                    new_date,
+                    new_start_time,
+                )
+                # 如果是修改同一個時間，不需要檢查容量
+                if (
+                    new_date != reservation.reservation_date
+                    or new_start_time != reservation.start_time
+                ):
+                    if concurrent_reservations >= schedule.capacity:
+                        raise GlobalErrorException(
+                            error_code=ErrorCode.RESERVATION_CAPACITY_EXCEEDED,
+                            error_message="Reservation capacity exceeded",
+                        )
 
-    return updated_reservation
+        # 如果修改付款方式，自動調整付款狀態
+        payment_status = reservation_patch.payment_status
+        if reservation_patch.payment_method:
+            if reservation_patch.payment_method == PaymentMethod.cash.value:
+                payment_status = None
+            elif payment_status is None:
+                payment_status = PaymentStatus.unpaid.value
+
+        # 更新 reservation
+        updated_reservation = self.command.update_reservation(
+            reservation_patch.reservation_id,
+            reservation_date=reservation_patch.reservation_date,
+            start_time=reservation_patch.start_time,
+            payment_method=reservation_patch.payment_method,
+            payment_status=payment_status,
+            status=reservation_patch.status,
+            note=reservation_patch.note,
+        )
+
+        return updated_reservation

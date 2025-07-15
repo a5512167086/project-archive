@@ -10,28 +10,40 @@ from shared.constants.error_code import ErrorCode
 from shared.exception import GlobalErrorException
 
 
-def send_reset_email(email: str, token: str):
-    reset_link = f"{FRONTEND_URL}/reset-password?token={token}"
+class MailService:
+    def __init__(self):
+        self.email = EMAIL
+        self.password = EMAIL_APP_PASSWORD
+        self.frontend_url = FRONTEND_URL
 
-    file_path = os.path.join(
-        os.path.dirname(__file__), "..", "templates", "password-reset.html"
-    )
-    with open(file_path, "r", encoding="utf-8") as file:
-        template = Template(file.read())
-        email_content = template.render(action_url=reset_link)
+    def send_reset_email(self, email: str, token: str):
+        reset_link = f"{self.frontend_url}/reset-password?token={token}"
 
-    msg = MIMEMultipart("alternative")
-    msg["From"] = EMAIL
-    msg["To"] = email
-    msg["Subject"] = "Easybot - 重設您的使用者密碼"
-    msg.attach(MIMEText(email_content, "html"))
-
-    try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(EMAIL, EMAIL_APP_PASSWORD)
-            server.sendmail(EMAIL, email, msg.as_string())
-    except Exception:
-        raise GlobalErrorException(
-            error_code=ErrorCode.EMAIL_SERVICE_FAILED,
-            error_message="Can't send email.",
+        file_path = os.path.join(
+            os.path.dirname(__file__), "..", "..", "templates", "password-reset.html"
         )
+        with open(file_path, "r", encoding="utf-8") as file:
+            template = Template(file.read())
+            email_content = template.render(action_url=reset_link)
+
+        msg = MIMEMultipart("alternative")
+        msg["From"] = self.email
+        msg["To"] = email
+        msg["Subject"] = "Easybot - 重設您的使用者密碼"
+        msg.attach(MIMEText(email_content, "html"))
+
+        try:
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+                server.login(self.email, self.password)
+                server.sendmail(self.email, email, msg.as_string())
+        except Exception:
+            raise GlobalErrorException(
+                error_code=ErrorCode.EMAIL_SERVICE_FAILED,
+                error_message="Can't send email.",
+            )
+
+
+# 向後兼容的函數包裝器，供現有代碼調用
+def send_reset_email(email: str, token: str):
+    service = MailService()
+    return service.send_reset_email(email, token)

@@ -80,9 +80,9 @@ class ServiceListView(SQLModel, table=True):
     service_description: str
     duration_minutes: int
     price: int
-    service_is_active: bool
-    service_created_at: datetime
-    service_updated_at: datetime
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
 
 
 class ReservationListView(SQLModel, table=True):

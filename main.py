@@ -4,11 +4,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from modules.bot.bot_router import bot_router
-from modules.ecomm.ecomm_router import brand_router, category_router, product_router
+from modules.ecomm.ecomm_router import (
+    brand_router,
+    category_router,
+    product_image_router,
+    product_router,
+)
 from modules.knowledge.knowledge_router import knowledge_router
 from modules.module.module_router import module_router
 from modules.reservation.reservation_router import reservation_router, service_router
-from modules.shared.image_router import image_router
 from modules.user.user_router import user_router
 from shared.exception import add_global_exception_handler
 from shared.models import *  # noqa: F403
@@ -19,15 +23,13 @@ app = FastAPI(
     root_path="/easybot-api",
 )
 
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://localhost:5173",
         "http://localhost:5173",
-        "http://localhost:5174",
-        "https://localhost:5174",
-        "https://127.0.0.1:5174",
+        "https://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://127.0.0.1:5173",
         "https://platform-web-gnod.onrender.com",
         "https://liff-web.onrender.com",
     ],
@@ -53,8 +55,8 @@ app.include_router(service_router)
 app.include_router(brand_router)
 app.include_router(category_router)
 app.include_router(product_router)
-# Image proxy router
-app.include_router(image_router)
+# Product image proxy router
+app.include_router(product_image_router)
 
 
 @app.exception_handler(RequestValidationError)

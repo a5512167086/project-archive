@@ -36,6 +36,7 @@ jobs:
           echo "EMAIL=${{ vars.EMAIL }}" >> .env
           echo "EMAIL_APP_PASSWORD=${{ secrets.EMAIL_APP_PASSWORD }}" >> .env
           echo "FRONTEND_URL=${{ vars.FRONTEND_URL }}" >> .env
+          echo "BACKEND_URL=${{ vars.BACKEND_URL }}" >> .env
           echo "LINE_CLIENT_ID=${{ vars.LINE_CLIENT_ID }}" >> .env
           echo "LINE_CLIENT_SECRET=${{ secrets.LINE_CLIENT_SECRET }}" >> .env
           echo "GOOGLE_CLIENT_ID=${{ vars.GOOGLE_CLIENT_ID }}" >> .env
@@ -88,6 +89,7 @@ jobs:
           echo "EMAIL=${{ vars.EMAIL }}" >> .env
           echo "EMAIL_APP_PASSWORD=${{ secrets.EMAIL_APP_PASSWORD }}" >> .env
           echo "FRONTEND_URL=${{ vars.FRONTEND_URL }}" >> .env
+          echo "BACKEND_URL=${{ vars.BACKEND_URL }}" >> .env
           echo "LINE_CLIENT_ID=${{ vars.LINE_CLIENT_ID }}" >> .env
           echo "LINE_CLIENT_SECRET=${{ secrets.LINE_CLIENT_SECRET }}" >> .env
           echo "GOOGLE_CLIENT_ID=${{ vars.GOOGLE_CLIENT_ID }}" >> .env

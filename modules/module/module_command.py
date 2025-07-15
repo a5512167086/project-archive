@@ -8,52 +8,59 @@ from shared.models.object_model import Object
 from shared.queries.entity_query import get_entity_id_by_name
 
 
-def insert_module_setting(
-    session: Session, setting_class_id: int, module_name: str, is_enabled: bool
-):
-    setting_entity_id = get_entity_id_by_name(session, "設定")
+class ModuleCommand:
+    def __init__(self, session: Session):
+        self.session = session
 
-    module_obj = Object(
-        chinese_name=module_name, english_name=module_name, entity_id=setting_entity_id
-    )
-    session.add(module_obj)
-    session.flush()
+    def insert_module_setting(
+        self, setting_class_id: int, module_name: str, is_enabled: bool
+    ):
+        setting_entity_id = get_entity_id_by_name(self.session, "設定")
 
-    module_setting = ModuleSetting(
-        object_id=module_obj.object_id, is_enabled=is_enabled
-    )
-    session.add(module_setting)
-
-    relation = ClassObjectRelation(
-        class_id=setting_class_id, object_id=module_obj.object_id
-    )
-    session.add(relation)
-
-
-def update_module_setting(
-    session: Session,
-    setting_class_id: int,
-    module_name: str,
-    is_enabled: Optional[bool] = None,
-    version: Optional[str] = None,
-    description: Optional[str] = None,
-):
-    module_view = session.exec(
-        select(ModuleSettingView).where(
-            ModuleSettingView.class_id == setting_class_id,
-            ModuleSettingView.chinese_name == module_name,
+        module_obj = Object(
+            chinese_name=module_name,
+            english_name=module_name,
+            entity_id=setting_entity_id,
         )
-    ).first()
+        self.session.add(module_obj)
+        self.session.flush()
 
-    module_setting = session.exec(
-        select(ModuleSetting).where(ModuleSetting.object_id == module_view.object_id)
-    ).first()
+        module_setting = ModuleSetting(
+            object_id=module_obj.object_id, is_enabled=is_enabled
+        )
+        self.session.add(module_setting)
 
-    if is_enabled is not None:
-        module_setting.is_enabled = is_enabled
-    if version is not None:
-        module_setting.version = version
-    if description is not None:
-        module_setting.description = description
+        relation = ClassObjectRelation(
+            class_id=setting_class_id, object_id=module_obj.object_id
+        )
+        self.session.add(relation)
 
-    session.add(module_setting)
+    def update_module_setting(
+        self,
+        setting_class_id: int,
+        module_name: str,
+        is_enabled: Optional[bool] = None,
+        version: Optional[str] = None,
+        description: Optional[str] = None,
+    ):
+        module_view = self.session.exec(
+            select(ModuleSettingView).where(
+                ModuleSettingView.class_id == setting_class_id,
+                ModuleSettingView.chinese_name == module_name,
+            )
+        ).first()
+
+        module_setting = self.session.exec(
+            select(ModuleSetting).where(
+                ModuleSetting.object_id == module_view.object_id
+            )
+        ).first()
+
+        if is_enabled is not None:
+            module_setting.is_enabled = is_enabled
+        if version is not None:
+            module_setting.version = version
+        if description is not None:
+            module_setting.description = description
+
+        self.session.add(module_setting)
