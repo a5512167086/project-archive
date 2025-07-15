@@ -11,7 +11,7 @@ import { useRegisterUserMutation } from '@/store/apis/userApi'
 import { useAppDispatch } from '@/utils/hook'
 import { clearUserError } from '@/store/modules/userSlice'
 import { CustomLoader } from '@/components/CustomLoader'
-import { useApiErrorHandler } from '@/hooks/useApiErrorHandler'
+import { useApiHandler } from '@/hooks/useApiHandler'
 
 const signUpContent = {
   title: 'signPage.signUp',
@@ -29,7 +29,7 @@ const SignUpPage = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
-  const { handleError, showSuccess } = useApiErrorHandler()
+  const { handleError, showSuccess } = useApiHandler()
   const [registerUser] = useRegisterUserMutation()
   const [isLoading, setIsLoading] = useState(false)
   const [email, setEmail] = useState('')

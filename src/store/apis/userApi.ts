@@ -1,4 +1,40 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import type {
+  BaseQueryFn,
+  FetchArgs,
+  FetchBaseQueryError
+} from '@reduxjs/toolkit/query'
+
+// Custom base query that properly handles all HTTP errors including 500s
+const customBaseQuery: BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError
+> = async (args, api, extraOptions) => {
+  const baseQuery = fetchBaseQuery({
+    baseUrl: import.meta.env.VITE_BACKEND_URL,
+    prepareHeaders: (headers) => {
+      if (!headers.has('Authorization')) {
+        const access_token =
+          localStorage.getItem('access_token') ||
+          sessionStorage.getItem('access_token')
+        if (access_token) {
+          headers.set('Authorization', `Bearer ${access_token}`)
+        }
+      }
+      return headers
+    }
+  })
+
+  const result = await baseQuery(args, api, extraOptions)
+
+  // Ensure any HTTP error status (including 500+) is treated as an error
+  if (result.error) {
+    return result
+  }
+
+  return result
+}
 
 export enum OAuthProvider {
   Google = 'google',
@@ -60,20 +96,7 @@ export type OAuthStatusResponse = {
 
 export const userApi = createApi({
   reducerPath: 'userApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_BACKEND_URL,
-    prepareHeaders: (headers) => {
-      if (!headers.has('Authorization')) {
-        const access_token =
-          localStorage.getItem('access_token') ||
-          sessionStorage.getItem('access_token')
-        if (access_token) {
-          headers.set('Authorization', `Bearer ${access_token}`)
-        }
-      }
-      return headers
-    }
-  }),
+  baseQuery: customBaseQuery,
   endpoints: (builder) => ({
     loginUser: builder.mutation<LoginResponse, LoginRequest>({
       query: (credentials) => ({

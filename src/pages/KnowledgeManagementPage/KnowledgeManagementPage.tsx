@@ -16,7 +16,7 @@ import { PAGE_PATHS } from '@/routes'
 import { CustomDialog } from '@/components/CustomDialog'
 import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
 import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
-import { useApiErrorHandler } from '@/hooks/useApiErrorHandler'
+import { useApiHandler } from '@/hooks/useApiHandler'
 
 const knowledgeManagementPageContent = {
   title: 'knowledgeSettingPage.title',
@@ -77,7 +77,7 @@ const KnowledgeManagementPage = () => {
   const [currentDeleteKnowledgeItem, setCurrentDeleteKnowledgeItem] =
     useState<KnowledgeItem | null>(null)
   const { t } = useTranslation()
-  const { handleError, showSuccess } = useApiErrorHandler()
+  const { handleError, showSuccess } = useApiHandler()
   const { knowledgeItems } = useAppSelector((state) => state.knowledge)
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
   const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)

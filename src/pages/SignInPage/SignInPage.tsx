@@ -25,7 +25,7 @@ import { clearUserError, setAuthenticated } from '@/store/modules/userSlice'
 import { validateEmail } from '@/utils/helper'
 import { useNavigate } from 'react-router-dom'
 import { CustomLoader } from '@/components/CustomLoader'
-import { useApiErrorHandler } from '@/hooks/useApiErrorHandler'
+import { useApiHandler } from '@/hooks/useApiHandler'
 
 const signInContent = {
   title: 'signPage.signIn',
@@ -43,7 +43,7 @@ const SignInPage = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { wrapApiCall } = useApiErrorHandler()
+  const { handleError } = useApiHandler()
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [password, setPassword] = useState('')
@@ -70,31 +70,28 @@ const SignInPage = () => {
     setEmailError(false)
     setIsLoading(true)
 
-    const wrappedLoginUser = wrapApiCall(loginUser, {
-      onSuccess: (result) => {
-        const payload = result.data
-        if (payload) {
-          if (remember) {
-            localStorage.setItem('access_token', payload.access_token)
-            localStorage.setItem('refresh_token', payload.refresh_token)
-          } else {
-            sessionStorage.setItem('access_token', payload.access_token)
-            sessionStorage.setItem('refresh_token', payload.refresh_token)
-          }
-          getUser()
-            .then(() => {
-              dispatch(setAuthenticated(true))
-              navigate(PAGE_PATHS.BOT_LIST)
-            })
-            .catch(() => {
-              dispatch(setAuthenticated(false))
-            })
-        }
-      }
-    })
-
     try {
-      await wrappedLoginUser({ email, password, remember })
+      const result = await loginUser({ email, password, remember }).unwrap()
+      const payload = result
+      if (payload) {
+        if (remember) {
+          localStorage.setItem('access_token', payload.access_token)
+          localStorage.setItem('refresh_token', payload.refresh_token)
+        } else {
+          sessionStorage.setItem('access_token', payload.access_token)
+          sessionStorage.setItem('refresh_token', payload.refresh_token)
+        }
+        getUser()
+          .then(() => {
+            dispatch(setAuthenticated(true))
+            navigate(PAGE_PATHS.BOT_LIST)
+          })
+          .catch(() => {
+            dispatch(setAuthenticated(false))
+          })
+      }
+    } catch (error) {
+      handleError(error)
     } finally {
       setIsLoading(false)
     }

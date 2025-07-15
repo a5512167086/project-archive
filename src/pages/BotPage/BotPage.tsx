@@ -19,7 +19,7 @@ import { useAppDispatch, useAppSelector } from '@/utils/hook'
 import { clearCurrentBot, setCurrentBot } from '@/store/modules/botSlice'
 import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
 import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
-import { useApiErrorHandler } from '@/hooks/useApiErrorHandler'
+import { useApiHandler } from '@/hooks/useApiHandler'
 
 const dialogFields: FieldProps[] = [
   {
@@ -80,7 +80,7 @@ const BotPage = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
-  const { handleError, showSuccess } = useApiErrorHandler()
+  const { handleError, showSuccess } = useApiHandler()
   const { botList } = useAppSelector((state) => state.bot)
   const [getBots] = useLazyGetBotsQuery()
   const [isDialogOpen, setIsDialogOpen] = useState(false)

@@ -30,7 +30,7 @@ import { useHandleAuthRedirect } from '@/hooks/useHandleAuthRedirect'
 import { CustomAlert } from '../CustomAlert/CustomAlert'
 import { useParams } from 'react-router-dom'
 import { setCurrentBot } from '@/store/modules/botSlice'
-import { useApiErrorHandler } from '@/hooks/useApiErrorHandler'
+import { useApiHandler } from '@/hooks/useApiHandler'
 
 const sidebarWrapperContent = {
   logout: 'header.signOut',
@@ -41,7 +41,7 @@ export const SidebarWrapper = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { handleError } = useApiErrorHandler()
+  const { handleError } = useApiHandler()
   const { uuid } = useParams()
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
   const { isAuthenticated } = useAppSelector((state) => state.user)

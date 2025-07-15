@@ -32,7 +32,7 @@ import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
-import { useApiErrorHandler } from '@/hooks/useApiErrorHandler'
+import { useApiHandler } from '@/hooks/useApiHandler'
 import { ScheduleEditor } from './ScheduleEditor'
 import { OptionGroupEditor, OptionGroupData } from './OptionGroupEditor'
 import {
@@ -50,7 +50,7 @@ const TEXT = {
 
 const ServiceManagementPage = () => {
   const { t } = useTranslation()
-  const { handleError, showSuccess } = useApiErrorHandler()
+  const { handleError, showSuccess } = useApiHandler()
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
   const { services } = useAppSelector((state) => state.reservation)
 

@@ -3,14 +3,13 @@ import {
   handleApiError,
   showSuccessToast,
   showInfoToast,
-  showWarningToast,
-  withErrorHandling
+  showWarningToast
 } from '@/utils/errorHandler'
 
 /**
  * Custom hook for API error handling with toast notifications
  */
-export const useApiErrorHandler = () => {
+export const useApiHandler = () => {
   const { t } = useTranslation()
 
   const handleError = (error: unknown, customMessage?: string) => {
@@ -29,23 +28,10 @@ export const useApiErrorHandler = () => {
     showWarningToast(message, t)
   }
 
-  const wrapApiCall = <T extends unknown[], R>(
-    apiCall: (...args: T) => Promise<R>,
-    options?: {
-      customErrorMessage?: string
-      showSuccessMessage?: string
-      onError?: (error: unknown) => void
-      onSuccess?: (result: R) => void
-    }
-  ) => {
-    return withErrorHandling(apiCall, t, options)
-  }
-
   return {
     handleError,
     showSuccess,
     showInfo,
-    showWarning,
-    wrapApiCall
+    showWarning
   }
 }

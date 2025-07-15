@@ -32,7 +32,7 @@ import {
   useUpdateReservationMutation,
   UpdateReservationRequest
 } from '@/store/apis/reservationApi'
-import { useApiErrorHandler } from '@/hooks/useApiErrorHandler'
+import { useApiHandler } from '@/hooks/useApiHandler'
 
 const reservationManagementPageContent = {
   title: 'reservationManagementPage.title',
@@ -41,7 +41,7 @@ const reservationManagementPageContent = {
 
 const ReservationManagementPage = () => {
   const { t } = useTranslation()
-  const { handleError, showSuccess } = useApiErrorHandler()
+  const { handleError, showSuccess } = useApiHandler()
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
   const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
 

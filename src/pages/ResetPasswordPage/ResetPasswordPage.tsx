@@ -11,7 +11,7 @@ import { useResetPasswordMutation } from '@/store/apis/userApi'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { useAppDispatch } from '@/utils/hook'
 import { clearUserError } from '@/store/modules/userSlice'
-import { useApiErrorHandler } from '@/hooks/useApiErrorHandler'
+import { useApiHandler } from '@/hooks/useApiHandler'
 
 const resetPasswordContent = {
   title: 'signPage.resetPassword',
@@ -30,7 +30,7 @@ const ResetPasswordPage = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
-  const { wrapApiCall } = useApiErrorHandler()
+  const { handleError, showSuccess } = useApiHandler()
   const [resetPassword] = useResetPasswordMutation()
   const [searchParams] = useSearchParams()
   const [isInitLoading, setIsInitLoading] = useState(true)
@@ -84,28 +84,23 @@ const ResetPasswordPage = () => {
     }
     setIsLoading(true)
 
-    const wrappedResetPassword = wrapApiCall(resetPassword, {
-      showSuccessMessage: 'success.password_reset_success',
-      onSuccess: () => {
-        setIsSuccess(true)
-        if (!isEmpty(token)) {
-          searchParams.delete('token')
-          navigate(
-            {
-              pathname: location.pathname,
-              search: searchParams.toString()
-            },
-            { replace: true }
-          )
-        }
-      },
-      onError: () => {
-        navigate(PAGE_PATHS.BASE)
-      }
-    })
-
     try {
-      await wrappedResetPassword({ token: token!, new_password: password })
+      await resetPassword({ token: token!, new_password: password }).unwrap()
+      showSuccess('success.password_reset_success')
+      setIsSuccess(true)
+      if (!isEmpty(token)) {
+        searchParams.delete('token')
+        navigate(
+          {
+            pathname: location.pathname,
+            search: searchParams.toString()
+          },
+          { replace: true }
+        )
+      }
+    } catch (error) {
+      handleError(error)
+      navigate(PAGE_PATHS.BASE)
     } finally {
       setIsLoading(false)
     }

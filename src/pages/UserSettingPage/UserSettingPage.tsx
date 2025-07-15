@@ -14,7 +14,7 @@ import {
   useLazyGetOAuthStatusQuery
 } from '@/store/apis/userApi'
 import { useUser } from '@/hooks/useUser'
-import { useApiErrorHandler } from '@/hooks/useApiErrorHandler'
+import { useApiHandler } from '@/hooks/useApiHandler'
 
 const userSettingPageContent = {
   title: 'userSettingPage.title',
@@ -32,7 +32,7 @@ const userSettingPageContent = {
 
 const UserSettingPage = () => {
   const { t } = useTranslation()
-  const { handleError, showSuccess } = useApiErrorHandler()
+  const { handleError, showSuccess } = useApiHandler()
   const { logout } = useUser()
   const { email, oauthStatus } = useAppSelector((state) => state.user)
   const [changePassword] = useChangePasswordMutation()

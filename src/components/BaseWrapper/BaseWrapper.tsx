@@ -10,7 +10,7 @@ import { useUser } from '@/hooks/useUser'
 import { useHandleAuthRedirect } from '@/hooks/useHandleAuthRedirect'
 import { CustomAlert } from '../CustomAlert/CustomAlert'
 import { useAppDispatch, useAppSelector } from '@/utils/hook'
-import { useApiErrorHandler } from '@/hooks/useApiErrorHandler'
+import { useApiHandler } from '@/hooks/useApiHandler'
 import { clearBotError } from '@/store/modules/botSlice'
 import { clearUserError } from '@/store/modules/userSlice'
 import { clearModuleError } from '@/store/modules/moduleSlice'
@@ -22,7 +22,7 @@ const loaderText = 'common.loading'
 export const BaseWrapper = () => {
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
-  const { handleError } = useApiErrorHandler()
+  const { handleError } = useApiHandler()
   const { isAuthFailed, setIsAuthFailed } = useUser()
   const { errorCode: botErrorCode } = useAppSelector((state) => state.bot)
   const { isAuthenticated, errorCode: userErrorCode } = useAppSelector(
