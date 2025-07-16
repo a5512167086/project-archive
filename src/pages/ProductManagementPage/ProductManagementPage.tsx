@@ -50,12 +50,6 @@ function a11yProps(index: number) {
 }
 
 // 模擬數據
-const initialBrands: Brand[] = [
-  { id: '1', name: 'Apple', description: '蘋果公司' },
-  { id: '2', name: 'Samsung', description: '三星電子' },
-  { id: '3', name: 'Sony', description: '索尼公司' }
-]
-
 const initialCategories: Category[] = [
   {
     id: '1',
@@ -146,7 +140,7 @@ const ProductManagementPage = () => {
   const [activeTab, setActiveTab] = useState(0)
 
   // 數據狀態
-  const [brands, setBrands] = useState<Brand[]>(initialBrands)
+  const [brands, setBrands] = useState<Brand[]>([])
   const [categories, setCategories] = useState<Category[]>(initialCategories)
   const [products, setProducts] = useState<Product[]>(initialProducts)
   const [expandedCategories, setExpandedCategories] = useState<string[]>([

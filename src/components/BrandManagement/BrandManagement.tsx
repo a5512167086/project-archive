@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
   Box,
   Card,
@@ -10,11 +10,20 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  Grid
+  Grid,
+  CircularProgress
 } from '@mui/material'
 import { Add as AddIcon } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import { CustomTable } from '@/components/CustomTable'
+import {
+  useLazyGetBrandsQuery,
+  useCreateBrandMutation,
+  useUpdateBrandMutation,
+  useDeleteBrandMutation,
+  type Brand as ApiBrand
+} from '@/store/apis/brandApi'
+import { useAppSelector } from '@/utils/hook'
 
 interface Brand {
   id: string
@@ -41,7 +50,7 @@ interface BrandManagementProps {
   onBrandFormChange: (form: BrandForm) => void
 }
 
-const BrandManagement: React.FC<BrandManagementProps> = ({
+const BrandManagement = ({
   brands,
   selectedBrands,
   brandDialog,
@@ -52,40 +61,111 @@ const BrandManagement: React.FC<BrandManagementProps> = ({
   onBrandDialogChange,
   onEditingBrandChange,
   onBrandFormChange
-}) => {
+}: BrandManagementProps) => {
   const { t } = useTranslation()
+  const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
+  const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
+  const { brandList } = useAppSelector((state) => state.brand)
+  const [getBrands] = useLazyGetBrandsQuery()
+  const [createBrand, { isLoading: isCreating }] = useCreateBrandMutation()
+  const [updateBrand, { isLoading: isUpdating }] = useUpdateBrandMutation()
+  const [deleteBrand, { isLoading: isDeleting }] = useDeleteBrandMutation()
 
-  // 品牌表格列定義
+  useEffect(() => {
+    if (brandList.length > 0) {
+      const convertedBrands: Brand[] = brandList.map((brand: ApiBrand) => ({
+        id: brand.object_id.toString(),
+        name: brand.brand_name,
+        description: brand.brand_description
+      }))
+      onBrandsChange(convertedBrands)
+    } else {
+      onBrandsChange([])
+    }
+  }, [brandList, onBrandsChange])
+
+  useEffect(() => {
+    if (currentBot?.bot_detail_id) {
+      getBrands(currentBot.bot_detail_id)
+    }
+  }, [currentBot?.bot_detail_id, getBrands])
+
   const brandColumns = [
     { id: 'name', label: 'productManagementPage.brandName' },
     { id: 'description', label: 'productManagementPage.description' }
   ]
 
-  const handleBrandSubmit = () => {
-    if (editingBrand) {
-      onBrandsChange(
-        brands.map((b) =>
-          b.id === editingBrand.id ? { ...editingBrand, ...brandForm } : b
-        )
-      )
-    } else {
-      onBrandsChange([...brands, { id: Date.now().toString(), ...brandForm }])
+  const handleBrandSubmit = async () => {
+    if (!currentBotObjectId) return
+
+    try {
+      if (editingBrand) {
+        await updateBrand({
+          bot_uuid: currentBot!.bot_detail_id,
+          object_id: Number(editingBrand.id),
+          brand_name: brandForm.name,
+          brand_description: brandForm.description
+        })
+          .unwrap()
+          .then(() => {
+            getBrands(currentBot!.bot_detail_id)
+          })
+      } else {
+        await createBrand({
+          bot_uuid: currentBot!.bot_detail_id,
+          brand_name: brandForm.name,
+          brand_description: brandForm.description
+        })
+          .unwrap()
+          .then(() => {
+            getBrands(currentBot!.bot_detail_id)
+          })
+      }
+
+      onBrandDialogChange(false)
+      onBrandFormChange({ name: '', description: '' })
+      onEditingBrandChange(null)
+    } catch (error) {
+      console.error('Brand operation failed:', error)
     }
-    onBrandDialogChange(false)
-    onBrandFormChange({ name: '', description: '' })
-    onEditingBrandChange(null)
   }
 
-  const deleteBrand = (brand: Brand) => {
-    onBrandsChange(brands.filter((b) => b.id !== brand.id))
+  const deleteBrandItem = async (brand: Brand) => {
+    if (!currentBotObjectId) return
+    try {
+      await deleteBrand({
+        bot_uuid: currentBot!.bot_detail_id,
+        deleted_id_list: [Number(brand.id)]
+      })
+        .unwrap()
+        .then(() => {
+          getBrands(currentBot!.bot_detail_id)
+        })
+    } catch (error) {
+      console.error('Delete brand failed:', error)
+    }
   }
 
-  const handleDeleteSelectedBrands = () => {
-    const selectedBrandIds = selectedBrands.map((index) => brands[index].id)
-    onBrandsChange(
-      brands.filter((brand) => !selectedBrandIds.includes(brand.id))
-    )
-    onSelectedBrandsChange([])
+  const handleDeleteSelectedBrands = async () => {
+    if (!currentBotObjectId || selectedBrands.length === 0) return
+
+    try {
+      const selectedBrandIds = selectedBrands.map((index) =>
+        Number(brands[index].id)
+      )
+      await deleteBrand({
+        bot_uuid: currentBot!.bot_detail_id,
+        deleted_id_list: selectedBrandIds
+      })
+        .unwrap()
+        .then(() => {
+          getBrands(currentBot!.bot_detail_id)
+        })
+
+      onSelectedBrandsChange([])
+    } catch (error) {
+      console.error('Delete selected brands failed:', error)
+    }
   }
 
   const handleEditBrand = (brand: Brand) => {
@@ -95,10 +175,26 @@ const BrandManagement: React.FC<BrandManagementProps> = ({
   }
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Card sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+    <Box
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: 0
+      }}
+    >
+      <Card
+        sx={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 0,
+          overflow: 'hidden'
+        }}
+      >
         <CardHeader
           title={t('productManagementPage.brandManagement')}
+          sx={{ flexShrink: 0 }}
           action={
             <Box display="flex" gap={2}>
               {selectedBrands.length > 0 && (
@@ -106,6 +202,7 @@ const BrandManagement: React.FC<BrandManagementProps> = ({
                   variant="outlined"
                   color="error"
                   onClick={handleDeleteSelectedBrands}
+                  disabled={isDeleting}
                 >
                   {t('productManagementPage.deleteSelected')}
                 </Button>
@@ -125,7 +222,16 @@ const BrandManagement: React.FC<BrandManagementProps> = ({
           }
         />
         <CardContent
-          sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+          sx={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: 0,
+            padding: 2,
+            '&:last-child': {
+              paddingBottom: 2
+            }
+          }}
           className="product__tableContainer"
         >
           <CustomTable
@@ -134,7 +240,7 @@ const BrandManagement: React.FC<BrandManagementProps> = ({
             selected={selectedBrands}
             setSelected={onSelectedBrandsChange}
             onEdit={handleEditBrand}
-            onDelete={deleteBrand}
+            onDelete={deleteBrandItem}
           />
         </CardContent>
       </Card>
@@ -161,6 +267,7 @@ const BrandManagement: React.FC<BrandManagementProps> = ({
                 onChange={(e) =>
                   onBrandFormChange({ ...brandForm, name: e.target.value })
                 }
+                disabled={isCreating || isUpdating}
               />
             </Grid>
             <Grid item xs={12}>
@@ -176,15 +283,26 @@ const BrandManagement: React.FC<BrandManagementProps> = ({
                     description: e.target.value
                   })
                 }
+                disabled={isCreating || isUpdating}
               />
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => onBrandDialogChange(false)}>
+          <Button
+            onClick={() => onBrandDialogChange(false)}
+            disabled={isCreating || isUpdating}
+          >
             {t('common.cancel')}
           </Button>
-          <Button onClick={handleBrandSubmit} variant="contained">
+          <Button
+            onClick={handleBrandSubmit}
+            variant="contained"
+            disabled={isCreating || isUpdating || !brandForm.name.trim()}
+          >
+            {(isCreating || isUpdating) && (
+              <CircularProgress size={20} sx={{ mr: 1 }} />
+            )}
             {editingBrand ? t('common.update') : t('common.add')}
           </Button>
         </DialogActions>
