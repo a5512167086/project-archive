@@ -34,7 +34,7 @@ export const CustomTable = <T,>({
   columns,
   onEdit,
   onDelete,
-  rowsPerPage = 10,
+  rowsPerPage = 11,
   selected,
   setSelected
 }: CustomTableProps<T>) => {
@@ -77,8 +77,21 @@ export const CustomTable = <T,>({
   }
 
   return (
-    <Paper sx={{ width: '100%' }}>
-      <TableContainer>
+    <Paper
+      sx={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden'
+      }}
+    >
+      <TableContainer
+        sx={{
+          flex: 1,
+          overflow: 'auto'
+        }}
+      >
         <Table size="small" stickyHeader>
           <TableHead>
             <TableRow>
@@ -153,6 +166,7 @@ export const CustomTable = <T,>({
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}
         rowsPerPageOptions={[]}
+        sx={{ flexShrink: 0 }}
       />
     </Paper>
   )

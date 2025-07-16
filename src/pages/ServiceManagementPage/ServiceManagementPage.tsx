@@ -331,7 +331,7 @@ const ServiceManagementPage = () => {
   return (
     <StyledServiceManagementPage disableGutters maxWidth={false}>
       <CustomBreadcrumb items={breadcrumbItems} />
-      <Box display="flex" justifyContent="space-between" alignItems="center">
+      <Box className="service__titleBox">
         <Typography variant="h4">{t(TEXT.title)}</Typography>
         <Box display="flex" gap={2}>
           {!!selected.length && (
@@ -352,14 +352,16 @@ const ServiceManagementPage = () => {
         </Box>
       </Box>
 
-      <CustomTable
-        data={services}
-        columns={columns}
-        selected={selected}
-        setSelected={setSelected}
-        onEdit={handleEdit}
-        onDelete={handleSingleDelete}
-      />
+      <div className="service__tableContainer">
+        <CustomTable
+          data={services}
+          columns={columns}
+          selected={selected}
+          setSelected={setSelected}
+          onEdit={handleEdit}
+          onDelete={handleSingleDelete}
+        />
+      </div>
 
       {/* Create Dialog */}
       <Dialog

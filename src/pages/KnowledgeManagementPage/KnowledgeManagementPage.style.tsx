@@ -3,18 +3,29 @@ import { Container, styled } from '@mui/material'
 export const StyledKnowledgeManagementPage = styled(Container)(() => ({
   display: 'flex',
   flexDirection: 'column',
-  height: '80vh',
+  height: 'calc(100vh - 64px)', // 100vh 減去 header 高度
   boxSizing: 'border-box',
+  overflow: 'hidden', // 防止頁面滾動
+  paddingBottom: '20px', // 添加底部邊距
   '& .knowledge__titleBox': {
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    flexShrink: 0, // 防止標題區域被壓縮
+    marginBottom: '16px'
   },
   '& .knowledge__button': {
     marginRight: '10px'
   },
   '& .knowledge__title': {
     fontSize: '2rem',
-    fontWeight: '500',
+    fontWeight: '500'
+  },
+  '& .knowledge__tableContainer': {
+    flex: 1, // 讓表格容器占滿剩餘空間
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+    marginBottom: '20px' // 為表格容器添加底部邊距
   }
 }))

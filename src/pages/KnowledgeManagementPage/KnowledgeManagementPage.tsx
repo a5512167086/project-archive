@@ -241,16 +241,18 @@ const KnowledgeManagementPage = () => {
           </Button>
         </Box>
       </Box>
-      <CustomTable
-        data={knowledgeItems}
-        columns={columns}
-        selected={selected}
-        setSelected={setSelected}
-        onEdit={() => {}}
-        onDelete={(item) => {
-          handleDeleteItem(item)
-        }}
-      />
+      <div className="knowledge__tableContainer">
+        <CustomTable
+          data={knowledgeItems}
+          columns={columns}
+          selected={selected}
+          setSelected={setSelected}
+          onEdit={() => {}}
+          onDelete={(item) => {
+            handleDeleteItem(item)
+          }}
+        />
+      </div>
       {/* insert single knowledge dialog */}
       <CustomDialog<{
         question: string
