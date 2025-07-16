@@ -19,8 +19,7 @@ import { useAppDispatch, useAppSelector } from '@/utils/hook'
 import { clearCurrentBot, setCurrentBot } from '@/store/modules/botSlice'
 import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
 import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
-import { useApiHandler } from '@/hooks/useApiHandler'
-
+import { showSuccessToast } from '@/utils/toast'
 const dialogFields: FieldProps[] = [
   {
     id: 'botName',
@@ -80,7 +79,6 @@ const BotPage = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
-  const { handleError, showSuccess } = useApiHandler()
   const { botList } = useAppSelector((state) => state.bot)
   const [getBots] = useLazyGetBotsQuery()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -125,22 +123,18 @@ const BotPage = () => {
     loginChannelId: string
     loginChannelSecret: string
   }) => {
-    try {
-      const result = await createBot({
-        bot_name: data.botName,
-        bot_channel_id: data.channelId,
-        bot_channel_access_token: data.channelAccessToken,
-        bot_channel_secret: data.channelSecret,
-        bot_login_channel_id: data.loginChannelId,
-        bot_login_channel_secret: data.loginChannelSecret
-      }).unwrap()
+    const result = await createBot({
+      bot_name: data.botName,
+      bot_channel_id: data.channelId,
+      bot_channel_access_token: data.channelAccessToken,
+      bot_channel_secret: data.channelSecret,
+      bot_login_channel_id: data.loginChannelId,
+      bot_login_channel_secret: data.loginChannelSecret
+    }).unwrap()
 
-      showSuccess('success.bot_created')
-      handleModalOpen(result.webhook_url)
-      getBots()
-    } catch (error) {
-      handleError(error)
-    }
+    showSuccessToast(t('success.bot_created'))
+    handleModalOpen(result.webhook_url)
+    getBots()
   }
 
   useEffect(() => {

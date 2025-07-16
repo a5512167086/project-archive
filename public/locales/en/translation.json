@@ -198,6 +198,8 @@
   },
   "common": {
     "uploaded": "Uploaded",
+    "add": "Add",
+    "update": "Update",
     "active": "Active",
     "inactive": "Inactive",
     "action": "Action",
@@ -275,7 +277,28 @@
     "reservation_schedule_not_found": "Reservation schedule not found.",
     "reservation_time_invalid": "Invalid reservation time.",
     "reservation_capacity_exceeded": "Reservation capacity exceeded.",
-    "reservation_option_invalid": "Invalid reservation option."
+    "reservation_option_invalid": "Invalid reservation option.",
+    "reservation_not_found": "Reservation not found.",
+
+    "brand_class_not_found": "Brand class not found.",
+    "brand_not_found": "Brand not found.",
+    "brand_already_exists": "Brand already exists.",
+
+    "category_class_not_found": "Category class not found.",
+    "category_not_found": "Category not found.",
+    "category_already_exists": "Category already exists.",
+    "parent_category_not_found": "Parent category not found.",
+    "invalid_category_hierarchy": "Invalid category hierarchy.",
+
+    "product_class_not_found": "Product class not found.",
+    "product_not_found": "Product not found.",
+    "product_sku_already_exists": "Product SKU already exists.",
+
+    "minio_upload_error": "File upload failed. Please try again.",
+    "minio_delete_error": "File deletion failed. Please try again.",
+
+    "internal_server_error": "Internal server error. Please try again later.",
+    "invalid_input": "Invalid input. Please check your data and try again."
   },
   "success": {
     "operation_completed": "Operation completed successfully",
@@ -331,6 +354,8 @@
     "categoryDescription": "Category Description",
     "parentCategory": "Parent Category",
     "noParentCategory": "None (Root Category)",
-    "description": "Description"
+    "description": "Description",
+    "deleteMultiTitle": "Are you sure you want to delete the selected brands? This action cannot be undone.",
+    "deleteSingleTitle": "Delete brand「{{name}}」"
   }
 }

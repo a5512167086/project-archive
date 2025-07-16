@@ -7,13 +7,17 @@ interface BrandState {
   errorCode: string
   errorMessage: string
   status: 'idle' | 'loading' | 'succeeded' | 'failed'
+  successMessage: string
+  successType: 'create' | 'update' | 'delete' | null
 }
 
 const initialState: BrandState = {
   brandList: [],
   errorCode: '',
   errorMessage: '',
-  status: 'idle'
+  status: 'idle',
+  successMessage: '',
+  successType: null
 }
 
 export const brandSlice = createSlice({
@@ -35,67 +39,67 @@ export const brandSlice = createSlice({
       state.errorCode = ''
       state.errorMessage = ''
       state.status = 'idle'
+    },
+    clearBrandSuccess: (state) => {
+      state.successMessage = ''
+      state.successType = null
     }
   },
   extraReducers: (builder) => {
     builder
       .addMatcher(brandApi.endpoints.getBrands.matchPending, (state) => {
         state.status = 'loading'
-        state.errorCode = ''
-        state.errorMessage = ''
       })
       .addMatcher(
         brandApi.endpoints.getBrands.matchFulfilled,
         (state, action) => {
           state.status = 'succeeded'
           state.brandList = action.payload
-          state.errorCode = ''
-          state.errorMessage = ''
         }
       )
       .addMatcher(
         brandApi.endpoints.getBrands.matchRejected,
         (state, action) => {
+          const error = action.payload!.data as CustomError
           state.status = 'failed'
-          state.errorCode = action.error?.code || 'UNKNOWN_ERROR'
-          state.errorMessage =
-            action.error?.message || 'An unknown error occurred'
+          state.errorCode = error['error_code']
+          state.errorMessage = error['error_message']
         }
       )
       .addMatcher(brandApi.endpoints.createBrand.matchFulfilled, (state) => {
-        state.errorCode = ''
-        state.errorMessage = ''
+        state.status = 'succeeded'
       })
       .addMatcher(brandApi.endpoints.updateBrand.matchFulfilled, (state) => {
-        state.errorCode = ''
-        state.errorMessage = ''
+        state.status = 'succeeded'
       })
       .addMatcher(brandApi.endpoints.deleteBrand.matchFulfilled, (state) => {
-        state.errorCode = ''
-        state.errorMessage = ''
+        state.status = 'succeeded'
       })
       .addMatcher(
         brandApi.endpoints.createBrand.matchRejected,
         (state, action) => {
+          const error = action.payload!.data as CustomError
           state.status = 'failed'
-          state.errorCode = action.error?.code || 'CREATE_ERROR'
-          state.errorMessage = action.error?.message || 'Failed to create brand'
+          state.errorCode = error['error_code']
+          state.errorMessage = error['error_message']
         }
       )
       .addMatcher(
         brandApi.endpoints.updateBrand.matchRejected,
         (state, action) => {
+          const error = action.payload!.data as CustomError
           state.status = 'failed'
-          state.errorCode = action.error?.code || 'UPDATE_ERROR'
-          state.errorMessage = action.error?.message || 'Failed to update brand'
+          state.errorCode = error['error_code']
+          state.errorMessage = error['error_message']
         }
       )
       .addMatcher(
         brandApi.endpoints.deleteBrand.matchRejected,
         (state, action) => {
+          const error = action.payload!.data as CustomError
           state.status = 'failed'
-          state.errorCode = action.error?.code || 'DELETE_ERROR'
-          state.errorMessage = action.error?.message || 'Failed to delete brand'
+          state.errorCode = error['error_code']
+          state.errorMessage = error['error_message']
         }
       )
   }

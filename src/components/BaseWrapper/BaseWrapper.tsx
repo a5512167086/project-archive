@@ -3,38 +3,21 @@ import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { StyledBaseWrapper } from './BaseWrapper.style'
 import { Outlet } from 'react-router-dom'
-import { Suspense, useEffect, useState, useCallback } from 'react'
+import { Suspense, useState, useCallback } from 'react'
 import { CustomLoader } from '../CustomLoader'
 import { useTranslation } from 'react-i18next'
 import { useUser } from '@/hooks/useUser'
 import { useHandleAuthRedirect } from '@/hooks/useHandleAuthRedirect'
 import { CustomAlert } from '../CustomAlert/CustomAlert'
-import { useAppDispatch, useAppSelector } from '@/utils/hook'
-import { useApiHandler } from '@/hooks/useApiHandler'
-import { clearBotError } from '@/store/modules/botSlice'
-import { clearUserError } from '@/store/modules/userSlice'
-import { clearModuleError } from '@/store/modules/moduleSlice'
-import { clearKnowledgeError } from '@/store/modules/knowledgeSlice'
-import { clearReservationError } from '@/store/modules/reservationSlice'
+import { useAppSelector } from '@/utils/hook'
+import { useErrorHandler } from '@/hooks/useErrorHandler'
 
 const loaderText = 'common.loading'
 
 export const BaseWrapper = () => {
-  const dispatch = useAppDispatch()
   const { t } = useTranslation()
-  const { handleError } = useApiHandler()
   const { isAuthFailed, setIsAuthFailed } = useUser()
-  const { errorCode: botErrorCode } = useAppSelector((state) => state.bot)
-  const { isAuthenticated, errorCode: userErrorCode } = useAppSelector(
-    (state) => state.user
-  )
-  const { errorCode: moduleError } = useAppSelector((state) => state.module)
-  const { errorCode: knowledgeError } = useAppSelector(
-    (state) => state.knowledge
-  )
-  const { errorCode: reservationError } = useAppSelector(
-    (state) => state.reservation
-  )
+  const { isAuthenticated } = useAppSelector((state) => state.user)
   const [isAlertOpen, setAlertOpen] = useState(false)
 
   const handleAuthFailed = useCallback(() => {
@@ -42,37 +25,9 @@ export const BaseWrapper = () => {
     setIsAuthFailed(false)
   }, [setIsAuthFailed])
 
-  const handleErrorNotification = useCallback(
-    (errorCode: string | null, clearAction?: () => void) => {
-      if (errorCode) {
-        handleError({ error_code: errorCode })
-        if (clearAction) clearAction()
-      }
-    },
-    [handleError]
-  )
+  useErrorHandler()
 
   useHandleAuthRedirect(isAuthenticated, isAuthFailed, handleAuthFailed)
-
-  useEffect(() => {
-    handleErrorNotification(botErrorCode, () => dispatch(clearBotError()))
-    handleErrorNotification(userErrorCode, () => dispatch(clearUserError()))
-    handleErrorNotification(moduleError, () => dispatch(clearModuleError()))
-    handleErrorNotification(knowledgeError, () =>
-      dispatch(clearKnowledgeError())
-    )
-    handleErrorNotification(reservationError, () =>
-      dispatch(clearReservationError())
-    )
-  }, [
-    botErrorCode,
-    userErrorCode,
-    moduleError,
-    knowledgeError,
-    reservationError,
-    handleErrorNotification,
-    dispatch
-  ])
   return (
     <StyledBaseWrapper>
       <Header />

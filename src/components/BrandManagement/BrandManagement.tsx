@@ -24,6 +24,8 @@ import {
   type Brand as ApiBrand
 } from '@/store/apis/brandApi'
 import { useAppSelector } from '@/utils/hook'
+import { CustomDialog } from '@/components/CustomDialog'
+import { showSuccessToast } from '@/utils/toast'
 
 interface Brand {
   id: string
@@ -70,6 +72,11 @@ const BrandManagement = ({
   const [createBrand, { isLoading: isCreating }] = useCreateBrandMutation()
   const [updateBrand, { isLoading: isUpdating }] = useUpdateBrandMutation()
   const [deleteBrand, { isLoading: isDeleting }] = useDeleteBrandMutation()
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
+  const [multiDeleteDialogOpen, setMultiDeleteDialogOpen] =
+    React.useState(false)
+  const [currentDeleteBrand, setCurrentDeleteBrand] =
+    React.useState<Brand | null>(null)
 
   useEffect(() => {
     if (brandList.length > 0) {
@@ -105,23 +112,18 @@ const BrandManagement = ({
           object_id: Number(editingBrand.id),
           brand_name: brandForm.name,
           brand_description: brandForm.description
-        })
-          .unwrap()
-          .then(() => {
-            getBrands(currentBot!.bot_detail_id)
-          })
+        }).unwrap()
+        showSuccessToast(t('success.data_updated'))
+        getBrands(currentBot!.bot_detail_id)
       } else {
         await createBrand({
           bot_uuid: currentBot!.bot_detail_id,
           brand_name: brandForm.name,
           brand_description: brandForm.description
-        })
-          .unwrap()
-          .then(() => {
-            getBrands(currentBot!.bot_detail_id)
-          })
+        }).unwrap()
+        showSuccessToast(t('success.data_saved'))
+        getBrands(currentBot!.bot_detail_id)
       }
-
       onBrandDialogChange(false)
       onBrandFormChange({ name: '', description: '' })
       onEditingBrandChange(null)
@@ -130,25 +132,29 @@ const BrandManagement = ({
     }
   }
 
-  const deleteBrandItem = async (brand: Brand) => {
-    if (!currentBotObjectId) return
+  const handleDeleteBrandConfirm = async () => {
+    if (!currentBotObjectId || !currentDeleteBrand) return
     try {
       await deleteBrand({
         bot_uuid: currentBot!.bot_detail_id,
-        deleted_id_list: [Number(brand.id)]
-      })
-        .unwrap()
-        .then(() => {
-          getBrands(currentBot!.bot_detail_id)
-        })
+        deleted_id_list: [Number(currentDeleteBrand.id)]
+      }).unwrap()
+      showSuccessToast(t('success.data_deleted'))
+      getBrands(currentBot!.bot_detail_id)
     } catch (error) {
       console.error('Delete brand failed:', error)
     }
+    setDeleteDialogOpen(false)
+    setCurrentDeleteBrand(null)
   }
 
-  const handleDeleteSelectedBrands = async () => {
-    if (!currentBotObjectId || selectedBrands.length === 0) return
+  const deleteBrandItem = (brand: Brand) => {
+    setCurrentDeleteBrand(brand)
+    setDeleteDialogOpen(true)
+  }
 
+  const handleMultiDeleteBrandConfirm = async () => {
+    if (!currentBotObjectId || selectedBrands.length === 0) return
     try {
       const selectedBrandIds = selectedBrands.map((index) =>
         Number(brands[index].id)
@@ -156,16 +162,18 @@ const BrandManagement = ({
       await deleteBrand({
         bot_uuid: currentBot!.bot_detail_id,
         deleted_id_list: selectedBrandIds
-      })
-        .unwrap()
-        .then(() => {
-          getBrands(currentBot!.bot_detail_id)
-        })
-
+      }).unwrap()
+      showSuccessToast(t('success.data_deleted'))
+      getBrands(currentBot!.bot_detail_id)
       onSelectedBrandsChange([])
     } catch (error) {
       console.error('Delete selected brands failed:', error)
     }
+    setMultiDeleteDialogOpen(false)
+  }
+
+  const handleDeleteSelectedBrands = () => {
+    setMultiDeleteDialogOpen(true)
   }
 
   const handleEditBrand = (brand: Brand) => {
@@ -241,6 +249,29 @@ const BrandManagement = ({
             setSelected={onSelectedBrandsChange}
             onEdit={handleEditBrand}
             onDelete={deleteBrandItem}
+          />
+          {/* 單一刪除確認 Dialog */}
+          <CustomDialog
+            open={deleteDialogOpen}
+            title={t('productManagementPage.deleteSingleTitle', {
+              name: currentDeleteBrand?.name || ''
+            })}
+            handleClose={() => {
+              setDeleteDialogOpen(false)
+              setTimeout(() => {
+                setCurrentDeleteBrand(null)
+              }, 200)
+            }}
+            onSubmit={handleDeleteBrandConfirm}
+            dangerButton
+          />
+          {/* 多選刪除確認 Dialog */}
+          <CustomDialog
+            open={multiDeleteDialogOpen}
+            title={t('productManagementPage.deleteMultiTitle')}
+            handleClose={() => setMultiDeleteDialogOpen(false)}
+            onSubmit={handleMultiDeleteBrandConfirm}
+            dangerButton
           />
         </CardContent>
       </Card>

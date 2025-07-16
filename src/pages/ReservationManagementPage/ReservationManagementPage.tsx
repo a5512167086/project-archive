@@ -32,7 +32,7 @@ import {
   useUpdateReservationMutation,
   UpdateReservationRequest
 } from '@/store/apis/reservationApi'
-import { useApiHandler } from '@/hooks/useApiHandler'
+import { showSuccessToast } from '@/utils/toast'
 
 const reservationManagementPageContent = {
   title: 'reservationManagementPage.title',
@@ -41,7 +41,6 @@ const reservationManagementPageContent = {
 
 const ReservationManagementPage = () => {
   const { t } = useTranslation()
-  const { handleError, showSuccess } = useApiHandler()
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
   const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
 
@@ -108,22 +107,18 @@ const ReservationManagementPage = () => {
   const handleSubmit = async () => {
     if (!editForm.bot_uuid || !editForm.reservation_id) return
 
-    try {
-      // Prepare the update data, ensuring payment_status is null when payment_method is cash
-      const updateData = { ...editForm } as UpdateReservationRequest
-      if (updateData.payment_method === 'cash') {
-        updateData.payment_status = null
-      }
+    // Prepare the update data, ensuring payment_status is null when payment_method is cash
+    const updateData = { ...editForm } as UpdateReservationRequest
+    if (updateData.payment_method === 'cash') {
+      updateData.payment_status = null
+    }
 
-      await updateReservation(updateData).unwrap()
-      showSuccess('success.data_updated')
-      setDialogOpen(false)
-      // Refresh reservations
-      if (currentBot?.bot_detail_id) {
-        getReservations({ bot_uuid: currentBot.bot_detail_id })
-      }
-    } catch (error) {
-      handleError(error)
+    await updateReservation(updateData).unwrap()
+    showSuccessToast(t('success.data_updated'))
+    setDialogOpen(false)
+    // Refresh reservations
+    if (currentBot?.bot_detail_id) {
+      getReservations({ bot_uuid: currentBot.bot_detail_id })
     }
   }
 

@@ -11,7 +11,7 @@ import { useRegisterUserMutation } from '@/store/apis/userApi'
 import { useAppDispatch } from '@/utils/hook'
 import { clearUserError } from '@/store/modules/userSlice'
 import { CustomLoader } from '@/components/CustomLoader'
-import { useApiHandler } from '@/hooks/useApiHandler'
+import { showSuccessToast } from '@/utils/toast'
 
 const signUpContent = {
   title: 'signPage.signUp',
@@ -29,7 +29,6 @@ const SignUpPage = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
-  const { handleError, showSuccess } = useApiHandler()
   const [registerUser] = useRegisterUserMutation()
   const [isLoading, setIsLoading] = useState(false)
   const [email, setEmail] = useState('')
@@ -80,10 +79,8 @@ const SignUpPage = () => {
 
     try {
       await registerUser({ email, username: name, password }).unwrap()
-      showSuccess('success.account_created_success')
+      showSuccessToast(t('success.account_created_success'))
       navigate(PAGE_PATHS.SIGN_IN)
-    } catch (error) {
-      handleError(error)
     } finally {
       setIsLoading(false)
     }

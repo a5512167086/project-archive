@@ -16,7 +16,7 @@ import { PAGE_PATHS } from '@/routes'
 import { CustomDialog } from '@/components/CustomDialog'
 import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
 import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
-import { useApiHandler } from '@/hooks/useApiHandler'
+import { showErrorToast, showSuccessToast } from '@/utils/toast'
 
 const knowledgeManagementPageContent = {
   title: 'knowledgeSettingPage.title',
@@ -77,7 +77,6 @@ const KnowledgeManagementPage = () => {
   const [currentDeleteKnowledgeItem, setCurrentDeleteKnowledgeItem] =
     useState<KnowledgeItem | null>(null)
   const { t } = useTranslation()
-  const { handleError, showSuccess } = useApiHandler()
   const { knowledgeItems } = useAppSelector((state) => state.knowledge)
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
   const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
@@ -106,21 +105,17 @@ const KnowledgeManagementPage = () => {
     // Delay clear currentDeleteKnowledgeItem to prevent item name flickering
     setTimeout(() => {
       setCurrentDeleteKnowledgeItem(null)
-    }, 100)
+    }, 200)
   }
 
   const handleDialogConfirm = async () => {
-    try {
-      await deleteKnowledges({
-        bot_uuid: currentBot!.bot_detail_id,
-        deleted_id_list: [currentDeleteKnowledgeItem!.object_id!]
-      }).unwrap()
+    await deleteKnowledges({
+      bot_uuid: currentBot!.bot_detail_id,
+      deleted_id_list: [currentDeleteKnowledgeItem!.object_id!]
+    }).unwrap()
 
-      showSuccess('success.knowledge_deleted')
-      getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
-    } catch (error) {
-      handleError(error)
-    }
+    showSuccessToast(t('success.knowledge_deleted'))
+    getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
   }
 
   const handleDelteItems = () => {
@@ -132,22 +127,18 @@ const KnowledgeManagementPage = () => {
   }
 
   const handleMutiDialogConfirm = async () => {
-    try {
-      const deletedIdList = selected.map(
-        (index) => knowledgeItems[index]?.object_id
-      )
+    const deletedIdList = selected.map(
+      (index) => knowledgeItems[index]?.object_id
+    )
 
-      await deleteKnowledges({
-        bot_uuid: currentBot!.bot_detail_id,
-        deleted_id_list: deletedIdList
-      }).unwrap()
+    await deleteKnowledges({
+      bot_uuid: currentBot!.bot_detail_id,
+      deleted_id_list: deletedIdList
+    }).unwrap()
 
-      showSuccess('success.knowledges_deleted')
-      setSelected([])
-      getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
-    } catch (error) {
-      handleError(error)
-    }
+    showSuccessToast(t('success.knowledges_deleted'))
+    setSelected([])
+    getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
   }
 
   const handleAddSingleKnowledge = () => {
@@ -162,18 +153,14 @@ const KnowledgeManagementPage = () => {
     question: string
     answer: string
   }) => {
-    try {
-      await insertKnowledge({
-        bot_uuid: currentBot!.bot_detail_id,
-        ...data
-      }).unwrap()
+    await insertKnowledge({
+      bot_uuid: currentBot!.bot_detail_id,
+      ...data
+    }).unwrap()
 
-      showSuccess('success.knowledge_added')
-      getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
-      handleInsertSingleDialogClose()
-    } catch (error) {
-      handleError(error)
-    }
+    showSuccessToast(t('success.knowledge_added'))
+    getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
+    handleInsertSingleDialogClose()
   }
 
   const handleAddKnowledgesByCSV = () => {
@@ -190,21 +177,17 @@ const KnowledgeManagementPage = () => {
       !data.csv_file.type.includes('csv') &&
       !data.csv_file.name.toLowerCase().endsWith('.csv')
     ) {
-      handleError(null, t('error.invalid_file_type'))
+      showErrorToast(null, t, 'error.invalid_file_type')
       return
     }
 
-    try {
-      await insertKnowledges({
-        bot_uuid: currentBot!.bot_detail_id,
-        csv_file: data.csv_file
-      }).unwrap()
+    await insertKnowledges({
+      bot_uuid: currentBot!.bot_detail_id,
+      csv_file: data.csv_file
+    }).unwrap()
 
-      showSuccess('success.csv_imported')
-      getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
-    } catch (error) {
-      handleError(error)
-    }
+    showSuccessToast(t('success.csv_imported'))
+    getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
   }
 
   useEffect(() => {

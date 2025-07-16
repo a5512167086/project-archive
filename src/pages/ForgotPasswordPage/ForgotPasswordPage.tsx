@@ -11,8 +11,7 @@ import { useForgotPasswordMutation } from '@/store/apis/userApi'
 import { clearUserError } from '@/store/modules/userSlice'
 import { useNavigate } from 'react-router-dom'
 import { PAGE_PATHS } from '@/routes'
-import { useApiHandler } from '@/hooks/useApiHandler'
-
+import { showSuccessToast } from '@/utils/toast'
 const forgotPasswordContent = {
   title: 'signPage.forgotPassword',
   description: 'signPage.forgotPasswordHint',
@@ -27,7 +26,6 @@ const ForgotPasswordPage = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
-  const { handleError, showSuccess } = useApiHandler()
   const [forgotPassword] = useForgotPasswordMutation()
   const [isLoading, setIsLoading] = useState(false)
   const [email, setEmail] = useState('')
@@ -54,13 +52,8 @@ const ForgotPasswordPage = () => {
 
     try {
       await forgotPassword({ email }).unwrap()
-      showSuccess('success.email_sent_success')
+      showSuccessToast(t('success.email_sent_success'))
       setIsSuccess(true)
-    } catch (error) {
-      // Always treat any error (including 500) as failure
-      console.error('Forgot password error:', error)
-      handleError(error)
-      setIsSuccess(false) // Explicitly set to false in case of error
     } finally {
       setIsLoading(false)
     }

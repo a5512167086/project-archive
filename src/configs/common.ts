@@ -54,7 +54,33 @@ export const ERROR_CODE_MESSAGE_MAPPING = {
   RESERVATION_SCHEDULE_NOT_FOUND: 'error.reservation_schedule_not_found',
   RESERVATION_TIME_INVALID: 'error.reservation_time_invalid',
   RESERVATION_CAPACITY_EXCEEDED: 'error.reservation_capacity_exceeded',
-  RESERVATION_OPTION_INVALID: 'error.reservation_option_invalid'
+  RESERVATION_OPTION_INVALID: 'error.reservation_option_invalid',
+  RESERVATION_NOT_FOUND: 'error.reservation_not_found',
+
+  // Brand related errors
+  BRAND_CLASS_NOT_FOUND: 'error.brand_class_not_found',
+  BRAND_NOT_FOUND: 'error.brand_not_found',
+  BRAND_ALREADY_EXISTS: 'error.brand_already_exists',
+
+  // Category related errors
+  CATEGORY_CLASS_NOT_FOUND: 'error.category_class_not_found',
+  CATEGORY_NOT_FOUND: 'error.category_not_found',
+  CATEGORY_ALREADY_EXISTS: 'error.category_already_exists',
+  PARENT_CATEGORY_NOT_FOUND: 'error.parent_category_not_found',
+  INVALID_CATEGORY_HIERARCHY: 'error.invalid_category_hierarchy',
+
+  // Product related errors
+  PRODUCT_CLASS_NOT_FOUND: 'error.product_class_not_found',
+  PRODUCT_NOT_FOUND: 'error.product_not_found',
+  PRODUCT_SKU_ALREADY_EXISTS: 'error.product_sku_already_exists',
+
+  // File and storage related errors
+  MINIO_UPLOAD_ERROR: 'error.minio_upload_error',
+  MINIO_DELETE_ERROR: 'error.minio_delete_error',
+
+  // General errors
+  INTERNAL_SERVER_ERROR: 'error.internal_server_error',
+  INVALID_INPUT: 'error.invalid_input'
 }
 
 export const SELECT_LANGUAGES_LIST = [LANGUAGES.EN, LANGUAGES.ZH]

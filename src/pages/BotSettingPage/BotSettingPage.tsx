@@ -15,7 +15,7 @@ import { useAppSelector } from '@/utils/hook'
 import { isEmpty } from '@/utils/helper'
 import { CustomLoader } from '@/components/CustomLoader'
 import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
-import { useApiHandler } from '@/hooks/useApiHandler'
+import { showSuccessToast } from '@/utils/toast'
 
 const botSettingPageContent = {
   botPageTitle: 'botPage.myBot',
@@ -33,7 +33,6 @@ const botSettingPageContent = {
 const BotSettingPage = () => {
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { handleError, showSuccess } = useApiHandler()
   const { botList, currentBotObjectId, status } = useAppSelector(
     (state) => state.bot
   )
@@ -72,23 +71,15 @@ const BotSettingPage = () => {
       bot_name: botName
     }
 
-    try {
-      await updateBot(updatedBot).unwrap()
-      showSuccess('success.bot_updated')
-      getBots()
-    } catch (error) {
-      handleError(error)
-    }
+    await updateBot(updatedBot).unwrap()
+    showSuccessToast(t('success.bot_updated'))
+    getBots()
   }
 
   const handleBotDelete = async () => {
-    try {
-      await deleteBot({ bot_uuid: currentBot!.bot_detail_id }).unwrap()
-      showSuccess('success.bot_deleted')
-      navigate(PAGE_PATHS.BOT_LIST)
-    } catch (error) {
-      handleError(error)
-    }
+    await deleteBot({ bot_uuid: currentBot!.bot_detail_id }).unwrap()
+    showSuccessToast(t('success.bot_deleted'))
+    navigate(PAGE_PATHS.BOT_LIST)
   }
 
   return (

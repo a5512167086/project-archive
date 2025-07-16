@@ -25,7 +25,6 @@ import { clearUserError, setAuthenticated } from '@/store/modules/userSlice'
 import { validateEmail } from '@/utils/helper'
 import { useNavigate } from 'react-router-dom'
 import { CustomLoader } from '@/components/CustomLoader'
-import { useApiHandler } from '@/hooks/useApiHandler'
 
 const signInContent = {
   title: 'signPage.signIn',
@@ -43,7 +42,6 @@ const SignInPage = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { handleError } = useApiHandler()
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [password, setPassword] = useState('')
@@ -90,8 +88,6 @@ const SignInPage = () => {
             dispatch(setAuthenticated(false))
           })
       }
-    } catch (error) {
-      handleError(error)
     } finally {
       setIsLoading(false)
     }

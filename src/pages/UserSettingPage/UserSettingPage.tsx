@@ -14,7 +14,7 @@ import {
   useLazyGetOAuthStatusQuery
 } from '@/store/apis/userApi'
 import { useUser } from '@/hooks/useUser'
-import { useApiHandler } from '@/hooks/useApiHandler'
+import { showErrorToast, showSuccessToast } from '@/utils/toast'
 
 const userSettingPageContent = {
   title: 'userSettingPage.title',
@@ -32,7 +32,6 @@ const userSettingPageContent = {
 
 const UserSettingPage = () => {
   const { t } = useTranslation()
-  const { handleError, showSuccess } = useApiHandler()
   const { logout } = useUser()
   const { email, oauthStatus } = useAppSelector((state) => state.user)
   const [changePassword] = useChangePasswordMutation()
@@ -59,7 +58,7 @@ const UserSettingPage = () => {
   const handleChangePassword = async (e: FormEvent) => {
     e.preventDefault()
     if (formData.newPassword !== formData.confirmPassword) {
-      handleError(null, t('error.password_mismatch'))
+      showErrorToast(null, t, 'error.password_mismatch')
       setFormData({
         currentPassword: '',
         newPassword: '',
@@ -68,17 +67,13 @@ const UserSettingPage = () => {
       return
     }
 
-    try {
-      await changePassword({
-        old_password: formData.currentPassword,
-        new_password: formData.newPassword
-      }).unwrap()
+    await changePassword({
+      old_password: formData.currentPassword,
+      new_password: formData.newPassword
+    }).unwrap()
 
-      showSuccess('success.password_changed')
-      logout()
-    } catch (error) {
-      handleError(error)
-    }
+    showSuccessToast(t('success.password_changed'))
+    logout()
   }
 
   return (

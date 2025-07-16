@@ -32,13 +32,13 @@ import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
-import { useApiHandler } from '@/hooks/useApiHandler'
 import { ScheduleEditor } from './ScheduleEditor'
 import { OptionGroupEditor, OptionGroupData } from './OptionGroupEditor'
 import {
   CreateScheduleEditor,
   CreateScheduleData
 } from './CreateScheduleEditor'
+import { showSuccessToast } from '@/utils/toast'
 
 const TEXT = {
   title: 'serviceManagementPage.title',
@@ -50,7 +50,6 @@ const TEXT = {
 
 const ServiceManagementPage = () => {
   const { t } = useTranslation()
-  const { handleError, showSuccess } = useApiHandler()
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
   const { services } = useAppSelector((state) => state.reservation)
 
@@ -109,81 +108,73 @@ const ServiceManagementPage = () => {
       } & Omit<ServiceScheduleCreate, 'schedule_type' | 'weekday'>)[]
     }
   ) => {
-    try {
-      const option_groups = (data.option_groups || []).map(
-        (group): ServiceOptionGroupCreate => ({
-          group_name: group.group_name,
-          group_description: group.group_description || null,
-          selection_type: group.selection_type as 'single' | 'multiple',
-          is_required: group.is_required === true,
-          display_order: Number(group.display_order) || 0,
-          is_active: true,
-          options: (group.options || []).map(
-            (option): ServiceOptionCreate => ({
-              option_name: option.option_name,
-              option_description: option.option_description || null,
-              price: Number(option.price) || 0,
-              display_order: Number(option.display_order) || 0,
-              is_active: true
-            })
-          )
-        })
-      )
-
-      // Convert weekdays array to individual schedule entries
-      const scheduleMap = new Map<number, ServiceScheduleCreate>()
-
-      for (const schedule of data.default_schedules || []) {
-        const weekdays = [...new Set(schedule.weekdays || [])] as number[]
-        weekdays.forEach((weekday) => {
-          scheduleMap.set(weekday, {
-            schedule_type: 'weekly',
-            weekday,
-            schedule_date: null,
-            start_time: schedule.start_time,
-            end_time: schedule.end_time,
-            capacity: schedule.capacity ? Number(schedule.capacity) : 1,
+    const option_groups = (data.option_groups || []).map(
+      (group): ServiceOptionGroupCreate => ({
+        group_name: group.group_name,
+        group_description: group.group_description || null,
+        selection_type: group.selection_type as 'single' | 'multiple',
+        is_required: group.is_required === true,
+        display_order: Number(group.display_order) || 0,
+        is_active: true,
+        options: (group.options || []).map(
+          (option): ServiceOptionCreate => ({
+            option_name: option.option_name,
+            option_description: option.option_description || null,
+            price: Number(option.price) || 0,
+            display_order: Number(option.display_order) || 0,
             is_active: true
           })
+        )
+      })
+    )
+
+    // Convert weekdays array to individual schedule entries
+    const scheduleMap = new Map<number, ServiceScheduleCreate>()
+
+    for (const schedule of data.default_schedules || []) {
+      const weekdays = [...new Set(schedule.weekdays || [])] as number[]
+      weekdays.forEach((weekday) => {
+        scheduleMap.set(weekday, {
+          schedule_type: 'weekly',
+          weekday,
+          schedule_date: null,
+          start_time: schedule.start_time,
+          end_time: schedule.end_time,
+          capacity: schedule.capacity ? Number(schedule.capacity) : 1,
+          is_active: true
         })
-      }
-
-      const payload: InsertServiceRequest = {
-        bot_uuid: currentBot!.bot_detail_id,
-        service_name: data.service_name,
-        service_description: data.service_description,
-        duration_minutes: Number(data.duration_minutes),
-        price: Number(data.price),
-        option_groups,
-        default_schedules: Array.from(scheduleMap.values())
-      }
-
-      await insertService(payload).unwrap()
-      showSuccess('success.service_created')
-      setDialogs((prev) => ({ ...prev, create: false }))
-      getServices({ bot_uuid: currentBot!.bot_detail_id })
-    } catch (error) {
-      handleError(error)
+      })
     }
+
+    const payload: InsertServiceRequest = {
+      bot_uuid: currentBot!.bot_detail_id,
+      service_name: data.service_name,
+      service_description: data.service_description,
+      duration_minutes: Number(data.duration_minutes),
+      price: Number(data.price),
+      option_groups,
+      default_schedules: Array.from(scheduleMap.values())
+    }
+
+    await insertService(payload).unwrap()
+    showSuccessToast(t('success.service_created'))
+    setDialogs((prev) => ({ ...prev, create: false }))
+    getServices({ bot_uuid: currentBot!.bot_detail_id })
   }
 
   const handleDelete = async (objectIds: string[]) => {
-    try {
-      await deleteServices({
-        bot_uuid: currentBot!.bot_detail_id,
-        delete_service_list: objectIds
-      }).unwrap()
+    await deleteServices({
+      bot_uuid: currentBot!.bot_detail_id,
+      delete_service_list: objectIds
+    }).unwrap()
 
-      if (objectIds.length > 1) {
-        showSuccess('success.services_deleted')
-      } else {
-        showSuccess('success.service_deleted')
-      }
-
-      getServices({ bot_uuid: currentBot!.bot_detail_id })
-    } catch (error) {
-      handleError(error)
+    if (objectIds.length > 1) {
+      showSuccessToast(t('success.services_deleted'))
+    } else {
+      showSuccessToast(t('success.service_deleted'))
     }
+
+    getServices({ bot_uuid: currentBot!.bot_detail_id })
   }
 
   const handleSingleDelete = (item: ServiceResponse) => {
@@ -332,7 +323,9 @@ const ServiceManagementPage = () => {
     <StyledServiceManagementPage disableGutters maxWidth={false}>
       <CustomBreadcrumb items={breadcrumbItems} />
       <Box className="service__titleBox">
-        <Typography variant="h5" className='service__title'>{t(TEXT.title)}</Typography>
+        <Typography variant="h5" className="service__title">
+          {t(TEXT.title)}
+        </Typography>
         <Box display="flex" gap={2}>
           {!!selected.length && (
             <Button

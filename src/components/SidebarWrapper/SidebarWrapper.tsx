@@ -30,7 +30,7 @@ import { useHandleAuthRedirect } from '@/hooks/useHandleAuthRedirect'
 import { CustomAlert } from '../CustomAlert/CustomAlert'
 import { useParams } from 'react-router-dom'
 import { setCurrentBot } from '@/store/modules/botSlice'
-import { useApiHandler } from '@/hooks/useApiHandler'
+import { useErrorHandler } from '@/hooks/useErrorHandler'
 
 const sidebarWrapperContent = {
   logout: 'header.signOut',
@@ -41,7 +41,6 @@ export const SidebarWrapper = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { handleError } = useApiHandler()
   const { uuid } = useParams()
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
   const { isAuthenticated } = useAppSelector((state) => state.user)
@@ -49,6 +48,8 @@ export const SidebarWrapper = () => {
   const [open, setOpen] = useState(false)
   const [isAlertOpen, setAlertOpen] = useState(false)
   const [getBots] = useLazyGetBotsQuery()
+
+  useErrorHandler()
 
   const handleAuthFailed = () => {
     setAlertOpen(true)
@@ -78,14 +79,9 @@ export const SidebarWrapper = () => {
       let bots = botList
 
       if (bots.length === 0) {
-        try {
-          const res = await getBots().unwrap()
-          if (res && Array.isArray(res)) {
-            bots = res
-          }
-        } catch (error) {
-          handleError(error)
-          return
+        const res = await getBots().unwrap()
+        if (res && Array.isArray(res)) {
+          bots = res
         }
       }
 
