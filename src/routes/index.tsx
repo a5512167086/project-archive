@@ -23,6 +23,9 @@ const KnowledgeManagementPage = lazy(
 const ReservationManagementPage = lazy(
   () => import('@/pages/ReservationManagementPage')
 )
+const ProductManagementPage = lazy(
+  () => import('@/pages/ProductManagementPage')
+)
 const ServiceManagementPage = lazy(
   () => import('@/pages/ServiceManagementPage')
 )
@@ -236,7 +239,7 @@ export const router = createBrowserRouter([
           },
           {
             path: PAGE_PATHS.PRODUCT_MANAGEMENT,
-            element: <div>test</div>
+            element: <ProductManagementPage />
           },
           {
             path: PAGE_PATHS.RESERVATION_MANAGEMENT,

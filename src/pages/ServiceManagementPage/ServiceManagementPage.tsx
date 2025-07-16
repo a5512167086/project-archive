@@ -332,7 +332,7 @@ const ServiceManagementPage = () => {
     <StyledServiceManagementPage disableGutters maxWidth={false}>
       <CustomBreadcrumb items={breadcrumbItems} />
       <Box className="service__titleBox">
-        <Typography variant="h4">{t(TEXT.title)}</Typography>
+        <Typography variant="h5" className='service__title'>{t(TEXT.title)}</Typography>
         <Box display="flex" gap={2}>
           {!!selected.length && (
             <Button

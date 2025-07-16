@@ -14,6 +14,10 @@ export const StyledServiceManagementPage = styled(Container)(() => ({
     flexShrink: 0, // 防止標題區域被壓縮
     marginBottom: '16px'
   },
+  '& .service__title': {
+    fontSize: '2rem',
+    fontWeight: '500'
+  },
   '& .service__tableContainer': {
     flex: 1, // 讓表格容器占滿剩餘空間
     display: 'flex',
