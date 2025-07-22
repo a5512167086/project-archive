@@ -7,6 +7,7 @@ import { clearModuleError } from '@/store/modules/moduleSlice'
 import { clearKnowledgeError } from '@/store/modules/knowledgeSlice'
 import { clearReservationError } from '@/store/modules/reservationSlice'
 import { clearBrandError } from '@/store/modules/brandSlice'
+import { clearCategoryError } from '@/store/modules/categorySlice'
 import { useTranslation } from 'react-i18next'
 
 export const useErrorHandler = (options?: {
@@ -28,6 +29,7 @@ export const useErrorHandler = (options?: {
     (state) => state.reservation
   )
   const { errorCode: brandError } = useAppSelector((state) => state.brand)
+  const { errorCode: categoryError } = useAppSelector((state) => state.category)
 
   const handleErrorNotification = useCallback(
     (errorCode: string | null, clearAction?: () => void) => {
@@ -59,7 +61,8 @@ export const useErrorHandler = (options?: {
         module: () => dispatch(clearModuleError()),
         knowledge: () => dispatch(clearKnowledgeError()),
         reservation: () => dispatch(clearReservationError()),
-        brand: () => dispatch(clearBrandError())
+        brand: () => dispatch(clearBrandError()),
+        category: () => dispatch(clearCategoryError())
       }
 
       const clearAction = clearActions[sliceName as keyof typeof clearActions]
@@ -110,6 +113,13 @@ export const useErrorHandler = (options?: {
       handleErrorNotification(brandError, () => dispatch(clearBrandError()))
     }
   }, [brandError, autoHandle, excludeSlices, handleErrorNotification, dispatch])
+
+  useEffect(() => {
+    if (autoHandle && categoryError && !excludeSlices.includes('category')) {
+      console.log('Category error detected:', categoryError)
+      handleErrorNotification(categoryError, () => dispatch(clearCategoryError()))
+    }
+  }, [categoryError, autoHandle, excludeSlices, handleErrorNotification, dispatch])
 
   return { handleSingleError }
 }

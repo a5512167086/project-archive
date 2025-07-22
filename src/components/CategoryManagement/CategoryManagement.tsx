@@ -19,7 +19,8 @@ import {
   Collapse,
   List,
   ListItem,
-  Typography
+  Typography,
+  CircularProgress
 } from '@mui/material'
 import {
   Add as AddIcon,
@@ -29,6 +30,15 @@ import {
   ChevronRight as ChevronRightIcon
 } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
+import { useAppSelector } from '@/utils/hook'
+import {
+  useCreateCategoryMutation,
+  useUpdateCategoryMutation,
+  useDeleteCategoryMutation,
+  useLazyGetCategoriesQuery
+} from '@/store/apis/categoryApi'
+import { showSuccessToast } from '@/utils/toast'
+import { CustomDialog } from '@/components/CustomDialog'
 
 interface Category {
   id: string
@@ -50,7 +60,6 @@ interface CategoryManagementProps {
   categoryDialog: boolean
   editingCategory: Category | null
   categoryForm: CategoryForm
-  onCategoriesChange: (categories: Category[]) => void
   onExpandedCategoriesChange: (expanded: string[]) => void
   onCategoryDialogChange: (open: boolean) => void
   onEditingCategoryChange: (category: Category | null) => void
@@ -63,13 +72,23 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({
   categoryDialog,
   editingCategory,
   categoryForm,
-  onCategoriesChange,
   onExpandedCategoriesChange,
   onCategoryDialogChange,
   onEditingCategoryChange,
   onCategoryFormChange
 }) => {
   const { t } = useTranslation()
+  const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
+  const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
+  const [getCategories] = useLazyGetCategoriesQuery()
+  const [createCategory, { isLoading: isCreating }] =
+    useCreateCategoryMutation()
+  const [updateCategory, { isLoading: isUpdating }] =
+    useUpdateCategoryMutation()
+  const [deleteCategory] = useDeleteCategoryMutation()
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
+  const [currentDeleteCategory, setCurrentDeleteCategory] =
+    React.useState<Category | null>(null)
 
   // 獲取所有類別（扁平化）
   const getAllCategories = (cats: Category[]): Category[] => {
@@ -85,69 +104,66 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({
 
   const allCategories = getAllCategories(categories)
 
-  const handleCategorySubmit = () => {
-    const newCategory: Category = {
-      id: editingCategory?.id || Date.now().toString(),
-      ...categoryForm,
-      parentId: categoryForm.parentId || undefined
-    }
+  const handleCategorySubmit = async () => {
+    if (!currentBotObjectId) return
 
-    if (editingCategory) {
-      const updateCategory = (cats: Category[]): Category[] => {
-        return cats.map((cat) => {
-          if (cat.id === editingCategory.id) {
-            return {
-              ...cat,
-              ...categoryForm,
-              parentId: categoryForm.parentId || undefined
-            }
-          }
-          if (cat.children) {
-            return { ...cat, children: updateCategory(cat.children) }
-          }
-          return cat
-        })
-      }
-      onCategoriesChange(updateCategory(categories))
-    } else {
-      if (categoryForm.parentId) {
-        const addToParent = (cats: Category[]): Category[] => {
-          return cats.map((cat) => {
-            if (cat.id === categoryForm.parentId) {
-              return {
-                ...cat,
-                children: [...(cat.children || []), newCategory]
-              }
-            }
-            if (cat.children) {
-              return { ...cat, children: addToParent(cat.children) }
-            }
-            return cat
-          })
+    try {
+      if (editingCategory) {
+        const originalParentId = editingCategory.parentId || '0'
+        const newParentId = categoryForm.parentId
+
+        let apiParentId: number | null
+        if (newParentId === originalParentId) {
+          apiParentId = null // Not changed
+        } else {
+          apiParentId = Number(newParentId) // Changed (0 for root)
         }
-        onCategoriesChange(addToParent(categories))
-      } else {
-        onCategoriesChange([...categories, newCategory])
-      }
-    }
 
-    onCategoryDialogChange(false)
-    onCategoryFormChange({ name: '', description: '', parentId: '' })
-    onEditingCategoryChange(null)
+        await updateCategory({
+          bot_uuid: currentBot!.bot_detail_id,
+          class_id: Number(editingCategory.id),
+          category_name: categoryForm.name,
+          category_description: categoryForm.description,
+          parent_category_id: apiParentId
+        }).unwrap()
+        showSuccessToast(t('success.data_updated'))
+      } else {
+        await createCategory({
+          bot_uuid: currentBot!.bot_detail_id,
+          category_name: categoryForm.name,
+          category_description: categoryForm.description,
+          parent_category_id: Number(categoryForm.parentId) || 0
+        }).unwrap()
+        showSuccessToast(t('success.data_saved'))
+      }
+      getCategories(currentBot!.bot_detail_id)
+      onCategoryDialogChange(false)
+      onCategoryFormChange({ name: '', description: '', parentId: '0' })
+      onEditingCategoryChange(null)
+    } catch (error) {
+      console.error('Category operation failed:', error)
+    }
   }
 
-  const deleteCategory = (categoryId: string) => {
-    const deleteCategoryRecursive = (cats: Category[]): Category[] => {
-      return cats
-        .filter((cat) => cat.id !== categoryId)
-        .map((cat) => ({
-          ...cat,
-          children: cat.children
-            ? deleteCategoryRecursive(cat.children)
-            : undefined
-        }))
+  const handleDeleteCategoryConfirm = async () => {
+    if (!currentBotObjectId || !currentDeleteCategory) return
+    try {
+      await deleteCategory({
+        bot_uuid: currentBot!.bot_detail_id,
+        deleted_class_id_list: [Number(currentDeleteCategory.id)]
+      }).unwrap()
+      showSuccessToast(t('success.data_deleted'))
+      getCategories(currentBot!.bot_detail_id)
+    } catch (error) {
+      console.error('Delete category failed:', error)
     }
-    onCategoriesChange(deleteCategoryRecursive(categories))
+    setDeleteDialogOpen(false)
+    setCurrentDeleteCategory(null)
+  }
+
+  const deleteCategoryItem = (category: Category) => {
+    setCurrentDeleteCategory(category)
+    setDeleteDialogOpen(true)
   }
 
   // 渲染類別樹
@@ -207,7 +223,7 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({
                   onCategoryFormChange({
                     name: category.name,
                     description: category.description,
-                    parentId: category.parentId || ''
+                    parentId: category.parentId || '0'
                   })
                   onCategoryDialogChange(true)
                 }}
@@ -216,7 +232,7 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({
               </IconButton>
               <IconButton
                 size="small"
-                onClick={() => deleteCategory(category.id)}
+                onClick={() => deleteCategoryItem(category)}
               >
                 <DeleteIcon fontSize="small" />
               </IconButton>
@@ -248,7 +264,7 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({
                 onCategoryFormChange({
                   name: '',
                   description: '',
-                  parentId: ''
+                  parentId: '0'
                 })
                 onCategoryDialogChange(true)
               }}
@@ -261,6 +277,21 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({
           <List sx={{ width: '100%' }}>{renderCategoryTree(categories)}</List>
         </CardContent>
       </Card>
+
+      <CustomDialog
+        open={deleteDialogOpen}
+        title={t('productManagementPage.deleteSingleTitle', {
+          name: currentDeleteCategory?.name || ''
+        })}
+        handleClose={() => {
+          setDeleteDialogOpen(false)
+          setTimeout(() => {
+            setCurrentDeleteCategory(null)
+          }, 200)
+        }}
+        onSubmit={handleDeleteCategoryConfirm}
+        dangerButton
+      />
 
       {/* 類別對話框 */}
       <Dialog
@@ -287,6 +318,7 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({
                     name: e.target.value
                   })
                 }
+                disabled={isCreating || isUpdating}
               />
             </Grid>
             <Grid item xs={12}>
@@ -302,6 +334,7 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({
                     description: e.target.value
                   })
                 }
+                disabled={isCreating || isUpdating}
               />
             </Grid>
             <Grid item xs={12}>
@@ -318,9 +351,19 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({
                       parentId: e.target.value
                     })
                   }
+                  disabled={isCreating || isUpdating}
+                  renderValue={(selected) => {
+                    if (selected === '0') {
+                      return t('productManagementPage.rootCategory', 'Root')
+                    }
+                    const selectedCategory = allCategories.find(
+                      (category) => category.id === selected
+                    )
+                    return selectedCategory?.name
+                  }}
                 >
-                  <MenuItem value="">
-                    {t('productManagementPage.noParentCategory')}
+                  <MenuItem value="0">
+                    {t('productManagementPage.rootCategory', 'Root')}
                   </MenuItem>
                   {allCategories
                     .filter((c) => c.id !== editingCategory?.id)
@@ -335,10 +378,20 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => onCategoryDialogChange(false)}>
+          <Button
+            onClick={() => onCategoryDialogChange(false)}
+            disabled={isCreating || isUpdating}
+          >
             {t('common.cancel')}
           </Button>
-          <Button onClick={handleCategorySubmit} variant="contained">
+          <Button
+            onClick={handleCategorySubmit}
+            variant="contained"
+            disabled={isCreating || isUpdating || !categoryForm.name.trim()}
+          >
+            {(isCreating || isUpdating) && (
+              <CircularProgress size={20} sx={{ mr: 1 }} />
+            )}
             {editingCategory ? t('common.update') : t('common.add')}
           </Button>
         </DialogActions>

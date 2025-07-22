@@ -2,6 +2,7 @@ import { Button } from '@mui/material'
 import { useAppDispatch, useAppSelector } from '@/utils/hook'
 import { setBotError } from '@/store/modules/botSlice'
 import { setBrandError } from '@/store/modules/brandSlice'
+import { setCategoryError } from '@/store/modules/categorySlice'
 import { useErrorHandler } from '@/hooks/useErrorHandler'
 
 /**
@@ -12,6 +13,7 @@ export const ErrorHandlerTest = () => {
   const dispatch = useAppDispatch()
   const { errorCode: botErrorCode } = useAppSelector((state) => state.bot)
   const { errorCode: brandErrorCode } = useAppSelector((state) => state.brand)
+  const { errorCode: categoryErrorCode } = useAppSelector((state) => state.category)
 
   // 使用錯誤處理 hook
   useErrorHandler()
@@ -32,11 +34,20 @@ export const ErrorHandlerTest = () => {
     }))
   }
 
+  const triggerCategoryError = () => {
+    console.log('Triggering category error...')
+    dispatch(setCategoryError({
+      error_code: 'TEST_CATEGORY_ERROR',
+      error_message: 'This is a test category error'
+    }))
+  }
+
   return (
     <div style={{ padding: '20px', border: '1px solid #ccc', margin: '20px' }}>
       <h3>Error Handler Test</h3>
       <p>Current Bot Error: {botErrorCode || 'None'}</p>
       <p>Current Brand Error: {brandErrorCode || 'None'}</p>
+      <p>Current Category Error: {categoryErrorCode || 'None'}</p>
       
       <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
         <Button variant="contained" color="error" onClick={triggerBotError}>
@@ -44,6 +55,9 @@ export const ErrorHandlerTest = () => {
         </Button>
         <Button variant="contained" color="error" onClick={triggerBrandError}>
           Trigger Brand Error
+        </Button>
+        <Button variant="contained" color="error" onClick={triggerCategoryError}>
+          Trigger Category Error
         </Button>
       </div>
       

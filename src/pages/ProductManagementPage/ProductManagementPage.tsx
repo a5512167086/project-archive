@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Box, Typography, Tabs, Tab } from '@mui/material'
 import {
   Inventory as InventoryIcon,
@@ -14,6 +14,8 @@ import BrandManagement from '@/components/BrandManagement'
 import { StyledProductManagementPage } from './ProductManagementPage.style'
 import { PAGE_PATHS } from '@/routes'
 import { useAppSelector } from '@/utils/hook'
+import { useLazyGetCategoriesQuery } from '@/store/apis/categoryApi'
+import { Category as ApiCategory } from '@/store/apis/categoryApi'
 
 // 類型定義
 interface Brand {
@@ -49,106 +51,22 @@ function a11yProps(index: number) {
   }
 }
 
-// 模擬數據
-const initialCategories: Category[] = [
-  {
-    id: '1',
-    name: '電子產品',
-    description: '各種電子設備',
-    children: [
-      {
-        id: '2',
-        name: '手機',
-        description: '智慧型手機',
-        parentId: '1',
-        children: [
-          { id: '3', name: 'iPhone', description: '蘋果手機', parentId: '2' },
-          { id: '4', name: 'Android', description: '安卓手機', parentId: '2' }
-        ]
-      },
-      {
-        id: '5',
-        name: '電腦',
-        description: '個人電腦',
-        parentId: '1',
-        children: [
-          {
-            id: '6',
-            name: '筆記型電腦',
-            description: '便攜式電腦',
-            parentId: '5'
-          },
-          {
-            id: '7',
-            name: '桌上型電腦',
-            description: '桌面電腦',
-            parentId: '5'
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: '8',
-    name: '家電',
-    description: '家用電器',
-    children: [
-      { id: '9', name: '冰箱', description: '冷藏設備', parentId: '8' },
-      { id: '10', name: '洗衣機', description: '洗滌設備', parentId: '8' }
-    ]
-  }
-]
 
-const initialProducts: Product[] = [
-  {
-    id: '1',
-    name: 'iPhone 15 Pro',
-    description: '最新款iPhone',
-    price: 35900,
-    brandId: '1',
-    categoryId: '3',
-    stock: 50,
-    status: 'active'
-  },
-  {
-    id: '2',
-    name: 'Galaxy S24',
-    description: '三星旗艦手機',
-    price: 28900,
-    brandId: '2',
-    categoryId: '4',
-    stock: 30,
-    status: 'active'
-  },
-  {
-    id: '3',
-    name: 'MacBook Pro',
-    description: '蘋果筆記型電腦',
-    price: 65900,
-    brandId: '1',
-    categoryId: '6',
-    stock: 20,
-    status: 'active'
-  }
-]
 
 const ProductManagementPage = () => {
   const { t } = useTranslation()
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
+  const { categoryList } = useAppSelector((state) => state.category)
+  const [getCategories] = useLazyGetCategoriesQuery()
   const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
 
   const [activeTab, setActiveTab] = useState(0)
 
   // 數據狀態
   const [brands, setBrands] = useState<Brand[]>([])
-  const [categories, setCategories] = useState<Category[]>(initialCategories)
-  const [products, setProducts] = useState<Product[]>(initialProducts)
-  const [expandedCategories, setExpandedCategories] = useState<string[]>([
-    '1',
-    '2',
-    '5',
-    '8'
-  ])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [products, setProducts] = useState<Product[]>([])
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([])
 
   // 選擇狀態
   const [selectedProducts, setSelectedProducts] = useState<number[]>([])
@@ -165,7 +83,7 @@ const ProductManagementPage = () => {
   const [categoryForm, setCategoryForm] = useState({
     name: '',
     description: '',
-    parentId: ''
+    parentId: '0'
   })
 
   // 商品管理狀態
@@ -180,6 +98,44 @@ const ProductManagementPage = () => {
     stock: 0,
     status: 'active' as 'active' | 'inactive'
   })
+
+  useEffect(() => {
+    if (currentBot?.bot_detail_id) {
+      getCategories(currentBot.bot_detail_id)
+    }
+  }, [currentBot?.bot_detail_id, getCategories])
+
+  const transformApiCategories = (apiCategories: ApiCategory[]): Category[] => {
+    return apiCategories.map((cat) => ({
+      id: cat.class_id.toString(),
+      name: cat.category_name,
+      description: cat.category_description,
+      parentId: cat.parent_class_id?.toString(),
+      children: cat.children ? transformApiCategories(cat.children) : []
+    }))
+  }
+
+  const getExpandedIds = (categories: Category[]): string[] => {
+    const ids: string[] = []
+    const traverse = (cats: Category[]) => {
+      for (const cat of cats) {
+        if (cat.children && cat.children.length > 0) {
+          ids.push(cat.id)
+          traverse(cat.children)
+        }
+      }
+    }
+    traverse(categories)
+    return ids
+  }
+
+  useEffect(() => {
+    if (categoryList) {
+      const transformed = transformApiCategories(categoryList)
+      setCategories(transformed)
+      setExpandedCategories(getExpandedIds(transformed))
+    }
+  }, [categoryList])
 
   const breadcrumbItems = [
     { link: PAGE_PATHS.BOT_LIST, linkText: 'botPage.myBot' },
@@ -267,7 +223,6 @@ const ProductManagementPage = () => {
             categoryDialog={categoryDialog}
             editingCategory={editingCategory}
             categoryForm={categoryForm}
-            onCategoriesChange={setCategories}
             onExpandedCategoriesChange={setExpandedCategories}
             onCategoryDialogChange={setCategoryDialog}
             onEditingCategoryChange={setEditingCategory}

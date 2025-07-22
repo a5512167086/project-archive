@@ -5,12 +5,14 @@ import moduleReducer from './modules/moduleSlice'
 import knowledgeReducer from './modules/knowledgeSlice'
 import reservationReducer from './modules/reservationSlice'
 import brandReducer from './modules/brandSlice'
+import categoryReducer from './modules/categorySlice'
 import { userApi } from './apis/userApi'
 import { botApi } from './apis/botApi'
 import { moduleApi } from './apis/moduleApi'
 import { knowledgeApi } from './apis/knowledgeApi'
 import { reservationApi } from './apis/reservationApi'
 import { brandApi } from './apis/brandApi'
+import { categoryApi } from './apis/categoryApi'
 
 export const store = configureStore({
   reducer: {
@@ -20,12 +22,14 @@ export const store = configureStore({
     knowledge: knowledgeReducer,
     reservation: reservationReducer,
     brand: brandReducer,
+    category: categoryReducer,
     [userApi.reducerPath]: userApi.reducer,
     [botApi.reducerPath]: botApi.reducer,
     [moduleApi.reducerPath]: moduleApi.reducer,
     [knowledgeApi.reducerPath]: knowledgeApi.reducer,
     [reservationApi.reducerPath]: reservationApi.reducer,
-    [brandApi.reducerPath]: brandApi.reducer
+    [brandApi.reducerPath]: brandApi.reducer,
+    [categoryApi.reducerPath]: categoryApi.reducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
@@ -35,6 +39,7 @@ export const store = configureStore({
       .concat(knowledgeApi.middleware)
       .concat(reservationApi.middleware)
       .concat(brandApi.middleware)
+      .concat(categoryApi.middleware)
 })
 
 export type RootState = ReturnType<typeof store.getState>
