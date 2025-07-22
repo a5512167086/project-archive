@@ -46,11 +46,9 @@ class DeleteCategoryRequest(BaseModel):
 class CategoryResponse(BaseModel):
     parent_class_id: Optional[int] = None
     class_id: int
-    entity_id: int
     category_name: str
     category_description: Optional[str] = None
-    created_at: datetime
-    updated_at: datetime
+    children: List["CategoryResponse"] = []
 
 
 class UpdateCategoryRequest(BaseModel):

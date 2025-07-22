@@ -31,6 +31,23 @@ class EcommService:
         self.query = EcommQuery(session)
         self.bot_service = BotService(session)
 
+    def get_nested_categories(self, bot_uuid: UUID):
+        categories = self.get_all_categories(bot_uuid)
+        category_dict = {}
+        for cat in categories:
+            cat_dict = cat.model_dump() if hasattr(cat, "model_dump") else dict(cat)
+            cat_dict["children"] = []
+            category_dict[cat_dict["class_id"]] = cat_dict
+
+        root_categories = []
+        for cat in category_dict.values():
+            parent_id = cat.get("parent_class_id")
+            if parent_id and parent_id in category_dict:
+                category_dict[parent_id]["children"].append(cat)
+            else:
+                root_categories.append(cat)
+        return root_categories
+
     def validate_brand_class(self, bot_class_id: int) -> int:
         brand_class_id = self.query.get_brand_class_id_by_bot_class_id(bot_class_id)
         if not brand_class_id:
@@ -144,9 +161,7 @@ class EcommService:
 
         # 檢查父類別是否存在（如果有提供）
         if body.parent_category_id:
-            if not self.query.check_parent_category_exists(
-                category_class_id, body.parent_category_id
-            ):
+            if not self.query.check_parent_category_exists(body.parent_category_id):
                 raise GlobalErrorException(
                     error_code=ErrorCode.PARENT_CATEGORY_NOT_FOUND,
                     error_message="Parent category not found",
@@ -178,8 +193,13 @@ class EcommService:
                 error_code=ErrorCode.EMPTY_DELETE_LIST,
                 error_message="Delete list cannot be empty",
             )
+        if category_class_id in body.deleted_class_id_list:
+            raise GlobalErrorException(
+                error_code=ErrorCode.CATEGORY_INVALID_DELETE_LIST,
+                error_message="Root category cannot be deleted",
+            )
 
-        self.command.delete_categories(category_class_id, body.deleted_class_id_list)
+        self.command.delete_categories(body.deleted_class_id_list)
 
     def update_category_by_id(self, body: UpdateCategoryRequest, current_user_id: UUID):
         bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
@@ -201,17 +221,14 @@ class EcommService:
         if body.parent_category_id is not None:
             # 檢查父類別是否存在（0 表示設為根類別）
             if body.parent_category_id != 0:
-                if not self.query.check_parent_category_exists(
-                    category_class_id, body.parent_category_id
-                ):
+                if not self.query.check_parent_category_exists(body.parent_category_id):
                     raise GlobalErrorException(
                         error_code=ErrorCode.PARENT_CATEGORY_NOT_FOUND,
                         error_message="Parent category not found",
                     )
-
                 # 檢查是否會造成循環引用
                 if not self.query.check_category_hierarchy_valid(
-                    category_class_id, body.class_id, body.parent_category_id
+                    category_class_id, body.parent_category_id
                 ):
                     raise GlobalErrorException(
                         error_code=ErrorCode.INVALID_CATEGORY_HIERARCHY,

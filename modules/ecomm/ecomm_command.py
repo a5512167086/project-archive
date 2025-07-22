@@ -10,6 +10,7 @@ from shared.models.class_model import Class
 from shared.models.class_object_relation_model import ClassObjectRelation
 from shared.models.inheritance_model import Inheritance
 from shared.models.object_model import Object
+from shared.models.permission import Permission
 from shared.queries.entity_query import get_entity_id_by_name
 
 logging.basicConfig(
@@ -21,6 +22,56 @@ logger = logging.getLogger(__name__)
 class EcommCommand:
     def __init__(self, session: Session):
         self.session = session
+
+    def get_category_tree(self):
+        """
+        取得所有類別並組成巢狀結構
+        """
+        # 取得所有類別
+        categories = self.session.exec(select(Class)).all()
+        # 取得所有繼承關係
+        inheritances = self.session.exec(select(Inheritance)).all()
+
+        # 建立 id -> category 映射
+        category_map = {str(cat.class_id): cat for cat in categories}
+        # 建立 parent -> children 對應
+        children_map = {}
+        parent_map = {}
+        for inh in inheritances:
+            parent_id = str(inh.parent_class_id)
+            child_id = str(inh.child_class_id)
+            if parent_id == child_id:
+                continue
+            if parent_id not in children_map:
+                children_map[parent_id] = []
+            children_map[parent_id].append(child_id)
+            parent_map[child_id] = parent_id
+
+        # 找出所有 root (沒有被當作 child 的 parent)
+        all_child_ids = set(str(inh.child_class_id) for inh in inheritances)
+        root_ids = [
+            str(cat.class_id)
+            for cat in categories
+            if str(cat.class_id) not in all_child_ids
+        ]
+
+        def build_node(cat_id):
+            cat = category_map[cat_id]
+            node = {
+                "id": str(cat.class_id),
+                "name": cat.chinese_name,
+                "description": cat.chinese_description,
+                "parentId": parent_map.get(cat_id),
+            }
+            # children
+            if cat_id in children_map:
+                node["children"] = [
+                    build_node(child_id) for child_id in children_map[cat_id]
+                ]
+            return node
+
+        tree = [build_node(root_id) for root_id in root_ids]
+        return tree
 
     def insert_brand(
         self, brand_class_id: int, brand_name: str, brand_description: str
@@ -110,13 +161,12 @@ class EcommCommand:
         result = self.session.exec(text(sql_query)).first()
 
         if result is None:
-            raise Exception("Failed to create category class")
+            raise Exception("CATEGORY_CREATE_FAILED: Failed to create category class")
 
         return result  # 回傳新建立的 class_id
+        # name_path 檢查移至 service 層，這裡不再檢查
 
-    def delete_categories(
-        self, category_class_id: int, delete_categories_class_id: List[int]
-    ):
+    def delete_categories(self, delete_categories_class_id: List[int]):
         for class_id in delete_categories_class_id:
             # 1. 找到要刪除的類別的父類別
             parent_inheritance = self.session.exec(
@@ -151,7 +201,7 @@ class EcommCommand:
             self.session.exec(
                 delete(Inheritance).where(Inheritance.parent_class_id == class_id)
             )
-
+            self.session.exec(delete(Permission).where(Permission.class_id == class_id))
             # 6. 刪除該類別本身
             self.session.exec(delete(Class).where(Class.class_id == class_id))
 
@@ -180,25 +230,17 @@ class EcommCommand:
 
         # 更新父類別關係
         if parent_category_id is not None:
-            # 先刪除現有的繼承關係
-            self.session.exec(
-                delete(Inheritance).where(Inheritance.child_class_id == class_id)
+            parent_category_id = (
+                parent_category_id if parent_category_id != 0 else category_class_id
             )
-
-            # 建立新的繼承關係
-            if parent_category_id != 0:  # 0 表示設為根類別
-                inheritance = Inheritance(
-                    parent_class_id=parent_category_id,
-                    child_class_id=class_id,
+            self.session.exec(
+                text(
+                    "SELECT * FROM fs_move_class(:target_class_id, :new_parent_class_id)"
+                ).bindparams(
+                    target_class_id=class_id,
+                    new_parent_class_id=parent_category_id,
                 )
-                self.session.add(inheritance)
-            else:
-                # 設為根類別，繼承原始的 category_class_id
-                inheritance = Inheritance(
-                    parent_class_id=category_class_id,
-                    child_class_id=class_id,
-                )
-                self.session.add(inheritance)
+            )
 
         return True
 

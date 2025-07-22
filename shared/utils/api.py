@@ -14,8 +14,6 @@ def get_channel_access_token(channel_id: str, channel_secret: str) -> str:
     if response.status_code == 200:
         return response.json()["access_token"]
     else:
-        print("❌ 無法取得 access token")
-        print(response.status_code, response.text)
         return None
 
 
@@ -36,9 +34,6 @@ def create_liff_app(channel_access_token: str):
     response = requests.post(url, headers=headers, json=data)
 
     if response.status_code != 200:
-        print("❌ LIFF 建立失敗")
-        print("Status Code:", response.status_code)
-        print("Response Body:", response.text)
         response.raise_for_status()
 
     return response.json()

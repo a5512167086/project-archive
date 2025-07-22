@@ -7,7 +7,9 @@ class Permission(SQLModel, table=True):
         UniqueConstraint("class_id", "role_type", "role_id", name="uq_permissions"),
     )
 
-    class_id: int = Field(foreign_key="classes.class_id", nullable=False)
+    class_id: int = Field(
+        foreign_key="classes.class_id", nullable=False, primary_key=True
+    )
     role_type: bool = Field(nullable=False, description="0表示是群組，1表示是使用者")
     role_id: int = Field(
         nullable=False, description="由RoleType決定值為Groups.GID或Member.MID"

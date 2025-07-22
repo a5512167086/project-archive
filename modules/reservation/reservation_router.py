@@ -3,6 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
+from modules.bot.bot_service import BotService
 from modules.reservation.reservation_schema import (
     DailyAvailableSlots,
     ReservationCreate,
@@ -22,6 +23,11 @@ from shared.dependencies import get_current_user
 def get_reservation_service(session: SessionDep) -> ReservationService:
     """依賴注入 ReservationService"""
     return ReservationService(session)
+
+
+def get_bot_service(session: SessionDep) -> BotService:
+    """依賴注入 BotService"""
+    return BotService(session)
 
 
 reservation_router = APIRouter(prefix="/reservations", tags=["reservations"])
@@ -45,8 +51,10 @@ def create_service(
     reservation_service: Annotated[
         ReservationService, Depends(get_reservation_service)
     ],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
+    bot_service.validate_bot_ownership(user_id, service.bot_uuid)
     reservation_service.insert_new_service(service, user_id)
     reservation_service.session.commit()
 
@@ -58,8 +66,10 @@ def delete_service(
     reservation_service: Annotated[
         ReservationService, Depends(get_reservation_service)
     ],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
+    bot_service.validate_bot_ownership(user_id, delete_service.bot_uuid)
     reservation_service.delete_service_by_service_id(
         delete_service.bot_uuid,
         delete_service.delete_service_list,
@@ -75,8 +85,10 @@ def update_service(
     reservation_service: Annotated[
         ReservationService, Depends(get_reservation_service)
     ],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
+    bot_service.validate_bot_ownership(user_id, service_patch.bot_uuid)
     reservation_service.update_service_by_service_id(service_patch, user_id)
     reservation_service.session.commit()
 
@@ -129,9 +141,12 @@ def delete_reservation(
     reservation_service: Annotated[
         ReservationService, Depends(get_reservation_service)
     ],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
+    """Delete a reservation by reservation ID"""
+    # TODO: Check if the user is the owner of the reservation
     user_id = current_user["user_id"]
-    print(f"Deleting reservation {reservation_id} for user {user_id}")
+    print(user_id)
     reservation_service.delete_user_reservation(reservation_id)
     reservation_service.session.commit()
 

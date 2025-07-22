@@ -79,12 +79,17 @@ class EcommQuery:
     def get_all_categories_by_class_id(
         self, parent_class_id: int
     ) -> List[CategoryListView]:
-        # 根據 parent_class_id 來取得所有子類別
-        statement = select(CategoryListView).where(
-            CategoryListView.parent_class_id == parent_class_id
-        )
-        result = self.session.exec(statement)
-        return result.all()
+        result = []
+        queue = [parent_class_id]
+        while queue:
+            pid = queue.pop(0)
+            statement = select(CategoryListView).where(
+                CategoryListView.parent_class_id == pid
+            )
+            children = self.session.exec(statement).all()
+            result.extend(children)
+            queue.extend([child.class_id for child in children])
+        return result
 
     def check_category_name_exists(
         self, parent_class_id: int, category_name: str
@@ -111,9 +116,7 @@ class EcommQuery:
         ).first()
         return result is not None
 
-    def check_parent_category_exists(
-        self, base_category_class_id: int, parent_category_class_id: int
-    ) -> bool:
+    def check_parent_category_exists(self, parent_category_class_id: int) -> bool:
         """檢查指定的父類別是否存在"""
         result = self.session.exec(
             select(CategoryListView).where(
@@ -123,26 +126,20 @@ class EcommQuery:
         return result is not None
 
     def check_category_hierarchy_valid(
-        self,
-        base_category_class_id: int,
-        category_class_id: int,
-        parent_category_class_id: int,
+        self, category_class_id: int, parent_category_class_id: int
     ) -> bool:
-        """檢查類別階層是否有效（避免循環引用）"""
         # 如果父類別就是自己，則無效
         if category_class_id == parent_category_class_id:
             return False
-
         # 檢查是否會造成循環引用
         current_parent = parent_category_class_id
         visited = set()
 
         while current_parent is not None:
-            if current_parent in visited or current_parent == category_class_id:
+            if current_parent in visited:
                 return False
             visited.add(current_parent)
 
-            # 查找當前父類別的父類別
             parent_result = self.session.exec(
                 select(CategoryListView.parent_class_id).where(
                     CategoryListView.class_id == current_parent,
