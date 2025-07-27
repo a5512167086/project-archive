@@ -104,6 +104,7 @@
   "knowledgeSettingPage": {
     "title": "知識管理",
     "addKnowledgeItemButton": "新增知識",
+    "editKnowledgeItemButton": "編輯知識",
     "addKnowledgeItemFromCSVButton": "透過CSV新增知識",
     "deleteKnowledgeItemTitle": "確定要刪除 {{knowledge_name}} 嗎?此動作不可返回",
     "deleteKnowledgeItemsTitle": "確定要刪除所有選取的知識嗎?此動作不可返回",

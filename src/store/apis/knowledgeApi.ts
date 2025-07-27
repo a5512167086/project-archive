@@ -27,6 +27,13 @@ type DeleteKnowledgeItemsRequest = {
   deleted_id_list: number[]
 }
 
+type UpdateKnowledgeItemRequest = {
+  bot_uuid: string
+  object_id: number
+  question: string
+  answer: string
+}
+
 export const knowledgeApi = createApi({
   reducerPath: 'knowledgeApi',
   baseQuery: fetchBaseQuery({
@@ -56,6 +63,13 @@ export const knowledgeApi = createApi({
       query: (data) => ({
         url: `knowledges`,
         method: 'POST',
+        body: data
+      })
+    }),
+    updateKnowledgeItem: builder.mutation<void, UpdateKnowledgeItemRequest>({
+      query: (data) => ({
+        url: `knowledges`,
+        method: 'PATCH',
         body: data
       })
     }),
@@ -89,5 +103,6 @@ export const {
   useLazyGetKnowledgeItemsQuery,
   useInsertKnowledgeItemMutation,
   useInsertKnowledgeItemsByCSVMutation,
-  useDeleteKnowledgeItemsMutation
+  useDeleteKnowledgeItemsMutation,
+  useUpdateKnowledgeItemMutation
 } = knowledgeApi

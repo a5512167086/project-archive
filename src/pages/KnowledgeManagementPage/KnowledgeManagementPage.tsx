@@ -7,7 +7,8 @@ import {
   useDeleteKnowledgeItemsMutation,
   useInsertKnowledgeItemMutation,
   useInsertKnowledgeItemsByCSVMutation,
-  useLazyGetKnowledgeItemsQuery
+  useLazyGetKnowledgeItemsQuery,
+  useUpdateKnowledgeItemMutation
 } from '@/store/apis/knowledgeApi'
 import { useEffect, useState } from 'react'
 import { useAppSelector } from '@/utils/hook'
@@ -16,11 +17,12 @@ import { PAGE_PATHS } from '@/routes'
 import { CustomDialog } from '@/components/CustomDialog'
 import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
 import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
-import { showErrorToast, showSuccessToast } from '@/utils/toast'
+import { showErrorToast, showSuccessToast } from '@/utils/toast' 
 
 const knowledgeManagementPageContent = {
   title: 'knowledgeSettingPage.title',
   addButtonText: 'knowledgeSettingPage.addKnowledgeItemButton',
+  editButtonText: 'knowledgeSettingPage.editKnowledgeItemButton',
   addButtonTextByCSV: 'knowledgeSettingPage.addKnowledgeItemFromCSVButton',
   deleteButtonText: 'knowledgeSettingPage.deleteSelectedKnowledgeItems',
   deleteDialogTitle: 'knowledgeSettingPage.deleteKnowledgeItemTitle',
@@ -33,7 +35,7 @@ const columns = [
   { id: 'answer', label: 'knowledgeSettingPage.answer' }
 ]
 
-const insertSingleKnowledgeFields: FieldProps[] = [
+const knowledgeFormFields: FieldProps[] = [
   {
     id: 'question',
     name: 'question',
@@ -66,15 +68,19 @@ const insertKnowledgesFields: FieldProps[] = [
 const KnowledgeManagementPage = () => {
   const [getKnowledges] = useLazyGetKnowledgeItemsQuery()
   const [insertKnowledge] = useInsertKnowledgeItemMutation()
+  const [updateKnowledge] = useUpdateKnowledgeItemMutation()
   const [insertKnowledges] = useInsertKnowledgeItemsByCSVMutation()
   const [deleteKnowledges] = useDeleteKnowledgeItemsMutation()
   const [selected, setSelected] = useState<number[]>([])
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isMutiDialogOpen, setIsMutiDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isMutiDeleteDialogOpen, setIsMutiDeleteDialogOpen] = useState(false)
   const [isInsertSingleDialogOpen, setIsInsertSingleDialogOpen] =
     useState(false)
   const [isInsertByCSVDialogOpen, setIsInsertByCSVDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [currentDeleteKnowledgeItem, setCurrentDeleteKnowledgeItem] =
+    useState<KnowledgeItem | null>(null)
+  const [editingKnowledgeItem, setEditingKnowledgeItem] =
     useState<KnowledgeItem | null>(null)
   const { t } = useTranslation()
   const { knowledgeItems } = useAppSelector((state) => state.knowledge)
@@ -97,12 +103,11 @@ const KnowledgeManagementPage = () => {
 
   const handleDeleteItem = (item: KnowledgeItem) => {
     setCurrentDeleteKnowledgeItem(item)
-    setIsDialogOpen(true)
+    setIsDeleteDialogOpen(true)
   }
 
   const handleDialogClose = () => {
-    setIsDialogOpen(false)
-    // Delay clear currentDeleteKnowledgeItem to prevent item name flickering
+    setIsDeleteDialogOpen(false)
     setTimeout(() => {
       setCurrentDeleteKnowledgeItem(null)
     }, 200)
@@ -119,11 +124,11 @@ const KnowledgeManagementPage = () => {
   }
 
   const handleDelteItems = () => {
-    setIsMutiDialogOpen(true)
+    setIsMutiDeleteDialogOpen(true)
   }
 
   const handleMutiDialogClose = () => {
-    setIsMutiDialogOpen(false)
+    setIsMutiDeleteDialogOpen(false)
   }
 
   const handleMutiDialogConfirm = async () => {
@@ -172,7 +177,6 @@ const KnowledgeManagementPage = () => {
   }
 
   const handleInsertByCSVDialogConfirm = async (data: { csv_file: File }) => {
-    // Validate CSV file type
     if (
       !data.csv_file.type.includes('csv') &&
       !data.csv_file.name.toLowerCase().endsWith('.csv')
@@ -188,6 +192,33 @@ const KnowledgeManagementPage = () => {
 
     showSuccessToast(t('success.csv_imported'))
     getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
+  }
+
+  const handleEditItem = (item: KnowledgeItem) => {
+    setEditingKnowledgeItem(item)
+    setIsEditDialogOpen(true)
+  }
+
+  const handleEditDialogClose = () => {
+    setIsEditDialogOpen(false)
+    setEditingKnowledgeItem(null)
+  }
+
+  const handleEditDialogConfirm = async (data: {
+    question: string
+    answer: string
+  }) => {
+    if (!editingKnowledgeItem) return
+
+    await updateKnowledge({
+      bot_uuid: currentBot!.bot_detail_id,
+      object_id: editingKnowledgeItem.object_id,
+      ...data
+    }).unwrap()
+
+    showSuccessToast(t('success.knowledge_updated'))
+    getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
+    handleEditDialogClose()
   }
 
   useEffect(() => {
@@ -230,26 +261,38 @@ const KnowledgeManagementPage = () => {
           columns={columns}
           selected={selected}
           setSelected={setSelected}
-          onEdit={() => {}}
-          onDelete={(item) => {
-            handleDeleteItem(item)
-          }}
+          onEdit={handleEditItem}
+          onDelete={handleDeleteItem}
         />
       </div>
-      {/* insert single knowledge dialog */}
+      {/* Insert Single Knowledge Dialog */}
       <CustomDialog<{
         question: string
         answer: string
       }>
         open={isInsertSingleDialogOpen}
         handleClose={handleInsertSingleDialogClose}
-        fields={insertSingleKnowledgeFields}
+        fields={knowledgeFormFields}
         title={t(knowledgeManagementPageContent.addButtonText)}
-        onSubmit={async (data) => {
-          await handleInsertSingleDialogConfirm(data)
-        }}
+        onSubmit={handleInsertSingleDialogConfirm}
       />
-      {/* insert knowledges by csv dialog */}
+      {/* Edit Knowledge Dialog */}
+      {editingKnowledgeItem && (
+        <CustomDialog<{
+          question: string
+          answer: string
+        }>
+          open={isEditDialogOpen}
+          handleClose={handleEditDialogClose}
+          fields={knowledgeFormFields.map((field) => ({
+            ...field,
+            defaultValue: editingKnowledgeItem[field.name as keyof KnowledgeItem]
+          }))}
+          title={t(knowledgeManagementPageContent.editButtonText)}
+          onSubmit={handleEditDialogConfirm}
+        />
+      )}
+      {/* Insert Knowledges by CSV Dialog */}
       <CustomDialog<{
         csv_file: File
       }>
@@ -257,13 +300,11 @@ const KnowledgeManagementPage = () => {
         handleClose={handleInsertByCSVDialogClose}
         fields={insertKnowledgesFields}
         title={knowledgeManagementPageContent.addButtonTextByCSV}
-        onSubmit={async (data) => {
-          await handleInsertByCSVDialogConfirm(data)
-        }}
+        onSubmit={handleInsertByCSVDialogConfirm}
       />
-      {/* delete single knowledge dialog */}
+      {/* Delete Single Knowledge Dialog */}
       <CustomDialog
-        open={isDialogOpen}
+        open={isDeleteDialogOpen}
         title={t(knowledgeManagementPageContent.deleteDialogTitle, {
           knowledge_name:
             currentDeleteKnowledgeItem && currentDeleteKnowledgeItem.question
@@ -271,9 +312,9 @@ const KnowledgeManagementPage = () => {
         handleClose={handleDialogClose}
         onSubmit={handleDialogConfirm}
       />
-      {/* delete muti selected knowledges dialog */}
+      {/* Delete Muti Selected Knowledges Dialog */}
       <CustomDialog
-        open={isMutiDialogOpen}
+        open={isMutiDeleteDialogOpen}
         handleClose={handleMutiDialogClose}
         title={t(knowledgeManagementPageContent.deleteMutiDialogTitle)}
         onSubmit={handleMutiDialogConfirm}

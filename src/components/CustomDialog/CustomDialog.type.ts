@@ -23,6 +23,7 @@ export interface FieldProps {
   errorText?: {
     invalidFormat?: string
   }
+  defaultValue?: unknown
 }
 
 export type CustomDialogProps<T = Record<string, unknown>> = DialogProps & {

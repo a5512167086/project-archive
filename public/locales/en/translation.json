@@ -103,6 +103,7 @@
   "knowledgeSettingPage": {
     "title": "Knowledge Management",
     "addKnowledgeItemButton": "Add Knowledge",
+    "editKnowledgeItemButton": "Edit Knowledge",
     "addKnowledgeItemFromCSVButton": "Add Knowledge via CSV",
     "deleteKnowledgeItemTitle": "Are you sure you want to delete {{knowledge_name}}? This action cannot be undone.",
     "deleteKnowledgeItemsTitle": "Are you sure you want to delete all selected knowledge items? This action cannot be undone.",

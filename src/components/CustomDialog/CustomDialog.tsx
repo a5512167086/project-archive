@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Box,
   Button,
@@ -49,7 +49,25 @@ export const CustomDialog = <T extends Record<string, unknown>>({
   const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [formState, setFormState] = useState<Record<string, unknown>>({})
+  const [formState, setFormState] = useState<Record<string, unknown>>(() => {
+    const initialFormState: Record<string, unknown> = {}
+    fields.forEach((field) => {
+      if (field.defaultValue !== undefined) {
+        initialFormState[field.name] = field.defaultValue
+      }
+    })
+    return initialFormState
+  })
+
+  useEffect(() => {
+    const newFormState: Record<string, unknown> = {}
+    fields.forEach((field) => {
+      if (field.defaultValue !== undefined) {
+        newFormState[field.name] = field.defaultValue
+      }
+    })
+    setFormState(newFormState)
+  }, [fields])
   const [checkboxValues, setCheckboxValues] = useState<Record<string, boolean>>(
     {}
   )
