@@ -312,7 +312,7 @@ class EcommCommand:
 
         return new_product_object.object_id
 
-    def delete_products(self, product_class_id: int, product_ids: List[UUID]):
+    def delete_products(self, product_ids: List[UUID]):
         """刪除產品"""
         # 先取得相關的 object_ids
         product_details = self.session.exec(
@@ -332,17 +332,16 @@ class EcommCommand:
                 delete(ProductVariant).where(ProductVariant.object_id.in_(object_ids))
             )
 
-            # 刪除產品詳細資訊
-            self.session.exec(
-                delete(ProductDetail).where(ProductDetail.product_id.in_(product_ids))
-            )
-
             # 刪除 ClassObjectRelation
             self.session.exec(
                 delete(ClassObjectRelation).where(
-                    ClassObjectRelation.class_id == product_class_id,
-                    ClassObjectRelation.object_id.in_(object_ids),
+                    ClassObjectRelation.object_id.in_(object_ids)
                 )
+            )
+
+            # 刪除產品詳細資訊
+            self.session.exec(
+                delete(ProductDetail).where(ProductDetail.product_id.in_(product_ids))
             )
 
             # 刪除 Object

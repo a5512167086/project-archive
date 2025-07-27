@@ -68,15 +68,6 @@ class EcommService:
             )
         return category_class_id
 
-    def validate_product_class(self, bot_class_id: int) -> int:
-        product_class_id = self.query.get_product_class_id_by_bot_class_id(bot_class_id)
-        if not product_class_id:
-            raise GlobalErrorException(
-                error_code=ErrorCode.PRODUCT_CLASS_NOT_FOUND,
-                error_message="Product class not found for the given bot class",
-            )
-        return product_class_id
-
     def insert_single_brand(self, body: InsertBrandRequest, current_user_id: UUID):
         bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
         self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
@@ -341,15 +332,14 @@ class EcommService:
         """刪除產品"""
         bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
         self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
-        product_class_id = self.validate_product_class(bot.class_id)
-
-        self.command.delete_products(product_class_id, body.product_ids)
+        self.validate_brand_class(bot.class_id)
+        self.command.delete_products(body.product_ids)
 
     def update_product_by_id(self, body: UpdateProductRequest, user_id: str):
         """更新產品"""
         bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
         self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
-        self.validate_product_class(bot.class_id)
+        self.validate_brand_class(bot.class_id)
 
         # 如果更新 SKU，檢查是否重複（排除自己）
         if body.sku_code is not None:
