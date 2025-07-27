@@ -34,8 +34,6 @@ _setting_entity_id int;
 
 _message_entity_id int;
 
-_product_entity_id int;
-
 _category_entity_id int;
 
 _brand_entity_id int;
@@ -85,11 +83,6 @@ LIMIT 1;
 SELECT entity_id INTO _knowledge_entity_id
 FROM entities e
 WHERE e.chinese_name = '知識'
-LIMIT 1;
-
-SELECT entity_id INTO _product_entity_id
-FROM entities e
-WHERE e.chinese_name = '產品'
 LIMIT 1;
 
 SELECT entity_id INTO _category_entity_id
@@ -209,14 +202,6 @@ PERFORM fs_insert_class(
     _knowledge_entity_id,
     '知識',
     '問答功能的知識',
-    _owner_id
-);
-
-PERFORM fs_insert_class(
-    _new_class_id,
-    _product_entity_id,
-    '產品',
-    '電商功能的產品',
     _owner_id
 );
 
