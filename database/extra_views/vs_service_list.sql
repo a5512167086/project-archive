@@ -1,6 +1,4 @@
-DROP VIEW IF EXISTS vs_service_list;
-
-CREATE VIEW vs_service_list AS
+CREATE OR REPLACE VIEW vs_service_list AS
 SELECT sd.service_id,
     o.object_id,
     co.class_id,
