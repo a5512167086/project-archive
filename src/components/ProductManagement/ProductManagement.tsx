@@ -14,7 +14,7 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Grid
+  Grid2
 } from '@mui/material'
 import { Add as AddIcon } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
@@ -272,8 +272,8 @@ const ProductManagement: React.FC<ProductManagementProps> = ({
             : t('productManagementPage.addProduct')}
         </DialogTitle>
         <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={12}>
+          <Grid2 container spacing={2} sx={{ mt: 1 }}>
+            <Grid2 size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 label={t('productManagementPage.productName')}
@@ -282,8 +282,8 @@ const ProductManagement: React.FC<ProductManagementProps> = ({
                   onProductFormChange({ ...productForm, name: e.target.value })
                 }
               />
-            </Grid>
-            <Grid item xs={12}>
+            </Grid2>
+            <Grid2 size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 label={t('productManagementPage.productDescription')}
@@ -297,8 +297,8 @@ const ProductManagement: React.FC<ProductManagementProps> = ({
                   })
                 }
               />
-            </Grid>
-            <Grid item xs={6}>
+            </Grid2>
+            <Grid2 size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 label={t('productManagementPage.price')}
@@ -311,8 +311,8 @@ const ProductManagement: React.FC<ProductManagementProps> = ({
                   })
                 }
               />
-            </Grid>
-            <Grid item xs={6}>
+            </Grid2>
+            <Grid2 size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 label={t('productManagementPage.stock')}
@@ -325,8 +325,8 @@ const ProductManagement: React.FC<ProductManagementProps> = ({
                   })
                 }
               />
-            </Grid>
-            <Grid item xs={6}>
+            </Grid2>
+            <Grid2 size={{ xs: 12 }}>
               <FormControl fullWidth>
                 <InputLabel>{t('productManagementPage.brand')}</InputLabel>
                 <Select
@@ -346,8 +346,8 @@ const ProductManagement: React.FC<ProductManagementProps> = ({
                   ))}
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid item xs={6}>
+            </Grid2>
+            <Grid2 size={{ xs: 12 }}>
               <FormControl fullWidth>
                 <InputLabel>{t('productManagementPage.category')}</InputLabel>
                 <Select
@@ -367,8 +367,8 @@ const ProductManagement: React.FC<ProductManagementProps> = ({
                   ))}
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid item xs={12}>
+            </Grid2>
+            <Grid2 size={{ xs: 12 }}>
               <FormControl fullWidth>
                 <InputLabel>{t('productManagementPage.status')}</InputLabel>
                 <Select
@@ -389,8 +389,8 @@ const ProductManagement: React.FC<ProductManagementProps> = ({
                   </MenuItem>
                 </Select>
               </FormControl>
-            </Grid>
-          </Grid>
+            </Grid2>
+          </Grid2>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => onProductDialogChange(false)}>

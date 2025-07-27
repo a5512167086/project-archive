@@ -1,6 +1,12 @@
 import { FormEvent, useEffect, useState } from 'react'
-import { Container, Typography, Box, Button, TextField } from '@mui/material'
-import Grid from '@mui/material/Grid2'
+import {
+  Container,
+  Typography,
+  Box,
+  Button,
+  TextField,
+  Grid2
+} from '@mui/material'
 import { useAppSelector } from '@/utils/hook'
 import {
   UserSettingStyledButton,
@@ -94,8 +100,8 @@ const UserSettingPage = () => {
           <Typography variant="h6" gutterBottom>
             {t(userSettingPageContent.connectedAccounts)}
           </Typography>
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, sm: 6 }}>
+          <Grid2 container spacing={2}>
+            <Grid2 size={{ xs: 12, sm: 6 }}>
               <UserSettingStyledButton
                 variant="outlined"
                 color="primary"
@@ -104,8 +110,8 @@ const UserSettingPage = () => {
               >
                 {t(userSettingPageContent.bindGoogle)}
               </UserSettingStyledButton>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
+            </Grid2>
+            <Grid2 size={{ xs: 12, sm: 6 }}>
               <UserSettingStyledButton
                 variant="outlined"
                 color="success"
@@ -114,16 +120,16 @@ const UserSettingPage = () => {
               >
                 {t(userSettingPageContent.bindLine)}
               </UserSettingStyledButton>
-            </Grid>
-          </Grid>
+            </Grid2>
+          </Grid2>
         </Box>
 
         <Box component="form" onSubmit={handleChangePassword}>
           <Typography variant="h6" gutterBottom>
             {t(userSettingPageContent.changePassword)}
           </Typography>
-          <Grid container spacing={3}>
-            <Grid size={12}>
+          <Grid2 container spacing={3}>
+            <Grid2 size={12}>
               <TextField
                 fullWidth
                 type="password"
@@ -134,8 +140,8 @@ const UserSettingPage = () => {
                 onChange={handleInputChange}
                 variant="outlined"
               />
-            </Grid>
-            <Grid size={12}>
+            </Grid2>
+            <Grid2 size={12}>
               <TextField
                 fullWidth
                 type="password"
@@ -146,8 +152,8 @@ const UserSettingPage = () => {
                 onChange={handleInputChange}
                 variant="outlined"
               />
-            </Grid>
-            <Grid size={12}>
+            </Grid2>
+            <Grid2 size={12}>
               <TextField
                 fullWidth
                 type="password"
@@ -158,8 +164,8 @@ const UserSettingPage = () => {
                 onChange={handleInputChange}
                 variant="outlined"
               />
-            </Grid>
-            <Grid size={12}>
+            </Grid2>
+            <Grid2 size={12}>
               <Button
                 fullWidth
                 type="submit"
@@ -169,8 +175,8 @@ const UserSettingPage = () => {
               >
                 {t(userSettingPageContent.changePassword)}
               </Button>
-            </Grid>
-          </Grid>
+            </Grid2>
+          </Grid2>
         </Box>
       </UserSettingStyledPaper>
     </Container>

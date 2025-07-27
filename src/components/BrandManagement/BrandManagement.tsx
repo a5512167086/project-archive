@@ -10,7 +10,7 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  Grid,
+  Grid2,
   CircularProgress
 } from '@mui/material'
 import { Add as AddIcon } from '@mui/icons-material'
@@ -289,8 +289,8 @@ const BrandManagement = ({
             : t('productManagementPage.addBrand')}
         </DialogTitle>
         <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={12}>
+          <Grid2 container spacing={2} sx={{ mt: 1 }}>
+            <Grid2 size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 label={t('productManagementPage.brandName')}
@@ -300,8 +300,8 @@ const BrandManagement = ({
                 }
                 disabled={isCreating || isUpdating}
               />
-            </Grid>
-            <Grid item xs={12}>
+            </Grid2>
+            <Grid2 size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 label={t('productManagementPage.brandDescription')}
@@ -316,8 +316,8 @@ const BrandManagement = ({
                 }
                 disabled={isCreating || isUpdating}
               />
-            </Grid>
-          </Grid>
+            </Grid2>
+          </Grid2>
         </DialogContent>
         <DialogActions>
           <Button

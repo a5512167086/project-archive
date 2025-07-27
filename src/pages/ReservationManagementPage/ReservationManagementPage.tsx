@@ -19,7 +19,7 @@ import {
   MenuItem,
   Chip,
   Divider,
-  Grid
+  Grid2
 } from '@mui/material'
 import { PAGE_PATHS } from '@/routes'
 import { useAppSelector } from '@/utils/hook'
@@ -236,24 +236,24 @@ const ReservationManagementPage = () => {
               <Typography variant="h6" gutterBottom>
                 {t('reservationManagementPage.basicInfo')}
               </Typography>
-              <Grid container spacing={2} sx={{ mb: 3 }}>
-                <Grid item xs={12} sm={6}>
+              <Grid2 container spacing={2} sx={{ mb: 3 }}>
+                <Grid2 size={{ xs: 12, sm: 6 }}>
                   <Typography variant="body2" color="text.secondary">
                     {t('reservationManagementPage.serviceName')}
                   </Typography>
                   <Typography variant="body1">
                     {selectedReservation.service_name}
                   </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6 }}>
                   <Typography variant="body2" color="text.secondary">
                     {t('common.price')}
                   </Typography>
                   <Typography variant="body1">
                     ${selectedReservation.price}
                   </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6 }}>
                   <TextField
                     label={t('reservationManagementPage.reservationDate')}
                     type="date"
@@ -264,8 +264,8 @@ const ReservationManagementPage = () => {
                     fullWidth
                     InputLabelProps={{ shrink: true }}
                   />
-                </Grid>
-                <Grid item xs={12} sm={6}>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6 }}>
                   <TextField
                     label={t('reservationManagementPage.startTime')}
                     type="time"
@@ -274,10 +274,9 @@ const ReservationManagementPage = () => {
                       handleFormChange('start_time', e.target.value)
                     }
                     fullWidth
-                    InputLabelProps={{ shrink: true }}
                   />
-                </Grid>
-              </Grid>
+                </Grid2>
+              </Grid2>
 
               <Divider sx={{ my: 2 }} />
 
@@ -285,8 +284,8 @@ const ReservationManagementPage = () => {
               <Typography variant="h6" gutterBottom>
                 {t('reservationManagementPage.statusAndPayment')}
               </Typography>
-              <Grid container spacing={2} sx={{ mb: 3 }}>
-                <Grid item xs={12} sm={4}>
+              <Grid2 container spacing={2} sx={{ mb: 3 }}>
+                <Grid2 size={{ xs: 12, sm: 4 }}>
                   <FormControl fullWidth>
                     <InputLabel>
                       {t('reservationManagementPage.status')}
@@ -312,8 +311,8 @@ const ReservationManagementPage = () => {
                       </MenuItem>
                     </Select>
                   </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={4}>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 4 }}>
                   <FormControl fullWidth>
                     <InputLabel>
                       {t('reservationManagementPage.paymentMethod')}
@@ -333,9 +332,9 @@ const ReservationManagementPage = () => {
                       </MenuItem>
                     </Select>
                   </FormControl>
-                </Grid>
+                </Grid2>
                 {editForm.payment_method !== 'cash' && (
-                  <Grid item xs={12} sm={4}>
+                  <Grid2 size={{ xs: 12, sm: 4 }}>
                     <FormControl fullWidth>
                       <InputLabel>
                         {t('reservationManagementPage.paymentStatus')}
@@ -358,9 +357,9 @@ const ReservationManagementPage = () => {
                         </MenuItem>
                       </Select>
                     </FormControl>
-                  </Grid>
+                  </Grid2>
                 )}
-              </Grid>
+              </Grid2>
 
               <Divider sx={{ my: 2 }} />
 
