@@ -83,3 +83,14 @@ class KnowledgeCommand:
         )
 
         self.session.exec(delete(Object).where(Object.object_id.in_(found_ids)))
+
+
+    def update_knowledge_item(
+        self, object_id: int, question: str | None, answer: str | None
+    ):
+        knowledge = self.session.get(Object, object_id)
+        if knowledge:
+            if question is not None:
+                knowledge.chinese_name = question
+            if answer is not None:
+                knowledge.english_name = answer

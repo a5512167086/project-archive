@@ -7,6 +7,7 @@ from modules.knowledge.knowledge_model import KnowledgeListView
 from modules.knowledge.knowledge_schema import (
     DeleteKnowledgeRequest,
     InsertKnowledgeRequest,
+    UpdateKnowledgeRequest,
 )
 from modules.knowledge.knowledge_service import KnowledgeService
 from shared.clients.database import SessionDep
@@ -62,4 +63,15 @@ def delete_knowledges(
     knowledge_service.delete_knowledges_by_bot_class_id(
         body.bot_uuid, body.deleted_id_list, user_id
     )
+    knowledge_service.session.commit()
+
+
+@knowledge_router.patch("")
+def update_knowledge(
+    body: UpdateKnowledgeRequest,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    knowledge_service: Annotated[KnowledgeService, Depends(get_knowledge_service)],
+):
+    user_id = current_user["user_id"]
+    knowledge_service.update_knowledge(body, user_id)
     knowledge_service.session.commit()

@@ -35,3 +35,13 @@ class KnowledgeQuery:
         )
         result = self.session.exec(statement)
         return result.all()
+
+    def get_knowledge_item_by_id(
+        self, knowledge_class_id, knowledge_id: int
+    ) -> KnowledgeListView | None:
+        statement = select(KnowledgeListView).where(
+            KnowledgeListView.object_id == knowledge_id,
+            KnowledgeListView.class_id == knowledge_class_id,
+        )
+        result = self.session.exec(statement)
+        return result.one_or_none()

@@ -7,7 +7,10 @@ from sqlmodel import Session
 from modules.bot.bot_service import BotService
 from modules.knowledge.knowledge_command import KnowledgeCommand
 from modules.knowledge.knowledge_query import KnowledgeQuery
-from modules.knowledge.knowledge_schema import InsertKnowledgeRequest
+from modules.knowledge.knowledge_schema import (
+    InsertKnowledgeRequest,
+    UpdateKnowledgeRequest,
+)
 from shared.constants.error_code import ErrorCode
 from shared.exception import GlobalErrorException
 
@@ -82,3 +85,20 @@ class KnowledgeService:
 
         knowledge_class_id = self.validate_knowledge_class(bot.class_id)
         self.command.delete_knowledge_items(knowledge_class_id, deleted_id_list)
+
+    def update_knowledge(self, body: UpdateKnowledgeRequest, current_user_id: UUID):
+        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
+        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
+        knowledge_class_id = self.validate_knowledge_class(bot.class_id)
+        knowledge = self.query.get_knowledge_item_by_id(
+            knowledge_class_id, body.object_id
+        )
+        if not knowledge:
+            raise GlobalErrorException(
+                error_code=ErrorCode.KNOWLEDGE_NOT_FOUND,
+                error_message="Knowledge not found",
+            )
+
+        self.command.update_knowledge_item(
+            knowledge.object_id, body.question, body.answer
+        )

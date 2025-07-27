@@ -13,3 +13,10 @@ class InsertKnowledgeRequest(BaseModel):
 class DeleteKnowledgeRequest(BaseModel):
     bot_uuid: UUID
     deleted_id_list: List[int]
+
+
+class UpdateKnowledgeRequest(BaseModel):
+    bot_uuid: UUID
+    object_id: int
+    question: str | None = None
+    answer: str | None = None
