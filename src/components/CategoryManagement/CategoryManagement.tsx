@@ -15,7 +15,7 @@ import {
   FormControl,
   InputLabel,
   IconButton,
-  Grid,
+  Grid2,
   Collapse,
   List,
   ListItem,
@@ -306,8 +306,8 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({
             : t('productManagementPage.addCategory')}
         </DialogTitle>
         <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={12}>
+          <Grid2 container spacing={2} sx={{ mt: 1 }}>
+            <Grid2 size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 label={t('productManagementPage.categoryName')}
@@ -320,8 +320,8 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({
                 }
                 disabled={isCreating || isUpdating}
               />
-            </Grid>
-            <Grid item xs={12}>
+            </Grid2>
+            <Grid2 size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 label={t('productManagementPage.categoryDescription')}
@@ -336,8 +336,8 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({
                 }
                 disabled={isCreating || isUpdating}
               />
-            </Grid>
-            <Grid item xs={12}>
+            </Grid2>
+            <Grid2 size={{ xs: 12 }}>
               <FormControl fullWidth>
                 <InputLabel>
                   {t('productManagementPage.parentCategory')}
@@ -374,8 +374,8 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({
                     ))}
                 </Select>
               </FormControl>
-            </Grid>
-          </Grid>
+            </Grid2>
+          </Grid2>
         </DialogContent>
         <DialogActions>
           <Button

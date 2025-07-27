@@ -67,7 +67,8 @@ export const CustomDialog = <T extends Record<string, unknown>>({
       }
     })
     setFormState(newFormState)
-  }, [fields])
+  }, [])
+
   const [checkboxValues, setCheckboxValues] = useState<Record<string, boolean>>(
     {}
   )
@@ -284,6 +285,7 @@ export const CustomDialog = <T extends Record<string, unknown>>({
       maxWidth={maxWidth}
       PaperProps={{ component: 'form', onSubmit: handleSubmit }}
       {...rest}
+      closeAfterTransition={false}
     >
       <DialogTitle textAlign="center" variant="h5">
         {t(title)}
