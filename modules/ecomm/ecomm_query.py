@@ -9,6 +9,7 @@ from modules.ecomm.ecomm_model import (
     CategoryListView,
     ProductDetail,
     ProductImage,
+    ProductListView,
     ProductVariant,
 )
 from shared.models.class_model import SubClassView
@@ -224,3 +225,9 @@ class EcommQuery:
                 })
 
         return products
+
+    def get_all_products_view(self, product_class_id: int) -> List[ProductListView]:
+        statement = select(ProductListView).where(
+            ProductListView.category_id == product_class_id
+        )
+        return self.session.exec(statement).all()

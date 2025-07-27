@@ -14,7 +14,7 @@ from modules.ecomm.ecomm_schema import (
     DeleteProductRequest,
     InsertBrandRequest,
     InsertCategoryRequest,
-    InsertProductRequest,
+    ProductResponse,
     UpdateBrandRequest,
     UpdateCategoryRequest,
     UpdateProductRequest,
@@ -207,7 +207,6 @@ class EcommService:
 
         category_class_id = self.validate_category_class(bot.class_id)
 
-        # 如果有提供 category_name，檢查是否重複（排除自己）
         if body.category_name is not None:
             if self.query.check_category_name_exists_exclude_self(
                 category_class_id, body.category_name, body.class_id
@@ -251,47 +250,39 @@ class EcommService:
             )
 
     # Product service methods
-    def get_all_products(self, bot_uuid: UUID) -> List[dict]:
+    def get_all_products(self, bot_uuid: UUID) -> List[ProductResponse]:
         """取得所有產品"""
         bot = self.bot_service.validate_line_bot_exists(bot_uuid)
-        product_class_id = self.validate_product_class(bot.class_id)
-        return self.query.get_products_by_class_id(product_class_id)
+        category_class = self.validate_category_class(bot.class_id)
 
-    def insert_single_product(self, body: InsertProductRequest, user_id: str):
-        """建立單一產品"""
-        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
-
-        # 如果沒有提供 category_id，使用根 Category class
-        if body.category_id is None:
-            product_class_id = self.validate_category_class(bot.class_id)
-        else:
-            # 如果提供了 category_id，使用指定的類別
-            product_class_id = body.category_id
-
-        # 檢查 SKU 是否已存在
-        if self.query.check_product_sku_exists(body.sku_code):
-            raise GlobalErrorException(
-                error_code=ErrorCode.PRODUCT_SKU_ALREADY_EXISTS,
-                error_message=f"SKU '{body.sku_code}' already exists",
+        products_data = self.query.get_all_products_view(category_class)
+        products = []
+        for product_data in products_data:
+            products.append(
+                ProductResponse(
+                    product_id=product_data.product_id,
+                    object_id=product_data.object_id,
+                    product_name=product_data.product_name,
+                    product_description=product_data.product_description,
+                    brand_id=product_data.brand_id,
+                    # If the category_id is root category, set to None
+                    category_id=product_data.category_id
+                    if product_data.category_id != category_class
+                    else None,
+                    sku_code=product_data.sku_code,
+                    price=product_data.price,
+                    stock=product_data.stock,
+                    is_active=product_data.is_active,
+                    created_at=product_data.created_at,
+                    updated_at=product_data.updated_at,
+                    images=[],
+                    variants=[],
+                )
             )
 
-        # 建立產品
-        self.command.insert_product(
-            product_class_id=product_class_id,
-            product_name=body.product_name,
-            product_description=body.product_description,
-            brand_id=body.brand_id,
-            sku_code=body.sku_code,
-            price=body.price,
-            stock=body.stock,
-            is_active=body.is_active,
-            images=[img.dict() for img in body.images],
-            variants=[variant.dict() for variant in body.variants],
-            owner_id=user_id,
-        )
+        return products
 
-    def insert_product_with_images(
+    def insert_product(
         self,
         bot_uuid: UUID,
         product_name: str,

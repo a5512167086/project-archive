@@ -14,7 +14,6 @@ from modules.ecomm.ecomm_schema import (
     DeleteProductRequest,
     InsertBrandRequest,
     InsertCategoryRequest,
-    InsertProductRequest,
     ProductResponse,
     UpdateBrandRequest,
     UpdateCategoryRequest,
@@ -131,68 +130,11 @@ def update_category(
 def list_products(
     bot_uuid: UUID, ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)]
 ):
-    products_data = ecomm_service.get_all_products(bot_uuid)
-    products = []
-    for product_data in products_data:
-        product_detail = product_data["product_detail"]
-        obj = product_data["object"]
-        images = product_data["images"]
-        variants = product_data["variants"]
-
-        products.append(
-            ProductResponse(
-                product_id=product_detail.product_id,
-                object_id=product_detail.object_id,
-                product_name=obj.chinese_name,
-                product_description=obj.chinese_description,
-                brand_id=product_detail.brand_id,
-                sku_code=product_detail.sku_code,
-                price=product_detail.price,
-                stock=product_detail.stock,
-                is_active=product_detail.is_active,
-                created_at=product_detail.created_at,
-                updated_at=product_detail.updated_at,
-                images=[
-                    {
-                        "image_id": img.image_id,
-                        "image_url": img.image_url,
-                        "object_id": img.object_id,
-                        "display_order": img.display_order,
-                    }
-                    for img in images
-                ],
-                variants=[
-                    {
-                        "variant_id": variant.variant_id,
-                        "object_id": variant.object_id,
-                        "variant_name": variant.variant_name,
-                        "sku_code": variant.sku_code,
-                        "price": variant.price,
-                        "stock": variant.stock,
-                        "created_at": variant.created_at,
-                        "updated_at": variant.updated_at,
-                    }
-                    for variant in variants
-                ],
-            )
-        )
-
-    return products
+    return ecomm_service.get_all_products(bot_uuid)
 
 
 @product_router.post("")
 def create_product(
-    product: InsertProductRequest,
-    current_user: Annotated[dict, Depends(get_current_user)],
-    ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
-):
-    user_id = current_user["user_id"]
-    ecomm_service.insert_single_product(product, user_id)
-    ecomm_service.session.commit()
-
-
-@product_router.post("/with-images")
-def create_product_with_images(
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     bot_uuid: UUID = Form(...),
@@ -242,7 +184,7 @@ def create_product_with_images(
             )
 
     # 使用新的 service 函數來處理產品創建和圖片上傳
-    ecomm_service.insert_product_with_images(
+    ecomm_service.insert_product(
         bot_uuid=bot_uuid,
         product_name=product_name,
         product_description=product_description,

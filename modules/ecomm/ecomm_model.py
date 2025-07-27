@@ -61,3 +61,20 @@ class ProductVariant(SQLModel, table=True):
     stock: int = Field(default=0)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class ProductListView(SQLModel, table=True):
+    __tablename__ = "vs_product_list"
+
+    product_id: UUID = Field(primary_key=True)
+    object_id: int
+    product_name: str
+    product_description: Optional[str] = None
+    category_id: int
+    brand_id: Optional[int] = None
+    sku_code: str
+    price: int
+    stock: int
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime

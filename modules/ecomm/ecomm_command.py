@@ -266,8 +266,6 @@ class EcommCommand:
         new_product_object = Object(
             chinese_name=product_name,
             chinese_description=product_description,
-            english_name=product_name,
-            english_description=product_description,
             entity_id=product_entity_id,
             owner_id=owner_id,
         )

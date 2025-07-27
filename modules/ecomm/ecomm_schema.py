@@ -123,6 +123,7 @@ class ProductResponse(BaseModel):
     product_name: str
     product_description: Optional[str]
     brand_id: Optional[int]
+    category_id: Optional[int]
     sku_code: str
     price: int
     stock: int
