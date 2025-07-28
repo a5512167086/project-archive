@@ -9,6 +9,7 @@ import { PAGE_PATHS } from '@/routes'
 import { useAppSelector } from '@/utils/hook'
 import { BrandManagement } from '@/components/BrandManagement'
 import { CategoryManagement } from '@/components/CategoryManagement'
+import { ProductManagement } from '@/components/ProductManagement'
 
 function a11yProps(index: number) {
   return {
@@ -85,7 +86,7 @@ const ProductManagementPage = () => {
       <Box sx={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
         {/* 商品管理 */}
         <TabPanel value={activeTab} index={0}>
-          test
+          <ProductManagement />
         </TabPanel>
 
         {/* 類別管理 */}

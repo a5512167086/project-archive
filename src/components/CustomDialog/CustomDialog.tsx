@@ -61,14 +61,16 @@ export const CustomDialog = <T extends Record<string, unknown>>({
   })
 
   useEffect(() => {
-    const newFormState: Record<string, unknown> = {}
+    if (!rest.open || fields.length === 0) return
+
+    const initialFormState: Record<string, unknown> = {}
     fields.forEach((field) => {
       if (field.defaultValue !== undefined) {
-        newFormState[field.name] = field.defaultValue
+        initialFormState[field.name] = field.defaultValue
       }
     })
-    setFormState(newFormState)
-  }, [])
+    setFormState(initialFormState)
+  }, [rest.open])
 
   const [checkboxValues, setCheckboxValues] = useState<Record<string, boolean>>(
     {}
@@ -295,29 +297,81 @@ export const CustomDialog = <T extends Record<string, unknown>>({
         {description && <Typography>{t(description)}</Typography>}
         {fields.map((field) => {
           if (field.type === 'file') {
-            return (
-              <Button
-                key={field.id}
-                component="label"
-                variant="contained"
-                startIcon={<CloudUploadIcon />}
-                disabled={!!uploadedFiles[field.name]}
-              >
-                {uploadedFiles[field.name]
-                  ? `${t('common.uploaded')}: ${uploadedFiles[field.name].name}`
-                  : t(field.label)}
-                <VisuallyHiddenInput
-                  type="file"
-                  name={field.name}
-                  accept={
-                    field.name === 'csv_file' ? '.csv,text/csv' : undefined
-                  }
-                  onChange={(e) =>
-                    handleFieldBlur(field, e.target.files?.[0] || null)
-                  }
-                />
-              </Button>
-            )
+            if (field.multiple) {
+              return (
+                <Box key={field.id} sx={{ mb: 2 }}>
+                  <Button
+                    component="label"
+                    variant="contained"
+                    startIcon={<CloudUploadIcon />}
+                    fullWidth
+                  >
+                    {t(field.label)}
+                    <VisuallyHiddenInput
+                      type="file"
+                      name={field.name}
+                      accept={field.accept}
+                      multiple
+                      onChange={(e) => {
+                        const files = e.target.files
+                          ? Array.from(e.target.files)
+                          : []
+                        setFormState((prev) => ({
+                          ...prev,
+                          [field.name]: files
+                        }))
+                      }}
+                    />
+                  </Button>
+                  <Box display="flex" gap={2} flexWrap="wrap" mt={1}>
+                    {Array.isArray(formState[field.name]) &&
+                      (formState[field.name] as File[]).map((file, idx) => (
+                        <Box
+                          key={idx}
+                          sx={{
+                            width: 80,
+                            height: 80,
+                            border: '1px solid #eee',
+                            borderRadius: 2,
+                            overflow: 'hidden',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={`preview-${idx}`}
+                            style={{ maxWidth: '100%', maxHeight: '100%' }}
+                          />
+                        </Box>
+                      ))}
+                  </Box>
+                </Box>
+              )
+            } else {
+              return (
+                <Button
+                  key={field.id}
+                  component="label"
+                  variant="contained"
+                  startIcon={<CloudUploadIcon />}
+                  disabled={!!uploadedFiles[field.name]}
+                >
+                  {uploadedFiles[field.name]
+                    ? `${t('common.uploaded')}: ${uploadedFiles[field.name].name}`
+                    : t(field.label)}
+                  <VisuallyHiddenInput
+                    type="file"
+                    name={field.name}
+                    accept={field.accept}
+                    onChange={(e) =>
+                      handleFieldBlur(field, e.target.files?.[0] || null)
+                    }
+                  />
+                </Button>
+              )
+            }
           }
 
           if (field.type === 'array') {

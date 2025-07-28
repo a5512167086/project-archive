@@ -24,6 +24,8 @@ export interface FieldProps {
     invalidFormat?: string
   }
   defaultValue?: unknown
+  multiple?: boolean
+  accept?: string
 }
 
 export type CustomDialogProps<T = Record<string, unknown>> = DialogProps & {

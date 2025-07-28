@@ -97,7 +97,8 @@ export const StyledSidebarHeader = styled(MuiAppBar, {
     }
   },
   '& .header__navLink': {
-    color: theme.palette.common.white
+    color: theme.palette.common.white,
+    marginTop: '3.25px'
   },
   variants: [
     {

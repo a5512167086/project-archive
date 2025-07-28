@@ -331,7 +331,10 @@
     "brand_deleted": "品牌刪除成功",
     "category_added": "類別新增成功",
     "category_updated": "類別更新成功",
-    "category_deleted": "類別刪除成功"
+    "category_deleted": "類別刪除成功",
+    "product_added": "商品新增成功",
+    "product_updated": "商品更新成功",
+    "product_deleted": "商品刪除成功"
   },
   "productManagementPage": {
     "title": "商品管理",
@@ -354,10 +357,13 @@
     "productDescription": "商品描述",
     "brand": "品牌",
     "category": "類別",
+    "skuCode": "SKU",
     "price": "價格",
     "stock": "庫存",
     "status": "狀態",
     "active": "啟用",
+    "noBrand": "無品牌",
+    "noCategory": "無類別",
     "inactive": "停用",
     "brandName": "品牌名稱",
     "brandDescription": "品牌描述",
@@ -368,6 +374,9 @@
     "description": "描述",
     "deleteBrandMultiTitle": "確定要刪除選中的品牌嗎？此操作無法撤銷。",
     "deleteBrandSingleTitle": "刪除品牌「{{name}}」",
-    "deleteCategorySingleTitle": "刪除類別「{{name}}」"
+    "deleteProductMultiTitle": "確定要刪除選中的商品嗎？此操作無法撤銷。",
+    "deleteProductSingleTitle": "刪除商品「{{name}}」",
+    "deleteCategorySingleTitle": "刪除類別「{{name}}」",
+    "imageUpload": "請上傳商品圖片，支援多張圖片上傳"
   }
 }

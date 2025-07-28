@@ -98,10 +98,7 @@ export const productApi = createApi({
         return {
           url: 'products',
           method: 'POST',
-          headers: {
-            'Content-Type': 'multipart/form-data;'
-          },
-          body: { bodyFormData },
+          body: bodyFormData,
           formData: true
         }
       }

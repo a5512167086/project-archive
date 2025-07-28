@@ -328,7 +328,10 @@
     "brand_deleted": "Brand deleted successfully",
     "category_added": "Category added successfully",
     "category_updated": "Category updated successfully",
-    "category_deleted": "Category deleted successfully"
+    "category_deleted": "Category deleted successfully",
+    "product_added": "Product added successfully",
+    "product_updated": "Product updated successfully",
+    "product_deleted": "Product deleted successfully"
   },
   "productManagementPage": {
     "title": "Product Management",
@@ -351,10 +354,13 @@
     "productDescription": "Product Description",
     "brand": "Brand",
     "category": "Category",
+    "skuCode": "SKU",
     "price": "Price",
     "stock": "Stock",
     "status": "Status",
     "active": "Active",
+    "noBrand": "No Brand",
+    "noCategory": "No Category",
     "inactive": "Inactive",
     "brandName": "Brand Name",
     "brandDescription": "Brand Description",
@@ -365,6 +371,9 @@
     "description": "Description",
     "deleteBrandMultiTitle": "Are you sure you want to delete the selected brands? This action cannot be undone.",
     "deleteBrandSingleTitle": "Delete brand「{{name}}」",
-    "deleteCategorySingleTitle": "Delete category「{{name}}」"
+    "deleteProductMultiTitle": "Are you sure you want to delete the selected products? This action cannot be undone.",
+    "deleteProductSingleTitle": "Delete product「{{name}}」",
+    "deleteCategorySingleTitle": "Delete category「{{name}}」",
+    "imageUpload": "Please upload product images, supporting multiple images upload"
   }
 }
