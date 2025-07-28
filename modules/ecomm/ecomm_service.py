@@ -202,7 +202,6 @@ class EcommService:
     def update_category_by_id(self, body: UpdateCategoryRequest, current_user_id: UUID):
         bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
         self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
-
         category_class_id = self.validate_category_class(bot.class_id)
 
         if body.category_name is not None:
@@ -214,26 +213,15 @@ class EcommService:
                     error_message=f"Category name '{body.category_name}' already exists",
                 )
 
-        # 如果有提供 parent_category_id，進行相關驗證
         if body.parent_category_id is not None:
-            # 檢查父類別是否存在（0 表示設為根類別）
             if body.parent_category_id != 0:
                 if not self.query.check_parent_category_exists(body.parent_category_id):
                     raise GlobalErrorException(
                         error_code=ErrorCode.PARENT_CATEGORY_NOT_FOUND,
                         error_message="Parent category not found",
                     )
-                # 檢查是否會造成循環引用
-                if not self.query.check_category_hierarchy_valid(
-                    category_class_id, body.parent_category_id
-                ):
-                    raise GlobalErrorException(
-                        error_code=ErrorCode.INVALID_CATEGORY_HIERARCHY,
-                        error_message="Invalid category hierarchy: circular reference detected",
-                    )
 
-        # 執行更新
-        success = self.command.update_category(
+        self.command.update_category(
             category_class_id,
             body.class_id,
             body.category_name,
@@ -241,10 +229,12 @@ class EcommService:
             body.parent_category_id,
         )
 
-        if not success:
+        if not self.query.check_category_hierarchy_valid(
+            category_class_id, body.parent_category_id
+        ):
             raise GlobalErrorException(
-                error_code=ErrorCode.CATEGORY_CLASS_NOT_FOUND,
-                error_message="Category not found or does not belong to this bot",
+                error_code=ErrorCode.INVALID_CATEGORY_HIERARCHY,
+                error_message="Invalid category hierarchy: circular reference detected",
             )
 
     # Product service methods

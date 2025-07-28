@@ -129,10 +129,9 @@ class EcommQuery:
     def check_category_hierarchy_valid(
         self, category_class_id: int, parent_category_class_id: int
     ) -> bool:
-        # 如果父類別就是自己，則無效
         if category_class_id == parent_category_class_id:
             return False
-        # 檢查是否會造成循環引用
+
         current_parent = parent_category_class_id
         visited = set()
 
@@ -146,7 +145,7 @@ class EcommQuery:
                     CategoryListView.class_id == current_parent,
                 )
             ).first()
-            current_parent = parent_result
+            current_parent = parent_result if parent_result else None
 
         return True
 
