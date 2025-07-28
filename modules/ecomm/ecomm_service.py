@@ -31,11 +31,16 @@ class EcommService:
         self.query = EcommQuery(session)
         self.bot_service = BotService(session)
 
-    def get_nested_categories(self, bot_uuid: UUID):
-        categories = self.get_all_categories(bot_uuid)
+    def get_nested_categories(
+        self, category_class_id: int, category_list: List[CategoryListView]
+    ):
         category_dict = {}
-        for cat in categories:
+        for cat in category_list:
             cat_dict = cat.model_dump() if hasattr(cat, "model_dump") else dict(cat)
+
+            if cat_dict.get("parent_class_id") == category_class_id:
+                cat_dict["parent_class_id"] = None
+
             cat_dict["children"] = []
             category_dict[cat_dict["class_id"]] = cat_dict
 
@@ -169,7 +174,9 @@ class EcommService:
     def get_all_categories(self, bot_uuid: UUID) -> List[CategoryListView]:
         bot = self.bot_service.validate_line_bot_exists(bot_uuid)
         category_class_id = self.validate_category_class(bot.class_id)
-        return self.query.get_all_categories_by_class_id(category_class_id)
+        return self.query.get_all_categories_by_class_id(
+            category_class_id
+        ), category_class_id
 
     def delete_categories_by_ids(
         self, body: DeleteCategoryRequest, current_user_id: UUID

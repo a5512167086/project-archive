@@ -89,7 +89,8 @@ def update_brand(
 def list_categories(
     bot_uuid: UUID, ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)]
 ):
-    return ecomm_service.get_nested_categories(bot_uuid)
+    category_list, category_class_id = ecomm_service.get_all_categories(bot_uuid)
+    return ecomm_service.get_nested_categories(category_class_id, category_list)
 
 
 @category_router.post("")
