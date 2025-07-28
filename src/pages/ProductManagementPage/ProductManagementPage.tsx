@@ -8,6 +8,7 @@ import { StyledProductManagementPage } from './ProductManagementPage.style'
 import { PAGE_PATHS } from '@/routes'
 import { useAppSelector } from '@/utils/hook'
 import { BrandManagement } from '@/components/BrandManagement'
+import { CategoryManagement } from '@/components/CategoryManagement'
 
 function a11yProps(index: number) {
   return {
@@ -89,7 +90,7 @@ const ProductManagementPage = () => {
 
         {/* 類別管理 */}
         <TabPanel value={activeTab} index={1}>
-          test
+          <CategoryManagement />
         </TabPanel>
 
         {/* 品牌管理 */}

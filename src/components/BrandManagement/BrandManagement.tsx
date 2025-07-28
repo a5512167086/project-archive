@@ -255,7 +255,7 @@ export const BrandManagement = () => {
           {/* 單一刪除 Dialog */}
           <CustomDialog
             open={isDeleteDialogOpen}
-            title={t('productManagementPage.deleteSingleTitle', {
+            title={t('productManagementPage.deleteBrandSingleTitle', {
               name: currentDeleteBrand?.brand_name
             })}
             handleClose={handleDeleteDialogClose}
@@ -264,7 +264,7 @@ export const BrandManagement = () => {
           {/* 多選刪除 Dialog */}
           <CustomDialog
             open={isMutiDeleteDialogOpen}
-            title={t('productManagementPage.deleteMultiTitle')}
+            title={t('productManagementPage.deleteBrandMultiTitle')}
             handleClose={handleMutiDeleteDialogClose}
             onSubmit={handleMutiDeleteDialogConfirm}
           />

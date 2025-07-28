@@ -325,7 +325,10 @@
     "account_created_success": "Account created successfully",
     "brand_added": "Brand added successfully",
     "brand_updated": "Brand updated successfully",
-    "brand_deleted": "Brand deleted successfully"
+    "brand_deleted": "Brand deleted successfully",
+    "category_added": "Category added successfully",
+    "category_updated": "Category updated successfully",
+    "category_deleted": "Category deleted successfully"
   },
   "productManagementPage": {
     "title": "Product Management",
@@ -339,6 +342,7 @@
     "addProduct": "Add Product",
     "editProduct": "Edit Product",
     "addCategory": "Add Category",
+    "addSubCategory": "Add Sub-Category",
     "editCategory": "Edit Category",
     "addBrand": "Add Brand",
     "editBrand": "Edit Brand",
@@ -359,7 +363,8 @@
     "parentCategory": "Parent Category",
     "noParentCategory": "None (Root Category)",
     "description": "Description",
-    "deleteMultiTitle": "Are you sure you want to delete the selected brands? This action cannot be undone.",
-    "deleteSingleTitle": "Delete brand「{{name}}」"
+    "deleteBrandMultiTitle": "Are you sure you want to delete the selected brands? This action cannot be undone.",
+    "deleteBrandSingleTitle": "Delete brand「{{name}}」",
+    "deleteCategorySingleTitle": "Delete category「{{name}}」"
   }
 }
