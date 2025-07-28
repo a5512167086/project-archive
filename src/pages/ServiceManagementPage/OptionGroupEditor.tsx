@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState, FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Box,
@@ -66,7 +66,7 @@ interface OptionGroupEditorProps {
 }
 
 // 可拖拽的選項群組組件
-const SortableOptionGroup: React.FC<{
+const SortableOptionGroup: FC<{
   group: OptionGroupData
   groupIndex: number
   isExpanded: boolean
@@ -293,7 +293,7 @@ const SortableOptionGroup: React.FC<{
 }
 
 // 可拖拽的選項組件
-const SortableOption: React.FC<{
+const SortableOption: FC<{
   option: OptionData
   optionIndex: number
   groupIndex: number
@@ -408,7 +408,7 @@ const SortableOption: React.FC<{
   )
 }
 
-export const OptionGroupEditor: React.FC<OptionGroupEditorProps> = ({
+export const OptionGroupEditor: FC<OptionGroupEditorProps> = ({
   optionGroups,
   onChange
 }) => {

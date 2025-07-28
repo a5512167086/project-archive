@@ -1,4 +1,4 @@
-import React from 'react'
+import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Box,
@@ -28,7 +28,7 @@ interface CreateScheduleEditorProps {
   onChange: (schedules: CreateScheduleData[]) => void
 }
 
-export const CreateScheduleEditor: React.FC<CreateScheduleEditorProps> = ({
+export const CreateScheduleEditor: FC<CreateScheduleEditorProps> = ({
   schedules,
   onChange
 }) => {

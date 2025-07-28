@@ -372,6 +372,7 @@ const ServiceManagementPage = () => {
         }}
         maxWidth="lg"
         fullWidth
+        closeAfterTransition={false}
       >
         <DialogTitle>{t('serviceManagementPage.addService')}</DialogTitle>
         <DialogContent dividers>
@@ -526,6 +527,7 @@ const ServiceManagementPage = () => {
         onClose={handleEditDialogClose}
         maxWidth="md"
         fullWidth
+        closeAfterTransition={false}
       >
         <DialogTitle>
           {t('serviceManagementPage.editReservationData')}

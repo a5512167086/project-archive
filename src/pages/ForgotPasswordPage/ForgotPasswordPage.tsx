@@ -4,7 +4,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { StyledForgotPasswordPage } from './ForgotPasswordPage.style'
 import { useTranslation } from 'react-i18next'
 import { validateEmail } from '@/utils/helper'
-import { useState } from 'react'
+import { useState, ChangeEvent } from 'react'
 import { CustomLoader } from '@/components/CustomLoader'
 import { useAppDispatch } from '@/utils/hook'
 import { useForgotPasswordMutation } from '@/store/apis/userApi'
@@ -32,7 +32,7 @@ const ForgotPasswordPage = () => {
   const [emailError, setEmailError] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newEmail = e.target.value
     setEmail(newEmail)
 

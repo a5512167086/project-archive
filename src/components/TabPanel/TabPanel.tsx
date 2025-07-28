@@ -1,18 +1,13 @@
-import React from 'react'
+import { FC, ReactNode } from 'react'
 import { Box } from '@mui/material'
 
 interface TabPanelProps {
-  children?: React.ReactNode
+  children?: ReactNode
   index: number
   value: number
 }
 
-const TabPanel: React.FC<TabPanelProps> = ({
-  children,
-  value,
-  index,
-  ...other
-}) => {
+const TabPanel: FC<TabPanelProps> = ({ children, value, index, ...other }) => {
   return (
     <div
       role="tabpanel"

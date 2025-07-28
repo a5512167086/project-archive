@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, ChangeEvent } from 'react'
 import {
   Avatar,
   Button,
@@ -50,7 +50,7 @@ const SignInPage = () => {
   const [loginUser] = useLoginUserMutation()
   const [getUser] = useLazyGetUserMeQuery()
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newEmail = e.target.value
     setEmail(newEmail)
 

@@ -225,6 +225,7 @@ const ReservationManagementPage = () => {
         onClose={handleDialogClose}
         maxWidth="md"
         fullWidth
+        closeAfterTransition={false}
       >
         <DialogTitle>
           {t('reservationManagementPage.reservationDetails')}
@@ -262,7 +263,6 @@ const ReservationManagementPage = () => {
                       handleFormChange('reservation_date', e.target.value)
                     }
                     fullWidth
-                    InputLabelProps={{ shrink: true }}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6 }}>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, FormEvent } from 'react'
 import {
   Box,
   Button,
@@ -37,6 +37,7 @@ export const CustomDialog = <T extends Record<string, unknown>>({
   handleClose,
   fields = [],
   title,
+  description,
   linkText,
   link,
   dangerButton,
@@ -116,7 +117,7 @@ export const CustomDialog = <T extends Record<string, unknown>>({
     handleClose()
   }
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setLoading(true)
 
@@ -291,6 +292,7 @@ export const CustomDialog = <T extends Record<string, unknown>>({
         {t(title)}
       </DialogTitle>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {description && <Typography>{t(description)}</Typography>}
         {fields.map((field) => {
           if (field.type === 'file') {
             return (

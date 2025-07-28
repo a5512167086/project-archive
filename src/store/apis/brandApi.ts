@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 export type Brand = {
   object_id: number
+  class_id: number
   brand_name: string
   brand_description: string
 }

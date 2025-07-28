@@ -1,4 +1,4 @@
-import React, { SetStateAction, useState } from 'react'
+import { SetStateAction, useState, Dispatch, ChangeEvent } from 'react'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -26,7 +26,7 @@ interface CustomTableProps<T> {
   onDelete?: (item: T) => void
   rowsPerPage?: number
   selected: number[]
-  setSelected: React.Dispatch<SetStateAction<number[]>>
+  setSelected: Dispatch<SetStateAction<number[]>>
 }
 
 export const CustomTable = <T,>({
@@ -51,7 +51,7 @@ export const CustomTable = <T,>({
     currentPageIndexes.some((index) => selected.includes(index)) &&
     !isAllSelected
 
-  const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSelectAll = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
       setSelected((prevSelected) => [
         ...new Set([...prevSelected, ...currentPageIndexes])
@@ -64,7 +64,7 @@ export const CustomTable = <T,>({
   }
 
   const handleSelectRow =
-    (rowIndex: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    (rowIndex: number) => (event: ChangeEvent<HTMLInputElement>) => {
       setSelected((prevSelected) =>
         event.target.checked
           ? [...prevSelected, rowIndex]

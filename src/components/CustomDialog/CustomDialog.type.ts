@@ -30,6 +30,7 @@ export type CustomDialogProps<T = Record<string, unknown>> = DialogProps & {
   handleClose: () => void
   fields?: FieldProps[]
   title: string
+  description?: string
   linkText?: string
   link?: string
   dangerButton?: boolean

@@ -17,7 +17,7 @@ import { PAGE_PATHS } from '@/routes'
 import { CustomDialog } from '@/components/CustomDialog'
 import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
 import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
-import { showErrorToast, showSuccessToast } from '@/utils/toast' 
+import { showErrorToast, showSuccessToast } from '@/utils/toast'
 
 const knowledgeManagementPageContent = {
   title: 'knowledgeSettingPage.title',
@@ -265,7 +265,6 @@ const KnowledgeManagementPage = () => {
           onDelete={handleDeleteItem}
         />
       </div>
-      {/* Insert Single Knowledge Dialog */}
       <CustomDialog<{
         question: string
         answer: string
@@ -276,7 +275,6 @@ const KnowledgeManagementPage = () => {
         title={t(knowledgeManagementPageContent.addButtonText)}
         onSubmit={handleInsertSingleDialogConfirm}
       />
-      {/* Edit Knowledge Dialog */}
       {editingKnowledgeItem && (
         <CustomDialog<{
           question: string
@@ -286,13 +284,13 @@ const KnowledgeManagementPage = () => {
           handleClose={handleEditDialogClose}
           fields={knowledgeFormFields.map((field) => ({
             ...field,
-            defaultValue: editingKnowledgeItem[field.name as keyof KnowledgeItem]
+            defaultValue:
+              editingKnowledgeItem[field.name as keyof KnowledgeItem]
           }))}
           title={t(knowledgeManagementPageContent.editButtonText)}
           onSubmit={handleEditDialogConfirm}
         />
       )}
-      {/* Insert Knowledges by CSV Dialog */}
       <CustomDialog<{
         csv_file: File
       }>
@@ -302,7 +300,6 @@ const KnowledgeManagementPage = () => {
         title={knowledgeManagementPageContent.addButtonTextByCSV}
         onSubmit={handleInsertByCSVDialogConfirm}
       />
-      {/* Delete Single Knowledge Dialog */}
       <CustomDialog
         open={isDeleteDialogOpen}
         title={t(knowledgeManagementPageContent.deleteDialogTitle, {
@@ -312,7 +309,6 @@ const KnowledgeManagementPage = () => {
         handleClose={handleDialogClose}
         onSubmit={handleDialogConfirm}
       />
-      {/* Delete Muti Selected Knowledges Dialog */}
       <CustomDialog
         open={isMutiDeleteDialogOpen}
         handleClose={handleMutiDialogClose}

@@ -3,7 +3,7 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import { useTranslation } from 'react-i18next'
 import { StyledResetPasswordPage } from './ResetPasswordPage.style'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, ChangeEvent } from 'react'
 import { CustomLoader } from '@/components/CustomLoader'
 import { isEmpty, isTokenValid } from '@/utils/helper'
 import { PAGE_PATHS } from '@/routes'
@@ -56,14 +56,12 @@ const ResetPasswordPage = () => {
     }
   }, [])
 
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newPassword = e.target.value
     setPassword(newPassword)
   }
 
-  const handleConfirmPasswordChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleConfirmPasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newConfirmPassword = e.target.value
     setConfirmPassword(newConfirmPassword)
     if (passwordError) {

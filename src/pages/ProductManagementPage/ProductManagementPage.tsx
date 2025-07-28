@@ -1,17 +1,13 @@
 import { useState } from 'react'
 import { Box, Typography, Tabs, Tab } from '@mui/material'
-import {
-  Inventory as InventoryIcon,
-  Category as CategoryIcon,
-  Business as BusinessIcon
-} from '@mui/icons-material'
+import { Inventory, Category, Business } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
 import TabPanel from '@/components/TabPanel'
-
 import { StyledProductManagementPage } from './ProductManagementPage.style'
 import { PAGE_PATHS } from '@/routes'
 import { useAppSelector } from '@/utils/hook'
+import { BrandManagement } from '@/components/BrandManagement'
 
 function a11yProps(index: number) {
   return {
@@ -65,19 +61,19 @@ const ProductManagementPage = () => {
           aria-label="product management tabs"
         >
           <Tab
-            icon={<InventoryIcon />}
+            icon={<Inventory />}
             label={t('productManagementPage.productTab')}
             iconPosition="start"
             {...a11yProps(0)}
           />
           <Tab
-            icon={<CategoryIcon />}
+            icon={<Category />}
             label={t('productManagementPage.categoryTab')}
             iconPosition="start"
             {...a11yProps(1)}
           />
           <Tab
-            icon={<BusinessIcon />}
+            icon={<Business />}
             label={t('productManagementPage.brandTab')}
             iconPosition="start"
             {...a11yProps(2)}
@@ -98,7 +94,7 @@ const ProductManagementPage = () => {
 
         {/* 品牌管理 */}
         <TabPanel value={activeTab} index={2}>
-          test
+          <BrandManagement />
         </TabPanel>
       </Box>
     </StyledProductManagementPage>

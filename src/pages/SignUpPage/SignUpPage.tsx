@@ -5,7 +5,7 @@ import { PAGE_PATHS } from '@/routes'
 import { CustomLink } from '@/components/CustomLink'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
+import { useState, ChangeEvent } from 'react'
 import { validateEmail } from '@/utils/helper'
 import { useRegisterUserMutation } from '@/store/apis/userApi'
 import { useAppDispatch } from '@/utils/hook'
@@ -38,7 +38,7 @@ const SignUpPage = () => {
   const [emailError, setEmailError] = useState(false)
   const [passwordError, setPasswordError] = useState(false)
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newEmail = e.target.value
     setEmail(newEmail)
 
@@ -47,14 +47,12 @@ const SignUpPage = () => {
     }
   }
 
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newPassword = e.target.value
     setPassword(newPassword)
   }
 
-  const handleConfirmPasswordChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleConfirmPasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newConfirmPassword = e.target.value
     setConfirmPassword(newConfirmPassword)
     if (passwordError) {

@@ -1,11 +1,4 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle
-} from '@mui/material'
+import { Button } from '@mui/material'
 import GoogleIcon from '@mui/icons-material/Google'
 import { StyledOAuth } from './OAuth.style'
 import { useTranslation } from 'react-i18next'
@@ -13,6 +6,7 @@ import LineIcon from '@/assets/line_logo.svg?react'
 import { useState } from 'react'
 import { handleGoogleOAuth, handleLineOAuth } from '@/utils/helper'
 import { OAuthActionType } from '@/configs/type'
+import { CustomDialog } from '@/components/CustomDialog/CustomDialog'
 
 const oauthContent = {
   google: 'signPage.google',
@@ -59,32 +53,18 @@ export const OAuth = () => {
       >
         {t(oauthContent.line)}
       </Button>
-      <Dialog
+      <CustomDialog
         open={open}
-        onClose={handleClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          {t(oauthContent.line_dialog_title)}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            {t(oauthContent.line_dialog_content)}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>{t(oauthContent.close)}</Button>
-          <Button
-            onClick={() => {
-              handleLineOAuth(OAuthActionType.Login)
-            }}
-            autoFocus
-          >
-            {t(oauthContent.agree)}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        handleClose={handleClose}
+        title={oauthContent.line_dialog_title}
+        description={oauthContent.line_dialog_content}
+        fields={[]}
+        maxWidth="xs"
+        onSubmit={() => {
+          handleLineOAuth(OAuthActionType.Login)
+        }}
+        dangerButton={false}
+      />
     </StyledOAuth>
   )
 }

@@ -322,7 +322,10 @@
     "settings_saved": "Settings saved successfully",
     "password_reset_success": "Password reset successfully",
     "email_sent_success": "Email sent successfully",
-    "account_created_success": "Account created successfully"
+    "account_created_success": "Account created successfully",
+    "brand_added": "Brand added successfully",
+    "brand_updated": "Brand updated successfully",
+    "brand_deleted": "Brand deleted successfully"
   },
   "productManagementPage": {
     "title": "Product Management",
