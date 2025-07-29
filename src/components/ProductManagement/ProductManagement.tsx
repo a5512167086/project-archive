@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   useLazyGetProductsQuery,
   useCreateProductsMutation,
+  useUpdateProductMutation,
   useDeleteProductsMutation,
   GetProductsResponse,
   CreateProductRequest
@@ -104,6 +105,75 @@ const createProductFields: FieldProps[] = [
   }
 ]
 
+const updateProductFields: FieldProps[] = [
+  {
+    id: 'product_name',
+    name: 'product_name',
+    label: 'productManagementPage.productName',
+    type: 'text',
+    required: true,
+    defaultValue: ''
+  },
+  {
+    id: 'product_description',
+    name: 'product_description',
+    label: 'productManagementPage.productDescription',
+    type: 'text',
+    required: false,
+    defaultValue: ''
+  },
+  {
+    id: 'sku_code',
+    name: 'sku_code',
+    label: 'productManagementPage.skuCode',
+    type: 'text',
+    required: true,
+    defaultValue: ''
+  },
+  {
+    id: 'brand_id',
+    name: 'brand_id',
+    label: 'productManagementPage.brand',
+    type: 'select',
+    required: true,
+    options: [], // will be filled dynamically
+    defaultValue: 'none' // 預設未選擇
+  },
+  {
+    id: 'category_id',
+    name: 'category_id',
+    label: 'productManagementPage.category',
+    type: 'select',
+    required: true,
+    options: [], // will be filled dynamically
+    defaultValue: 'none' // 預設未選擇
+  },
+  {
+    id: 'price',
+    name: 'price',
+    label: 'productManagementPage.price',
+    type: 'number',
+    required: true,
+    defaultValue: 0
+  },
+  {
+    id: 'stock',
+    name: 'stock',
+    label: 'productManagementPage.stock',
+    type: 'number',
+    required: true,
+    defaultValue: 0
+  },
+  {
+    id: 'is_active',
+    name: 'is_active',
+    label: 'productManagementPage.active',
+    type: 'checkbox',
+    required: false,
+    defaultValue: true
+  }
+]
+
 export const ProductManagement = () => {
   const { t } = useTranslation()
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
@@ -116,48 +186,72 @@ export const ProductManagement = () => {
   const [getBrands] = useLazyGetBrandsQuery()
   const [selected, setSelected] = useState<number[]>([])
   const [isInsertDialogOpen, setIsInsertDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [editingProduct, setEditingProduct] =
+    useState<GetProductsResponse | null>(null)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isMutiDeleteDialogOpen, setIsMutiDeleteDialogOpen] = useState(false)
   const [currentDeleteProduct, setCurrentDeleteProduct] =
     useState<GetProductsResponse | null>(null)
 
   const [createProduct] = useCreateProductsMutation()
+  const [updateProduct] = useUpdateProductMutation()
   const [deleteProduct] = useDeleteProductsMutation()
 
-  // Fill select options for brand and category
-  const productFields = createProductFields.map((field) => {
-    if (field.id === 'brand_id') {
+  const genProductFields = (productFields: FieldProps[]) =>
+    productFields.map((field) => {
+      const fieldValue =
+        editingProduct?.[field.name as keyof GetProductsResponse]
+
+      if (field.id === 'brand_id') {
+        return {
+          ...field,
+          options: [
+            {
+              label: t('productManagementPage.noBrand') || '未選擇',
+              value: 'none'
+            },
+            ...brandList.map((brand) => ({
+              label: brand.brand_name,
+              value: String(brand.object_id)
+            }))
+          ],
+          ...(fieldValue != null ? { defaultValue: String(fieldValue) } : {})
+        }
+      }
+
+      if (field.id === 'category_id') {
+        return {
+          ...field,
+          options: [
+            {
+              label: t('productManagementPage.noCategory') || '未選擇',
+              value: 'none'
+            },
+            ...categoryList.map((cat) => ({
+              label: cat.category_name,
+              value: String(cat.class_id)
+            }))
+          ],
+          ...(fieldValue != null ? { defaultValue: String(fieldValue) } : {})
+        }
+      }
+
       return {
         ...field,
-        options: [
-          {
-            label: t('productManagementPage.noBrand') || '未選擇',
-            value: 'none'
-          },
-          ...brandList.map((brand) => ({
-            label: brand.brand_name,
-            value: String(brand.object_id)
-          }))
-        ]
+        ...(fieldValue !== undefined ? { defaultValue: fieldValue } : {})
       }
-    }
-    if (field.id === 'category_id') {
-      return {
-        ...field,
-        options: [
-          {
-            label: t('productManagementPage.noCategory') || '未選擇',
-            value: 'none'
-          },
-          ...categoryList.map((cat) => ({
-            label: cat.category_name,
-            value: String(cat.class_id)
-          }))
-        ]
-      }
-    }
-    return field
-  })
+    })
+
+  const createFields = useMemo(
+    () => genProductFields(createProductFields),
+    [brandList, categoryList, t]
+  )
+
+  const updateFields = useMemo(
+    () => genProductFields(updateProductFields),
+    [brandList, categoryList, editingProduct, t]
+  )
 
   useEffect(() => {
     if (currentBot?.bot_detail_id) {
@@ -168,11 +262,22 @@ export const ProductManagement = () => {
   }, [currentBot?.bot_detail_id, getProducts])
 
   const handleOpenCreate = () => {
+    setEditingProduct(null)
     setIsInsertDialogOpen(true)
   }
 
   const handleOpenClose = () => {
     setIsInsertDialogOpen(false)
+  }
+
+  const handleOpenEdit = (product: GetProductsResponse) => {
+    setEditingProduct(product)
+    setIsEditDialogOpen(true)
+  }
+
+  const handleEditClose = () => {
+    setIsEditDialogOpen(false)
+    setEditingProduct(null)
   }
 
   const handleInsertProductConfirm = async (
@@ -191,7 +296,7 @@ export const ProductManagement = () => {
         typeof data.category_id === 'string' && data.category_id !== 'none'
           ? Number(data.category_id)
           : null,
-      images: null
+      images: data.images || null
     }
     await createProduct({
       bot_uuid: currentBot!.bot_detail_id,
@@ -203,6 +308,41 @@ export const ProductManagement = () => {
       })
     getProducts({ bot_uuid: currentBot!.bot_detail_id })
     handleOpenClose()
+  }
+
+  const handleEditProductConfirm = async (data: {
+    product_name: string
+    product_description: string
+    sku_code: string
+    price: number
+    stock: number
+    is_active: boolean
+    category_id?: number | null
+    brand_id?: number | null
+  }) => {
+    if (!editingProduct) return
+    const submitData = {
+      bot_uuid: currentBot!.bot_detail_id,
+      product_id: editingProduct.product_id,
+      product_name: data.product_name,
+      product_description: data.product_description,
+      sku_code: data.sku_code,
+      price: data.price,
+      stock: data.stock,
+      is_active: data.is_active,
+      category_id:
+        typeof data.category_id === 'string' && data.category_id !== 'none'
+          ? Number(data.category_id)
+          : null,
+      brand_id:
+        typeof data.brand_id === 'string' && data.brand_id !== 'none'
+          ? Number(data.brand_id)
+          : null
+    }
+    await updateProduct(submitData).unwrap()
+    showSuccessToast(t('success.product_updated'))
+    getProducts({ bot_uuid: currentBot!.bot_detail_id })
+    handleEditClose()
   }
 
   // 單一刪除
@@ -310,7 +450,7 @@ export const ProductManagement = () => {
             columns={productColumns}
             selected={selected}
             setSelected={setSelected}
-            onEdit={() => {}} // update 先不做
+            onEdit={handleOpenEdit}
             onDelete={handleDeleteProduct}
           />
           {/* 新增商品 Dialog */}
@@ -318,11 +458,23 @@ export const ProductManagement = () => {
             open={isInsertDialogOpen}
             handleClose={handleOpenClose}
             title={t('productManagementPage.addProduct')}
-            fields={productFields}
+            fields={createFields}
             maxWidth="md"
             onSubmit={handleInsertProductConfirm}
             dangerButton={false}
           />
+          {/* 編輯商品 Dialog */}
+          {editingProduct && (
+            <CustomDialog
+              open={isEditDialogOpen}
+              handleClose={handleEditClose}
+              title={t('productManagementPage.editProduct')}
+              fields={updateFields}
+              maxWidth="md"
+              onSubmit={handleEditProductConfirm}
+              dangerButton={false}
+            />
+          )}
           {/* 單一刪除 Dialog */}
           <CustomDialog
             open={isDeleteDialogOpen}

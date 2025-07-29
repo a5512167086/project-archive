@@ -57,6 +57,15 @@ export const productSlice = createSlice({
         }
       )
       .addMatcher(
+        productApi.endpoints.updateProduct.matchRejected,
+        (state, action) => {
+          const error = action.payload!.data as CustomError
+          state.status = 'failed'
+          state.errorCode = error?.error_code || 'UNKNOWN_ERROR'
+          state.errorMessage = error?.error_message || 'Unknown error occurred'
+        }
+      )
+      .addMatcher(
         productApi.endpoints.deleteProducts.matchRejected,
         (state, action) => {
           const error = action.payload!.data as CustomError

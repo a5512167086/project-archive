@@ -51,6 +51,19 @@ export type CreateProductRequest = {
   images: File[] | null
 }
 
+export type UpdateProductRequest = {
+  bot_uuid: string
+  product_id: string
+  product_name: string | null
+  product_description: string | null
+  category_id: number | null
+  brand_id: number | null
+  sku_code: string | null
+  price: number | null
+  stock: number | null
+  is_active: boolean | null
+}
+
 type DeleteProductsRequest = {
   bot_uuid: string
   product_ids: string[]
@@ -103,6 +116,13 @@ export const productApi = createApi({
         }
       }
     }),
+    updateProduct: builder.mutation<void, UpdateProductRequest>({
+      query: (data) => ({
+        url: 'products',
+        method: 'PATCH',
+        body: data
+      })
+    }),
     deleteProducts: builder.mutation<void, DeleteProductsRequest>({
       query: (data) => ({
         url: 'products',
@@ -116,5 +136,6 @@ export const productApi = createApi({
 export const {
   useLazyGetProductsQuery,
   useCreateProductsMutation,
+  useUpdateProductMutation,
   useDeleteProductsMutation
 } = productApi

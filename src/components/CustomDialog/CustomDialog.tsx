@@ -64,12 +64,20 @@ export const CustomDialog = <T extends Record<string, unknown>>({
     if (!rest.open || fields.length === 0) return
 
     const initialFormState: Record<string, unknown> = {}
+    const initialCheckboxValues: Record<string, boolean> = {}
+
     fields.forEach((field) => {
       if (field.defaultValue !== undefined) {
-        initialFormState[field.name] = field.defaultValue
+        if (field.type === 'checkbox') {
+          initialCheckboxValues[field.name] = Boolean(field.defaultValue)
+        } else {
+          initialFormState[field.name] = field.defaultValue
+        }
       }
     })
+
     setFormState(initialFormState)
+    setCheckboxValues(initialCheckboxValues)
   }, [rest.open])
 
   const [checkboxValues, setCheckboxValues] = useState<Record<string, boolean>>(
