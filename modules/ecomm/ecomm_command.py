@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 
-from sqlmodel import Session, delete, select, text
+from sqlmodel import Session, delete, select, text, update
 
 from modules.ecomm.ecomm_model import ProductDetail, ProductImage, ProductVariant
 from shared.models.class_model import Class
@@ -357,8 +357,6 @@ class EcommCommand:
         price: Optional[int] = None,
         stock: Optional[int] = None,
         is_active: Optional[bool] = None,
-        images: Optional[List[dict]] = None,
-        variants: Optional[List[dict]] = None,
         category_id: Optional[int] = None,
     ) -> bool:
         """更新產品"""
@@ -395,55 +393,21 @@ class EcommCommand:
 
         # 更新類別關係
         if category_id is not None:
-            # 刪除現有的類別關係
             self.session.exec(
-                delete(ClassObjectRelation).where(
-                    ClassObjectRelation.object_id == product_detail.object_id
-                )
+                update(ClassObjectRelation)
+                .where(ClassObjectRelation.object_id == product_detail.object_id)
+                .values(class_id=category_id)
             )
-
-            # 建立新的類別關係
-            new_relation = ClassObjectRelation(
-                class_id=category_id, object_id=product_detail.object_id
-            )
-            self.session.add(new_relation)
-
-        # 更新圖片
-        if images is not None:
-            # 刪除現有圖片
-            self.session.exec(
-                delete(ProductImage).where(
-                    ProductImage.object_id == product_detail.object_id
-                )
-            )
-
-            # 新增新圖片
-            for img in images:
-                product_image = ProductImage(
-                    image_url=img["image_url"],
-                    object_id=product_detail.object_id,
-                    display_order=img.get("display_order", 0),
-                )
-                self.session.add(product_image)
-
-        # 更新變體
-        if variants is not None:
-            # 刪除現有變體
-            self.session.exec(
-                delete(ProductVariant).where(
-                    ProductVariant.object_id == product_detail.object_id
-                )
-            )
-
-            # 新增新變體
-            for variant in variants:
-                product_variant = ProductVariant(
-                    object_id=product_detail.object_id,
-                    variant_name=variant["variant_name"],
-                    sku_code=variant.get("sku_code"),
-                    price=variant.get("price"),
-                    stock=variant.get("stock", 0),
-                )
-                self.session.add(product_variant)
 
         return True
+
+    def move_products_to_root_category(
+        self, root_category_class_id: int, moved_category_class_ids: List[int]
+    ):
+        stmt = (
+            update(ClassObjectRelation)
+            .where(ClassObjectRelation.class_id.in_(moved_category_class_ids))
+            .values(class_id=root_category_class_id)
+        )
+
+        self.session.exec(stmt)

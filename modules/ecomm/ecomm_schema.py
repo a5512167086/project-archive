@@ -145,8 +145,6 @@ class UpdateProductRequest(BaseModel):
     price: Optional[int] = None
     stock: Optional[int] = None
     is_active: Optional[bool] = None
-    images: Optional[List[ProductImageRequest]] = None
-    variants: Optional[List[ProductVariantRequest]] = None
 
 
 class DeleteProductRequest(BaseModel):

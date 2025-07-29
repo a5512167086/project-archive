@@ -283,22 +283,3 @@ async def get_product_image(
             raise HTTPException(status_code=500, detail=f"MinIO error: {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
-
-
-@product_image_router.get("/product/{bucket_name}/{file_name}")
-async def get_product_image_legacy(
-    bucket_name: str,
-    file_name: str,
-    minio_service: Annotated[MinioService, Depends(get_minio_service)],
-):
-    """
-    代理 MinIO 產品圖片請求 (舊版 URL 兼容)
-
-    Args:
-        bucket_name: MinIO bucket 名稱
-        file_name: 圖片檔案名稱
-
-    Returns:
-        StreamingResponse: 圖片內容
-    """
-    return await get_product_image(bucket_name, file_name, minio_service)

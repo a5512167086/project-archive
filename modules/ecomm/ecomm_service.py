@@ -185,7 +185,9 @@ class EcommService:
         self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
 
         category_class_id = self.validate_category_class(bot.class_id)
-
+        self.command.move_products_to_root_category(
+            category_class_id, body.deleted_class_id_list
+        )
         if not body.deleted_class_id_list:
             raise GlobalErrorException(
                 error_code=ErrorCode.EMPTY_DELETE_LIST,
@@ -239,11 +241,12 @@ class EcommService:
 
     # Product service methods
     def get_all_products(self, bot_uuid: UUID) -> List[ProductResponse]:
-        """取得所有產品"""
         bot = self.bot_service.validate_line_bot_exists(bot_uuid)
-        category_class = self.validate_category_class(bot.class_id)
-
-        products_data = self.query.get_all_products_view(category_class)
+        category_class_id = self.validate_category_class(bot.class_id)
+        category_ids = self.query.get_all_categories_by_class_id(category_class_id)
+        all_category_ids = [cat.class_id for cat in category_ids]
+        all_category_ids.append(category_class_id)
+        products_data = self.query.get_all_products_view(all_category_ids)
         products = []
         for product_data in products_data:
             products.append(
@@ -253,9 +256,8 @@ class EcommService:
                     product_name=product_data.product_name,
                     product_description=product_data.product_description,
                     brand_id=product_data.brand_id,
-                    # If the category_id is root category, set to None
                     category_id=product_data.category_id
-                    if product_data.category_id != category_class
+                    if product_data.category_id != category_class_id
                     else None,
                     sku_code=product_data.sku_code,
                     price=product_data.price,
@@ -348,16 +350,6 @@ class EcommService:
                     error_message=f"SKU '{body.sku_code}' already exists",
                 )
 
-        # 執行更新
-        images_dict = None
-        variants_dict = None
-
-        if body.images is not None:
-            images_dict = [img.dict() for img in body.images]
-
-        if body.variants is not None:
-            variants_dict = [variant.dict() for variant in body.variants]
-
         # 處理 category_id，如果是 None 則使用主 Category class
         category_id_to_use = None
         if body.category_id is not None:
@@ -377,8 +369,6 @@ class EcommService:
             price=body.price,
             stock=body.stock,
             is_active=body.is_active,
-            images=images_dict,
-            variants=variants_dict,
             category_id=category_id_to_use,
         )
 

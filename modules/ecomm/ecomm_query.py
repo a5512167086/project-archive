@@ -77,6 +77,15 @@ class EcommQuery:
 
         return result
 
+    def get_categories_by_class_id(
+        self, category_id_list: List[int]
+    ) -> List[CategoryListView]:
+        statement = select(CategoryListView).where(
+            CategoryListView.parent_class_id.in_(category_id_list)
+        )
+        result = self.session.exec(statement).all()
+        return result
+
     def get_all_categories_by_class_id(
         self, parent_class_id: int
     ) -> List[CategoryListView]:
@@ -225,8 +234,8 @@ class EcommQuery:
 
         return products
 
-    def get_all_products_view(self, product_class_id: int) -> List[ProductListView]:
+    def get_all_products_view(self, category_ids: List[int]) -> List[ProductListView]:
         statement = select(ProductListView).where(
-            ProductListView.category_id == product_class_id
+            ProductListView.category_id.in_(category_ids)
         )
         return self.session.exec(statement).all()
