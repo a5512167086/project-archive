@@ -311,7 +311,8 @@ IF NOT EXISTS (
     WHERE conname = 'fk_product_details_brand_id'
 ) THEN
 ALTER TABLE product_details
-ADD CONSTRAINT fk_product_details_brand_id FOREIGN KEY(brand_id) REFERENCES objects(object_id) ON DELETE CASCADE;
+ADD CONSTRAINT fk_product_details_brand_id FOREIGN KEY(brand_id) REFERENCES objects(object_id) ON DELETE
+SET NULL;
 
 END IF;
 
