@@ -91,9 +91,17 @@ export const CustomDialog = <T extends Record<string, unknown>>({
 
   const validateField = (
     field: FieldProps,
-    value: string | File | null
+    value: unknown
   ): string | undefined => {
+    if (field.type === 'file' && field.multiple) {
+      if (field.required && (!Array.isArray(value) || value.length === 0)) {
+        return t('error.fileRequired')
+      }
+      return undefined
+    }
+
     if (!field.required && !value) return undefined
+
     if (
       field.type === 'text' &&
       field.validate &&
@@ -136,7 +144,11 @@ export const CustomDialog = <T extends Record<string, unknown>>({
 
     fields.forEach((field) => {
       if (field.type === 'file') {
-        formJson[field.name] = formData.get(field.name)
+        if (field.multiple) {
+          formJson[field.name] = formState[field.name] || []
+        } else {
+          formJson[field.name] = formData.get(field.name)
+        }
       } else if (field.type === 'array') {
         formJson[field.name] = arrayState[field.name] || []
       } else if (field.type === 'time') {
@@ -150,10 +162,7 @@ export const CustomDialog = <T extends Record<string, unknown>>({
 
     const newErrors: Record<string, string> = {}
     fields.forEach((field) => {
-      const error = validateField(
-        field,
-        formJson[field.name] as string | File | null
-      )
+      const error = validateField(field, formJson[field.name])
       if (error) newErrors[field.name] = error
     })
 
