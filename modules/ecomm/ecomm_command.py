@@ -12,6 +12,8 @@ from shared.models.inheritance_model import Inheritance
 from shared.models.object_model import Object
 from shared.models.permission import Permission
 from shared.queries.entity_query import get_entity_id_by_name
+from modules.ecomm.ecomm_model import ShippingSetting, ShippingOption
+
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -411,3 +413,24 @@ class EcommCommand:
         )
 
         self.session.exec(stmt)
+
+    # Shipping command functions
+    async def update_shipping_setting(
+        self, bot_uuid: str, shipping_options: List[ShippingOption]
+    ):
+        """更新或建立運送設定"""
+        setting = await ShippingSetting.find_one(ShippingSetting.bot_uuid == bot_uuid)
+        if setting:
+            setting.shipping_options = shipping_options
+            await setting.save()
+        else:
+            new_setting = ShippingSetting(
+                bot_uuid=bot_uuid, shipping_options=shipping_options
+            )
+            await new_setting.insert()
+
+    async def delete_shipping_setting(self, bot_uuid: str):
+        """刪除運送設定"""
+        setting = await ShippingSetting.find_one(ShippingSetting.bot_uuid == bot_uuid)
+        if setting:
+            await setting.delete()

@@ -1,7 +1,10 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Literal, Optional
 from uuid import UUID, uuid4
 
+from beanie import Document
+from pydantic import BaseModel
+from pydantic import Field as PydanticField
 from sqlmodel import Field, SQLModel
 
 
@@ -78,3 +81,17 @@ class ProductListView(SQLModel, table=True):
     is_active: bool
     created_at: datetime
     updated_at: datetime
+
+
+class ShippingOption(BaseModel):
+    method: Literal["home_delivery", "store_pickup"]
+    fee: int = PydanticField(ge=0, description="運費")
+    is_enabled: bool = True
+
+
+class ShippingSetting(Document):
+    bot_uuid: str = PydanticField(description="bot_id")
+    shipping_options: List[ShippingOption] = PydanticField(default_factory=list)
+
+    class Settings:
+        name = "shipping_settings"

@@ -11,6 +11,8 @@ from modules.ecomm.ecomm_model import (
     ProductImage,
     ProductListView,
     ProductVariant,
+    ShippingSetting,
+
 )
 from shared.models.class_model import SubClassView
 from shared.models.object_model import Object
@@ -239,3 +241,8 @@ class EcommQuery:
             ProductListView.category_id.in_(category_ids)
         )
         return self.session.exec(statement).all()
+
+    # Shipping query functions
+    async def get_shipping_setting_by_bot_uuid(self, bot_uuid: str) -> ShippingSetting | None:
+        """根據 bot_uuid 取得運送設定"""
+        return await ShippingSetting.find_one(ShippingSetting.bot_uuid == bot_uuid)

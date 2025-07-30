@@ -1,8 +1,8 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Literal, Optional
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class InsertBrandRequest(BaseModel):
@@ -150,3 +150,25 @@ class UpdateProductRequest(BaseModel):
 class DeleteProductRequest(BaseModel):
     bot_uuid: UUID
     product_ids: List[UUID]
+
+
+# Shipping schemas
+class ShippingOptionSchema(BaseModel):
+    method: Literal["home_delivery", "store_pickup"]
+    fee: int = Field(ge=0, description="運費")
+    is_enabled: bool = True
+
+
+class UpdateShippingSettingRequest(BaseModel):
+    bot_uuid: UUID
+    shipping_options: List[ShippingOptionSchema]
+
+
+class ShippingSettingResponse(BaseModel):
+    bot_uuid: str
+    shipping_options: List[ShippingOptionSchema]
+
+
+class DeleteShippingMethodRequest(BaseModel):
+    bot_uuid: UUID
+    method: Literal["home_delivery", "store_pickup"]

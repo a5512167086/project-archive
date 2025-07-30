@@ -6,18 +6,25 @@ from sqlmodel import Session
 
 from modules.bot.bot_service import BotService
 from modules.ecomm.ecomm_command import EcommCommand
-from modules.ecomm.ecomm_model import BrandListView, CategoryListView
+from modules.ecomm.ecomm_model import (
+    BrandListView,
+    CategoryListView,
+    ShippingOption,
+    ShippingSetting,
+)
 from modules.ecomm.ecomm_query import EcommQuery
 from modules.ecomm.ecomm_schema import (
     DeleteBrandRequest,
     DeleteCategoryRequest,
     DeleteProductRequest,
+    DeleteShippingMethodRequest,
     InsertBrandRequest,
     InsertCategoryRequest,
     ProductResponse,
     UpdateBrandRequest,
     UpdateCategoryRequest,
     UpdateProductRequest,
+    UpdateShippingSettingRequest,
 )
 from shared.constants.error_code import ErrorCode
 from shared.exception import GlobalErrorException
@@ -377,3 +384,52 @@ class EcommService:
                 error_code=ErrorCode.PRODUCT_NOT_FOUND,
                 error_message="Product not found",
             )
+
+    # Shipping service methods
+    async def get_shipping_setting(self, bot_uuid: UUID) -> ShippingSetting:
+        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
+        bot_uuid_str = str(bot.bot_detail_id)
+        setting = await self.query.get_shipping_setting_by_bot_uuid(bot_uuid_str)
+        if not setting:
+            raise GlobalErrorException(
+                error_code=ErrorCode.SHIPPING_SETTING_NOT_FOUND,
+                error_message="Shipping setting not found",
+            )
+        return setting
+
+    async def update_shipping_setting(
+        self, body: UpdateShippingSettingRequest, current_user_id: UUID
+    ):
+        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
+        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
+
+        bot_uuid_str = str(bot.bot_detail_id)
+        converted_options = [
+            ShippingOption(**option.model_dump()) for option in body.shipping_options
+        ]
+
+        await self.command.update_shipping_setting(bot_uuid_str, converted_options)
+
+    async def delete_shipping_setting(
+        self, body: DeleteShippingMethodRequest, current_user_id: UUID
+    ):
+        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
+        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
+
+        bot_uuid_str = str(bot.bot_detail_id)
+        setting = await self.query.get_shipping_setting_by_bot_uuid(bot_uuid_str)
+        if not setting:
+            raise GlobalErrorException(
+                error_code=ErrorCode.SHIPPING_SETTING_NOT_FOUND,
+                error_message="Shipping setting not found",
+            )
+
+        setting.shipping_options = [
+            option
+            for option in setting.shipping_options
+            if option.method != body.method
+        ]
+
+        await self.command.update_shipping_setting(
+            bot_uuid_str, setting.shipping_options
+        )

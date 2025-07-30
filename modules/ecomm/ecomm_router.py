@@ -12,12 +12,15 @@ from modules.ecomm.ecomm_schema import (
     DeleteBrandRequest,
     DeleteCategoryRequest,
     DeleteProductRequest,
+    DeleteShippingMethodRequest,
     InsertBrandRequest,
     InsertCategoryRequest,
     ProductResponse,
+    ShippingSettingResponse,
     UpdateBrandRequest,
     UpdateCategoryRequest,
     UpdateProductRequest,
+    UpdateShippingSettingRequest,
 )
 from modules.ecomm.ecomm_service import EcommService
 from shared.clients.database import SessionDep
@@ -37,11 +40,39 @@ def get_minio_service() -> MinioService:
     return MinioService()
 
 
+ecomm_router = APIRouter(prefix="/ecomm", tags=["ecomm"])
 brand_router = APIRouter(prefix="/brands", tags=["brands"])
 category_router = APIRouter(prefix="/categories", tags=["categories"])
 product_router = APIRouter(prefix="/products", tags=["products"])
-# 產品圖片代理路由
 product_image_router = APIRouter(prefix="/product-images", tags=["product-images"])
+
+
+@ecomm_router.get("/{bot_uuid}", response_model=ShippingSettingResponse)
+async def get_shipping_settings(
+    bot_uuid: UUID,
+    ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+):
+    return await ecomm_service.get_shipping_setting(bot_uuid)
+
+
+@ecomm_router.patch("")
+async def update_shipping_settings(
+    update_request: UpdateShippingSettingRequest,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+):
+    user_id = current_user["user_id"]
+    await ecomm_service.update_shipping_setting(update_request, user_id)
+
+
+@ecomm_router.delete("")
+async def delete_shipping_settings(
+    body: DeleteShippingMethodRequest,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+):
+    user_id = current_user["user_id"]
+    await ecomm_service.delete_shipping_setting(body, user_id)
 
 
 @brand_router.get("/{bot_uuid}", response_model=List[BrandResponse])
@@ -230,16 +261,6 @@ async def get_product_image(
     file_name: str,
     minio_service: Annotated[MinioService, Depends(get_minio_service)],
 ):
-    """
-    代理 MinIO 產品圖片請求
-
-    Args:
-        bucket_name: MinIO bucket 名稱
-        file_name: 圖片檔案名稱
-
-    Returns:
-        StreamingResponse: 圖片內容
-    """
     try:
         # 從 MinIO 獲取圖片
         response = minio_service.client.get_object(bucket_name, file_name)
