@@ -1,19 +1,23 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 from uuid import UUID
 
 from sqlmodel import Session, delete, select, text, update
 
-from modules.ecomm.ecomm_model import ProductDetail, ProductImage, ProductVariant
+from modules.ecomm.ecomm_model import (
+    ProductDetail,
+    ProductImage,
+    ProductVariant,
+    ShippingOption,
+    ShippingSetting,
+)
 from shared.models.class_model import Class
 from shared.models.class_object_relation_model import ClassObjectRelation
 from shared.models.inheritance_model import Inheritance
 from shared.models.object_model import Object
 from shared.models.permission import Permission
 from shared.queries.entity_query import get_entity_id_by_name
-from modules.ecomm.ecomm_model import ShippingSetting, ShippingOption
-
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -390,7 +394,7 @@ class EcommCommand:
         if is_active is not None:
             product_detail.is_active = is_active
 
-        product_detail.updated_at = datetime.utcnow()
+        product_detail.updated_at = datetime.now(timezone.utc)
         self.session.add(product_detail)
 
         # 更新類別關係

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Literal, Optional
 from uuid import UUID, uuid4
 
@@ -40,8 +40,8 @@ class ProductDetail(SQLModel, table=True):
     sku_code: str = Field(max_length=64, unique=True)
     price: int
     stock: int = Field(default=0)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=datetime.now(timezone.utc))
 
 
 class ProductImage(SQLModel, table=True):
@@ -62,8 +62,8 @@ class ProductVariant(SQLModel, table=True):
     sku_code: Optional[str] = Field(default=None, max_length=64, unique=True)
     price: Optional[int] = None
     stock: int = Field(default=0)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=datetime.now(timezone.utc))
 
 
 class ProductListView(SQLModel, table=True):
@@ -95,3 +95,34 @@ class ShippingSetting(Document):
 
     class Settings:
         name = "shipping_settings"
+
+
+class OrderDetail(SQLModel, table=True):
+    __tablename__ = "order_details"
+
+    order_id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    object_id: int = Field(index=True)
+    total_amount: int
+    status: str = Field(default="pending", max_length=16)
+    payment_method: Optional[str] = Field(default=None, max_length=32)
+    payment_status: Optional[str] = Field(default=None, max_length=16)
+    shipping_method: Optional[str] = Field(default=None, max_length=32)
+    shipping_fee: int = Field(default=0)
+    tracking_number: Optional[str] = Field(default=None, max_length=128)
+    recipient_name: Optional[str] = Field(default=None, max_length=128)
+    recipient_phone: Optional[str] = Field(default=None, max_length=32)
+    shipping_address: Optional[str] = Field(default=None)
+    created_at: datetime = Field(default_factory=datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=datetime.now(timezone.utc))
+
+
+class OrderItem(SQLModel, table=True):
+    __tablename__ = "order_items"
+
+    order_item_id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    object_id: int = Field(index=True)
+    variant_id: Optional[UUID] = Field(default=None, index=True)
+    product_name_snapshot: str = Field(max_length=512)
+    sku_snapshot: str = Field(max_length=64)
+    price_snapshot: int
+    quantity: int
