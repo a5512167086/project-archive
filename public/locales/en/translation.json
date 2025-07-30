@@ -11,9 +11,11 @@
     "faq": "FAQ Module",
     "product": "Product Management",
     "order": "Order Management",
+    "ecomm": "E-commerce Settings",
     "reservation": "Reservation Management",
     "service": "Service Management",
-    "backToBotList": "Back to Bot Menu"
+    "backToBotList": "Back to Bot Menu",
+    "bot": "Bot Settings"
   },
   "homePage": {
     "hero": {

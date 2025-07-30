@@ -3,6 +3,7 @@ import { createBrowserRouter } from 'react-router-dom'
 import { BaseWrapper } from '@/components/BaseWrapper'
 import { SidebarWrapper } from '@/components/SidebarWrapper/SidebarWrapper'
 import QuizIcon from '@mui/icons-material/Quiz'
+import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications'
 import StoreIcon from '@mui/icons-material/Store'
 import EventNoteIcon from '@mui/icons-material/EventNote'
 import BackspaceIcon from '@mui/icons-material/Backspace'
@@ -17,6 +18,8 @@ const SignUpPage = lazy(() => import('@/pages/SignUpPage'))
 const ForgotPasswordPage = lazy(() => import('@/pages/ForgotPasswordPage'))
 const OAuthCallback = lazy(() => import('@/pages/OAuthCallbackPage'))
 const BotManagementPage = lazy(() => import('@/pages/BotManagementPage'))
+const OrderManagementPage = lazy(() => import('@/pages/OrderManagementPage'))
+const EcommSettingPage = lazy(() => import('@/pages/EcommSettingPage'))
 const KnowledgeManagementPage = lazy(
   () => import('@/pages/KnowledgeManagementPage')
 )
@@ -51,6 +54,7 @@ export const PAGE_PATHS = {
   BOT_MANAGEMENT: '/bot-list/:uuid',
   PRODUCT_MANAGEMENT: 'product',
   ORDER_MANAGEMENT: 'order',
+  ECOMM_SETTING: 'ecomm',
   BOT_SETTING: 'setting',
   RESERVATION_MANAGEMENT: 'reservation',
   SERVICE_MANAGEMENT: 'service',
@@ -111,6 +115,12 @@ export const SIDEBAR_NAVIGATION_ROUTE = [
         text: 'sidebar.order',
         icon: <StoreIcon />,
         link: PAGE_PATHS.ORDER_MANAGEMENT
+      },
+      {
+        key: 'ecommSetting',
+        text: 'sidebar.ecomm',
+        icon: <SettingsApplicationsIcon />,
+        link: PAGE_PATHS.ECOMM_SETTING
       }
     ]
   },
@@ -136,7 +146,7 @@ export const SIDEBAR_NAVIGATION_ROUTE = [
     items: [
       {
         key: 'setting',
-        text: 'common.setting',
+        text: 'sidebar.bot',
         icon: <SettingsIcon />,
         link: PAGE_PATHS.BOT_SETTING
       }
@@ -235,7 +245,11 @@ export const router = createBrowserRouter([
           },
           {
             path: PAGE_PATHS.ORDER_MANAGEMENT,
-            element: <div>test</div>
+            element: <OrderManagementPage />
+          },
+          {
+            path: PAGE_PATHS.ECOMM_SETTING,
+            element: <EcommSettingPage />
           },
           {
             path: PAGE_PATHS.PRODUCT_MANAGEMENT,

@@ -11,9 +11,11 @@
     "faq": "問答模組",
     "product": "產品管理",
     "order": "訂單管理",
+    "ecomm": "電商設定",
     "reservation": "預約管理",
     "service": "服務管理",
-    "backToBotList": "回到Bot選單"
+    "backToBotList": "回到Bot選單",
+    "bot": "Bot設定"
   },
   "homePage": {
     "hero": {
