@@ -38,6 +38,12 @@ const BotSettingPage = () => {
   )
   const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
   const [botName, setBotName] = useState(currentBot!.chinese_name)
+  // 新增Bot Channel相關欄位
+  const [channelId, setChannelId] = useState('')
+  const [channelSecret, setChannelSecret] = useState('')
+  const [channelAccessToken, setChannelAccessToken] = useState('')
+  const [loginChannelId, setLoginChannelId] = useState('')
+  const [loginChannelSecret, setLoginChannelSecret] = useState('')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [getBots] = useLazyGetBotsQuery()
   const [updateBot] = useUpdateBotMutation()
@@ -114,6 +120,118 @@ const BotSettingPage = () => {
             ) : (
               t(botSettingPageContent.rename)
             )}
+          </Button>
+        </Box>
+      </Box>
+      {/* 新增Bot Channel設定區域 */}
+      <Box className="setting__settingBox">
+        <CustomDivider text="Bot Channel 設定" />
+        <Box
+          className="setting__formBox"
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 3,
+            background: '#fafbfc',
+            borderRadius: 2,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+            p: 3,
+            position: 'relative',
+            width: '100%',
+            minWidth: 0,
+            maxWidth: 'none',
+            margin: 0
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+            <img
+              src="/src/assets/line_logo.svg"
+              alt="Line"
+              style={{ width: 28, height: 28 }}
+            />
+            <Typography variant="subtitle1" fontWeight={600}>
+              Bot Channel
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField
+              label="Channel ID"
+              variant="outlined"
+              size="small"
+              value={channelId}
+              onChange={(e) => setChannelId(e.target.value)}
+              sx={{ width: '100%' }}
+            />
+            <TextField
+              label="Channel Secret"
+              variant="outlined"
+              size="small"
+              value={channelSecret}
+              onChange={(e) => setChannelSecret(e.target.value)}
+              sx={{ width: '100%' }}
+            />
+          </Box>
+          <TextField
+            label="Channel Access Token"
+            variant="outlined"
+            size="small"
+            value={channelAccessToken}
+            onChange={(e) => setChannelAccessToken(e.target.value)}
+            sx={{ width: '100%' }}
+          />
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2, mb: 1 }}
+          >
+            <img
+              src="/src/assets/line_logo.svg"
+              alt="Line"
+              style={{ width: 28, height: 28, opacity: 0.7 }}
+            />
+            <Typography variant="subtitle1" fontWeight={600}>
+              Login Channel
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField
+              label="Login Channel ID"
+              variant="outlined"
+              size="small"
+              value={loginChannelId}
+              onChange={(e) => setLoginChannelId(e.target.value)}
+              sx={{ width: '100%' }}
+            />
+            <TextField
+              label="Login Channel Secret"
+              variant="outlined"
+              size="small"
+              value={loginChannelSecret}
+              onChange={(e) => setLoginChannelSecret(e.target.value)}
+              sx={{ width: '100%' }}
+            />
+          </Box>
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{
+              mt: 3,
+              alignSelf: 'flex-end',
+              minWidth: 160,
+              fontWeight: 600,
+              fontSize: 16
+            }}
+            onClick={() => {
+              // 這裡可以取得所有欄位的值
+              // 目前僅console.log，未串API
+              console.log({
+                channelId,
+                channelSecret,
+                channelAccessToken,
+                loginChannelId,
+                loginChannelSecret
+              })
+            }}
+          >
+            更新BOT SETTING
           </Button>
         </Box>
       </Box>
