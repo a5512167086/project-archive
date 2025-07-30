@@ -45,6 +45,11 @@ jobs:
           echo "REDIS_HOST=${{ vars.REDIS_HOST }}" >> .env
           echo "REDIS_PORT=${{ vars.REDIS_PORT }}" >> .env
           echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
+          echo "MONGODB_HOST=${{ vars.MONGODB_HOST }}" >> .env
+          echo "MONGODB_PORT=${{ vars.MONGODB_PORT }}" >> .env
+          echo "MONGODB_USER=${{ vars.MONGODB_USER }}" >> .env
+          echo "MONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD }}" >> .env
+          echo "MONGODB_DB_NAME=${{ vars.MONGODB_DB_NAME }}" >> .env
           echo "MINIO_ENDPOINT=${{ vars.MINIO_ENDPOINT }}" >> .env
           echo "MINIO_ACCESS_KEY=${{ vars.MINIO_ACCESS_KEY }}" >> .env
           echo "MINIO_SECRET_KEY=${{ secrets.MINIO_SECRET_KEY }}" >> .env
@@ -98,6 +103,11 @@ jobs:
           echo "REDIS_HOST=${{ vars.REDIS_HOST }}" >> .env
           echo "REDIS_PORT=${{ vars.REDIS_PORT }}" >> .env
           echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
+          echo "MONGODB_HOST=${{ vars.MONGODB_HOST }}" >> .env
+          echo "MONGODB_PORT=${{ vars.MONGODB_PORT }}" >> .env
+          echo "MONGODB_USER=${{ vars.MONGODB_USER }}" >> .env
+          echo "MONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD }}" >> .env
+          echo "MONGODB_DB_NAME=${{ vars.MONGODB_DB_NAME }}" >> .env
           echo "MINIO_ENDPOINT=${{ vars.MINIO_ENDPOINT }}" >> .env
           echo "MINIO_ACCESS_KEY=${{ vars.MINIO_ACCESS_KEY }}" >> .env
           echo "MINIO_SECRET_KEY=${{ secrets.MINIO_SECRET_KEY }}" >> .env
