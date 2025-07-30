@@ -9,4 +9,3 @@ CREATE TABLE IF NOT EXISTS module_settings(
 );
 
 CREATE INDEX IF NOT EXISTS idx_module_settings_object_id ON module_settings(object_id);
-

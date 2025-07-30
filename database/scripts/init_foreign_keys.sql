@@ -367,4 +367,40 @@ END IF;
 
 COMMENT ON TABLE product_variants IS '商品變體表';
 
+-- order_details
+IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'fk_order_details_object_id'
+) THEN
+ALTER TABLE order_details
+ADD CONSTRAINT fk_order_details_object_id FOREIGN KEY(object_id) REFERENCES objects(object_id) ON DELETE CASCADE;
+
+END IF;
+
+COMMENT ON TABLE order_details IS '訂單詳細資訊表';
+
+-- order_items
+IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'fk_order_items_object_id'
+) THEN
+ALTER TABLE order_items
+ADD CONSTRAINT fk_order_items_object_id FOREIGN KEY(object_id) REFERENCES objects(object_id) ON DELETE CASCADE;
+
+END IF;
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'fk_order_items_variant_id'
+) THEN
+ALTER TABLE order_items
+ADD CONSTRAINT fk_order_items_variant_id FOREIGN KEY(variant_id) REFERENCES product_variants(variant_id) ON DELETE CASCADE;
+
+END IF;
+
+COMMENT ON TABLE order_items IS '訂單項目表';
+
 END $$ LANGUAGE plpgsql;
