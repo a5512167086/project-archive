@@ -89,7 +89,7 @@ const BotSettingPage = () => {
   }
 
   return (
-    <StyledBotSettingPage>
+    <StyledBotSettingPage disableGutters maxWidth={false}>
       <CustomBreadcrumb items={breadcrumbItems} />
       <Typography variant="h5" className="setting__title">
         {t(botSettingPageContent.title)}

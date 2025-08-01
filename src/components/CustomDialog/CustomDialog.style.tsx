@@ -1,18 +1,6 @@
 import { Dialog, styled } from '@mui/material'
 
-export const StyledDialog = styled(Dialog)(() => ({
-  '& .dialog__actionBox': {
-    padding: '0 24px 24px 24px',
-    display: 'flex',
-    justifyContent: 'space-between'
-  },
-  '& .dialog__actionButton': {
-    marginLeft: '10px'
-  },
-  '& .dialog__uploadButton': {
-    width: '100%'
-  }
-}))
+export const StyledDialog = styled(Dialog)(() => ({}))
 
 export const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',

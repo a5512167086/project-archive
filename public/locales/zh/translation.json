@@ -102,7 +102,6 @@
     "deleteBotConfirmation": "你確定要刪除機器人嗎，此動作將無法返回",
     "deleteBotButton": "刪除機器人"
   },
-
   "knowledgeSettingPage": {
     "title": "知識管理",
     "addKnowledgeItemButton": "新增知識",
@@ -196,6 +195,19 @@
     "addSpecificDate": "新增指定日",
     "groupNumber": "群組 {{number}}"
   },
+  "ecommSettingPage": {
+    "title": "電商設定",
+    "shippingOptions": "物流選項",
+    "addShippingMethod": "新增物流方式",
+    "homeDelivery": "宅配",
+    "storePickup": "自取",
+    "fee": "費用",
+    "enabled": "啟用",
+    "noShippingOptions": "尚未設定任何物流選項。",
+    "deleteConfirmationTitle": "確認刪除",
+    "deleteConfirmationText": "您確定要刪除「{{method}}」這個物流方式嗎？",
+    "shippingMethod": "物流方式"
+  },
   "notFoundPage": {
     "title": "查無此頁面",
     "description": "哎呀！您正在尋找的頁面並不存在。它可能已被移動或刪除了，或者您輸入的 URL 不正確。"
@@ -215,6 +227,7 @@
     "done": "完成",
     "create": "建立",
     "save": "儲存",
+    "saveChanges": "儲存變更",
     "or": "或者",
     "setting": "設定",
     "rename": "重新命名",
@@ -239,22 +252,19 @@
     "invalidFormat": "格式錯誤",
     "fileRequired": "請選擇檔案",
     "unknown_error": "發生意外錯誤，請確認您的操作並重試。",
-
+    "shipping_method_exists": "此物流方式已存在。",
     "user_not_found": "該使用者不存在，請到註冊頁面註冊",
     "user_already_exists": "使用者已存在",
     "password_not_match": "密碼錯誤，請重新輸入",
     "user_lookup_failed": "查詢使用者資訊失敗。",
     "user_creation_failed": "建立使用者帳號失敗。",
-
     "oauth_already_exists": "該第三方登入已經被綁定，請使用其他第三方帳號綁定",
     "user_already_binded": "使用者帳號已經綁定此提供者。",
     "oauth_provider_not_supported": "不支援此OAuth提供者。",
-
     "email_service_failed": "電子郵件服務失敗，請稍後再試。",
     "token_expired": "登入狀態過期，請重新登入",
     "token_invalid": "無效的權杖，請重新登入。",
     "token_payload_invalid": "無效的權杖內容。",
-
     "bot_not_exist": "機器人不存在。",
     "bot_permission_denied": "此機器人權限不足。",
     "create_liff_app_failed": "建立LIFF應用程式失敗。",
@@ -264,17 +274,13 @@
     "empty_bot_uuid": "機器人UUID為必填。",
     "empty_credentials": "憑證為必填。",
     "empty_x_line_signature": "X-Line-Signature為必填。",
-
     "group_not_exist": "群組不存在。",
     "user_not_in_bot_group": "使用者不在機器人群組中。",
-
     "knowledge_class_not_found": "知識庫類別未找到。",
     "invalid_file_type": "無效的檔案類型。請上傳有效的CSV檔案。",
     "invalid_csv_format": "無效的CSV格式。",
     "empty_delete_list": "刪除清單不能為空。",
-
     "setting_class_not_found": "設定類別未找到。",
-
     "reservation_item_class_not_found": "預約項目類別未找到。",
     "service_class_not_found": "服務類別未找到。",
     "reservation_class_not_found": "預約類別未找到。",
@@ -285,24 +291,19 @@
     "reservation_capacity_exceeded": "預約容量已滿。",
     "reservation_option_invalid": "無效的預約選項。",
     "reservation_not_found": "預約未找到。",
-
     "brand_class_not_found": "品牌類別未找到。",
     "brand_not_found": "品牌未找到。",
     "brand_already_exists": "品牌已存在。",
-
     "category_class_not_found": "類別分類未找到。",
     "category_not_found": "類別未找到。",
     "category_already_exists": "類別已存在。",
     "parent_category_not_found": "父類別未找到。",
     "invalid_category_hierarchy": "無效的類別層級結構。",
-
     "product_class_not_found": "產品類別未找到。",
     "product_not_found": "產品未找到。",
     "product_sku_already_exists": "產品SKU已存在。",
-
     "minio_upload_error": "檔案上傳失敗，請重試。",
     "minio_delete_error": "檔案刪除失敗，請重試。",
-
     "internal_server_error": "內部伺服器錯誤，請稍後重試。",
     "invalid_input": "輸入資料無效，請檢查資料後重試。"
   },
@@ -336,7 +337,8 @@
     "category_deleted": "類別刪除成功",
     "product_added": "商品新增成功",
     "product_updated": "商品更新成功",
-    "product_deleted": "商品刪除成功"
+    "product_deleted": "商品刪除成功",
+    "shipping_method_deleted": "物流方式刪除成功"
   },
   "productManagementPage": {
     "title": "商品管理",

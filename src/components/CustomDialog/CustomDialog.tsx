@@ -310,7 +310,14 @@ export const CustomDialog = <T extends Record<string, unknown>>({
       <DialogTitle textAlign="center" variant="h5">
         {t(title)}
       </DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <DialogContent
+        sx={{
+          pt: '20px !important',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2
+        }}
+      >
         {description && <Typography>{t(description)}</Typography>}
         {fields.map((field) => {
           if (field.type === 'file') {

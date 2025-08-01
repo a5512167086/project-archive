@@ -227,7 +227,7 @@ const ReservationManagementPage = () => {
         fullWidth
         closeAfterTransition={false}
       >
-        <DialogTitle>
+        <DialogTitle >
           {t('reservationManagementPage.reservationDetails')}
         </DialogTitle>
         <DialogContent>

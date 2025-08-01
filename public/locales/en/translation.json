@@ -195,6 +195,19 @@
     "addSpecificDate": "Add Specific Date",
     "groupNumber": "Group {{number}}"
   },
+  "ecommSettingPage": {
+    "title": "E-commerce Settings",
+    "shippingOptions": "Shipping Options",
+    "addShippingMethod": "Add Shipping Method",
+    "homeDelivery": "Home Delivery",
+    "storePickup": "Self Pickup",
+    "fee": "Fee",
+    "enabled": "Enabled",
+    "noShippingOptions": "No shipping options configured yet.",
+    "deleteConfirmationTitle": "Confirm Deletion",
+    "deleteConfirmationText": "Are you sure you want to delete the shipping method \"{{method}}\"?",
+    "shippingMethod": "Shipping Method"
+  },
   "notFoundPage": {
     "title": "Page Not Found",
     "description": "Oops! The page you are looking for doesn't exist. It may have been moved or deleted, or you may have entered an incorrect URL."
@@ -214,6 +227,7 @@
     "done": "Done",
     "create": "Create",
     "save": "Save",
+    "saveChanges": "Save Changes",
     "or": "OR",
     "setting": "Settings",
     "rename": "Rename",
@@ -238,22 +252,19 @@
     "invalidFormat": "Invalid format",
     "fileRequired": "File is required",
     "unknown_error": "An unexpected error occurred, please check your action and try again.",
-
+    "shipping_method_exists": "This shipping method already exists.",
     "user_not_found": "User not found, please sign up.",
     "user_already_exists": "User already exists",
     "password_not_match": "Incorrect password, please try again.",
     "user_lookup_failed": "Failed to lookup user information.",
     "user_creation_failed": "Failed to create user account.",
-
     "oauth_already_exists": "The third-party login has already been bound, please use another third-party account to bind",
     "user_already_binded": "User account is already bound to this provider.",
     "oauth_provider_not_supported": "OAuth provider is not supported.",
-
     "email_service_failed": "Email service failed, please try again later.",
     "token_expired": "Session expired, please log in again",
     "token_invalid": "Invalid token, please log in again.",
     "token_payload_invalid": "Invalid token payload.",
-
     "bot_not_exist": "Bot does not exist.",
     "bot_permission_denied": "Permission denied for this bot.",
     "create_liff_app_failed": "Failed to create LIFF application.",
@@ -263,17 +274,13 @@
     "empty_bot_uuid": "Bot UUID is required.",
     "empty_credentials": "Credentials are required.",
     "empty_x_line_signature": "X-Line-Signature is required.",
-
     "group_not_exist": "Group does not exist.",
     "user_not_in_bot_group": "User is not in the bot group.",
-
     "knowledge_class_not_found": "Knowledge class not found.",
     "invalid_file_type": "Invalid file type. Please upload a valid CSV file.",
     "invalid_csv_format": "Invalid CSV format.",
     "empty_delete_list": "Delete list cannot be empty.",
-
     "setting_class_not_found": "Setting class not found.",
-
     "reservation_item_class_not_found": "Reservation item class not found.",
     "reservation_class_not_found": "Reservation class not found.",
     "reservation_item_not_found": "Reservation item not found.",
@@ -282,24 +289,19 @@
     "reservation_capacity_exceeded": "Reservation capacity exceeded.",
     "reservation_option_invalid": "Invalid reservation option.",
     "reservation_not_found": "Reservation not found.",
-
     "brand_class_not_found": "Brand class not found.",
     "brand_not_found": "Brand not found.",
     "brand_already_exists": "Brand already exists.",
-
     "category_class_not_found": "Category class not found.",
     "category_not_found": "Category not found.",
     "category_already_exists": "Category already exists.",
     "parent_category_not_found": "Parent category not found.",
     "invalid_category_hierarchy": "Invalid category hierarchy.",
-
     "product_class_not_found": "Product class not found.",
     "product_not_found": "Product not found.",
     "product_sku_already_exists": "Product SKU already exists.",
-
     "minio_upload_error": "File upload failed. Please try again.",
     "minio_delete_error": "File deletion failed. Please try again.",
-
     "internal_server_error": "Internal server error. Please try again later.",
     "invalid_input": "Invalid input. Please check your data and try again."
   },
@@ -333,7 +335,8 @@
     "category_deleted": "Category deleted successfully",
     "product_added": "Product added successfully",
     "product_updated": "Product updated successfully",
-    "product_deleted": "Product deleted successfully"
+    "product_deleted": "Product deleted successfully",
+    "shipping_method_deleted": "Shipping method deleted successfully"
   },
   "productManagementPage": {
     "title": "Product Management",

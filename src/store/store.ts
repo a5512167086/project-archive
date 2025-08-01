@@ -7,6 +7,7 @@ import reservationReducer from './modules/reservationSlice'
 import brandReducer from './modules/brandSlice'
 import categoryReducer from './modules/categorySlice'
 import productReducer from './modules/productSlice'
+import ecommReducer from './modules/ecommSlice'
 import { userApi } from './apis/userApi'
 import { botApi } from './apis/botApi'
 import { moduleApi } from './apis/moduleApi'
@@ -15,6 +16,7 @@ import { reservationApi } from './apis/reservationApi'
 import { brandApi } from './apis/brandApi'
 import { categoryApi } from './apis/categoryApi'
 import { productApi } from './apis/productApi'
+import { ecommApi } from './apis/ecommApi'
 
 export const store = configureStore({
   reducer: {
@@ -26,6 +28,7 @@ export const store = configureStore({
     brand: brandReducer,
     category: categoryReducer,
     product: productReducer,
+    ecomm: ecommReducer,
     [userApi.reducerPath]: userApi.reducer,
     [botApi.reducerPath]: botApi.reducer,
     [moduleApi.reducerPath]: moduleApi.reducer,
@@ -33,7 +36,8 @@ export const store = configureStore({
     [reservationApi.reducerPath]: reservationApi.reducer,
     [brandApi.reducerPath]: brandApi.reducer,
     [categoryApi.reducerPath]: categoryApi.reducer,
-    [productApi.reducerPath]: productApi.reducer
+    [productApi.reducerPath]: productApi.reducer,
+    [ecommApi.reducerPath]: ecommApi.reducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
@@ -45,6 +49,7 @@ export const store = configureStore({
       .concat(brandApi.middleware)
       .concat(categoryApi.middleware)
       .concat(productApi.middleware)
+      .concat(ecommApi.middleware)
 })
 
 export type RootState = ReturnType<typeof store.getState>
