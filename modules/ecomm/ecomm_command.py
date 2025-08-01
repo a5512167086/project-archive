@@ -418,7 +418,6 @@ class EcommCommand:
 
         self.session.exec(stmt)
 
-    # Shipping command functions
     async def update_shipping_setting(
         self, bot_uuid: str, shipping_options: List[ShippingOption]
     ):

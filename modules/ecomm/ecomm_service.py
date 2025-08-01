@@ -403,6 +403,13 @@ class EcommService:
         bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
         self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
 
+        methods = [option.method for option in body.shipping_options]
+        if len(methods) != len(set(methods)):
+            raise GlobalErrorException(
+                error_code=ErrorCode.SHIPPING_SETTING_ALREADY_EXISTS,
+                error_message="Duplicate shipping methods are not allowed",
+            )
+
         bot_uuid_str = str(bot.bot_detail_id)
         converted_options = [
             ShippingOption(**option.model_dump()) for option in body.shipping_options
