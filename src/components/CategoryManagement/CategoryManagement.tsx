@@ -69,6 +69,36 @@ export const CategoryManagement = () => {
     }
   ]
 
+  const getDescendantIds = (category: Category): number[] => {
+    return (
+      category.children?.flatMap((child) => [
+        child.class_id,
+        ...getDescendantIds(child)
+      ]) ?? []
+    )
+  }
+
+  const flattenCategories = (
+    categories: Category[],
+    level = 0
+  ): (Category & { level: number })[] => {
+    return categories.flatMap((cat) => [
+      { ...cat, level },
+      ...(cat.children ? flattenCategories(cat.children, level + 1) : [])
+    ])
+  }
+
+  const forbiddenIds = editingCategory
+    ? [editingCategory.class_id, ...getDescendantIds(editingCategory)]
+    : []
+
+  const parentCategoryOptions = flattenCategories(categoryList)
+    .filter((cat) => !forbiddenIds.includes(cat.class_id))
+    .map((cat) => ({
+      label: `${'—'.repeat(cat.level)} ${cat.category_name}`,
+      value: String(cat.class_id)
+    }))
+
   // 編輯 Dialog 欄位 (多一個 parent select)
   const editCategoryFields: FieldProps[] = [
     {
@@ -95,12 +125,7 @@ export const CategoryManagement = () => {
       required: false,
       options: [
         { label: t('productManagementPage.noParentCategory'), value: '0' },
-        ...categoryList
-          .filter((cat) => cat.class_id !== editingCategory?.class_id)
-          .map((cat) => ({
-            label: cat.category_name,
-            value: String(cat.class_id)
-          }))
+        ...parentCategoryOptions
       ],
       defaultValue:
         editingCategory?.parent_class_id === null ||
