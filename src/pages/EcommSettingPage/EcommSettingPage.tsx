@@ -32,6 +32,7 @@ import { showErrorToast, showSuccessToast } from '@/utils/toast'
 import { isEmpty } from '@/utils/helper'
 import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
 import { PAGE_PATHS } from '@/routes'
+import { CustomLoader } from '@/components/CustomLoader'
 
 export const EcommSettingPage = () => {
   const { t } = useTranslation()
@@ -41,12 +42,10 @@ export const EcommSettingPage = () => {
   )
   const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
 
-  const [getEcommSettings, { isLoading: isLoadingSettings }] =
-    useLazyGetEcommSettingsQuery()
-  const [updateEcommSettings, { isLoading: isUpdating }] =
-    useUpdateEcommSettingsMutation()
+  const [getEcommSettings] = useLazyGetEcommSettingsQuery()
+  const [updateEcommSettings] = useUpdateEcommSettingsMutation()
   const [deleteEcommShippingMethod] = useDeleteEcommShippingMethodMutation()
-
+  const [isLoading, setIsLoading] = useState(false)
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([])
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -73,6 +72,7 @@ export const EcommSettingPage = () => {
   }
 
   const handleSave = async () => {
+    setIsLoading(true)
     if (currentBot) {
       await updateEcommSettings({
         bot_uuid: currentBot.bot_detail_id,
@@ -80,6 +80,7 @@ export const EcommSettingPage = () => {
       }).unwrap()
       showSuccessToast(t('success.settings_saved'))
     }
+    setIsLoading(false)
   }
 
   const handleDelete = (option: ShippingOption) => {
@@ -242,7 +243,11 @@ export const EcommSettingPage = () => {
                 }
                 label={t('ecommSettingPage.enabled')}
               />
-              <IconButton color="error" onClick={() => handleDelete(option)}>
+              <IconButton
+                color="error"
+                onClick={() => handleDelete(option)}
+                disabled={isLoading}
+              >
                 <Delete />
               </IconButton>
             </ShippingOptionCard>
@@ -254,9 +259,9 @@ export const EcommSettingPage = () => {
           variant="contained"
           color="primary"
           onClick={handleSave}
-          disabled={isUpdating || isLoadingSettings}
+          disabled={isLoading}
         >
-          {t('common.saveChanges')}
+          {isLoading ? <CustomLoader size={24} /> : t('common.saveChanges')}
         </Button>
       </Box>
 
