@@ -2,7 +2,7 @@ from datetime import date, time
 from typing import List
 from uuid import UUID
 
-from sqlmodel import Session, select, func
+from sqlmodel import Session, func, select
 
 from modules.reservation.reservation_model import (
     ReservationDetail,
@@ -437,10 +437,9 @@ class ReservationQuery:
 
         # 首先獲取這些預約對應的服務信息
         service_info = self.session.exec(
-            select(
-                ReservationListView.object_id,
-                ReservationListView.service_id
-            ).where(ReservationListView.object_id.in_(reservation_object_ids))
+            select(ReservationListView.object_id, ReservationListView.service_id).where(
+                ReservationListView.object_id.in_(reservation_object_ids)
+            )
         ).all()
 
         service_object_ids = []
@@ -486,7 +485,7 @@ class ReservationQuery:
                 selected_options_map[reservation_object_id] = {}
             if group_id not in selected_options_map[reservation_object_id]:
                 selected_options_map[reservation_object_id][group_id] = []
-            
+
             selected_options_map[reservation_object_id][group_id].append({
                 "option_id": option[2],
                 "option_name": option[3],
@@ -498,21 +497,25 @@ class ReservationQuery:
             service_id = reservation_to_service_map.get(reservation_object_id)
             if not service_id:
                 continue
-                
+
             service_object_id = self.get_object_id_by_service_id(service_id)
             if not service_object_id:
                 continue
 
             result[reservation_object_id] = []
-            
+
             # 找到該服務的所有 option groups
-            service_groups = [g for g in all_option_groups if g.object_id == service_object_id]
-            
+            service_groups = [
+                g for g in all_option_groups if g.object_id == service_object_id
+            ]
+
             for group in service_groups:
                 group_data = {
                     "option_group_id": group.option_group_id,
                     "group_name": group.group_name,
-                    "selected_options": selected_options_map.get(reservation_object_id, {}).get(group.option_group_id, [])
+                    "selected_options": selected_options_map.get(
+                        reservation_object_id, {}
+                    ).get(group.option_group_id, []),
                 }
                 result[reservation_object_id].append(group_data)
 

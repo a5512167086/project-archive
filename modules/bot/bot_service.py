@@ -173,7 +173,7 @@ class BotService:
         bot_data = self.validate_bot_ownership(user_id, delete_bot_uuid)
         bot_object_id = bot_data.object_id
         bot_class_id = bot_data.class_id
-        bot_subclass_list = self.query.get_bot_subclass(bot_class_id)
+        bot_subclass_list = self.query.get_all_bot_subclasses(bot_class_id)
         self.command.delete_bot_by_id(bot_class_id, bot_object_id, bot_subclass_list)
         logger.info(f"Bot deleted successfully for bot_uuid: {delete_bot_uuid}")
 

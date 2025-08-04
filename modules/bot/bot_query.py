@@ -36,21 +36,33 @@ class BotQuery:
 
         return bot_data
 
-    def get_bot_subclass(self, bot_class_id: int) -> List[int]:
-        logger.info(
-            f"Fetching child_class_id from Inheritance for parent_class_id: {bot_class_id}"
-        )
-        statement = select(Inheritance.child_class_id).where(
-            Inheritance.parent_class_id == bot_class_id
-        )
-        result = self.session.exec(statement).all()
+    def get_all_bot_subclasses(self, parent_class_id: int) -> List[int]:
+        stmt = select(Inheritance.parent_class_id, Inheritance.child_class_id)
+        rows = self.session.exec(stmt).all()
 
-        logger.info(
-            f"Successfully fetched {len(result)} subclasses for parent_class_id: {bot_class_id}"
-        )
+        parent_to_children = {}
+        for parent_id, child_id in rows:
+            parent_to_children.setdefault(parent_id, []).append(child_id)
+
+        visited = set()
+        result = []
+
+        def dfs(current_id: int):
+            if current_id in visited:
+                return
+            visited.add(current_id)
+
+            for child_id in parent_to_children.get(current_id, []):
+                result.append(child_id)
+                dfs(child_id)
+
+        dfs(parent_class_id)
+
         return result
 
-    def get_line_bot_credentials(self, bot_uuid: UUID) -> BotListWithCredentialView | None:
+    def get_line_bot_credentials(
+        self, bot_uuid: UUID
+    ) -> BotListWithCredentialView | None:
         logger.info(f"Fetching credentials for bot_uuid: {bot_uuid}")
         stmt = select(BotListWithCredentialView).where(
             BotListWithCredentialView.bot_detail_id == bot_uuid

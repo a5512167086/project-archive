@@ -15,8 +15,8 @@ class ModuleSetting(SQLModel, table=True):
     version: str = Field(default="1.0.0", max_length=20)
     description: Optional[str] = None
 
-    created_at: datetime = Field(default_factory=datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class ModuleSettingView(SQLModel, table=True):
