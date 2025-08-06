@@ -172,3 +172,56 @@ class ShippingSettingResponse(BaseModel):
 class DeleteShippingMethodRequest(BaseModel):
     bot_uuid: UUID
     method: Literal["home_delivery", "store_pickup"]
+
+
+# Order schemas
+class OrderItemSchema(BaseModel):
+    variant_id: Optional[UUID] = None
+    product_name_snapshot: str
+    sku_snapshot: str
+    price_snapshot: int
+    quantity: int
+
+
+class InsertOrderRequest(BaseModel):
+    bot_uuid: UUID
+    total_amount: int
+    payment_method: str
+    payment_status: str
+    shipping_method: str
+    shipping_fee: int
+    recipient_name: str
+    recipient_phone: str
+    shipping_address: str
+    items: List[OrderItemSchema]
+
+
+class OrderResponse(BaseModel):
+    order_id: UUID
+    object_id: int
+    total_amount: int
+    status: str
+    payment_method: Optional[str]
+    payment_status: Optional[str]
+    shipping_method: Optional[str]
+    shipping_fee: int
+    tracking_number: Optional[str]
+    recipient_name: Optional[str]
+    recipient_phone: Optional[str]
+    shipping_address: Optional[str]
+    created_at: datetime
+    updated_at: datetime
+    items: List[OrderItemSchema] = []
+
+
+class UpdateOrderRequest(BaseModel):
+    bot_uuid: UUID
+    order_id: UUID
+    status: Optional[str] = None
+    payment_status: Optional[str] = None
+    tracking_number: Optional[str] = None
+
+
+class DeleteOrderRequest(BaseModel):
+    bot_uuid: UUID
+    order_ids: List[UUID]

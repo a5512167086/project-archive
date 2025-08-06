@@ -40,8 +40,8 @@ class ProductDetail(SQLModel, table=True):
     sku_code: str = Field(max_length=64, unique=True)
     price: int
     stock: int = Field(default=0)
-    created_at: datetime = Field(default_factory=datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class ProductImage(SQLModel, table=True):
@@ -62,8 +62,8 @@ class ProductVariant(SQLModel, table=True):
     sku_code: Optional[str] = Field(default=None, max_length=64, unique=True)
     price: Optional[int] = None
     stock: int = Field(default=0)
-    created_at: datetime = Field(default_factory=datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class ProductListView(SQLModel, table=True):
@@ -112,8 +112,8 @@ class OrderDetail(SQLModel, table=True):
     recipient_name: Optional[str] = Field(default=None, max_length=128)
     recipient_phone: Optional[str] = Field(default=None, max_length=32)
     shipping_address: Optional[str] = Field(default=None)
-    created_at: datetime = Field(default_factory=datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class OrderItem(SQLModel, table=True):
@@ -126,3 +126,22 @@ class OrderItem(SQLModel, table=True):
     sku_snapshot: str = Field(max_length=64)
     price_snapshot: int
     quantity: int
+
+
+class OrderListView(SQLModel, table=True):
+    __tablename__ = "vs_order_list"
+
+    order_id: UUID = Field(primary_key=True)
+    object_id: int
+    total_amount: int
+    status: str
+    payment_method: Optional[str] = None
+    payment_status: Optional[str] = None
+    shipping_method: Optional[str] = None
+    shipping_fee: int
+    tracking_number: Optional[str] = None
+    recipient_name: Optional[str] = None
+    recipient_phone: Optional[str] = None
+    shipping_address: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime

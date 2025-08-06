@@ -12,6 +12,9 @@ from modules.ecomm.ecomm_model import (
     ProductListView,
     ProductVariant,
     ShippingSetting,
+    OrderListView,
+    OrderDetail,
+    OrderItem,
 
 )
 from shared.models.class_model import SubClassView
@@ -246,3 +249,29 @@ class EcommQuery:
     async def get_shipping_setting_by_bot_uuid(self, bot_uuid: str) -> ShippingSetting | None:
         """根據 bot_uuid 取得運送設定"""
         return await ShippingSetting.find_one(ShippingSetting.bot_uuid == bot_uuid)
+
+    # Order query functions
+    def get_order_class_id_by_bot_class_id(self, bot_class_id: int) -> int | None:
+        order_entity_id = get_entity_id_by_name(self.session, "訂單")
+        result = self.session.exec(
+            select(SubClassView.class_id).where(
+                SubClassView.parent_class_id == bot_class_id,
+                SubClassView.entity_id == order_entity_id,
+            )
+        ).first()
+
+        return result
+
+    def get_all_orders_view(self, class_id: int) -> List[OrderListView]:
+        statement = select(OrderListView).where(OrderListView.class_id == class_id)
+        return self.session.exec(statement).all()
+
+    def get_order_by_id(self, order_id: UUID) -> OrderDetail | None:
+        """根據 order_id 取得訂單詳細資訊"""
+        return self.session.get(OrderDetail, order_id)
+
+    def get_order_items_by_object_id(self, object_id: int) -> List[OrderItem]:
+        """根據 object_id 取得訂單項目"""
+        return self.session.exec(
+            select(OrderItem).where(OrderItem.object_id == object_id)
+        ).all()

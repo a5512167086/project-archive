@@ -10,6 +10,7 @@ from modules.ecomm.ecomm_router import (
     brand_router,
     category_router,
     ecomm_router,
+    order_router,
     product_image_router,
     product_router,
 )
@@ -54,6 +55,10 @@ app.add_middleware(
         "https://localhost:5173",
         "http://127.0.0.1:5173",
         "https://127.0.0.1:5173",
+        "http://localhost:5174",
+        "https://localhost:5174",
+        "http://127.0.0.1:5174",
+        "https://127.0.0.1:5174",
         "https://platform-web-gnod.onrender.com",
         "https://liff-web.onrender.com",
     ],
@@ -81,3 +86,4 @@ app.include_router(category_router)
 app.include_router(product_router)
 # Product image proxy router
 app.include_router(product_image_router)
+app.include_router(order_router)

@@ -16,13 +16,17 @@ from modules.ecomm.ecomm_query import EcommQuery
 from modules.ecomm.ecomm_schema import (
     DeleteBrandRequest,
     DeleteCategoryRequest,
+    DeleteOrderRequest,
     DeleteProductRequest,
     DeleteShippingMethodRequest,
     InsertBrandRequest,
     InsertCategoryRequest,
+    InsertOrderRequest,
+    OrderResponse,
     ProductResponse,
     UpdateBrandRequest,
     UpdateCategoryRequest,
+    UpdateOrderRequest,
     UpdateProductRequest,
     UpdateShippingSettingRequest,
 )
@@ -390,11 +394,6 @@ class EcommService:
         bot = self.bot_service.validate_line_bot_exists(bot_uuid)
         bot_uuid_str = str(bot.bot_detail_id)
         setting = await self.query.get_shipping_setting_by_bot_uuid(bot_uuid_str)
-        if not setting:
-            raise GlobalErrorException(
-                error_code=ErrorCode.SHIPPING_SETTING_NOT_FOUND,
-                error_message="Shipping setting not found",
-            )
         return setting
 
     async def update_shipping_setting(
@@ -440,3 +439,71 @@ class EcommService:
         await self.command.update_shipping_setting(
             bot_uuid_str, setting.shipping_options
         )
+
+    # Order service methods
+    def validate_order_class(self, bot_class_id: int) -> int:
+        order_class_id = self.query.get_order_class_id_by_bot_class_id(bot_class_id)
+        if not order_class_id:
+            raise GlobalErrorException(
+                error_code=ErrorCode.ORDER_CLASS_NOT_FOUND,
+                error_message="Order class not found for the given bot class",
+            )
+        return order_class_id
+
+    def get_all_orders(self, bot_uuid: UUID) -> List[OrderResponse]:
+        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
+        order_class_id = self.validate_order_class(bot.class_id)
+        orders_data = self.query.get_all_orders_view(order_class_id)
+        orders = []
+        for order_data in orders_data:
+            order_items = self.query.get_order_items_by_object_id(order_data.object_id)
+            orders.append(
+                OrderResponse(
+                    **order_data.model_dump(),
+                    items=order_items,
+                )
+            )
+        return orders
+
+    def insert_order(self, body: InsertOrderRequest, user_id: str):
+        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
+        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+        order_class_id = self.validate_order_class(bot.class_id)
+
+        self.command.insert_order(
+            order_class_id=order_class_id,
+            total_amount=body.total_amount,
+            payment_method=body.payment_method,
+            payment_status=body.payment_status,
+            shipping_method=body.shipping_method,
+            shipping_fee=body.shipping_fee,
+            recipient_name=body.recipient_name,
+            recipient_phone=body.recipient_phone,
+            shipping_address=body.shipping_address,
+            items=[item.model_dump() for item in body.items],
+            owner_id=user_id,
+        )
+
+    def update_order_by_id(self, body: UpdateOrderRequest, user_id: str):
+        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
+        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+        self.validate_order_class(bot.class_id)
+
+        success = self.command.update_order(
+            order_id=body.order_id,
+            status=body.status,
+            payment_status=body.payment_status,
+            tracking_number=body.tracking_number,
+        )
+
+        if not success:
+            raise GlobalErrorException(
+                error_code=ErrorCode.ORDER_NOT_FOUND,
+                error_message="Order not found",
+            )
+
+    def delete_orders_by_ids(self, body: DeleteOrderRequest, user_id: str):
+        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
+        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+        self.validate_order_class(bot.class_id)
+        self.command.delete_orders(body.order_ids)

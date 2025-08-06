@@ -11,14 +11,18 @@ from modules.ecomm.ecomm_schema import (
     CategoryResponse,
     DeleteBrandRequest,
     DeleteCategoryRequest,
+    DeleteOrderRequest,
     DeleteProductRequest,
     DeleteShippingMethodRequest,
     InsertBrandRequest,
     InsertCategoryRequest,
+    InsertOrderRequest,
+    OrderResponse,
     ProductResponse,
     ShippingSettingResponse,
     UpdateBrandRequest,
     UpdateCategoryRequest,
+    UpdateOrderRequest,
     UpdateProductRequest,
     UpdateShippingSettingRequest,
 )
@@ -45,9 +49,10 @@ brand_router = APIRouter(prefix="/brands", tags=["brands"])
 category_router = APIRouter(prefix="/categories", tags=["categories"])
 product_router = APIRouter(prefix="/products", tags=["products"])
 product_image_router = APIRouter(prefix="/product-images", tags=["product-images"])
+order_router = APIRouter(prefix="/orders", tags=["orders"])
 
 
-@ecomm_router.get("/{bot_uuid}", response_model=ShippingSettingResponse)
+@ecomm_router.get("/{bot_uuid}", response_model=ShippingSettingResponse | None)
 async def get_shipping_settings(
     bot_uuid: UUID,
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
@@ -304,3 +309,44 @@ async def get_product_image(
             raise HTTPException(status_code=500, detail=f"MinIO error: {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+# Order endpoints
+@order_router.get("/{bot_uuid}", response_model=List[OrderResponse])
+def list_orders(
+    bot_uuid: UUID, ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)]
+):
+    return ecomm_service.get_all_orders(bot_uuid)
+
+
+@order_router.post("")
+def create_order(
+    order: InsertOrderRequest,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+):
+    user_id = current_user["user_id"]
+    ecomm_service.insert_order(order, user_id)
+    ecomm_service.session.commit()
+
+
+@order_router.patch("")
+def update_order(
+    update_request: UpdateOrderRequest,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+):
+    user_id = current_user["user_id"]
+    ecomm_service.update_order_by_id(update_request, user_id)
+    ecomm_service.session.commit()
+
+
+@order_router.delete("")
+def delete_orders(
+    delete_request: DeleteOrderRequest,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+):
+    user_id = current_user["user_id"]
+    ecomm_service.delete_orders_by_ids(delete_request, user_id)
+    ecomm_service.session.commit()

@@ -11,6 +11,8 @@ from modules.ecomm.ecomm_model import (
     ProductVariant,
     ShippingOption,
     ShippingSetting,
+    OrderDetail,
+    OrderItem,
 )
 from shared.models.class_model import Class
 from shared.models.class_object_relation_model import ClassObjectRelation
@@ -437,3 +439,111 @@ class EcommCommand:
         setting = await ShippingSetting.find_one(ShippingSetting.bot_uuid == bot_uuid)
         if setting:
             await setting.delete()
+
+    # Order command functions
+    def insert_order(
+        self,
+        order_class_id: int,
+        total_amount: int,
+        payment_method: str,
+        payment_status: str,
+        shipping_method: str,
+        shipping_fee: int,
+        recipient_name: str,
+        recipient_phone: str,
+        shipping_address: str,
+        items: List[dict],
+        owner_id: Optional[str] = None,
+    ) -> UUID:
+        """建立訂單"""
+        order_entity_id = get_entity_id_by_name(self.session, "訂單")
+
+        # 建立 Object
+        new_order_object = Object(
+            chinese_name=f"Order by {recipient_name}",
+            entity_id=order_entity_id,
+            owner_id=owner_id,
+        )
+        self.session.add(new_order_object)
+        self.session.flush()
+
+        # 建立 ClassObjectRelation
+        relation = ClassObjectRelation(
+            class_id=order_class_id, object_id=new_order_object.object_id
+        )
+        self.session.add(relation)
+
+        # 建立 OrderDetail
+        order_detail = OrderDetail(
+            object_id=new_order_object.object_id,
+            total_amount=total_amount,
+            payment_method=payment_method,
+            payment_status=payment_status,
+            shipping_method=shipping_method,
+            shipping_fee=shipping_fee,
+            recipient_name=recipient_name,
+            recipient_phone=recipient_phone,
+            shipping_address=shipping_address,
+        )
+        self.session.add(order_detail)
+        self.session.flush()
+
+        # 建立訂單項目
+        for item in items:
+            order_item = OrderItem(
+                object_id=new_order_object.object_id,
+                variant_id=item.get("variant_id"),
+                product_name_snapshot=item["product_name_snapshot"],
+                sku_snapshot=item["sku_snapshot"],
+                price_snapshot=item["price_snapshot"],
+                quantity=item["quantity"],
+            )
+            self.session.add(order_item)
+
+        return order_detail.order_id
+
+    def delete_orders(self, order_ids: List[UUID]):
+        """刪除訂單"""
+        orders = self.session.exec(
+            select(OrderDetail).where(OrderDetail.order_id.in_(order_ids))
+        ).all()
+
+        object_ids = [o.object_id for o in orders]
+
+        if object_ids:
+            self.session.exec(
+                delete(OrderItem).where(OrderItem.object_id.in_(object_ids))
+            )
+            self.session.exec(
+                delete(ClassObjectRelation).where(
+                    ClassObjectRelation.object_id.in_(object_ids)
+                )
+            )
+            self.session.exec(
+                delete(OrderDetail).where(OrderDetail.order_id.in_(order_ids))
+            )
+            self.session.exec(delete(Object).where(Object.object_id.in_(object_ids)))
+
+    def update_order(
+        self,
+        order_id: UUID,
+        status: Optional[str] = None,
+        payment_status: Optional[str] = None,
+        tracking_number: Optional[str] = None,
+    ) -> bool:
+        """更新訂單狀態"""
+        order_detail = self.session.get(OrderDetail, order_id)
+        if not order_detail:
+            return False
+
+        if status is not None:
+            order_detail.status = status
+        if payment_status is not None:
+            order_detail.payment_status = payment_status
+        if tracking_number is not None:
+            order_detail.tracking_number = tracking_number
+
+        order_detail.updated_at = datetime.now(timezone.utc)
+        self.session.add(order_detail)
+
+        return True
