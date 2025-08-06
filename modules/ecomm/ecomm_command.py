@@ -6,13 +6,13 @@ from uuid import UUID
 from sqlmodel import Session, delete, select, text, update
 
 from modules.ecomm.ecomm_model import (
+    OrderDetail,
+    OrderItem,
     ProductDetail,
     ProductImage,
     ProductVariant,
     ShippingOption,
     ShippingSetting,
-    OrderDetail,
-    OrderItem,
 )
 from shared.models.class_model import Class
 from shared.models.class_object_relation_model import ClassObjectRelation
@@ -300,8 +300,9 @@ class EcommCommand:
 
         # 建立產品圖片
         for img in images:
+            image_url = img["image_url"]
             product_image = ProductImage(
-                image_url=img["image_url"],
+                image_url=image_url,
                 object_id=new_product_object.object_id,
                 display_order=img.get("display_order", 0),
             )

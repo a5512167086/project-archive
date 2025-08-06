@@ -260,23 +260,16 @@ def update_product(
 
 
 # Product Image proxy endpoints
-@product_image_router.get("/{bucket_name}/{file_name}")
+@product_image_router.get("/{file_name}")
 async def get_product_image(
-    bucket_name: str,
     file_name: str,
     minio_service: Annotated[MinioService, Depends(get_minio_service)],
 ):
     try:
-        # 從 MinIO 獲取圖片
-        response = minio_service.client.get_object(bucket_name, file_name)
-
-        # 讀取圖片內容
+        response = minio_service.client.get_object("product-images", file_name)
         image_data = response.read()
-
-        # 獲取內容類型
         content_type = response.headers.get("Content-Type", "application/octet-stream")
 
-        # 如果沒有 Content-Type，根據檔案副檔名推測
         if content_type == "application/octet-stream":
             file_extension = file_name.lower().split(".")[-1]
             content_type_map = {
@@ -290,12 +283,11 @@ async def get_product_image(
             }
             content_type = content_type_map.get(file_extension, "image/jpeg")
 
-        # 返回圖片內容
         return StreamingResponse(
             io.BytesIO(image_data),
             media_type=content_type,
             headers={
-                "Cache-Control": "public, max-age=3600",  # 快取 1 小時
+                "Cache-Control": "public, max-age=3600",
                 "Content-Length": str(len(image_data)),
             },
         )

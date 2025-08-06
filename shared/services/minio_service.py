@@ -17,16 +17,6 @@ class MinioService:
     def upload_product_images(
         self, images: List[UploadFile], bucket_name: str = "product-images"
     ) -> List[dict]:
-        """
-        上傳產品圖片到 MinIO 並返回圖片資訊
-
-        Args:
-            images: 圖片檔案列表
-            bucket_name: MinIO bucket 名稱
-
-        Returns:
-            List[dict]: 包含 image_url 和 display_order 的字典列表
-        """
         try:
             # 檢查 bucket 是否存在，不存在則創建
             if not self.client.bucket_exists(bucket_name):
@@ -68,8 +58,7 @@ class MinioService:
                 )
 
                 # 生成圖片 URL - 使用代理 API
-                image_url = f"https://demo.wke.csie.ncnu.edu.tw/easybot-api/images/{bucket_name}/{unique_filename}"
-
+                image_url = f"https://demo.wke.csie.ncnu.edu.tw/easybot-api/product-images/{unique_filename}"
                 uploaded_images.append({"image_url": image_url, "display_order": i})
 
                 # 重置檔案指標以供後續使用

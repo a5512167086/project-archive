@@ -260,6 +260,13 @@ class EcommService:
         products_data = self.query.get_all_products_view(all_category_ids)
         products = []
         for product_data in products_data:
+            images = self.query.get_product_images_by_object_id(product_data.object_id)
+            variants = self.query.get_product_variants_by_object_id(
+                product_data.object_id
+            )
+            # Construct full image URL
+            for image in images:
+                image.image_url = image.image_url
             products.append(
                 ProductResponse(
                     product_id=product_data.product_id,
@@ -276,8 +283,8 @@ class EcommService:
                     is_active=product_data.is_active,
                     created_at=product_data.created_at,
                     updated_at=product_data.updated_at,
-                    images=[],
-                    variants=[],
+                    images=images,
+                    variants=variants,
                 )
             )
 

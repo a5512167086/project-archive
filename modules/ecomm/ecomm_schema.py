@@ -4,6 +4,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+from modules.ecomm.ecomm_model import ProductImage, ProductVariant
+
 
 class InsertBrandRequest(BaseModel):
     bot_uuid: UUID
@@ -48,7 +50,7 @@ class CategoryResponse(BaseModel):
     class_id: int
     category_name: str
     category_description: Optional[str] = None
-    children: List["CategoryResponse"] = []
+    children: List["CategoryResponse"] = Field(default_factory=list)
 
 
 class UpdateCategoryRequest(BaseModel):
@@ -59,10 +61,16 @@ class UpdateCategoryRequest(BaseModel):
     parent_category_id: Optional[int] = None
 
 
-# Product schemas
 class ProductImageRequest(BaseModel):
     image_url: str
     display_order: int = 0
+
+
+class ProductVariantRequest(BaseModel):
+    variant_name: str
+    sku_code: Optional[str] = None
+    price: Optional[int] = None
+    stock: int = 0
 
 
 class InsertProductWithImagesRequest(BaseModel):
@@ -75,14 +83,7 @@ class InsertProductWithImagesRequest(BaseModel):
     price: int
     stock: int = 0
     is_active: bool = True
-    variants: List["ProductVariantRequest"] = []
-
-
-class ProductVariantRequest(BaseModel):
-    variant_name: str
-    sku_code: Optional[str] = None
-    price: Optional[int] = None
-    stock: int = 0
+    variants: List[ProductVariantRequest] = []
 
 
 class InsertProductRequest(BaseModel):
@@ -99,24 +100,6 @@ class InsertProductRequest(BaseModel):
     variants: List[ProductVariantRequest] = []
 
 
-class ProductImageResponse(BaseModel):
-    image_id: int
-    image_url: str
-    object_id: int
-    display_order: int
-
-
-class ProductVariantResponse(BaseModel):
-    variant_id: UUID
-    object_id: Optional[int]
-    variant_name: str
-    sku_code: Optional[str]
-    price: Optional[int]
-    stock: int
-    created_at: datetime
-    updated_at: datetime
-
-
 class ProductResponse(BaseModel):
     product_id: UUID
     object_id: int
@@ -130,8 +113,8 @@ class ProductResponse(BaseModel):
     is_active: bool
     created_at: datetime
     updated_at: datetime
-    images: List[ProductImageResponse] = []
-    variants: List[ProductVariantResponse] = []
+    images: List[ProductImage] = []
+    variants: List[ProductVariant] = []
 
 
 class UpdateProductRequest(BaseModel):
