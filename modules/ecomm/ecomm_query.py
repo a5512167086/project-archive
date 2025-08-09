@@ -7,15 +7,14 @@ from sqlmodel import Session, select
 from modules.ecomm.ecomm_model import (
     BrandListView,
     CategoryListView,
+    OrderDetail,
+    OrderItem,
+    OrderListView,
     ProductDetail,
     ProductImage,
     ProductListView,
     ProductVariant,
     ShippingSetting,
-    OrderListView,
-    OrderDetail,
-    OrderItem,
-
 )
 from shared.models.class_model import SubClassView
 from shared.models.object_model import Object
@@ -175,6 +174,10 @@ class EcommQuery:
 
         return result
 
+    def get_product_by_id(self, product_id: UUID) -> ProductDetail | None:
+        """根據 product_id 取得產品詳細資訊"""
+        return self.session.get(ProductDetail, product_id)
+
     def get_product_by_object_id(self, object_id: int) -> ProductDetail | None:
         """根據 object_id 取得產品詳細資訊"""
         return self.session.exec(
@@ -189,11 +192,42 @@ class EcommQuery:
             .order_by(ProductImage.display_order)
         ).all()
 
+    def get_product_image_by_id(self, image_id: int) -> ProductImage | None:
+        """根據 image_id 取得產品圖片"""
+        return self.session.get(ProductImage, image_id)
+
     def get_product_variants_by_object_id(self, object_id: int) -> List[ProductVariant]:
         """根據 object_id 取得產品變體"""
         return self.session.exec(
             select(ProductVariant).where(ProductVariant.object_id == object_id)
         ).all()
+
+    def get_variant_by_id(self, variant_id: UUID) -> ProductVariant | None:
+        """根據 variant_id 取得產品變體"""
+        return self.session.get(ProductVariant, variant_id)
+
+    def check_variant_sku_exists(self, sku_code: str) -> bool:
+        """檢查變體 SKU 是否已存在"""
+        if not sku_code:
+            return False
+        result = self.session.exec(
+            select(ProductVariant).where(ProductVariant.sku_code == sku_code)
+        ).first()
+        return result is not None
+
+    def check_variant_sku_exists_exclude_self(
+        self, sku_code: str, exclude_variant_id: UUID
+    ) -> bool:
+        """檢查變體 SKU 是否已存在（排除自己）"""
+        if not sku_code:
+            return False
+        result = self.session.exec(
+            select(ProductVariant).where(
+                ProductVariant.sku_code == sku_code,
+                ProductVariant.variant_id != exclude_variant_id,
+            )
+        ).first()
+        return result is not None
 
     def check_product_sku_exists(self, sku_code: str) -> bool:
         """檢查 SKU 是否已存在"""
@@ -215,8 +249,6 @@ class EcommQuery:
         return result is not None
 
     def get_products_by_class_id(self, class_id: int) -> List[dict]:
-        """根據 class_id 取得所有產品"""
-        # 先取得該類別下的所有 objects
         objects = self.session.exec(
             select(Object)
             .join(SubClassView, Object.entity_id == SubClassView.entity_id)
@@ -227,14 +259,9 @@ class EcommQuery:
         for obj in objects:
             product_detail = self.get_product_by_object_id(obj.object_id)
             if product_detail:
-                images = self.get_product_images_by_object_id(obj.object_id)
-                variants = self.get_product_variants_by_object_id(obj.object_id)
-
                 products.append({
                     "product_detail": product_detail,
                     "object": obj,
-                    "images": images,
-                    "variants": variants,
                 })
 
         return products
@@ -246,7 +273,9 @@ class EcommQuery:
         return self.session.exec(statement).all()
 
     # Shipping query functions
-    async def get_shipping_setting_by_bot_uuid(self, bot_uuid: str) -> ShippingSetting | None:
+    async def get_shipping_setting_by_bot_uuid(
+        self, bot_uuid: str
+    ) -> ShippingSetting | None:
         """根據 bot_uuid 取得運送設定"""
         return await ShippingSetting.find_one(ShippingSetting.bot_uuid == bot_uuid)
 

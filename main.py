@@ -11,7 +11,6 @@ from modules.ecomm.ecomm_router import (
     category_router,
     ecomm_router,
     order_router,
-    product_image_router,
     product_router,
 )
 from modules.knowledge.knowledge_router import knowledge_router
@@ -84,6 +83,4 @@ app.include_router(ecomm_router)
 app.include_router(brand_router)
 app.include_router(category_router)
 app.include_router(product_router)
-# Product image proxy router
-app.include_router(product_image_router)
 app.include_router(order_router)

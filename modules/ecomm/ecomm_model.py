@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 from beanie import Document
 from pydantic import BaseModel
 from pydantic import Field as PydanticField
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, SQLModel, UniqueConstraint
 
 
 class BrandListView(SQLModel, table=True):
@@ -37,18 +37,22 @@ class ProductDetail(SQLModel, table=True):
     brand_id: Optional[int] = None
     object_id: int = Field(index=True)
     is_active: bool = Field(default=True)
-    sku_code: str = Field(max_length=64, unique=True)
+    sku_code: Optional[str] = Field(default=None, max_length=64, unique=True)
     price: int
-    stock: int = Field(default=0)
+    stock: Optional[int] = Field(default=None)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class ProductImage(SQLModel, table=True):
     __tablename__ = "product_images"
+    __table_args__ = (
+        UniqueConstraint("object_id", "filename"),
+        UniqueConstraint("object_id", "display_order"),
+    )
 
     image_id: Optional[int] = Field(default=None, primary_key=True)
-    image_url: str
+    filename: str
     object_id: int = Field(index=True)
     display_order: int = Field(default=0)
 
@@ -61,7 +65,7 @@ class ProductVariant(SQLModel, table=True):
     variant_name: str = Field(max_length=100)
     sku_code: Optional[str] = Field(default=None, max_length=64, unique=True)
     price: Optional[int] = None
-    stock: int = Field(default=0)
+    stock: Optional[int] = Field(default=0)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -75,9 +79,9 @@ class ProductListView(SQLModel, table=True):
     product_description: Optional[str] = None
     category_id: int
     brand_id: Optional[int] = None
-    sku_code: str
+    sku_code: Optional[str]
     price: int
-    stock: int
+    stock: Optional[int]
     is_active: bool
     created_at: datetime
     updated_at: datetime

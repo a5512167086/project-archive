@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from typing import List, Optional
 from uuid import UUID
 
-from sqlmodel import Session, delete, select, text, update
+from sqlmodel import Session, delete, func, select, text, update
 
 from modules.ecomm.ecomm_model import (
     OrderDetail,
@@ -259,12 +259,11 @@ class EcommCommand:
         product_name: str,
         product_description: str,
         brand_id: Optional[int],
-        sku_code: str,
+        sku_code: Optional[str],
         price: int,
-        stock: int,
+        stock: Optional[int],
         is_active: bool,
         images: List[dict],
-        variants: List[dict],
         owner_id: Optional[str] = None,
     ) -> int:
         """建立產品"""
@@ -300,24 +299,13 @@ class EcommCommand:
 
         # 建立產品圖片
         for img in images:
-            image_url = img["image_url"]
+            filename = img["filename"]
             product_image = ProductImage(
-                image_url=image_url,
+                filename=filename,
                 object_id=new_product_object.object_id,
                 display_order=img.get("display_order", 0),
             )
             self.session.add(product_image)
-
-        # 建立產品變體
-        for variant in variants:
-            product_variant = ProductVariant(
-                object_id=new_product_object.object_id,
-                variant_name=variant["variant_name"],
-                sku_code=variant.get("sku_code"),
-                price=variant.get("price"),
-                stock=variant.get("stock", 0),
-            )
-            self.session.add(product_variant)
 
         return new_product_object.object_id
 
@@ -385,17 +373,14 @@ class EcommCommand:
                 product_object.english_description = product_description
             self.session.add(product_object)
 
-        # 更新 ProductDetail
-        if brand_id is not None:
-            product_detail.brand_id = brand_id
-        if sku_code is not None:
-            product_detail.sku_code = sku_code
         if price is not None:
             product_detail.price = price
-        if stock is not None:
-            product_detail.stock = stock
         if is_active is not None:
             product_detail.is_active = is_active
+
+        product_detail.brand_id = brand_id
+        product_detail.sku_code = sku_code
+        product_detail.stock = stock
 
         product_detail.updated_at = datetime.now(timezone.utc)
         self.session.add(product_detail)
@@ -409,6 +394,59 @@ class EcommCommand:
             )
 
         return True
+
+    def insert_product_variant(
+        self,
+        object_id: int,
+        variant_name: str,
+        sku_code: Optional[str],
+        price: Optional[int],
+        stock: Optional[int],
+    ) -> ProductVariant:
+        """建立產品變體"""
+        product_variant = ProductVariant(
+            object_id=object_id,
+            variant_name=variant_name,
+            sku_code=sku_code,
+            price=price,
+            stock=stock,
+        )
+        self.session.add(product_variant)
+        self.session.flush()
+        self.session.refresh(product_variant)
+        return product_variant
+
+    def update_product_variant(
+        self,
+        variant_id: UUID,
+        variant_name: Optional[str] = None,
+        sku_code: Optional[str] = None,
+        price: Optional[int] = None,
+        stock: Optional[int] = None,
+    ) -> bool:
+        """更新產品變體"""
+        variant = self.session.get(ProductVariant, variant_id)
+        if not variant:
+            return False
+
+        if variant_name is not None:
+            variant.variant_name = variant_name
+        if sku_code is not None:
+            variant.sku_code = sku_code
+        if price is not None:
+            variant.price = price
+        if stock is not None:
+            variant.stock = stock
+
+        variant.updated_at = datetime.now(timezone.utc)
+        self.session.add(variant)
+        return True
+
+    def delete_product_variants(self, variant_ids: List[UUID]):
+        """刪除產品變體"""
+        self.session.exec(
+            delete(ProductVariant).where(ProductVariant.variant_id.in_(variant_ids))
+        )
 
     def move_products_to_root_category(
         self, root_category_class_id: int, moved_category_class_ids: List[int]
@@ -547,4 +585,43 @@ class EcommCommand:
         order_detail.updated_at = datetime.now(timezone.utc)
         self.session.add(order_detail)
 
+        return True
+
+    def insert_product_image(self, object_id: int, filename: str) -> ProductImage:
+        """Inserts a new product image."""
+        # Get the current max display_order for the given object_id
+        max_display_order = self.session.exec(
+            select(func.max(ProductImage.display_order)).where(
+                ProductImage.object_id == object_id
+            )
+        ).first()
+
+        new_display_order = (max_display_order or 0) + 1
+
+        product_image = ProductImage(
+            filename=filename,
+            object_id=object_id,
+            display_order=new_display_order,
+        )
+        self.session.add(product_image)
+        self.session.flush()
+        self.session.refresh(product_image)
+        return product_image
+
+    def delete_product_image(self, image_id: int):
+        """刪除產品圖片"""
+        self.session.exec(delete(ProductImage).where(ProductImage.image_id == image_id))
+
+    def update_product_image(
+        self, image_id: int, display_order: Optional[int] = None
+    ) -> bool:
+        """更新產品圖片"""
+        image = self.session.get(ProductImage, image_id)
+        if not image:
+            return False
+
+        if display_order is not None:
+            image.display_order = display_order
+
+        self.session.add(image)
         return True

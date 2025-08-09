@@ -57,11 +57,11 @@ class MinioService:
                     content_type=image.content_type,
                 )
 
-                # 生成圖片 URL - 使用代理 API
-                image_url = f"https://demo.wke.csie.ncnu.edu.tw/easybot-api/product-images/{unique_filename}"
-                uploaded_images.append({"image_url": image_url, "display_order": i})
-
-                # 重置檔案指標以供後續使用
+                uploaded_images.append({
+                    "filename": unique_filename,
+                    "display_order": i,
+                    "content_type": image.content_type,
+                })
                 image.file.seek(0)
 
             return uploaded_images

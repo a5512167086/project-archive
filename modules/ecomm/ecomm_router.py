@@ -1,29 +1,35 @@
 import io
-from typing import Annotated, List
+from typing import Annotated, List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from minio.error import S3Error
 
+from modules.ecomm.ecomm_model import ProductVariant
 from modules.ecomm.ecomm_schema import (
     BrandResponse,
     CategoryResponse,
     DeleteBrandRequest,
     DeleteCategoryRequest,
     DeleteOrderRequest,
+    DeleteProductImageRequest,
     DeleteProductRequest,
+    DeleteProductVariantRequest,
     DeleteShippingMethodRequest,
     InsertBrandRequest,
     InsertCategoryRequest,
     InsertOrderRequest,
+    InsertProductVariantRequest,
     OrderResponse,
     ProductResponse,
     ShippingSettingResponse,
     UpdateBrandRequest,
     UpdateCategoryRequest,
     UpdateOrderRequest,
+    UpdateProductImageRequest,
     UpdateProductRequest,
+    UpdateProductVariantRequest,
     UpdateShippingSettingRequest,
 )
 from modules.ecomm.ecomm_service import EcommService
@@ -48,7 +54,7 @@ ecomm_router = APIRouter(prefix="/ecomm", tags=["ecomm"])
 brand_router = APIRouter(prefix="/brands", tags=["brands"])
 category_router = APIRouter(prefix="/categories", tags=["categories"])
 product_router = APIRouter(prefix="/products", tags=["products"])
-product_image_router = APIRouter(prefix="/product-images", tags=["product-images"])
+
 order_router = APIRouter(prefix="/orders", tags=["orders"])
 
 
@@ -177,21 +183,20 @@ def create_product(
     bot_uuid: UUID = Form(...),
     product_name: str = Form(...),
     product_description: str = Form(...),
-    sku_code: str = Form(...),
     price: int = Form(...),
-    stock: str = Form("", description="庫存數量，留空則預設為0"),
+    sku_code: Optional[str] = Form(None),
+    stock: Optional[str] = Form(None, description="庫存數量，留空則為無限"),
     is_active: bool = Form(True, description="是否啟用產品"),
     category_id: str = Form("", description="分類ID，留空則使用根分類"),
     brand_id: str = Form("", description="品牌ID，可選"),
     images: List[UploadFile] = File([], description="產品圖片檔案"),
 ):
-    """創建產品並上傳圖片到 MinIO"""
     user_id = current_user["user_id"]
 
     # 處理可選的整數參數
     parsed_category_id = None
     parsed_brand_id = None
-    parsed_stock = 0  # 預設庫存為 0
+    parsed_stock: Optional[int] = None
 
     if category_id and category_id.strip():
         try:
@@ -220,7 +225,6 @@ def create_product(
                 error_message="Invalid stock format",
             )
 
-    # 使用新的 service 函數來處理產品創建和圖片上傳
     ecomm_service.insert_product(
         bot_uuid=bot_uuid,
         product_name=product_name,
@@ -259,8 +263,42 @@ def update_product(
     ecomm_service.session.commit()
 
 
+@product_router.post("/variants", response_model=ProductVariant)
+def create_product_variant(
+    variant: InsertProductVariantRequest,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+):
+    user_id = current_user["user_id"]
+    new_variant = ecomm_service.insert_product_variant(variant, user_id)
+    ecomm_service.session.commit()
+    return new_variant
+
+
+@product_router.patch("/variants")
+def update_product_variant(
+    update_request: UpdateProductVariantRequest,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+):
+    user_id = current_user["user_id"]
+    ecomm_service.update_product_variant(update_request, user_id)
+    ecomm_service.session.commit()
+
+
+@product_router.delete("/variants")
+def delete_product_variants(
+    delete_request: DeleteProductVariantRequest,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+):
+    user_id = current_user["user_id"]
+    ecomm_service.delete_product_variants(delete_request, user_id)
+    ecomm_service.session.commit()
+
+
 # Product Image proxy endpoints
-@product_image_router.get("/{file_name}")
+@product_router.get("/images/{file_name}")
 async def get_product_image(
     file_name: str,
     minio_service: Annotated[MinioService, Depends(get_minio_service)],
@@ -301,6 +339,41 @@ async def get_product_image(
             raise HTTPException(status_code=500, detail=f"MinIO error: {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@product_router.post("/images/upload")
+def upload_product_image(
+    current_user: Annotated[dict, Depends(get_current_user)],
+    ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_uuid: UUID = Form(...),
+    product_id: UUID = Form(...),
+    images: List[UploadFile] = File(...),
+):
+    user_id = current_user["user_id"]
+    ecomm_service.upload_product_image(bot_uuid, product_id, user_id, images)
+    ecomm_service.session.commit()
+
+
+@product_router.patch("/images")
+def update_product_image(
+    update_request: UpdateProductImageRequest,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+):
+    user_id = current_user["user_id"]
+    ecomm_service.update_product_image(update_request, user_id)
+    ecomm_service.session.commit()
+
+
+@product_router.delete("/images")
+def delete_product_image(
+    delete_request: DeleteProductImageRequest,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+):
+    user_id = current_user["user_id"]
+    ecomm_service.delete_product_image(delete_request, user_id)
+    ecomm_service.session.commit()
 
 
 # Order endpoints

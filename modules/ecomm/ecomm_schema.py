@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from modules.ecomm.ecomm_model import ProductImage, ProductVariant
+from modules.ecomm.ecomm_model import ProductVariant
 
 
 class InsertBrandRequest(BaseModel):
@@ -62,7 +62,7 @@ class UpdateCategoryRequest(BaseModel):
 
 
 class ProductImageRequest(BaseModel):
-    image_url: str
+    filename: str
     display_order: int = 0
 
 
@@ -70,7 +70,30 @@ class ProductVariantRequest(BaseModel):
     variant_name: str
     sku_code: Optional[str] = None
     price: Optional[int] = None
-    stock: int = 0
+    stock: Optional[int] = 0
+
+
+class InsertProductVariantRequest(BaseModel):
+    bot_uuid: UUID
+    product_id: UUID
+    variant_name: str
+    sku_code: Optional[str] = None
+    price: Optional[int] = None
+    stock: Optional[int] = 0
+
+
+class UpdateProductVariantRequest(BaseModel):
+    bot_uuid: UUID
+    variant_id: UUID
+    variant_name: Optional[str] = None
+    sku_code: Optional[str] = None
+    price: Optional[int] = None
+    stock: Optional[int] = None
+
+
+class DeleteProductVariantRequest(BaseModel):
+    bot_uuid: UUID
+    variant_ids: List[UUID]
 
 
 class InsertProductWithImagesRequest(BaseModel):
@@ -79,9 +102,9 @@ class InsertProductWithImagesRequest(BaseModel):
     product_description: str
     category_id: Optional[int] = None
     brand_id: Optional[int] = None
-    sku_code: str
+    sku_code: Optional[str] = None
     price: int
-    stock: int = 0
+    stock: Optional[int] = 0
     is_active: bool = True
     variants: List[ProductVariantRequest] = []
 
@@ -92,12 +115,19 @@ class InsertProductRequest(BaseModel):
     product_description: str
     category_id: Optional[int] = None
     brand_id: Optional[int] = None
-    sku_code: str
+    sku_code: Optional[str] = None
     price: int
-    stock: int = 0
+    stock: Optional[int] = 0
     is_active: bool = True
     images: List[ProductImageRequest] = []
     variants: List[ProductVariantRequest] = []
+
+
+class ProductImageResponse(BaseModel):
+    image_id: int
+    filename: str
+    display_order: int
+    image_url: str
 
 
 class ProductResponse(BaseModel):
@@ -107,13 +137,13 @@ class ProductResponse(BaseModel):
     product_description: Optional[str]
     brand_id: Optional[int]
     category_id: Optional[int]
-    sku_code: str
+    sku_code: Optional[str]
     price: int
-    stock: int
+    stock: Optional[int]
     is_active: bool
     created_at: datetime
     updated_at: datetime
-    images: List[ProductImage] = []
+    images: List[ProductImageResponse] = []
     variants: List[ProductVariant] = []
 
 
@@ -133,6 +163,22 @@ class UpdateProductRequest(BaseModel):
 class DeleteProductRequest(BaseModel):
     bot_uuid: UUID
     product_ids: List[UUID]
+
+
+class UpdateProductImageRequest(BaseModel):
+    bot_uuid: UUID
+    image_id: int
+    display_order: Optional[int] = None
+
+
+class DeleteProductImageRequest(BaseModel):
+    bot_uuid: UUID
+    image_id: int
+
+
+class UploadProductImageRequest(BaseModel):
+    bot_uuid: UUID
+    product_id: UUID
 
 
 # Shipping schemas

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 from fastapi import UploadFile
@@ -17,22 +17,32 @@ from modules.ecomm.ecomm_schema import (
     DeleteBrandRequest,
     DeleteCategoryRequest,
     DeleteOrderRequest,
+    DeleteProductImageRequest,
     DeleteProductRequest,
+    DeleteProductVariantRequest,
     DeleteShippingMethodRequest,
     InsertBrandRequest,
     InsertCategoryRequest,
     InsertOrderRequest,
+    InsertProductVariantRequest,
     OrderResponse,
+    ProductImageResponse,
     ProductResponse,
     UpdateBrandRequest,
     UpdateCategoryRequest,
     UpdateOrderRequest,
+    UpdateProductImageRequest,
     UpdateProductRequest,
+    UpdateProductVariantRequest,
     UpdateShippingSettingRequest,
 )
+from shared.constants.config import BACKEND_URL
 from shared.constants.error_code import ErrorCode
 from shared.exception import GlobalErrorException
-from shared.services.minio_service import upload_product_images
+from shared.services.minio_service import (
+    delete_product_image,
+    upload_product_images,
+)
 
 
 class EcommService:
@@ -260,13 +270,21 @@ class EcommService:
         products_data = self.query.get_all_products_view(all_category_ids)
         products = []
         for product_data in products_data:
-            images = self.query.get_product_images_by_object_id(product_data.object_id)
+            images_orm = self.query.get_product_images_by_object_id(
+                product_data.object_id
+            )
             variants = self.query.get_product_variants_by_object_id(
                 product_data.object_id
             )
-            # Construct full image URL
-            for image in images:
-                image.image_url = image.image_url
+            images = [
+                ProductImageResponse(
+                    image_id=img.image_id,
+                    filename=img.filename,
+                    display_order=img.display_order,
+                    image_url=f"{BACKEND_URL}/ecomm/products/images/{img.filename}",
+                )
+                for img in images_orm
+            ]
             products.append(
                 ProductResponse(
                     product_id=product_data.product_id,
@@ -295,9 +313,9 @@ class EcommService:
         bot_uuid: UUID,
         product_name: str,
         product_description: str,
-        sku_code: str,
+        sku_code: Optional[str],
         price: int,
-        stock: int,
+        stock: Optional[int],
         is_active: bool,
         images: List[UploadFile],
         user_id: str,
@@ -316,7 +334,7 @@ class EcommService:
             product_class_id = category_id
 
         # 檢查 SKU 是否已存在
-        if self.query.check_product_sku_exists(sku_code):
+        if sku_code and self.query.check_product_sku_exists(sku_code):
             raise GlobalErrorException(
                 error_code=ErrorCode.PRODUCT_SKU_ALREADY_EXISTS,
                 error_message=f"SKU '{sku_code}' already exists",
@@ -341,7 +359,6 @@ class EcommService:
             stock=stock,
             is_active=is_active,
             images=uploaded_images,
-            variants=[],  # 暫時不處理 variants
             owner_id=user_id,
         )
 
@@ -367,16 +384,14 @@ class EcommService:
                     error_code=ErrorCode.PRODUCT_SKU_ALREADY_EXISTS,
                     error_message=f"SKU '{body.sku_code}' already exists",
                 )
+        if body.sku_code == "":
+            body.sku_code = None
 
-        # 處理 category_id，如果是 None 則使用主 Category class
         category_id_to_use = None
-        if body.category_id is not None:
-            if body.category_id == 0:
-                # 如果 category_id 是 0，使用主 Category class
-                category_id_to_use = self.validate_category_class(bot.class_id)
-            else:
-                # 使用指定的類別
-                category_id_to_use = body.category_id
+        if body.category_id is None:
+            category_id_to_use = self.validate_category_class(bot.class_id)
+        else:
+            category_id_to_use = body.category_id
 
         success = self.command.update_product(
             product_id=body.product_id,
@@ -514,3 +529,146 @@ class EcommService:
         self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
         self.validate_order_class(bot.class_id)
         self.command.delete_orders(body.order_ids)
+
+    # Product Variant service methods
+    def insert_product_variant(self, body: InsertProductVariantRequest, user_id: str):
+        """建立產品變體"""
+        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
+        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+
+        # 驗證產品是否存在
+        product = self.query.get_product_by_id(body.product_id)
+        if not product:
+            raise GlobalErrorException(
+                error_code=ErrorCode.PRODUCT_NOT_FOUND,
+                error_message="Product not found",
+            )
+
+        # 檢查 SKU 是否重複
+        if body.sku_code:
+            if self.query.check_product_sku_exists(
+                body.sku_code
+            ) or self.query.check_variant_sku_exists(body.sku_code):
+                raise GlobalErrorException(
+                    error_code=ErrorCode.PRODUCT_SKU_ALREADY_EXISTS,
+                    error_message=f"SKU '{body.sku_code}' already exists",
+                )
+
+        return self.command.insert_product_variant(
+            object_id=product.object_id,
+            variant_name=body.variant_name,
+            sku_code=body.sku_code,
+            price=body.price,
+            stock=body.stock,
+        )
+
+    def update_product_variant(self, body: UpdateProductVariantRequest, user_id: str):
+        """更新產品變體"""
+        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
+        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+
+        # 驗證變體是否存在
+        variant = self.query.get_variant_by_id(body.variant_id)
+        if not variant:
+            raise GlobalErrorException(
+                error_code=ErrorCode.PRODUCT_VARIANT_NOT_FOUND,
+                error_message="Product variant not found",
+            )
+
+        # 檢查 SKU 是否重複
+        if body.sku_code:
+            if self.query.check_variant_sku_exists_exclude_self(
+                body.sku_code, body.variant_id
+            ) or (body.sku_code and self.query.check_product_sku_exists(body.sku_code)):
+                raise GlobalErrorException(
+                    error_code=ErrorCode.PRODUCT_SKU_ALREADY_EXISTS,
+                    error_message=f"SKU '{body.sku_code}' already exists",
+                )
+        if body.sku_code == "":
+            body.sku_code = None
+
+        success = self.command.update_product_variant(
+            variant_id=body.variant_id,
+            variant_name=body.variant_name,
+            sku_code=body.sku_code,
+            price=body.price,
+            stock=body.stock,
+        )
+
+        if not success:
+            raise GlobalErrorException(
+                error_code=ErrorCode.PRODUCT_VARIANT_NOT_FOUND,
+                error_message="Product variant not found",
+            )
+
+    def delete_product_variants(self, body: DeleteProductVariantRequest, user_id: str):
+        """刪除產品變體"""
+        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
+        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+        self.command.delete_product_variants(body.variant_ids)
+
+    def upload_product_image(
+        self, bot_uuid: UUID, product_id: UUID, user_id: str, images: List[UploadFile]
+    ):
+        """Uploads new product images."""
+        product = self.query.get_product_by_id(product_id)
+        if not product:
+            raise GlobalErrorException(
+                error_code=ErrorCode.PRODUCT_NOT_FOUND,
+                error_message="Product not found",
+            )
+
+        self.bot_service.validate_bot_ownership(user_id, bot_uuid)
+
+        if not images:
+            raise GlobalErrorException(
+                error_code=ErrorCode.INVALID_INPUT,
+                error_message="Image list cannot be empty",
+            )
+
+        uploaded_images = upload_product_images(images)
+
+        for img_data in uploaded_images:
+            self.command.insert_product_image(product.object_id, img_data["filename"])
+
+    def update_product_image(self, body: UpdateProductImageRequest, user_id: str):
+        """更新產品圖片資訊"""
+        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
+        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+
+        # 驗證圖片是否存在
+        image = self.query.get_product_image_by_id(body.image_id)
+        if not image:
+            raise GlobalErrorException(
+                error_code=ErrorCode.PRODUCT_IMAGE_NOT_FOUND,
+                error_message="Product image not found",
+            )
+
+        success = self.command.update_product_image(
+            image_id=body.image_id, display_order=body.display_order
+        )
+
+        if not success:
+            raise GlobalErrorException(
+                error_code=ErrorCode.PRODUCT_IMAGE_NOT_FOUND,
+                error_message="Product image not found",
+            )
+
+    def delete_product_image(self, body: DeleteProductImageRequest, user_id: str):
+        """刪除產品圖片"""
+        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
+        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+
+        # 驗證圖片是否存在
+        image = self.query.get_product_image_by_id(body.image_id)
+        if not image:
+            raise GlobalErrorException(
+                error_code=ErrorCode.PRODUCT_IMAGE_NOT_FOUND,
+                error_message="Product image not found",
+            )
+
+        # 從 MinIO 刪除
+        delete_product_image(image.filename)
+
+        # 從資料庫刪除
+        self.command.delete_product_image(body.image_id)
