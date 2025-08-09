@@ -50,7 +50,7 @@ const createProductFields: FieldProps[] = [
     name: 'sku_code',
     label: 'productManagementPage.skuCode',
     type: 'text',
-    required: true,
+    required: false,
     defaultValue: ''
   },
   {
@@ -84,8 +84,8 @@ const createProductFields: FieldProps[] = [
     name: 'stock',
     label: 'productManagementPage.stock',
     type: 'number',
-    required: true,
-    defaultValue: 0
+    required: false,
+    defaultValue: null
   },
   {
     id: 'images',
@@ -129,7 +129,7 @@ const updateProductFields: FieldProps[] = [
     name: 'sku_code',
     label: 'productManagementPage.skuCode',
     type: 'text',
-    required: true,
+    required: false,
     defaultValue: ''
   },
   {
@@ -163,8 +163,8 @@ const updateProductFields: FieldProps[] = [
     name: 'stock',
     label: 'productManagementPage.stock',
     type: 'number',
-    required: true,
-    defaultValue: 0
+    required: false,
+    defaultValue: null
   },
   {
     id: 'is_active',
@@ -344,9 +344,9 @@ export const ProductManagement = () => {
       product_id: editingProduct.product_id,
       product_name: data.product_name,
       product_description: data.product_description,
-      sku_code: data.sku_code,
+      sku_code: String(data.sku_code) === '' ? null : data.sku_code,
       price: data.price,
-      stock: data.stock,
+      stock: (data.stock === null || data.stock === undefined || String(data.stock) === '' || isNaN(Number(data.stock))) ? null : Number(data.stock),
       is_active: data.is_active,
       category_id:
         typeof data.category_id === 'string' && data.category_id !== 'none'
