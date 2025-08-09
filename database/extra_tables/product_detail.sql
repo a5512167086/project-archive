@@ -3,9 +3,9 @@ CREATE TABLE IF NOT EXISTS product_details (
     brand_id INT,
     object_id int NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
-    sku_code VARCHAR(64) UNIQUE NOT NULL,
+    sku_code VARCHAR(64) NULL,
     price INT NOT NULL,
-    stock INT DEFAULT 0 NOT NULL,
+    stock INT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
