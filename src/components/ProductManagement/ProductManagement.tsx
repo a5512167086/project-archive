@@ -21,6 +21,8 @@ import { useLazyGetCategoriesQuery } from '@/store/apis/categoryApi'
 
 const productColumns = [
   { id: 'product_name', label: 'productManagementPage.productName' },
+  { id: 'brand_name', label: 'productManagementPage.brand' },
+  { id: 'category_name', label: 'productManagementPage.category' },
   { id: 'sku_code', label: 'productManagementPage.skuCode' },
   { id: 'price', label: 'productManagementPage.price' },
   { id: 'stock', label: 'productManagementPage.stock' }
@@ -253,6 +255,22 @@ export const ProductManagement = () => {
     [brandList, categoryList, editingProduct, t]
   )
 
+  const tableData = useMemo(() => {
+    return products.map((product) => {
+      const brand = brandList.find(
+        (brand) => brand.object_id === product.brand_id
+      )
+      const category = categoryList.find(
+        (category) => category.class_id === product.category_id
+      )
+      return {
+        ...product,
+        brand_name: brand?.brand_name || t('productManagementPage.noBrand'),
+        category_name: category?.category_name || t('productManagementPage.noCategory')
+      }
+    })
+  }, [products, brandList, categoryList, t])
+
   useEffect(() => {
     if (currentBot?.bot_detail_id) {
       getProducts({ bot_uuid: currentBot.bot_detail_id })
@@ -445,7 +463,7 @@ export const ProductManagement = () => {
           }}
         >
           <CustomTable
-            data={products}
+            data={tableData}
             rowsPerPage={8}
             columns={productColumns}
             selected={selected}
