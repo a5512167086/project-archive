@@ -29,6 +29,7 @@ const ReservationManagementPage = lazy(
 const ProductManagementPage = lazy(
   () => import('@/pages/ProductManagementPage')
 )
+const UpdateProductPage = lazy(() => import('@/pages/UpdateProductPage'))
 const ServiceManagementPage = lazy(
   () => import('@/pages/ServiceManagementPage')
 )
@@ -53,6 +54,7 @@ export const PAGE_PATHS = {
   BOT_LIST: '/bot-list',
   BOT_MANAGEMENT: '/bot-list/:uuid',
   PRODUCT_MANAGEMENT: 'product',
+  UPDATE_PRODUCT: 'product/:productId',
   ORDER_MANAGEMENT: 'order',
   ECOMM_SETTING: 'ecomm',
   BOT_SETTING: 'setting',
@@ -254,6 +256,10 @@ export const router = createBrowserRouter([
           {
             path: PAGE_PATHS.PRODUCT_MANAGEMENT,
             element: <ProductManagementPage />
+          },
+          {
+            path: PAGE_PATHS.UPDATE_PRODUCT,
+            element: <UpdateProductPage />
           },
           {
             path: PAGE_PATHS.RESERVATION_MANAGEMENT,

@@ -338,7 +338,10 @@
     "product_added": "商品新增成功",
     "product_updated": "商品更新成功",
     "product_deleted": "商品刪除成功",
-    "shipping_method_deleted": "物流方式刪除成功"
+    "shipping_method_deleted": "物流方式刪除成功",
+    "variant_added": "規格新增成功",
+    "variant_updated": "規格更新成功",
+    "variant_deleted": "規格刪除成功"
   },
   "productManagementPage": {
     "title": "商品管理",
@@ -382,5 +385,24 @@
     "deleteProductSingleTitle": "刪除商品「{{name}}」",
     "deleteCategorySingleTitle": "刪除類別「{{name}}」",
     "imageUpload": "請上傳商品圖片，支援多張圖片上傳"
+  },
+  "updateProductPage": {
+    "loading": "載入中...",
+    "productDataTab": "商品資料",
+    "variantsTab": "商品規格",
+    "imagesTab": "商品圖片",
+    "updateProductButton": "更新商品",
+    "imageCrudPlaceholder": "商品圖片 CRUD 將會在這裡實作。"
+  },
+  "productVariant": {
+    "variantName": "規格名稱",
+    "skuCode": "SKU",
+    "price": "價格",
+    "stock": "庫存",
+    "addVariant": "新增規格",
+    "createVariant": "建立規格",
+    "editVariant": "編輯規格",
+    "deleteVariantTitle": "確定刪除規格 「{{name}}」？",
+    "noVariantsAdded": "尚未新增任何規格。"
   }
 }

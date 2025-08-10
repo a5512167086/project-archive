@@ -336,7 +336,10 @@
     "product_added": "Product added successfully",
     "product_updated": "Product updated successfully",
     "product_deleted": "Product deleted successfully",
-    "shipping_method_deleted": "Shipping method deleted successfully"
+    "shipping_method_deleted": "Shipping method deleted successfully",
+    "variant_added": "Variant added successfully",
+    "variant_updated": "Variant updated successfully",
+    "variant_deleted": "Variant deleted successfully"
   },
   "productManagementPage": {
     "title": "Product Management",
@@ -380,5 +383,24 @@
     "deleteProductSingleTitle": "Delete product「{{name}}」",
     "deleteCategorySingleTitle": "Delete category「{{name}}」",
     "imageUpload": "Please upload product images, supporting multiple images upload"
+  },
+  "updateProductPage": {
+    "loading": "Loading...",
+    "productDataTab": "Product Data",
+    "variantsTab": "Variants",
+    "imagesTab": "Images",
+    "updateProductButton": "Update Product",
+    "imageCrudPlaceholder": "Product image CRUD will be implemented here."
+  },
+  "productVariant": {
+    "variantName": "Variant Name",
+    "skuCode": "SKU",
+    "price": "Price",
+    "stock": "Stock",
+    "addVariant": "Add Variant",
+    "createVariant": "Create Variant",
+    "editVariant": "Edit Variant",
+    "deleteVariantTitle": "Delete variant "{{name}}"?",
+    "noVariantsAdded": "No variants added yet."
   }
 }

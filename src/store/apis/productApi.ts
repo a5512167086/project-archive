@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+
 export type ProductImageResponse = {
   image_id: number
   image_url: string
@@ -69,6 +70,29 @@ type DeleteProductsRequest = {
   product_ids: string[]
 }
 
+type CreateProductsVariants = {
+  bot_uuid: string
+  product_id: string
+  variant_name: string
+  sku_code: string | null
+  price: number | null
+  stock: number | null
+}
+
+type UpdateProductsVariants = {
+  bot_uuid: string
+  variant_id: string
+  variant_name: string
+  sku_code: string | null
+  price: number | null
+  stock: number | null
+}
+
+type DeleteProductsVariantsRequest = {
+  bot_uuid: string
+  variant_ids: string[]
+}
+
 export const productApi = createApi({
   reducerPath: 'productApi',
   baseQuery: fetchBaseQuery({
@@ -129,6 +153,30 @@ export const productApi = createApi({
         method: 'DELETE',
         body: data
       })
+    }),
+    createProductsVariants: builder.mutation<void, CreateProductsVariants>({
+      query: (data) => ({
+        url: 'products/variants',
+        method: 'POST',
+        body: data
+      })
+    }),
+    updateProductsVariants: builder.mutation<void, UpdateProductsVariants>({
+      query: (data) => ({
+        url: 'products/variants',
+        method: 'PATCH',
+        body: data
+      })
+    }),
+    deleteProductsVariants: builder.mutation<
+      void,
+      DeleteProductsVariantsRequest
+    >({
+      query: (data) => ({
+        url: 'products/variants',
+        method: 'DELETE',
+        body: data
+      })
     })
   })
 })
@@ -137,5 +185,8 @@ export const {
   useLazyGetProductsQuery,
   useCreateProductsMutation,
   useUpdateProductMutation,
-  useDeleteProductsMutation
+  useDeleteProductsMutation,
+  useCreateProductsVariantsMutation,
+  useUpdateProductsVariantsMutation,
+  useDeleteProductsVariantsMutation
 } = productApi
