@@ -339,7 +339,11 @@
     "shipping_method_deleted": "Shipping method deleted successfully",
     "variant_added": "Variant added successfully",
     "variant_updated": "Variant updated successfully",
-    "variant_deleted": "Variant deleted successfully"
+    "variant_deleted": "Variant deleted successfully",
+    "image_added": "Image added successfully",
+    "image_updated": "Image updated successfully",
+    "image_deleted": "Image deleted successfully",
+    "image_order_updated": "Image order updated successfully"
   },
   "productManagementPage": {
     "title": "Product Management",
@@ -389,8 +393,7 @@
     "productDataTab": "Product Data",
     "variantsTab": "Variants",
     "imagesTab": "Images",
-    "updateProductButton": "Update Product",
-    "imageCrudPlaceholder": "Product image CRUD will be implemented here."
+    "updateProductButton": "Update Product"
   },
   "productVariant": {
     "variantName": "Variant Name",
@@ -400,7 +403,17 @@
     "addVariant": "Add Variant",
     "createVariant": "Create Variant",
     "editVariant": "Edit Variant",
-    "deleteVariantTitle": "Delete variant "{{name}}"?",
+    "deleteVariantTitle": "Delete variant \"{{name}}\"?",
     "noVariantsAdded": "No variants added yet."
+  },
+  "productImage": {
+    "imageFile": "Image File",
+    "displayOrder": "Display Order",
+    "addImages": "Add Images",
+    "createImage": "Upload Image",
+    "editImage": "Edit Image",
+    "deleteImageTitle": "Delete image {{id}}?",
+    "noImagesAdded": "No images added yet.",
+    "primary": "Primary"
   }
 }

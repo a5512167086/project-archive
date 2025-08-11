@@ -4,7 +4,7 @@ export type ProductImageResponse = {
   image_id: number
   image_url: string
   object_id: number
-  display_order: number
+  is_primary: boolean
 }
 
 export type ProductVariantResponse = {
@@ -70,7 +70,7 @@ type DeleteProductsRequest = {
   product_ids: string[]
 }
 
-type CreateProductsVariants = {
+type CreateProductsVariantsRequest = {
   bot_uuid: string
   product_id: string
   variant_name: string
@@ -79,7 +79,7 @@ type CreateProductsVariants = {
   stock: number | null
 }
 
-type UpdateProductsVariants = {
+type UpdateProductsVariantsRequest = {
   bot_uuid: string
   variant_id: string
   variant_name: string
@@ -91,6 +91,23 @@ type UpdateProductsVariants = {
 type DeleteProductsVariantsRequest = {
   bot_uuid: string
   variant_ids: string[]
+}
+
+type CreateProductsImagesRequest = {
+  bot_uuid: string
+  product_id: string
+  images: File[] | null
+}
+
+type UpdateProductsImagesRequest = {
+  bot_uuid: string
+  image_id: number
+  is_primary: boolean
+}
+
+type DeleteProductsImagesRequest = {
+  bot_uuid: string
+  image_id: number
 }
 
 export const productApi = createApi({
@@ -154,14 +171,20 @@ export const productApi = createApi({
         body: data
       })
     }),
-    createProductsVariants: builder.mutation<void, CreateProductsVariants>({
+    createProductsVariants: builder.mutation<
+      void,
+      CreateProductsVariantsRequest
+    >({
       query: (data) => ({
         url: 'products/variants',
         method: 'POST',
         body: data
       })
     }),
-    updateProductsVariants: builder.mutation<void, UpdateProductsVariants>({
+    updateProductsVariants: builder.mutation<
+      void,
+      UpdateProductsVariantsRequest
+    >({
       query: (data) => ({
         url: 'products/variants',
         method: 'PATCH',
@@ -177,6 +200,37 @@ export const productApi = createApi({
         method: 'DELETE',
         body: data
       })
+    }),
+    createProductsImages: builder.mutation<void, CreateProductsImagesRequest>({
+      query: (data) => {
+        const bodyFormData = new FormData()
+        bodyFormData.append('bot_uuid', data.bot_uuid)
+        bodyFormData.append('product_id', data.product_id)
+        data.images?.forEach((file) => {
+          bodyFormData.append('images', file)
+        })
+
+        return {
+          url: 'products/images/upload',
+          method: 'POST',
+          body: bodyFormData,
+          formData: true
+        }
+      }
+    }),
+    updateProductsImages: builder.mutation<void, UpdateProductsImagesRequest>({
+      query: (data) => ({
+        url: 'products/images',
+        method: 'PATCH',
+        body: data
+      })
+    }),
+    deleteProductsImages: builder.mutation<void, DeleteProductsImagesRequest>({
+      query: (data) => ({
+        url: 'products/images',
+        method: 'DELETE',
+        body: data
+      })
     })
   })
 })
@@ -188,5 +242,8 @@ export const {
   useDeleteProductsMutation,
   useCreateProductsVariantsMutation,
   useUpdateProductsVariantsMutation,
-  useDeleteProductsVariantsMutation
+  useDeleteProductsVariantsMutation,
+  useCreateProductsImagesMutation,
+  useUpdateProductsImagesMutation,
+  useDeleteProductsImagesMutation
 } = productApi

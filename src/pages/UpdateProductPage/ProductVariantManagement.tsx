@@ -152,40 +152,50 @@ export const ProductVariantManagement = ({
   }, [selectedVariant, t])
 
   return (
-    <Box>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1
+      }}
+    >
       <Button
         variant="contained"
         startIcon={<Add />}
         onClick={() => setIsCreateDialogOpen(true)}
-        sx={{ mb: 2 }}
+        sx={{ mb: 2, alignSelf: 'flex-start' }}
       >
         {t('productVariant.addVariant')}
       </Button>
-      <CustomTable
-        columns={variantColumns}
-        data={variants}
-        selected={selected}
-        setSelected={setSelected}
-        onEdit={(variant: ProductVariantResponse) => {
-          const originalVariant = variants.find(
-            (v) => v.variant_id === variant.variant_id
-          )
-          setSelectedVariant(originalVariant || null)
-          setIsEditDialogOpen(true)
+      <Box
+        sx={{
+          flex: 1, // 讓表格容器占滿剩餘空間
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden'
         }}
-        onDelete={(variant: ProductVariantResponse) => {
-          const originalVariant = variants.find(
-            (v) => v.variant_id === variant.variant_id
-          )
-          setSelectedVariant(originalVariant || null)
-          setIsDeleteDialogOpen(true)
-        }}
-      />
-      {variants.length === 0 && (
-        <Box sx={{ mt: 2, textAlign: 'center', color: 'text.secondary' }}>
-          {t('productVariant.noVariantsAdded')}
-        </Box>
-      )}
+      >
+        <CustomTable
+          columns={variantColumns}
+          data={variants}
+          selected={selected}
+          setSelected={setSelected}
+          onEdit={(variant: ProductVariantResponse) => {
+            const originalVariant = variants.find(
+              (v) => v.variant_id === variant.variant_id
+            )
+            setSelectedVariant(originalVariant || null)
+            setIsEditDialogOpen(true)
+          }}
+          onDelete={(variant: ProductVariantResponse) => {
+            const originalVariant = variants.find(
+              (v) => v.variant_id === variant.variant_id
+            )
+            setSelectedVariant(originalVariant || null)
+            setIsDeleteDialogOpen(true)
+          }}
+        />
+      </Box>
       <CustomDialog
         open={isCreateDialogOpen}
         handleClose={() => setIsCreateDialogOpen(false)}

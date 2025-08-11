@@ -1,7 +1,9 @@
+import { StyledUpdateProductPage } from './UpdateProductPage.style'
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAppSelector } from '@/utils/hook'
 import { ProductVariantManagement } from './ProductVariantManagement'
+import { ProductImageManagement } from './ProductImageManagement'
 import {
   useLazyGetProductsQuery,
   useUpdateProductMutation,
@@ -181,6 +183,12 @@ const UpdateProductPage = () => {
     }
   }
 
+  const handleImagesUpdate = () => {
+    if (currentBot) {
+      getProducts({ bot_uuid: currentBot.bot_detail_id })
+    }
+  }
+
   const handleUpdateProduct = async () => {
     if (!product) return
 
@@ -275,7 +283,7 @@ const UpdateProductPage = () => {
   }
 
   return (
-    <Box>
+    <StyledUpdateProductPage disableGutters maxWidth={false}>
       <Card>
         <CardHeader
           title={`${t('productManagementPage.editProduct')}: ${
@@ -360,7 +368,7 @@ const UpdateProductPage = () => {
             </Box>
           )}
           {currentTab === 1 && (
-            <Box sx={{ mt: 2 }}>
+            <Box sx={{ mt: 2, flex: 1, display: 'flex', flexDirection: 'column' }}>
               <ProductVariantManagement
                 variants={product.variants || []}
                 productId={product.product_id}
@@ -370,12 +378,16 @@ const UpdateProductPage = () => {
           )}
           {currentTab === 2 && (
             <Box sx={{ mt: 2 }}>
-              <p>{t('updateProductPage.imageCrudPlaceholder')}</p>
+              <ProductImageManagement
+                images={product.images || []}
+                productId={product.product_id}
+                onImagesUpdate={handleImagesUpdate}
+              />
             </Box>
           )}
         </CardContent>
       </Card>
-    </Box>
+    </StyledUpdateProductPage>
   )
 }
 
