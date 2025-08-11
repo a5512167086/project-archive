@@ -189,7 +189,7 @@ class EcommQuery:
         return self.session.exec(
             select(ProductImage)
             .where(ProductImage.object_id == object_id)
-            .order_by(ProductImage.display_order)
+            .order_by(ProductImage.created_at)
         ).all()
 
     def get_product_image_by_id(self, image_id: int) -> ProductImage | None:

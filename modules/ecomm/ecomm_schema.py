@@ -61,11 +61,6 @@ class UpdateCategoryRequest(BaseModel):
     parent_category_id: Optional[int] = None
 
 
-class ProductImageRequest(BaseModel):
-    filename: str
-    display_order: int = 0
-
-
 class ProductVariantRequest(BaseModel):
     variant_name: str
     sku_code: Optional[str] = None
@@ -109,6 +104,11 @@ class InsertProductWithImagesRequest(BaseModel):
     variants: List[ProductVariantRequest] = []
 
 
+class ProductImageRequest(BaseModel):
+    filename: str
+    is_primary: bool = False
+
+
 class InsertProductRequest(BaseModel):
     bot_uuid: UUID
     product_name: str
@@ -126,8 +126,8 @@ class InsertProductRequest(BaseModel):
 class ProductImageResponse(BaseModel):
     image_id: int
     filename: str
-    display_order: int
     image_url: str
+    is_primary: bool
 
 
 class ProductResponse(BaseModel):
@@ -168,7 +168,7 @@ class DeleteProductRequest(BaseModel):
 class UpdateProductImageRequest(BaseModel):
     bot_uuid: UUID
     image_id: int
-    display_order: Optional[int] = None
+    is_primary: Optional[bool] = None
 
 
 class DeleteProductImageRequest(BaseModel):

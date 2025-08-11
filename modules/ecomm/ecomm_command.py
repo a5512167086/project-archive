@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from typing import List, Optional
 from uuid import UUID
 
-from sqlmodel import Session, delete, func, select, text, update
+from sqlmodel import Session, delete, select, text, update
 
 from modules.ecomm.ecomm_model import (
     OrderDetail,
@@ -303,7 +303,6 @@ class EcommCommand:
             product_image = ProductImage(
                 filename=filename,
                 object_id=new_product_object.object_id,
-                display_order=img.get("display_order", 0),
             )
             self.session.add(product_image)
 
@@ -587,21 +586,14 @@ class EcommCommand:
 
         return True
 
-    def insert_product_image(self, object_id: int, filename: str) -> ProductImage:
+    def insert_product_image(
+        self, object_id: int, filename: str, is_primary: bool = False
+    ) -> ProductImage:
         """Inserts a new product image."""
-        # Get the current max display_order for the given object_id
-        max_display_order = self.session.exec(
-            select(func.max(ProductImage.display_order)).where(
-                ProductImage.object_id == object_id
-            )
-        ).first()
-
-        new_display_order = (max_display_order or 0) + 1
-
         product_image = ProductImage(
             filename=filename,
             object_id=object_id,
-            display_order=new_display_order,
+            is_primary=is_primary,
         )
         self.session.add(product_image)
         self.session.flush()
@@ -612,16 +604,21 @@ class EcommCommand:
         """刪除產品圖片"""
         self.session.exec(delete(ProductImage).where(ProductImage.image_id == image_id))
 
-    def update_product_image(
-        self, image_id: int, display_order: Optional[int] = None
-    ) -> bool:
+    def update_product_image(self, image_id: int, is_primary: Optional[bool] = None) -> bool:
         """更新產品圖片"""
         image = self.session.get(ProductImage, image_id)
         if not image:
             return False
 
-        if display_order is not None:
-            image.display_order = display_order
+        if is_primary is not None:
+            if is_primary:
+                # 將同一個 object_id 的其他圖片的 is_primary 設為 False
+                self.session.exec(
+                    update(ProductImage)
+                    .where(ProductImage.object_id == image.object_id)
+                    .values(is_primary=False)
+                )
+            image.is_primary = is_primary
 
         self.session.add(image)
         return True

@@ -280,8 +280,8 @@ class EcommService:
                 ProductImageResponse(
                     image_id=img.image_id,
                     filename=img.filename,
-                    display_order=img.display_order,
                     image_url=f"{BACKEND_URL}/products/images/{img.filename}",
+                    is_primary=img.is_primary,
                 )
                 for img in images_orm
             ]
@@ -347,6 +347,16 @@ class EcommService:
             valid_images = [img for img in images if img.filename and img.size > 0]
             if valid_images:
                 uploaded_images = upload_product_images(valid_images)
+                # Set is_primary for the first image if no primary is explicitly set
+                if uploaded_images:
+                    # Check if any image is already marked as primary (though not expected from UploadFile)
+                    has_primary = False
+                    for img_data in uploaded_images:
+                        img_data["is_primary"] = False # Default to False
+                    
+                    # If no primary image is set, set the first one as primary
+                    if not has_primary and uploaded_images:
+                        uploaded_images[0]["is_primary"] = True
 
         # 建立產品
         self.command.insert_product(
@@ -629,7 +639,7 @@ class EcommService:
         uploaded_images = upload_product_images(images)
 
         for img_data in uploaded_images:
-            self.command.insert_product_image(product.object_id, img_data["filename"])
+            self.command.insert_product_image(product.object_id, img_data["filename"], is_primary=False)
 
     def update_product_image(self, body: UpdateProductImageRequest, user_id: str):
         """更新產品圖片資訊"""
@@ -644,9 +654,7 @@ class EcommService:
                 error_message="Product image not found",
             )
 
-        success = self.command.update_product_image(
-            image_id=body.image_id, display_order=body.display_order
-        )
+        success = self.command.update_product_image(image_id=body.image_id, is_primary=body.is_primary)
 
         if not success:
             raise GlobalErrorException(

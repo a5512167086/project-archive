@@ -48,13 +48,13 @@ class ProductImage(SQLModel, table=True):
     __tablename__ = "product_images"
     __table_args__ = (
         UniqueConstraint("object_id", "filename"),
-        UniqueConstraint("object_id", "display_order"),
     )
 
     image_id: Optional[int] = Field(default=None, primary_key=True)
     filename: str
     object_id: int = Field(index=True)
-    display_order: int = Field(default=0)
+    is_primary: bool = Field(default=False)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class ProductVariant(SQLModel, table=True):
