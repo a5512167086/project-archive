@@ -234,7 +234,7 @@ export const ProductManagement = () => {
     })
       .unwrap()
       .then(() => {
-        showSuccessToast(t('success.product_added'))
+        showSuccessToast('success.product_added', t)
       })
     getProducts({ bot_uuid: currentBot!.bot_detail_id })
     handleOpenClose()
@@ -258,7 +258,7 @@ export const ProductManagement = () => {
       bot_uuid: currentBot!.bot_detail_id,
       product_ids: [currentDeleteProduct.product_id]
     }).unwrap()
-    showSuccessToast(t('success.product_deleted'))
+    showSuccessToast('success.product_deleted', t)
     getProducts({ bot_uuid: currentBot!.bot_detail_id })
     handleDeleteDialogClose()
   }
@@ -278,7 +278,7 @@ export const ProductManagement = () => {
       bot_uuid: currentBot!.bot_detail_id,
       product_ids: deletedIdList
     }).unwrap()
-    showSuccessToast(t('success.product_deleted'))
+    showSuccessToast('success.product_deleted', t)
     setSelected([])
     getProducts({ bot_uuid: currentBot!.bot_detail_id })
     handleMutiDeleteDialogClose()

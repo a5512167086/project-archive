@@ -119,7 +119,7 @@ const KnowledgeManagementPage = () => {
       deleted_id_list: [currentDeleteKnowledgeItem!.object_id!]
     }).unwrap()
 
-    showSuccessToast(t('success.knowledge_deleted'))
+    showSuccessToast('success.knowledge_deleted', t)
     getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
   }
 
@@ -141,7 +141,7 @@ const KnowledgeManagementPage = () => {
       deleted_id_list: deletedIdList
     }).unwrap()
 
-    showSuccessToast(t('success.knowledges_deleted'))
+    showSuccessToast('success.knowledges_deleted', t)
     setSelected([])
     getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
   }
@@ -163,7 +163,7 @@ const KnowledgeManagementPage = () => {
       ...data
     }).unwrap()
 
-    showSuccessToast(t('success.knowledge_added'))
+    showSuccessToast('success.knowledge_added', t)
     getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
     handleInsertSingleDialogClose()
   }
@@ -190,7 +190,7 @@ const KnowledgeManagementPage = () => {
       csv_file: data.csv_file
     }).unwrap()
 
-    showSuccessToast(t('success.csv_imported'))
+    showSuccessToast('success.csv_imported', t)
     getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
   }
 
@@ -216,7 +216,7 @@ const KnowledgeManagementPage = () => {
       ...data
     }).unwrap()
 
-    showSuccessToast(t('success.knowledge_updated'))
+    showSuccessToast('success.knowledge_updated', t)
     getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
     handleEditDialogClose()
   }
@@ -228,25 +228,39 @@ const KnowledgeManagementPage = () => {
   return (
     <StyledKnowledgeManagementPage disableGutters maxWidth={false}>
       <CustomBreadcrumb items={breadcrumbItems} />
-      <Box className="knowledge__titleBox">
-        <Typography variant="h5" className="knowledge__title">
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexShrink: 0,
+          marginBottom: '16px'
+        }}
+      >
+        <Typography
+          variant="h5"
+          sx={{
+            fontSize: '2rem',
+            fontWeight: '500'
+          }}
+        >
           {t(knowledgeManagementPageContent.title)}
         </Typography>
         <Box>
           {!isEmpty(selected) && (
             <Button
-              className="knowledge__button"
               variant="outlined"
               color="error"
               onClick={handleDelteItems}
+              sx={{ marginRight: '10px' }}
             >
               {t(knowledgeManagementPageContent.deleteButtonText)}
             </Button>
           )}
           <Button
-            className="knowledge__button"
             variant="outlined"
             onClick={handleAddSingleKnowledge}
+            sx={{ marginRight: '10px' }}
           >
             {t(knowledgeManagementPageContent.addButtonText)}
           </Button>
@@ -255,7 +269,7 @@ const KnowledgeManagementPage = () => {
           </Button>
         </Box>
       </Box>
-      <div className="knowledge__tableContainer">
+      <Box className="knowledge__tableContainer">
         <CustomTable
           data={knowledgeItems}
           columns={columns}
@@ -264,7 +278,7 @@ const KnowledgeManagementPage = () => {
           onEdit={handleEditItem}
           onDelete={handleDeleteItem}
         />
-      </div>
+      </Box>
       <CustomDialog<{
         question: string
         answer: string

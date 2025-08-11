@@ -41,9 +41,5 @@ export const StyledHero = styled(Box)(() => ({
       fontSize: '1.5rem'
     }
   },
-  '& .hero__description ': {
-    [theme.breakpoints.down('md')]: {
-      fontSize: '1rem'
-    }
-  }
+  
 }))

@@ -11,10 +11,5 @@ export const StyledNotFoundPage = styled(Box)(() => ({
   '& .notfound__errorImg': {
     maxWidth: '300px',
     margin: '20px 0'
-  },
-  '& .notfound__title': {
-    margin: '10px 0 ',
-    fontSize: '2.25rem',
-    fontWeight: 'bold'
   }
 }))

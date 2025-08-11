@@ -38,7 +38,7 @@ export const StyledSwitch = styled((props: SwitchProps) => (
     },
     '&.Mui-disabled + .MuiSwitch-track': {
       opacity: 0.7,
-      ...theme.applyStyles('dark', {
+      ...(theme.palette.mode === 'dark' && {
         opacity: 0.3
       })
     }
@@ -55,7 +55,7 @@ export const StyledSwitch = styled((props: SwitchProps) => (
     transition: theme.transitions.create(['background-color'], {
       duration: 500
     }),
-    ...theme.applyStyles('dark', {
+    ...(theme.palette.mode === 'dark' && {
       backgroundColor: '#39393D'
     })
   }
@@ -111,11 +111,5 @@ export const StyledCustomCard = styled(Card)(({ theme }) => ({
     fontWeight: 'bold',
     fontSize: '1rem',
     padding: '5px 10px'
-  },
-  '& .card__switch': {
-    '& .MuiFormControlLabel-label': {
-      fontWeight: 'bold',
-      fontSize: '1.25rem'
-    }
   }
 }))

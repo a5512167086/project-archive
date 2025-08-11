@@ -95,8 +95,20 @@ const SignInPage = () => {
 
   return (
     <StyledSignInPage maxWidth="xs">
-      <Box className="signin__box">
-        <Avatar className="signin__avatar">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
+        }}
+      >
+        <Avatar
+          sx={(theme) => ({
+            margin: '10px',
+            backgroundColor: theme.palette.primary.main
+          })}
+        >
           <LockOutlinedIcon />
         </Avatar>
         <OAuth />
@@ -106,11 +118,11 @@ const SignInPage = () => {
         </Typography>
         <Box
           component="form"
-          className="signin__formBox"
           onSubmit={(event) => {
             event.preventDefault()
             handleSignIn()
           }}
+          sx={{ marginTop: '10px' }}
         >
           <TextField
             variant="outlined"
@@ -154,7 +166,7 @@ const SignInPage = () => {
             fullWidth
             variant="contained"
             disabled={isLoading || emailError}
-            className="sigin__signinButton"
+            sx={{ margin: '20px 0' }}
           >
             {isLoading ? (
               <CustomLoader size={25} />
@@ -170,7 +182,15 @@ const SignInPage = () => {
                 variant="body2"
               />
             </Grid2>
-            <Grid2 size={{ xs: 12, sm: 8 }} className="signin__signupButton">
+            <Grid2
+              size={{ xs: 12, sm: 8 }}
+              sx={(theme) => ({
+                textAlign: 'right',
+                [theme.breakpoints.down('sm')]: {
+                  textAlign: 'left'
+                }
+              })}
+            >
               <CustomLink
                 linkText={t(signInContent.notHaveAccount)}
                 link={PAGE_PATHS.SIGN_UP}

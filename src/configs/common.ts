@@ -80,7 +80,8 @@ export const ERROR_CODE_MESSAGE_MAPPING = {
 
   // General errors
   INTERNAL_SERVER_ERROR: 'error.internal_server_error',
-  INVALID_INPUT: 'error.invalid_input'
+  INVALID_INPUT: 'error.invalid_input',
+  FIELD_REQUIRED: 'error.fieldRequired'
 }
 
 export const SELECT_LANGUAGES_LIST = [LANGUAGES.EN, LANGUAGES.ZH]

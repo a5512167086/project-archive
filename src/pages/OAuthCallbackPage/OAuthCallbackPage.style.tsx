@@ -25,8 +25,5 @@ export const StyledOAuthCallbackPage = styled(Box)(({ theme }) => ({
   },
   '& .oauth__text': {
     marginBottom: '15px'
-  },
-  '& .oauth__button': {
-    margin: '10px 0'
   }
 }))

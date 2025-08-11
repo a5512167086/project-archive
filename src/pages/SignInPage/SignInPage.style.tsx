@@ -17,11 +17,5 @@ export const StyledSignInPage = styled(Container)(({ theme }) => ({
   },
   '& .sigin__signinButton': {
     margin: '20px 0'
-  },
-  '& .signin__signupButton': {
-    textAlign: 'right',
-    [theme.breakpoints.down('sm')]: {
-      textAlign: 'left'
-    }
   }
 }))

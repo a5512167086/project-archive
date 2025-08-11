@@ -37,7 +37,7 @@ export const OAuth = () => {
         }}
         fullWidth
         variant="contained"
-        className="oauth__button"
+        sx={{ margin: '10px 0' }}
         startIcon={<GoogleIcon />}
       >
         {t(oauthContent.google)}
@@ -48,7 +48,7 @@ export const OAuth = () => {
         fullWidth
         variant="contained"
         color="secondary"
-        className="oauth__button"
+        sx={{ margin: '10px 0' }}
         startIcon={<LineIcon style={{ width: '20px', height: '20px' }} />}
       >
         {t(oauthContent.line)}

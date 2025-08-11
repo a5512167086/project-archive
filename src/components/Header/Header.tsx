@@ -37,26 +37,56 @@ export const Header = () => {
   return (
     <StyledHeader>
       <AppBar component="nav" position="fixed">
-        <Toolbar className="header__toolbar">
+        <Toolbar sx={{ height: '100%' }}>
           <IconButton
             color="inherit"
             aria-label="open drawer"
             edge="start"
             onClick={handleDrawerToggle}
-            className="header__iconButton"
+            sx={(theme) => ({
+              marginRight: '20px',
+              [theme.breakpoints.up('sm')]: {
+                display: 'none'
+              }
+            })}
           >
             <MenuIcon />
           </IconButton>
-          <LogoIcon className="header__logo" />
-          <Typography variant="h6" component="div" className="header__title">
+          <Box>
+            <LogoIcon className="header__logo" />
+          </Box>
+          <Typography
+            variant="h6"
+            component="div"
+            sx={(theme) => ({
+              flexGrow: 1,
+              fontSize: '1.75rem',
+              [theme.breakpoints.down('sm')]: {
+                textAlign: 'center',
+                paddingRight: '45px'
+              },
+              [theme.breakpoints.up('sm')]: {
+                display: 'block'
+              }
+            })}
+          >
             EasyBot
           </Typography>
-          <Box className="header__navBox">
+          <Box
+            sx={(theme) => ({
+              [theme.breakpoints.down('sm')]: {
+                display: 'none'
+              },
+              [theme.breakpoints.up('sm')]: {
+                display: 'block'
+              }
+            })}
+          >
             {!isAuthenticated ? (
               PUBLIC_NAVIGATION_ROUTE.map((item) => (
                 <Button
                   key={t(item.text)}
-                  className="header__navLink"
+                  sx={{ color: (theme) => theme.palette.common.white }}
                   onClick={() => {
                     handleNavigation(item.link)
                   }}
@@ -69,7 +99,7 @@ export const Header = () => {
                 {PRIVATE_NAVIGATION_ROUTE.map((item) => (
                   <Button
                     key={t(item.text)}
-                    className="header__navLink"
+                    sx={{ color: (theme) => theme.palette.common.white }}
                     onClick={() => {
                       handleNavigation(item.link)
                     }}
@@ -77,7 +107,10 @@ export const Header = () => {
                     {t(item.text)}
                   </Button>
                 ))}
-                <Button className="header__navLink" onClick={logout}>
+                <Button
+                  onClick={logout}
+                  sx={{ color: (theme) => theme.palette.common.white }}
+                >
                   {t(headerContent.logout)}
                 </Button>
               </>

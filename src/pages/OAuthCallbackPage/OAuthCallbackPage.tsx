@@ -99,12 +99,30 @@ const OAuthCallbackPage = () => {
         <CustomLoader size="6rem" text={t(oauthCallbackContent.loading)} />
       )}
       {errorCode && !isAuthenticated && (
-        <Paper elevation={3} className="oauth__paper">
-          <ErrorIcon className="oauth__icon" />
-          <Typography variant="h4" component="h1" className="oauth__text">
+        <Paper
+          elevation={3}
+          sx={{
+            padding: '40px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            backgroundColor: 'background.paper'
+          }}
+        >
+          <ErrorIcon
+            sx={{
+              fontSize: '3.5rem',
+              marginBottom: '15px'
+            }}
+          />
+          <Typography variant="h4" component="h1" sx={{ marginBottom: '15px' }}>
             {t(oauthCallbackContent.failedTitle)}
           </Typography>
-          <Typography variant="body1" align="center" className="oauth__text">
+          <Typography
+            variant="body1"
+            align="center"
+            sx={{ marginBottom: '15px' }}
+          >
             {t(
               ERROR_CODE_MESSAGE_MAPPING[
                 errorCode as keyof typeof ERROR_CODE_MESSAGE_MAPPING
@@ -121,8 +139,8 @@ const OAuthCallbackPage = () => {
           <Button
             fullWidth
             variant="contained"
-            className="oauth__button"
             onClick={handleNavigateToLogin}
+            sx={{ margin: '10px 0' }}
           >
             {t(oauthCallbackContent.backToLogin)}
           </Button>

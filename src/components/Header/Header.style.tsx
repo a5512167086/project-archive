@@ -45,12 +45,5 @@ export const StyledHeader = styled(Box)(({ theme }) => ({
   '& .header__navLink': {
     color: theme.palette.common.white
   },
-  '& .header__drawer': {
-    [theme.breakpoints.down('sm')]: {
-      display: 'none'
-    },
-    [theme.breakpoints.down('xs')]: {
-      display: 'block'
-    }
-  }
+  
 }))

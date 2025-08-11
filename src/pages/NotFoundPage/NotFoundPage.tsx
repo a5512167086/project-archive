@@ -12,13 +12,24 @@ const NotFoundPage = () => {
   const { t } = useTranslation()
   return (
     <StyledNotFoundPage>
-      <img className="notfound__errorImg" src={ErrorIcon} />
-      <Typography variant="h5" className="notfound__title">
+      <img
+        src={ErrorIcon}
+        style={{
+          maxWidth: '300px',
+          margin: '20px 0'
+        }}
+      />
+      <Typography
+        variant="h5"
+        sx={{
+          margin: '10px 0 ',
+          fontSize: '2.25rem',
+          fontWeight: 'bold'
+        }}
+      >
         {t(notFoundPage.title)}
       </Typography>
-      <Typography variant="h6" className="notfound__description">
-        {t(notFoundPage.description)}
-      </Typography>
+      <Typography variant="h6">{t(notFoundPage.description)}</Typography>
     </StyledNotFoundPage>
   )
 }

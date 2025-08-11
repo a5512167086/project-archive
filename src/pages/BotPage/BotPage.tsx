@@ -132,7 +132,7 @@ const BotPage = () => {
       bot_login_channel_secret: data.loginChannelSecret
     }).unwrap()
 
-    showSuccessToast(t('success.bot_created'))
+    showSuccessToast('success.bot_created', t)
     handleModalOpen(result.webhook_url)
     getBots()
   }

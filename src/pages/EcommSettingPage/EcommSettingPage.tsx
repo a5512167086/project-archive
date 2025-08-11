@@ -78,7 +78,7 @@ export const EcommSettingPage = () => {
         bot_uuid: currentBot.bot_detail_id,
         shipping_options: shippingOptions
       }).unwrap()
-      showSuccessToast(t('success.settings_saved'))
+      showSuccessToast('success.settings_saved', t)
     }
     setIsLoading(false)
   }
@@ -99,7 +99,7 @@ export const EcommSettingPage = () => {
         bot_uuid: currentBot.bot_detail_id,
         method: deleteTarget.method
       }).unwrap()
-      showSuccessToast(t('success.shipping_method_deleted'))
+      showSuccessToast('success.shipping_method_deleted', t)
       getEcommSettings(currentBot.bot_detail_id)
     }
     handleCloseDeleteDialog()

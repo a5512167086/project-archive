@@ -78,13 +78,13 @@ const BotSettingPage = () => {
     }
 
     await updateBot(updatedBot).unwrap()
-    showSuccessToast(t('success.bot_updated'))
+    showSuccessToast('success.bot_updated', t)
     getBots()
   }
 
   const handleBotDelete = async () => {
     await deleteBot({ bot_uuid: currentBot!.bot_detail_id }).unwrap()
-    showSuccessToast(t('success.bot_deleted'))
+    showSuccessToast('success.bot_deleted', t)
     navigate(PAGE_PATHS.BOT_LIST)
   }
 
@@ -184,7 +184,6 @@ const BotSettingPage = () => {
           >
             <img
               src="/src/assets/line_logo.svg"
-              alt="Line"
               style={{ width: 28, height: 28, opacity: 0.7 }}
             />
             <Typography variant="subtitle1" fontWeight={600}>

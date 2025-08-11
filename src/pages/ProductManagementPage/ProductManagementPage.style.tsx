@@ -27,12 +27,5 @@ export const StyledProductManagementPage = styled(Container)(() => ({
   // Tabs container
   '& .MuiTabs-root': {
     flexShrink: 0
-  },
-  // Tab panels
-  '& .MuiBox-root': {
-    '&[role="tabpanel"]': {
-      height: '100%',
-      minHeight: 0
-    }
   }
 }))

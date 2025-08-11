@@ -14,14 +14,5 @@ export const StyledSignUpPage = styled(Container)(({ theme }) => ({
   },
   '& .signup__formBox': {
     marginTop: '10px'
-  },
-  '& .sigin__signupButton': {
-    margin: '20px 0'
-  },
-  '& .signup__signupButton': {
-    textAlign: 'right',
-    [theme.breakpoints.down('sm')]: {
-      textAlign: 'left'
-    }
   }
 }))

@@ -173,7 +173,7 @@ export const CategoryManagement = () => {
       category_description: data.category_description,
       parent_category_id: parentCategoryId ?? undefined
     }).unwrap()
-    showSuccessToast(t('success.category_added'))
+    showSuccessToast('success.category_added', t)
     getCategories(currentBot!.bot_detail_id)
     handleCloseCreate()
   }
@@ -192,7 +192,7 @@ export const CategoryManagement = () => {
       parent_category_id:
         data.parent_category_id === '0' ? 0 : Number(data.parent_category_id)
     }).unwrap()
-    showSuccessToast(t('success.category_updated'))
+    showSuccessToast('success.category_updated', t)
     getCategories(currentBot!.bot_detail_id)
     handleCloseEdit()
   }
@@ -203,7 +203,7 @@ export const CategoryManagement = () => {
       bot_uuid: currentBot!.bot_detail_id,
       deleted_class_id_list: [currentDeleteCategory.class_id]
     }).unwrap()
-    showSuccessToast(t('success.category_deleted'))
+    showSuccessToast('success.category_deleted', t)
     getCategories(currentBot!.bot_detail_id)
     handleCloseDelete()
   }

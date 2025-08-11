@@ -4,7 +4,7 @@ import Typography from '@mui/material/Typography'
 import CardActionArea from '@mui/material/CardActionArea'
 import { StyledCustomCard, StyledSwitch } from './CustomCard.style'
 import { ActionType, CustomCardProps } from './CustomCard.type'
-import { Button, FormControlLabel, IconButton } from '@mui/material'
+import { Box, Button, FormControlLabel, IconButton } from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Settings'
 
 export const CustomCard = ({
@@ -32,18 +32,25 @@ export const CustomCard = ({
         <CardActionArea className="card__actionArea" onClick={cardButtonAction}>
           <CardContent className="card__content">
             {imgSrc && (
-              <div className="card__imgBox">
+              <Box className="card__imgBox">
                 <CardMedia
                   component="img"
                   image={imgSrc}
                   className="card__img"
                 />
-              </div>
+              </Box>
             )}
             <Typography variant="h5" component="div" className="card__title">
               {titleText}
             </Typography>
-            <Typography component="div" className="card__description">
+            <Typography
+              component="div"
+              sx={{
+                width: '100%',
+                padding: '0 10px',
+                textAlign: 'left'
+              }}
+            >
               {descriptionText}
             </Typography>
           </CardContent>
@@ -58,15 +65,26 @@ export const CustomCard = ({
           <Typography variant="h5" component="div" className="card__title">
             {titleText}
           </Typography>
-          <Typography component="div" className="card__description">
+          <Typography
+            component="div"
+            sx={{
+              width: '100%',
+              padding: '0 10px',
+              textAlign: 'left'
+            }}
+          >
             {descriptionText}
           </Typography>
           {actionType === ActionType.Button && (
             <Button
               startIcon={buttonIcon}
               variant="outlined"
-              className="card__button"
               onClick={buttonAction}
+              sx={{
+                fontWeight: 'bold',
+                fontSize: '1rem',
+                padding: '5px 10px'
+              }}
             >
               {buttonText}
             </Button>
@@ -76,11 +94,16 @@ export const CustomCard = ({
               value="start"
               control={<StyledSwitch sx={{ m: 1 }} color="primary" />}
               label={buttonText}
-              className="card__switch"
               labelPlacement="start"
               checked={checked}
               onChange={(event) => {
                 onSwitchClick?.((event.target as HTMLInputElement).checked)
+              }}
+              sx={{
+                '& .MuiFormControlLabel-label': {
+                  fontWeight: 'bold',
+                  fontSize: '1.25rem'
+                }
               }}
             />
           )}

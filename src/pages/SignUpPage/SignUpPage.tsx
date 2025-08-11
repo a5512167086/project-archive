@@ -77,7 +77,7 @@ const SignUpPage = () => {
 
     try {
       await registerUser({ email, username: name, password }).unwrap()
-      showSuccessToast(t('success.account_created_success'))
+      showSuccessToast('success.account_created_success', t)
       navigate(PAGE_PATHS.SIGN_IN)
     } finally {
       setIsLoading(false)
@@ -86,8 +86,20 @@ const SignUpPage = () => {
 
   return (
     <StyledSignUpPage maxWidth="xs">
-      <Box className="signup__box">
-        <Avatar className="signup__avatar">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
+        }}
+      >
+        <Avatar
+          sx={(theme) => ({
+            margin: '10px',
+            backgroundColor: theme.palette.primary.main
+          })}
+        >
           <PersonAddAltIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
@@ -95,11 +107,11 @@ const SignUpPage = () => {
         </Typography>
         <Box
           component="form"
-          className="signup__formBox"
           onSubmit={(event) => {
             event.preventDefault()
             handleSignUp()
           }}
+          sx={{ marginTop: '10px' }}
         >
           <TextField
             variant="outlined"
@@ -158,8 +170,14 @@ const SignUpPage = () => {
             fullWidth
             type="submit"
             variant="contained"
-            className="sigin__signupButton"
             disabled={isLoading || emailError || passwordError}
+            sx={(theme) => ({
+              margin: '20px 0',
+              textAlign: 'right',
+              [theme.breakpoints.down('sm')]: {
+                textAlign: 'left'
+              }
+            })}
           >
             {isLoading ? (
               <CustomLoader size={25} />

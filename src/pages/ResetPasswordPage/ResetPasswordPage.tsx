@@ -83,7 +83,7 @@ const ResetPasswordPage = () => {
 
     try {
       await resetPassword({ token: token!, new_password: password }).unwrap()
-      showSuccessToast('success.password_reset_success')
+      showSuccessToast('success.password_reset_success', t)
       setIsSuccess(true)
       if (!isEmpty(token)) {
         searchParams.delete('token')

@@ -157,7 +157,7 @@ const ServiceManagementPage = () => {
     }
 
     await insertService(payload).unwrap()
-    showSuccessToast(t('success.service_created'))
+    showSuccessToast('success.service_created', t)
     setDialogs((prev) => ({ ...prev, create: false }))
     getServices({ bot_uuid: currentBot!.bot_detail_id })
   }
@@ -169,9 +169,9 @@ const ServiceManagementPage = () => {
     }).unwrap()
 
     if (objectIds.length > 1) {
-      showSuccessToast(t('success.services_deleted'))
+      showSuccessToast('success.services_deleted', t)
     } else {
-      showSuccessToast(t('success.service_deleted'))
+      showSuccessToast('success.service_deleted', t)
     }
 
     getServices({ bot_uuid: currentBot!.bot_detail_id })
@@ -303,7 +303,7 @@ const ServiceManagementPage = () => {
       option_groups: fixedOptionGroups,
       schedules: fixedSchedules
     }).unwrap()
-
+    showSuccessToast('success.service_updated', t)
     setEditDialogOpen(false)
     setEditTarget(null)
     getServices({ bot_uuid: currentBot!.bot_detail_id })

@@ -20,12 +20,5 @@ export const StyledKnowledgeManagementPage = styled(Container)(() => ({
   '& .knowledge__title': {
     fontSize: '2rem',
     fontWeight: '500'
-  },
-  '& .knowledge__tableContainer': {
-    flex: 1, // 讓表格容器占滿剩餘空間
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden',
-    marginBottom: '20px' // 為表格容器添加底部邊距
   }
 }))

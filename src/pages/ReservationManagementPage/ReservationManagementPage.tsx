@@ -114,7 +114,7 @@ const ReservationManagementPage = () => {
     }
 
     await updateReservation(updateData).unwrap()
-    showSuccessToast(t('success.data_updated'))
+    showSuccessToast('success.data_updated', t)
     setDialogOpen(false)
     // Refresh reservations
     if (currentBot?.bot_detail_id) {
@@ -186,13 +186,19 @@ const ReservationManagementPage = () => {
   return (
     <StyledReservationManagementPage disableGutters maxWidth={false}>
       <CustomBreadcrumb items={breadcrumbItems} />
-      <Box className="reservation__titleBox">
-        <Typography variant="h5" className="reservation__title">
+      <Box>
+        <Typography
+          variant="h5"
+          sx={{
+            fontSize: '2rem',
+            fontWeight: '500'
+          }}
+        >
           {t(reservationManagementPageContent.title)}
         </Typography>
       </Box>
 
-      <Box className="calendar__wrapper">
+      <Box>
         <FullCalendar
           height={'75vh'}
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
@@ -227,7 +233,7 @@ const ReservationManagementPage = () => {
         fullWidth
         closeAfterTransition={false}
       >
-        <DialogTitle >
+        <DialogTitle>
           {t('reservationManagementPage.reservationDetails')}
         </DialogTitle>
         <DialogContent>

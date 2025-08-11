@@ -99,7 +99,7 @@ export const ProductVariantManagement = ({
       bot_uuid: currentBot!.bot_detail_id,
       product_id: productId
     }).unwrap()
-    showSuccessToast(t('success.variant_added'))
+    showSuccessToast('success.variant_added', t)
     onVariantsUpdate()
     setIsCreateDialogOpen(false)
   }
@@ -123,7 +123,7 @@ export const ProductVariantManagement = ({
       bot_uuid: currentBot!.bot_detail_id,
       variant_id: selectedVariant.variant_id
     }).unwrap()
-    showSuccessToast(t('success.variant_updated'))
+    showSuccessToast('success.variant_updated', t)
     onVariantsUpdate()
     setIsEditDialogOpen(false)
     setSelectedVariant(null)
@@ -135,7 +135,7 @@ export const ProductVariantManagement = ({
       bot_uuid: currentBot!.bot_detail_id,
       variant_ids: [selectedVariant.variant_id]
     }).unwrap()
-    showSuccessToast(t('success.variant_deleted'))
+    showSuccessToast('success.variant_deleted', t)
     onVariantsUpdate()
     setIsDeleteDialogOpen(false)
     setSelectedVariant(null)

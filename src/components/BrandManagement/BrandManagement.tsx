@@ -97,7 +97,7 @@ export const BrandManagement = () => {
       ...data
     }).unwrap()
 
-    showSuccessToast(t('success.brand_updated'))
+    showSuccessToast('success.brand_updated', t)
     getBrands(currentBot!.bot_detail_id)
     handleEditClose()
   }
@@ -113,7 +113,7 @@ export const BrandManagement = () => {
     })
       .unwrap()
       .then(() => {
-        showSuccessToast(t('success.brand_added'))
+        showSuccessToast('success.brand_added', t)
       })
     getBrands(currentBot!.bot_detail_id)
     handleOpenClose()
@@ -137,7 +137,7 @@ export const BrandManagement = () => {
       bot_uuid: currentBot!.bot_detail_id,
       deleted_id_list: [currentDeleteBrand.object_id]
     }).unwrap()
-    showSuccessToast(t('success.brand_deleted'))
+    showSuccessToast('success.brand_deleted', t)
     getBrands(currentBot!.bot_detail_id)
     handleDeleteDialogClose()
   }
@@ -157,7 +157,7 @@ export const BrandManagement = () => {
       bot_uuid: currentBot!.bot_detail_id,
       deleted_id_list: deletedIdList
     }).unwrap()
-    showSuccessToast(t('success.brand_deleted'))
+    showSuccessToast('success.brand_deleted', t)
     setSelected([])
     getBrands(currentBot!.bot_detail_id)
     handleMutiDeleteDialogClose()

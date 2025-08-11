@@ -213,7 +213,7 @@ const UpdateProductPage = () => {
             : Number(formData.brand_id)
     }
     await updateProduct(submitData).unwrap()
-    showSuccessToast(t('success.product_updated'))
+    showSuccessToast('success.product_updated', t)
     getProducts({ bot_uuid: currentBot!.bot_detail_id })
     navigate(`/bot-list/${currentBot!.bot_detail_id}/product`)
   }
@@ -261,7 +261,14 @@ const UpdateProductPage = () => {
 
   if (!product) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100%'
+        }}
+      >
         <CircularProgress />
       </Box>
     )
@@ -276,7 +283,12 @@ const UpdateProductPage = () => {
           }`}
           action={
             <Box display="flex" gap={1}>
-              <Button variant="outlined" onClick={() => navigate(`/bot-list/${currentBot!.bot_detail_id}/product`)}>
+              <Button
+                variant="outlined"
+                onClick={() =>
+                  navigate(`/bot-list/${currentBot!.bot_detail_id}/product`)
+                }
+              >
                 {t('common.cancel')}
               </Button>
               <Button variant="contained" onClick={handleUpdateProduct}>
@@ -313,7 +325,11 @@ const UpdateProductPage = () => {
                         <InputLabel>{t(field.label)}</InputLabel>
                         <Select
                           name={field.name}
-                          value={formData[field.name as keyof FormState] === null ? 'none' : String(formData[field.name as keyof FormState])}
+                          value={
+                            formData[field.name as keyof FormState] === null
+                              ? 'none'
+                              : String(formData[field.name as keyof FormState])
+                          }
                           label={t(field.label)}
                           onChange={handleSelectChange}
                         >

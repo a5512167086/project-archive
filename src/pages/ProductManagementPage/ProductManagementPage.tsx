@@ -50,8 +50,20 @@ const ProductManagementPage = () => {
     >
       <CustomBreadcrumb items={breadcrumbItems} />
 
-      <Box className="product__titleBox">
-        <Typography variant="h5" className="product__title">
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          flexShrink: 0
+        }}
+      >
+        <Typography
+          variant="h5"
+          sx={{
+            fontSize: '2rem',
+            fontWeight: '500'
+          }}
+        >
           {t('productManagementPage.title')}
         </Typography>
       </Box>
@@ -61,6 +73,7 @@ const ProductManagementPage = () => {
           value={activeTab}
           onChange={(_, newValue) => setActiveTab(newValue)}
           aria-label="product management tabs"
+          sx={{ flexShrink: 0 }}
         >
           <Tab
             icon={<Inventory />}

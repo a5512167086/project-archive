@@ -52,7 +52,7 @@ const ForgotPasswordPage = () => {
 
     try {
       await forgotPassword({ email }).unwrap()
-      showSuccessToast(t('success.email_sent_success'))
+      showSuccessToast('success.email_sent_success', t)
       setIsSuccess(true)
     } finally {
       setIsLoading(false)

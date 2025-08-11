@@ -37,8 +37,8 @@ export const showErrorToast = (
  * @param message - Success message key or direct message
  * @param t - Translation function
  */
-export const showSuccessToast = (message: string) => {
-  enqueueSnackbar(message, {
+export const showSuccessToast = (message: string, t: TFunction) => {
+  enqueueSnackbar(t(message), {
     variant: 'success',
     preventDuplicate: true,
     autoHideDuration: 3000
@@ -50,8 +50,8 @@ export const showSuccessToast = (message: string) => {
  * @param message - Info message key or direct message
  * @param t - Translation function
  */
-export const showInfoToast = (message: string) => {
-  enqueueSnackbar(message, {
+export const showInfoToast = (message: string, t: TFunction) => {
+  enqueueSnackbar(t(message), {
     variant: 'info',
     preventDuplicate: true,
     autoHideDuration: 4000
@@ -63,8 +63,8 @@ export const showInfoToast = (message: string) => {
  * @param message - Warning message key or direct message
  * @param t - Translation function
  */
-export const showWarningToast = (message: string) => {
-  enqueueSnackbar(message, {
+export const showWarningToast = (message: string, t: TFunction) => {
+  enqueueSnackbar(t(message), {
     variant: 'warning',
     preventDuplicate: true,
     autoHideDuration: 4000

@@ -78,7 +78,7 @@ const UserSettingPage = () => {
       new_password: formData.newPassword
     }).unwrap()
 
-    showSuccessToast(t('success.password_changed'))
+    showSuccessToast('success.password_changed', t)
     logout()
   }
 
