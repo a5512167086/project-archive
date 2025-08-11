@@ -63,9 +63,9 @@ class ProductVariant(SQLModel, table=True):
     variant_id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
     object_id: Optional[int] = None
     variant_name: str = Field(max_length=100)
-    sku_code: Optional[str] = Field(default=None, max_length=64, unique=True)
-    price: Optional[int] = None
-    stock: Optional[int] = Field(default=0)
+    sku_code: Optional[str] = Field(default=None, max_length=64)
+    price: Optional[int] = Field(default=None)
+    stock: Optional[int] = Field(default=None)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 

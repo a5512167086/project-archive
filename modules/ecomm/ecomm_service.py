@@ -281,7 +281,7 @@ class EcommService:
                     image_id=img.image_id,
                     filename=img.filename,
                     display_order=img.display_order,
-                    image_url=f"{BACKEND_URL}/ecomm/products/images/{img.filename}",
+                    image_url=f"{BACKEND_URL}/products/images/{img.filename}",
                 )
                 for img in images_orm
             ]
