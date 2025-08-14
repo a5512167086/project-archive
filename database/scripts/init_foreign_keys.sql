@@ -394,6 +394,16 @@ END IF;
 IF NOT EXISTS (
     SELECT 1
     FROM pg_constraint
+    WHERE conname = 'fk_order_items_product_id'
+) THEN
+ALTER TABLE order_items
+ADD CONSTRAINT fk_order_items_product_id FOREIGN KEY(product_id) REFERENCES product_details(product_id) ON DELETE CASCADE;
+
+END IF;
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
     WHERE conname = 'fk_order_items_variant_id'
 ) THEN
 ALTER TABLE order_items

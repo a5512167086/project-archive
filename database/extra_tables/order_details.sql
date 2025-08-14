@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS order_details (
     recipient_name VARCHAR(128),
     recipient_phone VARCHAR(32),
     shipping_address TEXT,
+    notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
