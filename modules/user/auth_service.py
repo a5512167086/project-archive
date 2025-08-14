@@ -14,7 +14,7 @@ from shared.exception import GlobalErrorException
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-ACCESS_TOKEN_EXPIRE = timedelta(hours=1)
+ACCESS_TOKEN_EXPIRE = timedelta(days=1)
 REFRESH_TOKEN_EXPIRE = timedelta(days=14)
 
 
