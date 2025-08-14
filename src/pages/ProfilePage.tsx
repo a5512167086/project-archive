@@ -32,12 +32,12 @@ export default function ProfilePage() {
       path: "/orders",
     },
     {
-      id: "reservation",
+      id: "appointments",
       icon: Calendar,
       title: "我的預約",
       description: "管理預約記錄",
       color: "green" as const,
-      path: "/reservation",
+      path: "/appointments",
     },
   ];
 
@@ -69,7 +69,7 @@ export default function ProfilePage() {
         <CardHeader>
           <CardTitle className="text-lg">可用功能模組</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-2">
           <div className="grid grid-cols-2 gap-2">
             {availableModules.map((module) => {
               const Icon = module.config.icon;

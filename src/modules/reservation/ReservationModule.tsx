@@ -24,7 +24,7 @@ function ReservationContent() {
     error,
   } = useGetReservationItemsQuery(botUUID || "", { skip: !botUUID });
 
-  const handleBookingClick = (itemId: string) => {
+  const handleReservationClick = (itemId: string) => {
     const item = reservationItemsData?.find(
       (item) => item.service_id === itemId
     );
@@ -53,20 +53,20 @@ function ReservationContent() {
     }
   };
 
-  const handleConfirmBooking = () => {
+  const handleConfirmReservation = () => {
     console.log("預約確認完成:", {
       item: selectedItem?.service_name,
     });
     // 預約成功後可以執行的操作，比如刷新數據等
-    // Toast 通知已經在 BookingDialog 中處理
+    // Toast 通知已經在 ReservationDialog 中處理
   };
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className="flex flex-col h-full space-y-4">
         <SearchInput placeholder="搜尋服務..." />
-        <Card>
-          <CardContent className="p-6">
+        <Card className="flex-1 flex flex-col">
+          <CardContent className="flex-1 flex items-center justify-center">
             <div className="text-center text-gray-500">載入中...</div>
           </CardContent>
         </Card>
@@ -76,10 +76,10 @@ function ReservationContent() {
 
   if (error) {
     return (
-      <div className="space-y-4">
+      <div className="flex flex-col h-full space-y-4">
         <SearchInput placeholder="搜尋服務..." />
-        <Card>
-          <CardContent className="p-6">
+        <Card className="flex-1 flex flex-col">
+          <CardContent className="flex-1 flex items-center justify-center">
             <div className="text-center text-red-500">載入服務失敗</div>
           </CardContent>
         </Card>
@@ -90,15 +90,15 @@ function ReservationContent() {
   const reservationItems = reservationItemsData || [];
 
   return (
-    <div className="space-y-4" style={{ height: "100%" }}>
+    <div className="flex flex-col h-full space-y-4">
       <SearchInput placeholder="搜尋服務..." />
-      <Card>
+      <Card className="flex-1 flex flex-col">
         <CardHeader>
           <CardTitle className="text-lg">
             可預約服務 ({reservationItems.length})
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="flex-1 flex flex-col space-y-3">
           {reservationItems.length === 0 ? (
             <div className="text-center text-gray-500 py-4">暫無可預約服務</div>
           ) : (
@@ -135,7 +135,7 @@ function ReservationContent() {
                   priceLabel={hasPayableOptions ? "起" : undefined}
                   buttonText="預約"
                   disabled={isItemDisabled}
-                  onButtonClick={handleBookingClick}
+                  onButtonClick={handleReservationClick}
                 />
               );
             })
@@ -152,7 +152,7 @@ function ReservationContent() {
             setIsDialogOpen(false);
             setSelectedItem(null);
           }}
-          onConfirm={handleConfirmBooking}
+          onConfirm={handleConfirmReservation}
         />
       )}
     </div>

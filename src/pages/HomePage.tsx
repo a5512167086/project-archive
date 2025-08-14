@@ -14,7 +14,7 @@ export default function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [availableModules, setAvailableModules] = useState<AppModule[]>([]);
 
-  // 從 URL 參數獲取當前模組，默認為 booking
+  // 從 URL 參數獲取當前模組，默認為 reservation
   const activeModule = searchParams.get("module") || "reservation";
 
   // Register modules on component mount
@@ -32,7 +32,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 flex flex-1">
       <DynamicTabs
         modules={availableModules}
         activeModule={activeModule}

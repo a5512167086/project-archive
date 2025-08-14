@@ -338,7 +338,7 @@ export default function ReservationPage() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 h-full">
       {/* 狀態篩選 */}
       <div className="flex space-x-2 overflow-x-auto pb-2">
         {statusFilters.map((statusFilter) => (
