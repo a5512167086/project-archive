@@ -3,8 +3,8 @@ import { useSearchParams } from "react-router";
 import { DynamicTabs } from "../components/DynamicTabs";
 
 // Import modules
-import { bookingModule } from "../modules/booking/booking-module";
-import { ecommerceModule } from "../modules/ecommerce/ecommerce-module";
+import { reservationModule } from "../modules/reservation/ReservationModule";
+import { ecommerceModule } from "../modules/ecommerce/EcommerceModule";
 
 // Import registry
 import { moduleRegistry } from "../lib/module-registry";
@@ -15,12 +15,12 @@ export default function HomePage() {
   const [availableModules, setAvailableModules] = useState<AppModule[]>([]);
 
   // 從 URL 參數獲取當前模組，默認為 booking
-  const activeModule = searchParams.get("module") || "booking";
+  const activeModule = searchParams.get("module") || "reservation";
 
   // Register modules on component mount
   useEffect(() => {
     // Register default modules
-    moduleRegistry.register(bookingModule);
+    moduleRegistry.register(reservationModule);
     moduleRegistry.register(ecommerceModule);
 
     // Get all registered modules

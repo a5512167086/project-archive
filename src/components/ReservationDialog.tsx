@@ -21,27 +21,27 @@ import {
 import { useLiff } from "../hooks/useLiff";
 import { useToast } from "../hooks/useToast";
 
-interface BookingDialogProps {
+interface ReservationDialogProps {
   reservationItem: ReservationItem;
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
 }
 
-type BookingStep = "date" | "time" | "options" | "confirm" | "result";
+type ReservationStep = "date" | "time" | "options" | "confirm" | "result";
 
-export function BookingDialog({
+export function ReservationDialog({
   reservationItem,
   isOpen,
   onClose,
   onConfirm,
-}: BookingDialogProps) {
+}: ReservationDialogProps) {
   const { botUUID } = useLiff();
   const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [step, setStep] = useState<BookingStep>("date");
+  const [step, setStep] = useState<ReservationStep>("date");
   const [optionValues, setOptionValues] = useState<Record<string, string>>({});
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "bank_transfer">(
     "cash"

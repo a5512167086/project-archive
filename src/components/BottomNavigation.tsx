@@ -4,7 +4,7 @@ import { ShoppingBag, Package, Clock, User } from "lucide-react";
 const navItems = [
   { id: "home", path: "/home", icon: ShoppingBag, label: "首頁" },
   { id: "orders", path: "/orders", icon: Package, label: "訂單" },
-  { id: "appointments", path: "/appointments", icon: Clock, label: "預約" },
+  { id: "reservation", path: "/reservation", icon: Clock, label: "預約" },
   { id: "profile", path: "/profile", icon: User, label: "個人" },
 ];
 

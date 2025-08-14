@@ -19,7 +19,14 @@ export interface Category {
 
 export type CategoriesResponse = Category[];
 
-export interface Product {
+export type ProductImage = {
+  image_id: number;
+  filename: string;
+  image_url: string;
+  is_primary: boolean;
+};
+
+export type Product = {
   product_id: string;
   object_id: number;
   product_name: string;
@@ -32,9 +39,9 @@ export interface Product {
   is_active: boolean;
   created_at: string;
   updated_at: string;
-  images: unknown[];
+  images: ProductImage[];
   variants: unknown[];
-}
+};
 
 export type ProductsResponse = Product[];
 
@@ -61,4 +68,5 @@ export const ecommApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetBrandsQuery, useGetCategoriesQuery, useGetProductsQuery } = ecommApi;
+export const { useGetBrandsQuery, useGetCategoriesQuery, useGetProductsQuery } =
+  ecommApi;

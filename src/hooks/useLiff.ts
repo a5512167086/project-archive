@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import liff from "@line/liff";
 import eruda from "eruda";
-import {
-  useGetBotInfoQuery,
-  useCustomerLoginMutation,
-} from "../store/api/reservationApi";
+import { useGetBotInfoQuery } from "../store/api/botApi";
+import { useCustomerLoginMutation } from "../store/api/userApi";
 
 interface LiffState {
   isInitialized: boolean;
@@ -78,7 +76,9 @@ export const useLiff = () => {
 
         // 如果 URL 中有新的 bot_uuid，且與現有的不同，需要重新登入
         if (foundBotUUID && foundBotUUID !== existingBotUUID) {
-          console.log(`🔄 Bot UUID 已更新: ${existingBotUUID} -> ${foundBotUUID}`);
+          console.log(
+            `🔄 Bot UUID 已更新: ${existingBotUUID} -> ${foundBotUUID}`
+          );
           // 清除舊的 tokens
           localStorage.removeItem("access_token");
           localStorage.removeItem("refresh_token");
@@ -109,7 +109,7 @@ export const useLiff = () => {
         if (existingAccessToken && foundBotUUID === existingBotUUID) {
           console.log("✅ 發現現有的 access token，跳過登入流程");
           setAccessToken(existingAccessToken);
-          setState(prev => ({
+          setState((prev) => ({
             ...prev,
             isInitialized: true,
             isLoggedIn: true,
@@ -134,9 +134,9 @@ export const useLiff = () => {
     initializeAuth();
   }, []);
 
-  // 當 botInfo 可用時，初始化 LIFF (只有在沒有 access token 時)
+  // 當 botInfo 可用時，初始化 LIFF
   useEffect(() => {
-    if (!botInfo || !botUUID || accessToken) return;
+    if (!botInfo || !botUUID) return;
 
     const initLiff = async () => {
       try {
@@ -170,29 +170,34 @@ export const useLiff = () => {
           throw new Error("無法取得 ID Token");
         }
 
+        console.log("✅ 成功取得用戶資訊", userProfile);
         console.log(`✅ 成功取得用戶資訊: ${userProfile.displayName}`);
 
-        // 使用 Redux mutation 登入
-        const loginResult = await customerLogin({
-          line_id_token: idToken,
-          bot_id: botUUID,
-        }).unwrap();
+        // 只有在沒有 access token 時才執行登入流程
+        if (!accessToken) {
+          // 使用 Redux mutation 登入
+          const loginResult = await customerLogin({
+            line_id_token: idToken,
+            bot_id: botUUID,
+          }).unwrap();
 
-        console.log("✅ 後端登入成功！");
+          console.log("✅ 後端登入成功！");
 
-        // 儲存 access_token 和 refresh_token 到 localStorage
-        localStorage.setItem("access_token", loginResult.access_token);
-        localStorage.setItem("refresh_token", loginResult.refresh_token);
+          // 儲存 access_token 和 refresh_token 到 localStorage
+          localStorage.setItem("access_token", loginResult.access_token);
+          localStorage.setItem("refresh_token", loginResult.refresh_token);
 
-        // 為了向後兼容，也保存到 token 鍵
-        localStorage.setItem("token", loginResult.access_token);
+          // 為了向後兼容，也保存到 token 鍵
+          localStorage.setItem("token", loginResult.access_token);
 
-        console.log("💾 Token 已儲存到 localStorage", {
-          access_token_length: loginResult.access_token.length,
-          refresh_token_length: loginResult.refresh_token.length,
-        });
+          console.log("💾 Token 已儲存到 localStorage", {
+            access_token_length: loginResult.access_token.length,
+            refresh_token_length: loginResult.refresh_token.length,
+          });
 
-        setAccessToken(loginResult.access_token);
+          setAccessToken(loginResult.access_token);
+        }
+
         setState({
           isInitialized: true,
           isLoggedIn: true,

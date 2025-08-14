@@ -1,14 +1,12 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Card, CardContent } from "@/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface UserProfileCardProps {
-  name: string
-  memberLevel: string
-  points: number
-  avatar?: string
+  name: string;
+  avatar?: string;
 }
 
-export function UserProfileCard({ name, memberLevel, points, avatar }: UserProfileCardProps) {
+export function UserProfileCard({ name, avatar }: UserProfileCardProps) {
   return (
     <Card>
       <CardContent className="p-6">
@@ -19,11 +17,9 @@ export function UserProfileCard({ name, memberLevel, points, avatar }: UserProfi
           </Avatar>
           <div>
             <h3 className="font-medium text-lg">{name}</h3>
-            <p className="text-sm text-muted-foreground">會員等級：{memberLevel}</p>
-            <p className="text-sm text-muted-foreground">積分：{points.toLocaleString()} 點</p>
           </div>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

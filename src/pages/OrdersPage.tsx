@@ -21,7 +21,7 @@ export default function OrdersPage() {
             <p className="text-muted-foreground mb-4">
               目前主要提供預約服務功能
             </p>
-            <Link to="/appointments">
+            <Link to="/reservation">
               <Button>前往預約頁面</Button>
             </Link>
           </div>

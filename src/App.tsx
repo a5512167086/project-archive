@@ -4,8 +4,8 @@ import { router } from "./router/routes";
 import { useLiff } from "./hooks/useLiff";
 
 // Import modules
-import { bookingModule } from "./modules/booking/booking-module";
-import { ecommerceModule } from "./modules/ecommerce/ecommerce-module";
+import { reservationModule } from "./modules/reservation/ReservationModule";
+import { ecommerceModule } from "./modules/ecommerce/EcommerceModule";
 
 // Import registry
 import { moduleRegistry } from "./lib/module-registry";
@@ -15,7 +15,7 @@ function App() {
 
   // Register modules on component mount
   useEffect(() => {
-    moduleRegistry.register(bookingModule);
+    moduleRegistry.register(reservationModule);
     moduleRegistry.register(ecommerceModule);
   }, []);
 

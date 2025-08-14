@@ -3,7 +3,7 @@ import { Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SearchInput } from "../../components/SearchInput";
 import { FeaturedItem } from "../../components/FeaturedItem";
-import { BookingDialog } from "../../components/BookingDialog";
+import { ReservationDialog } from "../../components/ReservationDialog";
 import {
   useGetReservationItemsQuery,
   type ReservationItem,
@@ -11,7 +11,7 @@ import {
 import { useLiff } from "../../hooks/useLiff";
 import type { AppModule } from "../../types/module";
 
-function BookingContent() {
+function ReservationContent() {
   const { botUUID } = useLiff();
   const [selectedItem, setSelectedItem] = useState<ReservationItem | null>(
     null
@@ -90,7 +90,7 @@ function BookingContent() {
   const reservationItems = reservationItemsData || [];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" style={{ height: "100%" }}>
       <SearchInput placeholder="搜尋服務..." />
       <Card>
         <CardHeader>
@@ -145,7 +145,7 @@ function BookingContent() {
 
       {/* 預約對話框 */}
       {selectedItem && (
-        <BookingDialog
+        <ReservationDialog
           reservationItem={selectedItem}
           isOpen={isDialogOpen}
           onClose={() => {
@@ -159,16 +159,16 @@ function BookingContent() {
   );
 }
 
-export const bookingModule: AppModule = {
+export const reservationModule: AppModule = {
   config: {
-    id: "booking",
+    id: "reservation",
     name: "預約服務",
     icon: Calendar,
     color: "blue",
     description: "預約各種專業服務",
   },
   component: {
-    id: "booking",
-    render: () => <BookingContent />,
+    id: "reservation",
+    render: () => <ReservationContent />,
   },
 };

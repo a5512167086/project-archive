@@ -3,7 +3,7 @@ import Layout from "../components/Layout";
 import HomePage from "../pages/HomePage";
 import ProfilePage from "../pages/ProfilePage";
 import OrdersPage from "../pages/OrdersPage";
-import AppointmentsPage from "../pages/AppointmentsPage";
+import ReservationPage from "../pages/ReservationPage";
 
 export const router = createBrowserRouter([
   {
@@ -27,8 +27,8 @@ export const router = createBrowserRouter([
         element: <OrdersPage />,
       },
       {
-        path: "appointments",
-        element: <AppointmentsPage />,
+        path: "reservation",
+        element: <ReservationPage />,
       },
     ],
   },

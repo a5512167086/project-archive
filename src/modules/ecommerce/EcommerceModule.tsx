@@ -7,6 +7,7 @@ import type { AppModule } from "../../types/module";
 import {
   useGetProductsQuery,
   useGetCategoriesQuery,
+  useGetBrandsQuery,
   type Category,
 } from "../../store/api/ecommApi";
 import { useLiff } from "../../hooks/useLiff";
@@ -16,7 +17,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { CategoryFilterDialog } from "@/components/CategoryFilterDialog";
+import { FilterDialog } from "@/components/FilterDialog";
 
 const CategoryItem = ({
   category,
@@ -66,6 +67,7 @@ function EcommerceContent() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
     null
   );
+  const [selectedBrandId, setSelectedBrandId] = useState<number | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const {
@@ -78,18 +80,27 @@ function EcommerceContent() {
     isLoading: categoriesLoading,
     error: categoriesError,
   } = useGetCategoriesQuery(botUUID || "", { skip: !botUUID });
+  const { 
+    data: brands, 
+    isLoading: brandsLoading, 
+    error: brandsError 
+  } = useGetBrandsQuery(botUUID || "", { skip: !botUUID });
 
-  if (productsLoading || categoriesLoading) {
+  if (productsLoading || categoriesLoading || brandsLoading) {
     return <div>Loading...</div>;
   }
 
-  if (productsError || categoriesError) {
+  if (productsError || categoriesError || brandsError) {
     return <div>Error loading data</div>;
   }
 
-  const filteredProducts = selectedCategoryId
-    ? products?.filter((p) => p.category_id === selectedCategoryId)
-    : products;
+  const filteredProducts = products?.filter((p) => {
+    const categoryMatch = selectedCategoryId
+      ? p.category_id === selectedCategoryId
+      : true;
+    const brandMatch = selectedBrandId ? p.brand_id === selectedBrandId : true;
+    return categoryMatch && brandMatch;
+  });
 
   return (
     <div className="space-y-4">
@@ -99,25 +110,33 @@ function EcommerceContent() {
       />
 
       <div className="grid grid-cols-2 gap-4">
-        {filteredProducts?.map((product) => (
-          <ProductCard
-            key={product.product_id}
-            id={product.product_id}
-            name={product.product_name}
-            price={product.price}
-            rating={5} // Assuming a default rating
-            image={placeholder}
-            onAddToCart={(id) => console.log(`Add to cart: ${id}`)}
-            onToggleFavorite={(id) => console.log(`Toggle favorite: ${id}`)}
-          />
-        ))}
+        {filteredProducts?.map((product) => {
+          const images = product.images as
+            | { image_url: string; is_primary?: boolean }[]
+            | undefined;
+          const primaryImage = images?.find((img) => img.is_primary);
+          const imageUrl =
+            primaryImage?.image_url || images?.[0]?.image_url || placeholder;
+          return (
+            <ProductCard
+              key={product.product_id}
+              id={product.product_id}
+              name={product.product_name}
+              price={product.price}
+              image={imageUrl}
+            />
+          );
+        })}
       </div>
-      <CategoryFilterDialog
+      <FilterDialog
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         categories={categories || []}
         selectedCategoryId={selectedCategoryId}
         onSelectCategory={setSelectedCategoryId}
+        brands={brands || []}
+        selectedBrandId={selectedBrandId}
+        onSelectBrand={setSelectedBrandId}
       />
     </div>
   );

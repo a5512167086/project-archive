@@ -28,23 +28,6 @@ export interface CreateReservationRequest {
   price: number;
 }
 
-export interface BotInfo {
-  id: string;
-  name: string;
-  liff_id: string;
-  description?: string;
-}
-
-export interface LoginRequest {
-  line_id_token: string;
-  bot_id: string;
-}
-
-export interface LoginResponse {
-  access_token: string;
-  refresh_token: string;
-}
-
 // 預約服務項目相關類型 - 基於實際 API 回應結構
 export interface ReservationItemOption {
   option_id: string;
@@ -261,20 +244,6 @@ export const reservationApi = baseApi.injectEndpoints({
         })),
       ],
     }),
-
-    // LIFF 相關 endpoints (保留這些因為登入還是需要的)
-    getBotInfo: builder.query<BotInfo, string>({
-      query: (botUUID) => `/bots/${botUUID}`,
-      providesTags: ["User"],
-    }),
-    customerLogin: builder.mutation<LoginResponse, LoginRequest>({
-      query: (credentials) => ({
-        url: "/users/customer-login",
-        method: "POST",
-        body: credentials,
-      }),
-      invalidatesTags: ["User"],
-    }),
   }),
 });
 
@@ -288,6 +257,4 @@ export const {
   useGetReservationItemsQuery,
   useGetAvailableTimesQuery,
   useGetUserReservationsQuery,
-  useGetBotInfoQuery,
-  useCustomerLoginMutation,
 } = reservationApi;

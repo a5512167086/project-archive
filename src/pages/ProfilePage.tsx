@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { ShoppingBag, Package, Heart, Calendar } from "lucide-react";
+import { Package, Calendar } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -13,7 +13,13 @@ import { useLiff } from "../hooks/useLiff";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const liffState = useLiff();
+  const { userProfile, isLoading } = useLiff();
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">載入中...</div>
+    );
+  }
   const availableModules = moduleRegistry.getAllModules();
 
   const quickActions = [
@@ -26,48 +32,25 @@ export default function ProfilePage() {
       path: "/orders",
     },
     {
-      id: "appointments",
+      id: "reservation",
       icon: Calendar,
       title: "我的預約",
       description: "管理預約記錄",
       color: "green" as const,
-      path: "/appointments",
-    },
-    {
-      id: "favorites",
-      icon: Heart,
-      title: "我的收藏",
-      description: "收藏的商品",
-      color: "red" as const,
-      path: "/home?module=ecommerce",
-    },
-    {
-      id: "cart",
-      icon: ShoppingBag,
-      title: "購物車",
-      description: "待結帳商品",
-      color: "purple" as const,
-      path: "/home?module=ecommerce",
+      path: "/reservation",
     },
   ];
 
   const handleQuickActionClick = (path: string) => {
     navigate(path);
   };
-
-  // 使用 LIFF 的用戶資訊
-  const userName = liffState.userProfile?.displayName || "用戶";
-  const userAvatar =
-    liffState.userProfile?.pictureUrl || "https://via.placeholder.com/64";
+  console.log(userProfile);
+  const userName = userProfile?.displayName || "用戶";
+  const userAvatar = userProfile?.pictureUrl;
 
   return (
     <div className="space-y-4">
-      <UserProfileCard
-        name={userName}
-        memberLevel="金卡會員"
-        points={2580}
-        avatar={userAvatar}
-      />
+      <UserProfileCard name={userName} avatar={userAvatar} />
 
       <div className="grid grid-cols-2 gap-4">
         {quickActions.map((action) => (
@@ -104,20 +87,6 @@ export default function ProfilePage() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Debug info (只在開發環境顯示) */}
-      {import.meta.env.DEV && liffState.userProfile && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Debug Info</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <pre className="text-xs bg-gray-100 p-2 rounded overflow-auto">
-              {JSON.stringify(liffState.userProfile, null, 2)}
-            </pre>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

@@ -258,7 +258,7 @@ function ReservationDetailModal({
   );
 }
 
-export default function AppointmentsPage() {
+export default function ReservationPage() {
   const [searchParams] = useSearchParams();
   const [selectedReservation, setSelectedReservation] =
     useState<UserReservation | null>(null);
@@ -344,7 +344,7 @@ export default function AppointmentsPage() {
         {statusFilters.map((statusFilter) => (
           <Link
             key={statusFilter.key}
-            to={`/appointments${
+            to={`/reservation${
               statusFilter.key !== "all" ? `?status=${statusFilter.key}` : ""
             }`}
             className="whitespace-nowrap"
