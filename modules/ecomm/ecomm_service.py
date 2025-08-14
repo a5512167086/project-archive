@@ -347,16 +347,10 @@ class EcommService:
             valid_images = [img for img in images if img.filename and img.size > 0]
             if valid_images:
                 uploaded_images = upload_product_images(valid_images)
-                # Set is_primary for the first image if no primary is explicitly set
+                # Set is_primary for the first image
                 if uploaded_images:
-                    # Check if any image is already marked as primary (though not expected from UploadFile)
-                    has_primary = False
-                    for img_data in uploaded_images:
-                        img_data["is_primary"] = False # Default to False
-                    
-                    # If no primary image is set, set the first one as primary
-                    if not has_primary and uploaded_images:
-                        uploaded_images[0]["is_primary"] = True
+                    for i, img_data in enumerate(uploaded_images):
+                        img_data["is_primary"] = i == 0
 
         # 建立產品
         self.command.insert_product(

@@ -299,10 +299,10 @@ class EcommCommand:
 
         # 建立產品圖片
         for img in images:
-            filename = img["filename"]
             product_image = ProductImage(
-                filename=filename,
+                filename=img["filename"],
                 object_id=new_product_object.object_id,
+                is_primary=img.get("is_primary", False),
             )
             self.session.add(product_image)
 
