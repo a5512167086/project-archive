@@ -1,6 +1,6 @@
 import { X, Check, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { Category, Brand } from "../store/api/ecommApi";
+import type { Category, Brand } from "../store/apis/ecommApi";
 import {
   Collapsible,
   CollapsibleContent,

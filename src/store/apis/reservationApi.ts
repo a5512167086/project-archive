@@ -232,18 +232,6 @@ export const reservationApi = baseApi.injectEndpoints({
         { type: "ReservationItem", id: `times-${serviceId}` },
       ],
     }),
-
-    // 用戶預約記錄 endpoints
-    getUserReservations: builder.query<UserReservationsResponse, string>({
-      query: (botUuid) => `/reservations/user/${botUuid}`,
-      providesTags: (result, error, botUuid) => [
-        { type: "UserReservation", id: `user-${botUuid}` },
-        ...(result || []).map((reservation) => ({
-          type: "UserReservation" as const,
-          id: reservation.reservation_id,
-        })),
-      ],
-    }),
   }),
 });
 
@@ -256,5 +244,4 @@ export const {
   useCreateNewReservationMutation,
   useGetReservationItemsQuery,
   useGetAvailableTimesQuery,
-  useGetUserReservationsQuery,
 } = reservationApi;

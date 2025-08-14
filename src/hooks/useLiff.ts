@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import liff from "@line/liff";
 import eruda from "eruda";
-import { useGetBotInfoQuery } from "../store/api/botApi";
-import { useCustomerLoginMutation } from "../store/api/userApi";
+import { useGetBotInfoQuery } from "../store/apis/botApi";
+import { useCustomerLoginMutation } from "../store/apis/userApi";
 
 interface LiffState {
   isInitialized: boolean;

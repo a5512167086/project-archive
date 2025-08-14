@@ -9,7 +9,7 @@ import {
   useGetCategoriesQuery,
   useGetBrandsQuery,
   type Category,
-} from "../../store/api/ecommApi";
+} from "../../store/apis/ecommApi";
 import { useLiff } from "../../hooks/useLiff";
 import placeholder from "@/assets/placeholder.svg";
 import {
@@ -80,10 +80,10 @@ function EcommerceContent() {
     isLoading: categoriesLoading,
     error: categoriesError,
   } = useGetCategoriesQuery(botUUID || "", { skip: !botUUID });
-  const { 
-    data: brands, 
-    isLoading: brandsLoading, 
-    error: brandsError 
+  const {
+    data: brands,
+    isLoading: brandsLoading,
+    error: brandsError,
   } = useGetBrandsQuery(botUUID || "", { skip: !botUUID });
 
   if (productsLoading || categoriesLoading || brandsLoading) {

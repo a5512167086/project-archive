@@ -17,7 +17,7 @@ import {
   useCreateNewReservationMutation,
   type ReservationItem,
   type CreateReservationOptionValue,
-} from "../store/api/reservationApi";
+} from "../store/apis/reservationApi";
 import { useLiff } from "../hooks/useLiff";
 import { useToast } from "../hooks/useToast";
 

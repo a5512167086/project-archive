@@ -25,6 +25,16 @@ export type ProductImage = {
   image_url: string;
   is_primary: boolean;
 };
+export type ProductVariant = {
+  variant_id: string;
+  object_id: number;
+  variant_name: string;
+  sku_code: string;
+  price: number;
+  stock: number;
+  created_at: string;
+  updated_at: string;
+};
 
 export type Product = {
   product_id: string;
@@ -40,7 +50,7 @@ export type Product = {
   created_at: string;
   updated_at: string;
   images: ProductImage[];
-  variants: unknown[];
+  variants: ProductVariant[];
 };
 
 export type ProductsResponse = Product[];

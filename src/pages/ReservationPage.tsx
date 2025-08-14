@@ -8,9 +8,9 @@ import {
 } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
-import { useGetUserReservationsQuery } from "../store/api/reservationApi";
+import { useGetUserReservationsQuery } from "../store/apis/userApi";
 import { useLiff } from "../hooks/useLiff";
-import type { UserReservation } from "../store/api/reservationApi";
+import type { UserReservation } from "../store/apis/reservationApi";
 
 // 狀態映射和顏色定義
 const statusMap = {
@@ -109,7 +109,8 @@ function ReservationDetailModal({
                   }
                 `}
               >
-                {statusMap[reservation.status as keyof typeof statusMap]?.label || reservation.status}
+                {statusMap[reservation.status as keyof typeof statusMap]
+                  ?.label || reservation.status}
               </Badge>
             </div>
 
@@ -137,7 +138,12 @@ function ReservationDetailModal({
                     }
                   `}
                 >
-                  {paymentStatusMap[(reservation.payment_status || "unpaid") as keyof typeof paymentStatusMap]}
+                  {
+                    paymentStatusMap[
+                      (reservation.payment_status ||
+                        "unpaid") as keyof typeof paymentStatusMap
+                    ]
+                  }
                 </Badge>
               </div>
             )}
@@ -445,8 +451,8 @@ export default function ReservationPage() {
                           }
                         `}
                       >
-                        {statusMap[reservation.status as keyof typeof statusMap]?.label ||
-                          reservation.status}
+                        {statusMap[reservation.status as keyof typeof statusMap]
+                          ?.label || reservation.status}
                       </Badge>
 
                       <Button

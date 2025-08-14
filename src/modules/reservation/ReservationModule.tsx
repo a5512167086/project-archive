@@ -7,7 +7,7 @@ import { ReservationDialog } from "../../components/ReservationDialog";
 import {
   useGetReservationItemsQuery,
   type ReservationItem,
-} from "../../store/api/reservationApi";
+} from "../../store/apis/reservationApi";
 import { useLiff } from "../../hooks/useLiff";
 import type { AppModule } from "../../types/module";
 

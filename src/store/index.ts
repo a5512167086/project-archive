@@ -1,10 +1,16 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch, useSelector } from "react-redux";
 import type { TypedUseSelectorHook } from "react-redux";
-import { baseApi } from "./api/baseApi";
+import { baseApi } from "./apis/baseApi";
+import ecommReducer from "./modules/ecommSlice";
+import reservationReducer from "./modules/reservationSlice";
+import userReducer from "./modules/userSlice";
 
 export const store = configureStore({
   reducer: {
+    ecomm: ecommReducer,
+    reservation: reservationReducer,
+    user: userReducer,
     [baseApi.reducerPath]: baseApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
