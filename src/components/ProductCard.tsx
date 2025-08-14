@@ -5,11 +5,15 @@ interface ProductCardProps {
   name: string;
   price: number;
   image: string;
+  onClick: () => void;
 }
 
-export function ProductCard({ name, price, image }: ProductCardProps) {
+export function ProductCard({ name, price, image, onClick }: ProductCardProps) {
   return (
-    <Card className="cursor-pointer hover:shadow-md transition-shadow">
+    <Card
+      className="cursor-pointer hover:shadow-md transition-shadow"
+      onClick={onClick}
+    >
       <CardContent className="p-3">
         <div className="relative">
           <img

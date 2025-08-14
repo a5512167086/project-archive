@@ -5,12 +5,14 @@ import { baseApi } from "./apis/baseApi";
 import ecommReducer from "./modules/ecommSlice";
 import reservationReducer from "./modules/reservationSlice";
 import userReducer from "./modules/userSlice";
+import cartReducer from "./modules/cartSlice";
 
 export const store = configureStore({
   reducer: {
     ecomm: ecommReducer,
     reservation: reservationReducer,
     user: userReducer,
+    cart: cartReducer,
     [baseApi.reducerPath]: baseApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>

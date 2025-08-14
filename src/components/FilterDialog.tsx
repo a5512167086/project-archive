@@ -149,7 +149,7 @@ export function FilterDialog({
       </div>
 
       <div className="border-t p-4">
-        <Button className="w-full" onClick={onClose}>
+        <Button className="w-full mb-2" onClick={onClose}>
           套用
         </Button>
       </div>

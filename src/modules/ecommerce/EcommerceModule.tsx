@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { ShoppingBag, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { SearchInput } from "../../components/SearchInput";
-import { ProductCard } from "../../components/ProductCard";
-import type { AppModule } from "../../types/module";
+import { SearchInput } from "@/components/SearchInput";
+import { ProductCard } from "@/components/ProductCard";
+import type { AppModule } from "@/types/module";
+import { ProductDialog } from "@/components/ProductDialog";
 import {
   useGetProductsQuery,
   useGetCategoriesQuery,
   useGetBrandsQuery,
   type Category,
-} from "../../store/apis/ecommApi";
-import { useLiff } from "../../hooks/useLiff";
+} from "@/store/apis/ecommApi";
+import { useLiff } from "@/hooks/useLiff";
 import placeholder from "@/assets/placeholder.svg";
 import {
   Collapsible,
@@ -69,6 +70,9 @@ function EcommerceContent() {
   );
   const [selectedBrandId, setSelectedBrandId] = useState<number | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(
+    null
+  );
 
   const {
     data: products,
@@ -124,6 +128,7 @@ function EcommerceContent() {
               name={product.product_name}
               price={product.price}
               image={imageUrl}
+              onClick={() => setSelectedProductId(product.product_id)}
             />
           );
         })}
@@ -138,6 +143,15 @@ function EcommerceContent() {
         selectedBrandId={selectedBrandId}
         onSelectBrand={setSelectedBrandId}
       />
+      {selectedProductId && products && (
+        <ProductDialog
+          isOpen={!!selectedProductId}
+          onClose={() => setSelectedProductId(null)}
+          product={
+            products.find((p) => p.product_id === selectedProductId) || null
+          }
+        />
+      )}
     </div>
   );
 }
