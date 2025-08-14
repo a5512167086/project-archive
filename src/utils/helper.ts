@@ -1,6 +1,7 @@
 import { OAuthActionType } from '@/configs/type'
 import { BotsResponse } from '@/store/apis/botApi'
 import { jwtDecode } from 'jwt-decode'
+import { Category } from '@/store/apis/categoryApi'
 
 export const validateEmail = (email: string) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -92,4 +93,28 @@ export const handleLineOAuth = (action: OAuthActionType) => {
   )}&state=${state}&scope=${scope}`
 
   window.location.href = oauthUrl
+}
+
+export const flattenCategories = (
+  categories: Category[],
+  indentation: string = '',
+  level: number = 0
+) => {
+  let flattened: { label: string; value: string }[] = []
+
+  categories.forEach((category) => {
+    const prefix = level > 0 ? `${indentation.repeat(level)}` : ''
+    flattened.push({
+      label: `${prefix}${category.category_name}`,
+      value: String(category.class_id)
+    })
+
+    if (category.children && category.children.length > 0) {
+      flattened = flattened.concat(
+        flattenCategories(category.children, indentation, level + 1)
+      )
+    }
+  })
+
+  return flattened
 }

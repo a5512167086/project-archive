@@ -18,6 +18,7 @@ import { showSuccessToast } from '@/utils/toast'
 import { isEmpty } from '@/utils/helper'
 import { useLazyGetBrandsQuery } from '@/store/apis/brandApi'
 import { useLazyGetCategoriesQuery } from '@/store/apis/categoryApi'
+import { flattenCategories } from '@/utils/helper'
 
 const productColumns = [
   { id: 'product_name', label: 'productManagementPage.productName' },
@@ -148,6 +149,7 @@ export const ProductManagement = () => {
       }
 
       if (field.id === 'category_id') {
+        const flattenedCategories = flattenCategories(categoryList, '  ') // Use 2 spaces for indentation
         return {
           ...field,
           options: [
@@ -155,10 +157,7 @@ export const ProductManagement = () => {
               label: t('productManagementPage.noCategory') || '未選擇',
               value: 'none'
             },
-            ...categoryList.map((cat) => ({
-              label: cat.category_name,
-              value: String(cat.class_id)
-            }))
+            ...flattenedCategories
           ]
         }
       }

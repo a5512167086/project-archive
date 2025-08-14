@@ -12,6 +12,7 @@ import {
 import { useLazyGetBrandsQuery } from '@/store/apis/brandApi'
 import { useLazyGetCategoriesQuery } from '@/store/apis/categoryApi'
 import { useTranslation } from 'react-i18next'
+import { flattenCategories } from '@/utils/helper'
 import {
   Box,
   Card,
@@ -249,6 +250,7 @@ const UpdateProductPage = () => {
         }
       }
       if (field.id === 'category_id') {
+        const flattenedCategories = flattenCategories(categoryList, '  ') // Use 2 spaces for indentation
         return {
           ...field,
           options: [
@@ -256,10 +258,7 @@ const UpdateProductPage = () => {
               label: t('productManagementPage.noCategory') || '未選擇',
               value: 'none'
             },
-            ...categoryList.map((cat) => ({
-              label: cat.category_name,
-              value: String(cat.class_id)
-            }))
+            ...flattenedCategories
           ]
         }
       }
@@ -368,7 +367,9 @@ const UpdateProductPage = () => {
             </Box>
           )}
           {currentTab === 1 && (
-            <Box sx={{ mt: 2, flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <Box
+              sx={{ mt: 2, flex: 1, display: 'flex', flexDirection: 'column' }}
+            >
               <ProductVariantManagement
                 variants={product.variants || []}
                 productId={product.product_id}
