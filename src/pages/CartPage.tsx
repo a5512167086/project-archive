@@ -1,10 +1,18 @@
 import { useSelector, useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { removeFromCart, updateQuantity } from "@/store/modules/cartSlice";
+import {
+  removeFromCart,
+  updateQuantity,
+  clearCart,
+} from "@/store/modules/cartSlice";
 import { RootState } from "@/store";
 import { Trash2 } from "lucide-react";
-import { useGetProductsQuery } from "@/store/apis/ecommApi";
+import {
+  useGetProductsQuery,
+  useCreateOrderMutation,
+  type Product,
+} from "@/store/apis/ecommApi";
 import { useLiff } from "@/hooks/useLiff";
 import { useNavigate } from "react-router";
 import { useState } from "react";
@@ -26,6 +34,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+const getCartItemPrice = (
+  product: Product,
+  variantId: string | null | undefined
+) => {
+  if (variantId) {
+    const variant = product.variants?.find((v) => v.variant_id === variantId);
+    if (variant) {
+      return variant.price;
+    }
+  }
+  return product.price;
+};
 
 export function CartPage() {
   const navigate = useNavigate();
@@ -61,7 +82,8 @@ export function CartPage() {
     .filter((item): item is NonNullable<typeof item> => item !== null);
 
   const cartTotal = cartProducts.reduce(
-    (total, item) => total + item.product.price * item.quantity,
+    (total, item) =>
+      total + getCartItemPrice(item.product, item.variantId) * item.quantity,
     0
   );
 
@@ -77,18 +99,67 @@ export function CartPage() {
     }
   };
 
-  const handlePurchase = () => {
-    console.log({
-      recipientName,
-      recipientPhone,
-      note,
-      paymentMethod,
-      shippingMethod,
-      shippingAddress,
-      cartItems,
-      cartTotal,
-    });
-    setIsCheckoutOpen(false);
+  const [createOrder, { isLoading: isCreatingOrder }] =
+    useCreateOrderMutation();
+
+  const handlePurchase = async () => {
+    if (!botUUID) {
+      console.error("botUUID is not available");
+      return;
+    }
+
+    const orderItems = cartProducts
+      .map((item) => {
+        if (!item.variantId) {
+          return null;
+        }
+        // Ensure the variant exists
+        const variantExists = item.product.variants?.some(
+          (v) => v.variant_id === item.variantId
+        );
+        if (!variantExists) {
+          return null;
+        }
+        return {
+          product_id: item.productId,
+          variant_id: item.variantId,
+          quantity: item.quantity,
+        };
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null);
+
+    if (orderItems.length !== cartProducts.length) {
+      console.warn(
+        "Some items in the cart were removed from the order because they were missing a variant selection or the selected variant is no longer available."
+      );
+    }
+
+    if (orderItems.length === 0) {
+      console.error("No items to purchase.");
+      // TODO: Show toast
+      return;
+    }
+
+    try {
+      await createOrder({
+        bot_uuid: botUUID,
+        recipient_name: recipientName,
+        recipient_phone: recipientPhone,
+        notes: note,
+        payment_method: paymentMethod as "cash" | "bank_transfer",
+        shipping_method: shippingMethod as "home_delivery" | "store_pickup",
+        shipping_address:
+          shippingMethod === "home_delivery" ? shippingAddress : undefined,
+        items: orderItems,
+      }).unwrap();
+
+      dispatch(clearCart());
+      setIsCheckoutOpen(false);
+      navigate("/orders");
+    } catch (err) {
+      console.error("Failed to create order:", err);
+      // TODO: Show error toast
+    }
   };
 
   return (
@@ -110,7 +181,7 @@ export function CartPage() {
                   <div>
                     <p className="font-semibold">{item.product.product_name}</p>
                     <p className="text-sm text-gray-500">
-                      ${item.product.price}
+                      ${getCartItemPrice(item.product, item.variantId)}
                     </p>
                   </div>
                 </div>
@@ -240,7 +311,9 @@ export function CartPage() {
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={handlePurchase}>確認下單</Button>
+                <Button onClick={handlePurchase} disabled={isCreatingOrder}>
+                  {isCreatingOrder ? "下單中..." : "確認下單"}
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

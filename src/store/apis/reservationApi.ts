@@ -218,7 +218,6 @@ export const reservationApi = baseApi.injectEndpoints({
         { type: "UserReservation", id: `user-${bot_uuid}` },
       ],
     }),
-
     // 服務項目 endpoints
     getReservationItems: builder.query<ReservationItemsResponse, string>({
       query: (botUuid) => `/services/${botUuid}`,

@@ -55,6 +55,23 @@ export type Product = {
 
 export type ProductsResponse = Product[];
 
+export type OrderItem = {
+  product_id: string;
+  variant_id: string;
+  quantity: number;
+};
+
+export type CreateOrderRequest = {
+  bot_uuid: string;
+  payment_method: "cash" | "bank_transfer";
+  shipping_method: "home_delivery" | "store_pickup";
+  recipient_name: string;
+  recipient_phone: string;
+  shipping_address?: string;
+  notes?: string;
+  items: OrderItem[];
+};
+
 export const ecommApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getBrands: builder.query<BrandsResponse, string>({
@@ -75,8 +92,19 @@ export const ecommApi = baseApi.injectEndpoints({
         { type: "Product", id: `products-${botUuid}` },
       ],
     }),
+    createOrder: builder.mutation<void, CreateOrderRequest>({
+      query: (order) => ({
+        url: "/orders",
+        method: "POST",
+        body: order,
+      }),
+    }),
   }),
 });
 
-export const { useGetBrandsQuery, useGetCategoriesQuery, useGetProductsQuery } =
-  ecommApi;
+export const {
+  useGetBrandsQuery,
+  useGetCategoriesQuery,
+  useGetProductsQuery,
+  useCreateOrderMutation,
+} = ecommApi;

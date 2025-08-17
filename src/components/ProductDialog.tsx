@@ -18,7 +18,6 @@ import {
 import { ImageCarousel } from "./ImageCarousel";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { addToCart } from "@/store/modules/cartSlice";
-import { useToast } from "@/hooks/useToast";
 import type { Product } from "@/store/apis/ecommApi";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { flattenCategories } from "@/lib/utils";
@@ -48,7 +47,6 @@ export function ProductDialog({
   }, [isOpen, product]);
 
   const dispatch = useAppDispatch();
-  const { toast } = useToast();
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -59,7 +57,6 @@ export function ProductDialog({
         variantId: selectedVariantId,
       })
     );
-    toast.success("已加入購物車");
     onClose();
   };
 
