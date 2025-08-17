@@ -295,6 +295,22 @@ class EcommQuery:
         statement = select(OrderListView).where(OrderListView.class_id == class_id)
         return self.session.exec(statement).all()
 
+    def get_all_user_orders_view(
+        self, user_id: UUID, class_id: int
+    ) -> List[OrderListView]:
+        user_order_object_ids = self.session.exec(
+            select(Object.object_id).where(Object.owner_id == str(user_id))
+        ).all()
+
+        if not user_order_object_ids:
+            return []
+
+        statement = select(OrderListView).where(
+            OrderListView.class_id == class_id,
+            OrderListView.object_id.in_(user_order_object_ids),
+        )
+        return self.session.exec(statement).all()
+
     def get_order_by_id(self, order_id: UUID) -> OrderDetail | None:
         """根據 order_id 取得訂單詳細資訊"""
         return self.session.get(OrderDetail, order_id)

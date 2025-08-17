@@ -378,20 +378,33 @@ def delete_product_image(
 
 # Order endpoints
 @order_router.get("/{bot_uuid}", response_model=List[OrderResponse])
-def list_orders(
-    bot_uuid: UUID, ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)]
+def list_bot_orders(
+    bot_uuid: UUID,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
 ):
-    return ecomm_service.get_all_orders(bot_uuid)
+    user_id = current_user["user_id"]
+    return ecomm_service.get_all_orders(user_id, bot_uuid)
+
+
+@order_router.get("/user/{bot_uuid}", response_model=List[OrderResponse])
+def list_user_orders(
+    bot_uuid: UUID,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+):
+    user_id = current_user["user_id"]
+    return ecomm_service.get_all_user_orders(user_id, bot_uuid)
 
 
 @order_router.post("")
-def create_order(
+async def create_order(
     order: InsertOrderRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
 ):
     user_id = current_user["user_id"]
-    ecomm_service.insert_order(order, user_id)
+    await ecomm_service.insert_order(order, user_id)
     ecomm_service.session.commit()
 
 

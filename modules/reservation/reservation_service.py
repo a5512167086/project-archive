@@ -307,8 +307,12 @@ class ReservationService:
 
         return list(daily_slots_map.values())
 
-    def delete_user_reservation(self, reservation_id: UUID):
+    def delete_user_reservation(
+        self, user_id: UUID, bot_uuid: UUID, reservation_id: UUID
+    ):
         """Delete a user's reservation"""
+        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
+        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
         self.command.delete_reservation_by_id(reservation_id)
 
     def get_bot_reservations_list(
@@ -343,7 +347,7 @@ class ReservationService:
                                 option_name=option_data["option_name"],
                             )
                         )
-                    
+
                     selected_option_groups.append(
                         ReservationSelectedOptionGroupResponse(
                             option_group_id=group_data["option_group_id"],
@@ -417,7 +421,7 @@ class ReservationService:
                                 option_name=option_data["option_name"],
                             )
                         )
-                    
+
                     selected_option_groups.append(
                         ReservationSelectedOptionGroupResponse(
                             option_group_id=group_data["option_group_id"],
@@ -502,11 +506,13 @@ class ReservationService:
                     raise GlobalErrorException(
                         error_code=ErrorCode.RESERVATION_TIME_INVALID,
                         error_message="Reservation time is outside of schedule",
-                    )                # 檢查容量（排除目前這筆預約）
-                concurrent_reservations = self.query.get_concurrent_reservations_count_by_schedule(
-                    schedule.service_schedule_id,
-                    new_date,
-                    new_start_time,
+                    )  # 檢查容量（排除目前這筆預約）
+                concurrent_reservations = (
+                    self.query.get_concurrent_reservations_count_by_schedule(
+                        schedule.service_schedule_id,
+                        new_date,
+                        new_start_time,
+                    )
                 )
                 # 如果是修改同一個時間，不需要檢查容量
                 if (

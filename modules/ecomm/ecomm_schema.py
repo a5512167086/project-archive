@@ -5,6 +5,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 from modules.ecomm.ecomm_model import ProductVariant
+from shared.constants.common import PaymentMethod, ShippingMethod
 
 
 class InsertBrandRequest(BaseModel):
@@ -205,23 +206,19 @@ class DeleteShippingMethodRequest(BaseModel):
 
 # Order schemas
 class OrderItemSchema(BaseModel):
+    product_id: UUID
     variant_id: Optional[UUID] = None
-    product_name_snapshot: str
-    sku_snapshot: str
-    price_snapshot: int
     quantity: int
 
 
 class InsertOrderRequest(BaseModel):
     bot_uuid: UUID
-    total_amount: int
-    payment_method: str
-    payment_status: str
-    shipping_method: str
-    shipping_fee: int
+    payment_method: PaymentMethod
+    shipping_method: ShippingMethod
     recipient_name: str
     recipient_phone: str
-    shipping_address: str
+    shipping_address: Optional[str] = None
+    notes: Optional[str] = None
     items: List[OrderItemSchema]
 
 

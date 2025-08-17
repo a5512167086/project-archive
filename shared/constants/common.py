@@ -19,6 +19,11 @@ class PaymentStatus(str, Enum):
     refunded = "refunded"
 
 
+class ShippingMethod(str, Enum):
+    home_delivery = "home_delivery"
+    store_pickup = "store_pickup"
+
+
 class ScheduleType(str, Enum):
     weekly = "weekly"
     specific = "specific"

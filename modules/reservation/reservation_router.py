@@ -137,17 +137,15 @@ def create_reservation(
 @reservation_router.delete("/{reservation_id}")
 def delete_reservation(
     reservation_id: UUID,
+    bot_uuid: UUID,
     current_user: Annotated[dict, Depends(get_current_user)],
     reservation_service: Annotated[
         ReservationService, Depends(get_reservation_service)
     ],
-    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     """Delete a reservation by reservation ID"""
-    # TODO: Check if the user is the owner of the reservation
     user_id = current_user["user_id"]
-    print(user_id)
-    reservation_service.delete_user_reservation(reservation_id)
+    reservation_service.delete_user_reservation(user_id, bot_uuid, reservation_id)
     reservation_service.session.commit()
 
 

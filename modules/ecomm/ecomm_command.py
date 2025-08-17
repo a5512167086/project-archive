@@ -530,11 +530,11 @@ class EcommCommand:
         for item in items:
             order_item = OrderItem(
                 object_id=new_order_object.object_id,
+                product_id=item["product_id"],
                 variant_id=item.get("variant_id"),
-                product_name_snapshot=item["product_name_snapshot"],
-                sku_snapshot=item["sku_snapshot"],
-                price_snapshot=item["price_snapshot"],
                 quantity=item["quantity"],
+                unit_price=item["unit_price"],
+                subtotal=item["subtotal"],
             )
             self.session.add(order_item)
 

@@ -39,6 +39,8 @@ from modules.ecomm.ecomm_schema import (
 from shared.constants.config import BACKEND_URL
 from shared.constants.error_code import ErrorCode
 from shared.exception import GlobalErrorException
+from shared.queries.group_query import is_user_in_group
+from shared.services.group_service import GroupService
 from shared.services.minio_service import (
     delete_product_image,
     upload_product_images,
@@ -51,6 +53,7 @@ class EcommService:
         self.command = EcommCommand(session)
         self.query = EcommQuery(session)
         self.bot_service = BotService(session)
+        self.group_service = GroupService(session)
 
     def get_nested_categories(
         self, category_class_id: int, category_list: List[CategoryListView]
@@ -476,37 +479,131 @@ class EcommService:
             )
         return order_class_id
 
-    def get_all_orders(self, bot_uuid: UUID) -> List[OrderResponse]:
+    def get_all_orders(self, user_id: UUID, bot_uuid: UUID) -> List[OrderResponse]:
         bot = self.bot_service.validate_line_bot_exists(bot_uuid)
+        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
         order_class_id = self.validate_order_class(bot.class_id)
         orders_data = self.query.get_all_orders_view(order_class_id)
         orders = []
         for order_data in orders_data:
-            order_items = self.query.get_order_items_by_object_id(order_data.object_id)
+            order_items_data = self.query.get_order_items_by_object_id(
+                order_data.object_id
+            )
+            order_items_schema = []
+            for item_data in order_items_data:
+                order_items_schema.append({
+                    "product_id": item_data.product_id,
+                    "variant_id": item_data.variant_id,
+                    "quantity": item_data.quantity,
+                    "unit_price": item_data.unit_price,
+                    "subtotal": item_data.subtotal,
+                })
             orders.append(
                 OrderResponse(
                     **order_data.model_dump(),
-                    items=order_items,
+                    items=order_items_schema,
                 )
             )
         return orders
 
-    def insert_order(self, body: InsertOrderRequest, user_id: str):
+    def get_all_user_orders(self, user_id: UUID, bot_uuid: UUID) -> List[OrderResponse]:
+        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
+        bot_group = self.group_service.validate_group_exist_in_bot(
+            bot.class_id, "Users"
+        )
+        if not is_user_in_group(self.session, bot_group.group_id, user_id):
+            raise GlobalErrorException(
+                error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
+                error_message="User is not a member of this bot's group.",
+            )
+        order_class_id = self.validate_order_class(bot.class_id)
+        orders_data = self.query.get_all_orders_view(order_class_id)
+        orders = []
+        for order_data in orders_data:
+            order_items_data = self.query.get_order_items_by_object_id(
+                order_data.object_id
+            )
+            order_items_schema = []
+            for item_data in order_items_data:
+                order_items_schema.append({
+                    "product_id": item_data.product_id,
+                    "variant_id": item_data.variant_id,
+                    "quantity": item_data.quantity,
+                    "unit_price": item_data.unit_price,
+                    "subtotal": item_data.subtotal,
+                })
+            orders.append(
+                OrderResponse(
+                    **order_data.model_dump(),
+                    items=order_items_schema,
+                )
+            )
+        return orders
+
+    async def insert_order(self, body: InsertOrderRequest, user_id: str):
         bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
         self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
         order_class_id = self.validate_order_class(bot.class_id)
 
+        # Get shipping setting and fee
+        shipping_setting = await self.query.get_shipping_setting_by_bot_uuid(
+            str(body.bot_uuid)
+        )
+        if not shipping_setting:
+            raise GlobalErrorException(
+                error_code=ErrorCode.SHIPPING_SETTING_NOT_FOUND,
+                error_message="Shipping settings not found for this bot.",
+            )
+
+        shipping_fee = 0
+        found_shipping_method = False
+        for option in shipping_setting.shipping_options:
+            if option.method == body.shipping_method:
+                shipping_fee = option.fee
+                found_shipping_method = True
+                break
+
+        if not found_shipping_method:
+            raise GlobalErrorException(
+                error_code=ErrorCode.INVALID_INPUT,
+                error_message=f"Shipping method '{body.shipping_method}' is not valid or enabled.",
+            )
+
+        # Fetch product details for each item to get unit_price and subtotal
+        processed_items = []
+        for item in body.items:
+            product_detail = self.query.get_product_by_id(item.product_id)
+            if not product_detail:
+                raise GlobalErrorException(
+                    error_code=ErrorCode.PRODUCT_NOT_FOUND,
+                    error_message=f"Product with ID {item.product_id} not found",
+                )
+
+            unit_price = product_detail.price
+            subtotal = unit_price * item.quantity
+
+            processed_items.append({
+                "product_id": item.product_id,
+                "variant_id": item.variant_id,
+                "quantity": item.quantity,
+                "unit_price": unit_price,
+                "subtotal": subtotal,
+            })
+
+        # Calculate total_amount based on processed_items
+        total_amount = sum(item["subtotal"] for item in processed_items) + shipping_fee
+
         self.command.insert_order(
             order_class_id=order_class_id,
-            total_amount=body.total_amount,
+            total_amount=total_amount,
             payment_method=body.payment_method,
-            payment_status=body.payment_status,
+            payment_status="unpaid",
             shipping_method=body.shipping_method,
-            shipping_fee=body.shipping_fee,
+            shipping_fee=shipping_fee,
             recipient_name=body.recipient_name,
             recipient_phone=body.recipient_phone,
             shipping_address=body.shipping_address,
-            items=[item.model_dump() for item in body.items],
+            items=processed_items,
             owner_id=user_id,
         )
 
@@ -633,7 +730,9 @@ class EcommService:
         uploaded_images = upload_product_images(images)
 
         for img_data in uploaded_images:
-            self.command.insert_product_image(product.object_id, img_data["filename"], is_primary=False)
+            self.command.insert_product_image(
+                product.object_id, img_data["filename"], is_primary=False
+            )
 
     def update_product_image(self, body: UpdateProductImageRequest, user_id: str):
         """更新產品圖片資訊"""
@@ -648,7 +747,9 @@ class EcommService:
                 error_message="Product image not found",
             )
 
-        success = self.command.update_product_image(image_id=body.image_id, is_primary=body.is_primary)
+        success = self.command.update_product_image(
+            image_id=body.image_id, is_primary=body.is_primary
+        )
 
         if not success:
             raise GlobalErrorException(

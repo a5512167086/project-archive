@@ -7,6 +7,8 @@ from pydantic import BaseModel
 from pydantic import Field as PydanticField
 from sqlmodel import Field, SQLModel, UniqueConstraint
 
+from shared.constants.common import PaymentMethod, PaymentStatus, ShippingMethod
+
 
 class BrandListView(SQLModel, table=True):
     __tablename__ = "vs_brand_list"
@@ -46,9 +48,7 @@ class ProductDetail(SQLModel, table=True):
 
 class ProductImage(SQLModel, table=True):
     __tablename__ = "product_images"
-    __table_args__ = (
-        UniqueConstraint("object_id", "filename"),
-    )
+    __table_args__ = (UniqueConstraint("object_id", "filename"),)
 
     image_id: Optional[int] = Field(default=None, primary_key=True)
     filename: str
@@ -108,14 +108,15 @@ class OrderDetail(SQLModel, table=True):
     object_id: int = Field(index=True)
     total_amount: int
     status: str = Field(default="pending", max_length=16)
-    payment_method: Optional[str] = Field(default=None, max_length=32)
-    payment_status: Optional[str] = Field(default=None, max_length=16)
-    shipping_method: Optional[str] = Field(default=None, max_length=32)
+    payment_method: Optional[PaymentMethod] = Field(default=None, max_length=32)
+    payment_status: Optional[PaymentStatus] = Field(default=None, max_length=16)
+    shipping_method: Optional[ShippingMethod] = Field(default=None, max_length=32)
     shipping_fee: int = Field(default=0)
     tracking_number: Optional[str] = Field(default=None, max_length=128)
     recipient_name: Optional[str] = Field(default=None, max_length=128)
     recipient_phone: Optional[str] = Field(default=None, max_length=32)
     shipping_address: Optional[str] = Field(default=None)
+    notes: Optional[str] = Field(default=None)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -125,16 +126,16 @@ class OrderItem(SQLModel, table=True):
 
     order_item_id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
     object_id: int = Field(index=True)
+    product_id: UUID
     variant_id: Optional[UUID] = Field(default=None, index=True)
-    product_name_snapshot: str = Field(max_length=512)
-    sku_snapshot: str = Field(max_length=64)
-    price_snapshot: int
     quantity: int
+    unit_price: int
+    subtotal: int
 
 
 class OrderListView(SQLModel, table=True):
     __tablename__ = "vs_order_list"
-
+    class_id: int
     order_id: UUID = Field(primary_key=True)
     object_id: int
     total_amount: int
