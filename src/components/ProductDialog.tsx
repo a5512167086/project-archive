@@ -54,7 +54,7 @@ export function ProductDialog({
     if (!product) return;
     dispatch(
       addToCart({
-        product,
+        productId: product.product_id,
         quantity,
         variantId: selectedVariantId,
       })

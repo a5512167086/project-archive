@@ -7,7 +7,7 @@ export default function Layout() {
       {/* Header */}
       <div className="bg-white border-b sticky top-0 z-10">
         <div className="px-4 py-3">
-          <h1 className="text-xl font-bold text-center">多功能服務平台</h1>
+          <h1 className="text-xl font-bold text-center">服務平台</h1>
         </div>
       </div>
 

@@ -1,10 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Product, ProductVariant } from "../apis/ecommApi";
 
 export interface CartItem {
-  id: string; // combination of product_id and variant_id
-  product: Product;
-  variant?: ProductVariant;
+  itemId: string;
+  productId: string;
+  variantId?: string | null;
   quantity: number;
 }
 
@@ -23,52 +22,47 @@ const cartSlice = createSlice({
     addToCart: (
       state,
       action: PayloadAction<{
-        product: Product;
-        quantity: number;
+        productId: string;
         variantId?: string | null;
+        quantity: number;
       }>
     ) => {
-      const { product, quantity, variantId } = action.payload;
-      const variant = variantId
-        ? product.variants.find((v) => v.variant_id === variantId)
-        : undefined;
+      const { productId, quantity, variantId } = action.payload;
 
-      const cartItemId = variant
-        ? `${product.product_id}-${variant.variant_id}`
-        : product.product_id;
+      const itemId = variantId ? `${productId}-${variantId}` : productId;
 
-      const existingItem = state.items.find((item) => item.id === cartItemId);
+      const existingItem = state.items.find((item) => item.itemId === itemId);
 
       if (existingItem) {
         existingItem.quantity += quantity;
       } else {
         state.items.push({
-          id: cartItemId,
-          product,
+          itemId: itemId,
+          productId: productId,
           quantity,
-          variant,
+          variantId: variantId || null,
         });
       }
     },
-    removeFromCart: (state, action: PayloadAction<{ cartItemId: string }>) => {
+    removeFromCart: (state, action: PayloadAction<{ itemId: string }>) => {
       state.items = state.items.filter(
-        (item) => item.id !== action.payload.cartItemId
+        (item) => item.itemId !== action.payload.itemId
       );
     },
     updateQuantity: (
       state,
       action: PayloadAction<{
-        cartItemId: string;
+        itemId: string;
         quantity: number;
       }>
     ) => {
-      const { cartItemId, quantity } = action.payload;
-      const item = state.items.find((item) => item.id === cartItemId);
+      const { itemId, quantity } = action.payload;
+      const item = state.items.find((item) => item.itemId === itemId);
       if (item) {
         if (quantity > 0) {
           item.quantity = quantity;
         } else {
-          state.items = state.items.filter((i) => i.id !== cartItemId);
+          state.items = state.items.filter((i) => i.itemId !== itemId);
         }
       }
     },
