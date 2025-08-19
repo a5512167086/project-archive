@@ -26,7 +26,9 @@ export function FeaturedItem({
 }: FeaturedItemProps) {
   return (
     <div
-      className={`flex items-center space-x-3 ${disabled ? "opacity-60" : ""}`}
+      className={`flex items-center border hover:shadow-md transition-shadow space-x-3 p-3 mx-2 rounded ${
+        disabled ? "opacity-60" : ""
+      }`}
     >
       <img
         src={image || placeholder}

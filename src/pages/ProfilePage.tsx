@@ -44,7 +44,6 @@ export default function ProfilePage() {
   const handleQuickActionClick = (path: string) => {
     navigate(path);
   };
-  console.log(userProfile);
   const userName = userProfile?.displayName || "用戶";
   const userAvatar = userProfile?.pictureUrl;
 

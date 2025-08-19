@@ -193,7 +193,7 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="space-y-4 flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col">
       <div className="flex space-x-2 overflow-x-auto pb-2">
         {statusFilters.map((statusFilter) => (
           <Link

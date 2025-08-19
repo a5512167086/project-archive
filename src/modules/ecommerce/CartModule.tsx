@@ -14,5 +14,4 @@ export const cartModule: AppModule = {
     id: "cart",
     render: () => <CartPage />,
   },
-  isPage: true,
 };

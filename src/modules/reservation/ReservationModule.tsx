@@ -22,6 +22,7 @@ function ReservationContent() {
     data: reservationItemsData,
     isLoading,
     error,
+    refetch,
   } = useGetReservationItemsQuery(botUUID || "", { skip: !botUUID });
 
   const handleReservationClick = (itemId: string) => {
@@ -53,12 +54,8 @@ function ReservationContent() {
     }
   };
 
-  const handleConfirmReservation = () => {
-    console.log("預約確認完成:", {
-      item: selectedItem?.service_name,
-    });
-    // 預約成功後可以執行的操作，比如刷新數據等
-    // Toast 通知已經在 ReservationDialog 中處理
+  const handleConfirmReservation = async () => {
+    await refetch();
   };
 
   if (isLoading) {

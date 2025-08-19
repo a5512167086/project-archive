@@ -344,7 +344,7 @@ export default function ReservationPage() {
   }
 
   return (
-    <div className="space-y-4 flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col">
       {/* 狀態篩選 */}
       <div className="flex space-x-2 overflow-x-auto pb-2">
         {statusFilters.map((statusFilter) => (
@@ -396,7 +396,7 @@ export default function ReservationPage() {
               return (
                 <div
                   key={reservation.reservation_id}
-                  className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                  className="border rounded-lg p-4 hover:shadow-md transition-shadow mx-2"
                 >
                   <div className="flex items-center justify-between">
                     {/* 左側：預約資訊 */}
