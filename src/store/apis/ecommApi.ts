@@ -57,7 +57,7 @@ export type ProductsResponse = Product[];
 
 export type OrderItem = {
   product_id: string;
-  variant_id: string;
+  variant_id: string | null;
   quantity: number;
 };
 

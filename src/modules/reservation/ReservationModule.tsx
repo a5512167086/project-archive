@@ -10,6 +10,7 @@ import {
 } from "../../store/apis/reservationApi";
 import { useLiff } from "../../hooks/useLiff";
 import type { AppModule } from "../../types/module";
+import { useNavigate } from "react-router";
 
 function ReservationContent() {
   const { botUUID } = useLiff();
@@ -17,6 +18,7 @@ function ReservationContent() {
     null
   );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
   const {
     data: reservationItemsData,
@@ -56,6 +58,7 @@ function ReservationContent() {
 
   const handleConfirmReservation = async () => {
     await refetch();
+    navigate("/reservation");
   };
 
   if (isLoading) {

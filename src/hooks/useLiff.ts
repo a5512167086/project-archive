@@ -18,11 +18,6 @@ interface LiffState {
   isLoading: boolean;
 }
 
-function getCleanRedirectUri() {
-  // 只保留 pathname，避免殘留 liff.state/bot_uuid 再次觸發流程
-  return `${window.location.origin}${window.location.pathname}`;
-}
-
 function extractBotUUIDFromURL(): string | null {
   const urlParams = new URLSearchParams(window.location.search);
   let found = urlParams.get("bot_uuid");
@@ -39,6 +34,13 @@ function extractBotUUIDFromURL(): string | null {
   return found;
 }
 
+function buildRedirectUriWithBotUUID(botUUID: string) {
+  const url = new URL(window.location.href);
+  // 確保重導回來仍帶著 bot_uuid（避免登入回來遺失）
+  url.searchParams.set("bot_uuid", botUUID);
+  return url.toString();
+}
+
 function clearURLParams() {
   const url = new URL(window.location.href);
   url.searchParams.delete("bot_uuid");
@@ -48,7 +50,6 @@ function clearURLParams() {
 
 export const useLiff = () => {
   const [botUUID, setBotUUID] = useState<string | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [state, setState] = useState<LiffState>({
     isInitialized: false,
     isLoggedIn: false,
@@ -58,82 +59,49 @@ export const useLiff = () => {
     isLoading: true,
   });
 
-  // Redux hooks - 只有當 botUUID 存在時才執行查詢
+  // 只有當 botUUID 存在時才取 bot info
   const {
     data: botInfo,
     error: botError,
     isLoading: isBotLoading,
-  } = useGetBotInfoQuery(botUUID!, {
-    skip: !botUUID,
-  });
+  } = useGetBotInfoQuery(botUUID!, { skip: !botUUID });
 
   const [customerLogin, { isLoading: isLoginLoading }] =
     useCustomerLoginMutation();
 
-  // 防止 DEV/StrictMode 重複初始化 LIFF
+  // 防併發初始化鎖
   const didInitRef = useRef(false);
 
-  // 初次載入：處理 eruda、API_BASE、bot_uuid、既有 token
+  // Step 1: 啟動時先解析/保存 bot_uuid（不要急著清 URL）
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        if (import.meta.env.DEV) {
-          // 僅 DEV 啟用 eruda
-          eruda.init();
-        }
+        eruda.init();
 
-        const API_BASE = import.meta.env.VITE_API_BASE_URL;
-        if (!API_BASE) {
-          throw new Error("VITE_API_BASE_URL 環境變數未設定");
-        }
-
-        // 1) 取得 bot_uuid（URL > liff.state > localStorage）
         let foundBotUUID = extractBotUUIDFromURL();
         const existingBotUUID = localStorage.getItem("bot_uuid");
-        const existingAccessToken = localStorage.getItem("access_token");
 
-        // 2) 如 URL 帶來的新 bot_uuid 不同於現存，需重設 tokens
-        if (foundBotUUID && foundBotUUID !== existingBotUUID) {
-          console.log(
-            `🔄 Bot UUID 已更新: ${existingBotUUID} -> ${foundBotUUID}`
-          );
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("refresh_token");
-          localStorage.setItem("bot_uuid", foundBotUUID);
-          setAccessToken(null);
-        } else if (foundBotUUID) {
-          // URL 與現存一致 -> 同步到 localStorage
-          localStorage.setItem("bot_uuid", foundBotUUID);
-        } else {
-          // URL 沒帶 -> 用 localStorage
-          foundBotUUID = existingBotUUID;
+        if (!foundBotUUID) {
+          foundBotUUID = existingBotUUID || null;
         }
-
-        // 3) 清除 URL 參數（避免回來又被判定需要重跑）
-        clearURLParams();
 
         if (!foundBotUUID) {
           throw new Error("缺少 bot_uuid 參數");
         }
 
-        // 4) 若已有本地 access_token 且 bot_uuid 未變，先標記登入完成，跳過之後的 LIFF 登入
-        if (existingAccessToken && foundBotUUID === existingBotUUID) {
-          console.log("✅ 發現現有的 access token，跳過 LIFF 登入流程");
-          setAccessToken(existingAccessToken);
-          setState((prev) => ({
-            ...prev,
-            isInitialized: true,
-            isLoggedIn: true,
-            isLoading: false,
-          }));
+        // 若帶來的新 bot_uuid 與現存不同：清 token、覆寫
+        if (foundBotUUID !== existingBotUUID) {
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          localStorage.setItem("bot_uuid", foundBotUUID);
         }
 
-        console.log(`📱 設置 bot_uuid: ${foundBotUUID}`);
         setBotUUID(foundBotUUID);
+        // ⚠️ 不要此時清 URL，等登入與換 token 完成再清
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
-        console.log(`❌ 錯誤: ${errorMessage}`);
+        console.log("❌ 初始化失敗:", errorMessage);
         setState((prev) => ({
           ...prev,
           error: errorMessage,
@@ -145,71 +113,60 @@ export const useLiff = () => {
     initializeAuth();
   }, []);
 
-  // 當 botInfo 到位後初始化 LIFF（只跑一次）
+  // Step 2: botInfo 到位後，初始化 LIFF 並處理登入/換 token
   useEffect(() => {
     if (!botInfo || !botUUID) return;
+
+    // ✅ 進入 effect 立刻上鎖，避免 React 18/StrictMode 造成的雙執行/併發
     if (didInitRef.current) return;
     didInitRef.current = true;
 
     const initLiff = async () => {
+      const loginGuardKey = "liff_login_in_progress";
       try {
-        console.log(`✅ 成功取得 bot 資訊，liff_id: ${botInfo.liff_id}`);
+        console.log(`✅ 取得 bot 資訊，liff_id: ${botInfo.liff_id}`);
 
-        // 1) 初始化 LIFF（外部瀏覽器可自動導向 LINE 登入）
         await liff.init({
           liffId: botInfo.liff_id,
-          withLoginOnExternalBrowser: true,
+          // 只在外部瀏覽器開啟自動導向，LINE App 內避免跳外部造成循環
+          withLoginOnExternalBrowser: !liff.isInClient(),
         });
-
-        // 2) 若本地已經有 access_token，直接視為已登入完成
-        const storedAccessToken = localStorage.getItem("access_token");
-        if (storedAccessToken) {
-          console.log("✅ 已有 access_token，跳過 LIFF login 及後端換 token");
-          setAccessToken(storedAccessToken);
-
-          // 嘗試補齊基本的 LIFF 狀態（若在 LINE 內部已登入）
-          try {
-            await liff.ready;
-            if (liff.isLoggedIn()) {
-              const profile = await liff.getProfile();
-              setState((prev) => ({
-                ...prev,
-                isInitialized: true,
-                isLoggedIn: true,
-                idToken: liff.getIDToken(),
-                userProfile: profile,
-                isLoading: false,
-              }));
-              return;
-            }
-          } catch {
-            // ignore：非 LINE 內登入或取不到 profile 不阻擋
-          }
-
-          // 若取不到 LIFF profile，也至少標記登入完成
-          setState((prev) => ({
-            ...prev,
-            isInitialized: true,
-            isLoggedIn: true,
-            isLoading: false,
-          }));
-          return;
-        }
-
-        // 3) 尚無本地 access_token：等 LIFF 就緒再判斷登入狀態
         await liff.ready;
 
+        // ── Debug：初始化後先印狀態
+        console.table({
+          place: "after liff.ready",
+          inClient: liff.isInClient(),
+          liffLoggedIn: liff.isLoggedIn(),
+          hasIdToken: !!liff.getIDToken(),
+          hasAppAT: !!localStorage.getItem("access_token"),
+          botUUID,
+        });
+
+        // 若尚未登入 LIFF → 僅觸發一次 login（避免無限循環）
         if (!liff.isLoggedIn()) {
-          console.log("🔐 尚未登入，導向 LIFF 登入頁面...");
-          liff.login({ redirectUri: getCleanRedirectUri() });
-          return;
+          const inProgress = sessionStorage.getItem(loginGuardKey) === "1";
+          if (!inProgress) {
+            sessionStorage.setItem(loginGuardKey, "1");
+            const redirectUri = buildRedirectUriWithBotUUID(botUUID);
+            console.table({
+              place: "before liff.login",
+              redirectUri,
+              inClient: liff.isInClient(),
+              withLoginOnExternalBrowser: !liff.isInClient(),
+            });
+            liff.login({ redirectUri });
+          }
+          return; // 等重導回來
         }
 
-        // 4) 已登入 LIFF：取得 idToken 與 profile，向後端換取 access/refresh token
+        // 已登入 LIFF：用 idToken 換取 app access/refresh token
         const idToken = liff.getIDToken();
         if (!idToken) throw new Error("無法取得 ID Token");
+
         const userProfile = await liff.getProfile();
 
+        // 呼叫你的後端，取得 access/refresh token
         const loginResult = await customerLogin({
           line_id_token: idToken,
           bot_id: botUUID,
@@ -217,7 +174,6 @@ export const useLiff = () => {
 
         localStorage.setItem("access_token", loginResult.access_token);
         localStorage.setItem("refresh_token", loginResult.refresh_token);
-        setAccessToken(loginResult.access_token);
 
         setState({
           isInitialized: true,
@@ -227,10 +183,25 @@ export const useLiff = () => {
           error: null,
           isLoading: false,
         });
+
+        // 成功後再清 URL，避免下次又觸發
+        clearURLParams();
+        sessionStorage.removeItem(loginGuardKey);
+
+        // ── Debug：完成後印狀態
+        console.table({
+          place: "after customerLogin",
+          liffLoggedIn: liff.isLoggedIn(),
+          hasIdToken: !!liff.getIDToken(),
+          hasAppAT: !!localStorage.getItem("access_token"),
+        });
       } catch (error) {
+        sessionStorage.removeItem(loginGuardKey);
+        // 若你想允許之後「手動重試」，可以在這裡把鎖打開：
+        // didInitRef.current = false;
         const errorMessage =
           error instanceof Error ? error.message : String(error);
-        console.log(`❌ 錯誤: ${errorMessage}`);
+        console.log("❌ initLiff error:", errorMessage);
         setState((prev) => ({
           ...prev,
           error: errorMessage,
@@ -240,15 +211,14 @@ export const useLiff = () => {
     };
 
     void initLiff();
-    // 只依賴 botInfo/botUUID（與 customerLogin），不要把 accessToken 放進來避免重跑
-  }, [botInfo, botUUID, customerLogin, accessToken]);
+  }, [botInfo, botUUID]); // 🔸 刻意不把 customerLogin 放進依賴
 
-  // 處理 bot 查詢錯誤
+  // Step 3: bot 查詢錯誤處理
   useEffect(() => {
     if (botError) {
       const errorMessage =
         "status" in botError ? `API 錯誤: ${botError.status}` : "未知錯誤";
-      console.log(`❌ 取得 bot 資訊失敗: ${errorMessage}`);
+      console.log("❌ 取得 bot 資訊失敗:", errorMessage);
       setState((prev) => ({
         ...prev,
         error: errorMessage,

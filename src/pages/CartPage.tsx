@@ -34,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/hooks/useToast";
 
 const getCartItemPrice = (
   product: Product,
@@ -51,6 +52,7 @@ const getCartItemPrice = (
 export function CartPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { toast } = useToast();
   const { botUUID } = useLiff();
   const { data: products, isLoading } = useGetProductsQuery(botUUID || "", {
     skip: !botUUID,
@@ -107,22 +109,20 @@ export function CartPage() {
       console.error("botUUID is not available");
       return;
     }
-
     const orderItems = cartProducts
       .map((item) => {
-        if (!item.variantId) {
-          return null;
+        if (item.variantId !== null && item.variantId !== undefined) {
+          const variantExists = item.product.variants?.some(
+            (v) => v.variant_id === item.variantId
+          );
+          if (!variantExists) {
+            return null;
+          }
         }
-        // Ensure the variant exists
-        const variantExists = item.product.variants?.some(
-          (v) => v.variant_id === item.variantId
-        );
-        if (!variantExists) {
-          return null;
-        }
+
         return {
           product_id: item.productId,
-          variant_id: item.variantId,
+          variant_id: item.variantId ?? null,
           quantity: item.quantity,
         };
       })
@@ -156,6 +156,7 @@ export function CartPage() {
       dispatch(clearCart());
       setIsCheckoutOpen(false);
       navigate("/orders");
+      toast.success("訂單已成功建立！感謝您的購買。");
     } catch (err) {
       console.error("Failed to create order:", err);
       // TODO: Show error toast
