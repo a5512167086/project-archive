@@ -10,7 +10,7 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { useGetUserReservationsQuery } from "../store/apis/userApi";
 import { useLiff } from "../hooks/useLiff";
-import type { UserReservation } from "../store/apis/reservationApi";
+import type { UserReservation } from "../store/apis/userApi";
 
 // 狀態映射和顏色定義
 const statusMap = {

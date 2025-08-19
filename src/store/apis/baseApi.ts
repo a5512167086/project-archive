@@ -32,6 +32,7 @@ export const baseApi = createApi({
     "ReservationItem",
     "User",
     "UserReservation",
+    "UserOrder",
     "Brand",
     "Category",
     "Product",

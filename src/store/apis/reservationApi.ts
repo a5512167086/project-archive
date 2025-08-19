@@ -131,24 +131,6 @@ export interface UserReservationOptionGroup {
   selected_options: UserReservationSelectedOption[];
 }
 
-export interface UserReservation {
-  reservation_id: string;
-  service_id: string;
-  service_name: string;
-  price: number;
-  notes: string;
-  reservation_date: string; // YYYY-MM-DD 格式
-  start_time: string; // ISO 8601 格式
-  end_time: string; // ISO 8601 格式
-  status: string;
-  payment_method: string;
-  payment_status: string;
-  created_at: string; // ISO 8601 格式
-  selected_option_groups: UserReservationOptionGroup[];
-}
-
-export type UserReservationsResponse = UserReservation[];
-
 export const reservationApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // 預約相關 endpoints

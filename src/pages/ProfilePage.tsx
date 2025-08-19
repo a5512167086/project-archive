@@ -32,12 +32,12 @@ export default function ProfilePage() {
       path: "/orders",
     },
     {
-      id: "appointments",
+      id: "reservation",
       icon: Calendar,
       title: "我的預約",
       description: "管理預約記錄",
       color: "green" as const,
-      path: "/appointments",
+      path: "/reservation",
     },
   ];
 
