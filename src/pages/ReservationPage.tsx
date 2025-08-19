@@ -344,7 +344,7 @@ export default function ReservationPage() {
   }
 
   return (
-    <div className="space-y-4 h-full">
+    <div className="space-y-4 flex flex-1 flex-col">
       {/* 狀態篩選 */}
       <div className="flex space-x-2 overflow-x-auto pb-2">
         {statusFilters.map((statusFilter) => (
@@ -365,7 +365,7 @@ export default function ReservationPage() {
         ))}
       </div>
 
-      <Card>
+      <Card className="flex flex-col flex-1">
         <CardHeader>
           <CardTitle className="text-lg">
             {filter === "all"

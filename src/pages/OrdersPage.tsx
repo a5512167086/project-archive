@@ -9,8 +9,8 @@ import { Button } from "../components/ui/button";
 
 export default function OrdersPage() {
   return (
-    <div className="space-y-4">
-      <Card>
+    <div className="space-y-4 flex flex-col flex-1">
+      <Card className="flex flex-col flex-1">
         <CardHeader>
           <CardTitle className="text-lg text-center">訂單功能</CardTitle>
         </CardHeader>
