@@ -105,6 +105,22 @@ export function CartPage() {
     useCreateOrderMutation();
 
   const handlePurchase = async () => {
+    if (!recipientName.trim()) {
+      toast.error("收件人姓名不能為空");
+      return;
+    }
+
+    const phoneRegex = /^\d{8,12}$/;
+    if (!phoneRegex.test(recipientPhone)) {
+      toast.error("請輸入有效的電話號碼（8-12位數字）");
+      return;
+    }
+
+    if (shippingMethod === "home_delivery" && !shippingAddress.trim()) {
+      toast.error("配送地址不能為空");
+      return;
+    }
+
     if (!botUUID) {
       console.error("botUUID is not available");
       return;

@@ -4,6 +4,11 @@ import type { UserOrder } from "@/store/apis/userApi";
 import type { ProductsResponse } from "@/store/apis/ecommApi";
 import { X } from "lucide-react";
 
+const shippingMethod = {
+  store_pickup: "門市取貨",
+  home_delivery: "宅配",
+};
+
 // 狀態映射和顏色定義
 const statusMap = {
   pending: { label: "待處理", className: "bg-orange-100 text-orange-800" },
@@ -103,20 +108,26 @@ export function OrderDetailModal({
               </div>
             </div>
 
-            {order.shipping_method !== "store_pickup" && (
-              <div className="space-y-2">
-                <h4 className="font-medium text-gray-700">配送資訊：</h4>
-                <div className="bg-gray-50 p-3 rounded-md space-y-1 text-sm">
-                  <p>收件人: {order.recipient_name}</p>
-                  <p>電話: {order.recipient_phone}</p>
+            <div className="space-y-2">
+              <h4 className="font-medium text-gray-700">配送資訊：</h4>
+              <div className="bg-gray-50 p-3 rounded-md space-y-1 text-sm">
+                <p>收件人: {order.recipient_name}</p>
+                <p>電話: {order.recipient_phone}</p>
+                {order.shipping_method !== "store_pickup" && (
                   <p>地址: {order.shipping_address}</p>
-                  <p>配送方式: {order.shipping_method}</p>
-                  {order.tracking_number && (
-                    <p>追蹤編號: {order.tracking_number}</p>
-                  )}
-                </div>
+                )}
+                <p>
+                  配送方式:
+                  {" " +
+                    shippingMethod[
+                      order.shipping_method as keyof typeof shippingMethod
+                    ]}
+                </p>
+                {order.tracking_number && (
+                  <p>追蹤編號: {order.tracking_number}</p>
+                )}
               </div>
-            )}
+            </div>
 
             <div className="text-xs text-gray-500 pt-2 border-t">
               訂單建立時間：

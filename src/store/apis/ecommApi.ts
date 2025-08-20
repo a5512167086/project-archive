@@ -98,6 +98,9 @@ export const ecommApi = baseApi.injectEndpoints({
         method: "POST",
         body: order,
       }),
+      invalidatesTags: (result, error, order) => [
+        { type: "UserOrder", id: `user-${order.bot_uuid}` },
+      ],
     }),
   }),
 });
