@@ -7,3 +7,4 @@ CREATE TABLE IF NOT EXISTS class_object_relations(
     PRIMARY KEY (class_id, object_id)
 );
 
+CREATE INDEX IF NOT EXISTS idx_class_object_relations_object_id ON class_object_relations(object_id);
