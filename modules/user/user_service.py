@@ -10,7 +10,11 @@ from jwt.exceptions import (
 from sqlmodel import Session
 
 from modules.bot.bot_service import BotService
-from modules.user.auth_service import create_jwt_token, generate_token_pair
+from modules.user.auth_service import (
+    _verify_jwt_token,
+    create_jwt_token,
+    generate_token_pair,
+)
 from modules.user.user_command import UserCommand
 from modules.user.user_query import UserQuery
 from modules.user.user_schema import (
@@ -21,7 +25,11 @@ from modules.user.user_schema import (
     OAuthLoginRequest,
 )
 from shared.commands.group_command import insert_group_member
-from shared.constants.config import ACCESS_TOKEN_EXPIRE_SECONDS, JWT_RESET_SECRET
+from shared.constants.config import (
+    ACCESS_TOKEN_EXPIRE_SECONDS,
+    JWT_REFRESH_SECRET,
+    JWT_RESET_SECRET,
+)
 from shared.constants.error_code import ErrorCode
 from shared.exception import GlobalErrorException
 from shared.services.group_service import validate_group_exist_in_bot
@@ -93,6 +101,27 @@ class UserService:
             )
 
         return generate_token_pair(db_user.user_id, db_user.email, user.remember)
+
+    def refresh_token(self, refresh_token: str):
+        try:
+            payload = _verify_jwt_token(refresh_token, JWT_REFRESH_SECRET)
+        except GlobalErrorException as e:
+            if e.error_code == ErrorCode.TOKEN_EXPIRED:
+                raise GlobalErrorException(
+                    status_code=403,
+                    error_code=ErrorCode.TOKEN_EXPIRED,
+                    error_message="Refresh token has expired, please login again",
+                )
+            raise e
+
+        user = self.query.get_user_by_id(payload["sub"])
+        if not user:
+            raise GlobalErrorException(
+                error_code=ErrorCode.USER_NOT_EXISTS,
+                error_message="User not found",
+            )
+
+        return generate_token_pair(user.user_id, user.email)
 
     def handle_new_oauth_user(self, oauth_user_info, provider):
         random_password = generate_random_password()

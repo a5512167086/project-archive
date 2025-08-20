@@ -9,6 +9,7 @@ from modules.user.user_schema import (
     LoginRequest,
     OAuthBindRequest,
     OAuthLoginRequest,
+    RefreshTokenRequest,
     RegisterRequest,
     RegisterResponse,
     ResetPasswordRequest,
@@ -21,7 +22,7 @@ from shared.dependencies import get_current_user
 
 
 def get_user_service(session: SessionDep) -> UserService:
-    """依賴注入 UserService"""
+    """依賴注入 UserService""" 
     return UserService(session)
 
 
@@ -33,6 +34,16 @@ async def login_user(
     user: LoginRequest, user_service: Annotated[UserService, Depends(get_user_service)]
 ):
     return user_service.login(user)
+
+
+@user_router.post("/token-refresh", response_model=TokenResponse)
+async def refresh_token(
+    body: RefreshTokenRequest,
+    user_service: Annotated[UserService, Depends(get_user_service)],
+):
+    token = user_service.refresh_token(body.refresh_token)
+    user_service.session.commit()
+    return token
 
 
 @user_router.post("/oauth-login", response_model=TokenResponse)

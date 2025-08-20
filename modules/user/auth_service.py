@@ -49,11 +49,10 @@ def generate_token_pair(
     }
 
 
-def verify_jwt_token(
+def _verify_jwt_token(
+    token: str,
     secret: str,
-    credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer()),
 ) -> Dict[str, Any]:
-    token = credentials.credentials
     try:
         payload = jwt.decode(token, secret, algorithms=["HS256"])
         user_id = payload.get("sub")
@@ -80,3 +79,12 @@ def verify_jwt_token(
             error_code=ErrorCode.TOKEN_INVALID,
             error_message="Invalid token",
         )
+
+
+# For dependency
+def verify_jwt_token(
+    secret: str,
+    credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer()),
+) -> Dict[str, Any]:
+    token = credentials.credentials
+    return _verify_jwt_token(token, secret)
