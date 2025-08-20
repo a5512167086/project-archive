@@ -1,70 +1,21 @@
 import { useState } from "react";
-import { ShoppingBag, ChevronDown, ShoppingCart } from "lucide-react";
+import { ShoppingBag, ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SearchInput } from "@/components/SearchInput";
-import { ProductCard } from "@/components/ProductCard";
+import { ProductCard } from "@/components/features/ecommerce/components/ProductCard";
 import type { AppModule } from "@/types/module";
-import { ProductDialog } from "@/components/ProductDialog";
+import { ProductDialog } from "@/components/features/ecommerce/components/ProductDialog";
 import {
   useGetProductsQuery,
   useGetCategoriesQuery,
   useGetBrandsQuery,
-  type Category,
 } from "@/store/apis/ecommApi";
 import { useLiff } from "@/hooks/useLiff";
 import placeholder from "@/assets/placeholder.svg";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { FilterDialog } from "@/components/FilterDialog";
+import { FilterDialog } from "@/components/features/ecommerce/components/FilterDialog";
 import { Link } from "react-router";
 import { useAppSelector } from "@/store";
 import { Button } from "@/components/ui/button";
-
-const CategoryItem = ({
-  category,
-  selectedCategoryId,
-  onSelectCategory,
-}: {
-  category: Category;
-  selectedCategoryId: number | null;
-  onSelectCategory: (id: number | null) => void;
-}) => {
-  const isSelected = category.class_id === selectedCategoryId;
-
-  return (
-    <Collapsible>
-      <div className="flex items-center justify-between">
-        <Badge
-          variant={isSelected ? "secondary" : "outline"}
-          className="whitespace-nowrap cursor-pointer"
-          onClick={() => onSelectCategory(category.class_id)}
-        >
-          {category.category_name}
-        </Badge>
-        {category.children && category.children.length > 0 && (
-          <CollapsibleTrigger>
-            <ChevronDown className="h-4 w-4" />
-          </CollapsibleTrigger>
-        )}
-      </div>
-      {category.children && category.children.length > 0 && (
-        <CollapsibleContent className="ml-4 mt-2 space-y-2">
-          {category.children.map((child) => (
-            <CategoryItem
-              key={child.class_id}
-              category={child}
-              selectedCategoryId={selectedCategoryId}
-              onSelectCategory={onSelectCategory}
-            />
-          ))}
-        </CollapsibleContent>
-      )}
-    </Collapsible>
-  );
-};
 
 function EcommerceContent() {
   const { botUUID } = useLiff();

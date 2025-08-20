@@ -6,20 +6,16 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
-import { QuickActionCard } from "../components/QuickActionCard";
-import { UserProfileCard } from "../components/UserProfileCard";
+import { QuickActionCard } from "@/components/features/profile/components/QuickActionCard";
+import { UserProfileCard } from "@/components/features/profile/components/UserProfileCard";
 import { moduleRegistry } from "../lib/module-registry";
 import { useLiff } from "../hooks/useLiff";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
   const { userProfile, isLoading } = useLiff();
+  console.log(userProfile, isLoading);
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">載入中...</div>
-    );
-  }
   const availableModules = moduleRegistry.getAllModules();
 
   const quickActions = [
