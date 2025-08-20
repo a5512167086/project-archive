@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import liff from "@line/liff";
 import eruda from "eruda";
 import { useGetBotInfoQuery } from "../store/apis/botApi";
@@ -48,6 +48,9 @@ function clearURLParams() {
   window.history.replaceState({}, "", url.toString());
 }
 
+// Module-level lock to prevent re-initialization across StrictMode remounts
+let didInit = false;
+
 export const useLiff = () => {
   const [botUUID, setBotUUID] = useState<string | null>(null);
   const [state, setState] = useState<LiffState>({
@@ -68,9 +71,6 @@ export const useLiff = () => {
 
   const [customerLogin, { isLoading: isLoginLoading }] =
     useCustomerLoginMutation();
-
-  // 防併發初始化鎖
-  const didInitRef = useRef(false);
 
   // Step 1: 啟動時先解析/保存 bot_uuid（不要急著清 URL）
   useEffect(() => {
@@ -117,9 +117,9 @@ export const useLiff = () => {
   useEffect(() => {
     if (!botInfo || !botUUID) return;
 
-    // ✅ 進入 effect 立刻上鎖，避免 React 18/StrictMode 造成的雙執行/併發
-    if (didInitRef.current) return;
-    didInitRef.current = true;
+    // Use module-level lock which persists across StrictMode remounts
+    if (didInit) return;
+    didInit = true;
 
     const initLiff = async () => {
       const loginGuardKey = "liff_login_in_progress";
@@ -197,8 +197,8 @@ export const useLiff = () => {
         });
       } catch (error) {
         sessionStorage.removeItem(loginGuardKey);
-        // 若你想允許之後「手動重試」，可以在這裡把鎖打開：
-        // didInitRef.current = false;
+        // Reset lock on error to allow retries if the component remounts
+        didInit = false;
         const errorMessage =
           error instanceof Error ? error.message : String(error);
         console.log("❌ initLiff error:", errorMessage);
