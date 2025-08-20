@@ -50,6 +50,15 @@ export interface UserOrder {
 
 export type UserOrdersResponse = UserOrder[];
 
+export type TokenRefreshRequest = {
+  refresh_token: string;
+};
+
+export type TokenRefreshResponse = {
+  access_token: string;
+  refresh_token: string;
+};
+
 export const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     customerLogin: builder.mutation<LoginResponse, LoginRequest>({
@@ -59,6 +68,13 @@ export const userApi = baseApi.injectEndpoints({
         body: credentials,
       }),
       invalidatesTags: ["User"],
+    }),
+    refreshToken: builder.mutation<TokenRefreshResponse, TokenRefreshRequest>({
+      query: (data) => ({
+        url: "/users/token-refresh",
+        method: "POST",
+        body: data,
+      }),
     }),
     getUserReservations: builder.query<UserReservationsResponse, string>({
       query: (botUuid) => `/reservations/user/${botUuid}`,
@@ -85,6 +101,7 @@ export const userApi = baseApi.injectEndpoints({
 
 export const {
   useCustomerLoginMutation,
+  useRefreshTokenMutation,
   useGetUserReservationsQuery,
   useGetUserOrdersQuery,
 } = userApi;

@@ -1,8 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import liff from "@line/liff";
 import eruda from "eruda";
 import { useGetBotInfoQuery } from "../store/apis/botApi";
-import { useCustomerLoginMutation } from "../store/apis/userApi";
+import {
+  useCustomerLoginMutation,
+  useRefreshTokenMutation,
+} from "../store/apis/userApi";
 
 interface LiffState {
   isInitialized: boolean;
@@ -17,6 +20,13 @@ interface LiffState {
   error: string | null;
   isLoading: boolean; // 僅代表「初始化/登入交換階段」
 }
+
+// 🔥 全局標記，防止多個組件實例重複初始化
+let globalLiffInitialized = false;
+let globalUserData: {
+  idToken: string | null;
+  userProfile: { displayName: string; pictureUrl: string; userId: string };
+} | null = null;
 
 function extractBotUUIDFromURL(): string | null {
   const urlParams = new URLSearchParams(window.location.search);
@@ -55,6 +65,20 @@ function isTokenValid(token: string | null): boolean {
     // 簡單的 JWT 過期檢查
     const payload = JSON.parse(atob(token.split(".")[1]));
     const now = Math.floor(Date.now() / 1000);
+    // 提前 5 分鐘認為過期，避免邊界情況
+    return payload.exp > now + 300;
+  } catch {
+    return false;
+  }
+}
+
+// 檢查 refresh token 是否有效
+function isRefreshTokenValid(refreshToken: string | null): boolean {
+  if (!refreshToken) return false;
+
+  try {
+    const payload = JSON.parse(atob(refreshToken.split(".")[1]));
+    const now = Math.floor(Date.now() / 1000);
     return payload.exp > now;
   } catch {
     return false;
@@ -85,6 +109,10 @@ export const useLiff = () => {
   const [customerLogin, { isLoading: isLoginLoading }] =
     useCustomerLoginMutation();
 
+  // 啟用 refresh token API
+  const [refreshTokenMutation, { isLoading: isRefreshLoading }] =
+    useRefreshTokenMutation();
+
   // Step 1: 啟動時解析/保存 bot_uuid（不要急著清 URL）
   useEffect(() => {
     const initializeAuth = async () => {
@@ -106,6 +134,9 @@ export const useLiff = () => {
           localStorage.removeItem("id_token");
           localStorage.removeItem("user_profile");
           localStorage.setItem("bot_uuid", foundBotUUID);
+          // 清除全局狀態
+          globalLiffInitialized = false;
+          globalUserData = null;
         }
 
         setBotUUID(foundBotUUID);
@@ -124,24 +155,105 @@ export const useLiff = () => {
     initializeAuth();
   }, []);
 
+  // 🔥 使用 useCallback 穩定函數引用
+  const attemptTokenRefresh = useCallback(
+    async (refreshToken: string) => {
+      try {
+        console.log("🔄 Attempting to refresh token...");
+        const refreshResult = await refreshTokenMutation({
+          refresh_token: refreshToken,
+        }).unwrap();
+
+        localStorage.setItem("access_token", refreshResult.access_token);
+        if (refreshResult.refresh_token) {
+          localStorage.setItem("refresh_token", refreshResult.refresh_token);
+        }
+
+        console.log("✅ Token refreshed successfully");
+        return refreshResult.access_token;
+      } catch (error) {
+        console.log("❌ Token refresh failed:", error);
+        // Clear invalid tokens
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        // 清除全局狀態
+        globalLiffInitialized = false;
+        globalUserData = null;
+        return null;
+      }
+    },
+    [refreshTokenMutation]
+  );
+
   // Step 2: botInfo 到位後，初始化 LIFF 並處理登入/換 token
   useEffect(() => {
     console.log("🔄 Effect triggered:", {
       hasBotInfo: !!botInfo,
       botUUID,
       didInit: didInitRef.current,
+      globalInitialized: globalLiffInitialized,
       timestamp: Date.now(),
       liffId: botInfo?.liff_id,
     });
 
     if (!botInfo || !botUUID) return;
-    if (didInitRef.current) {
+
+    // 🔥 檢查全局狀態和本地狀態
+    if (didInitRef.current || globalLiffInitialized) {
       console.log("⏭️ Skipped: already initialized");
+
+      // 如果全局已初始化但本地狀態未更新，從 localStorage 恢復
+      if (globalLiffInitialized && !state.isInitialized) {
+        const existingToken = localStorage.getItem("access_token");
+        const existingBotUUID = localStorage.getItem("bot_uuid");
+
+        if (
+          existingToken &&
+          existingBotUUID === botUUID &&
+          isTokenValid(existingToken)
+        ) {
+          const storedIdToken = localStorage.getItem("id_token");
+          const storedUserProfile = localStorage.getItem("user_profile");
+
+          let userProfile = null;
+          try {
+            userProfile = storedUserProfile
+              ? JSON.parse(storedUserProfile)
+              : null;
+          } catch (error) {
+            console.warn("Failed to parse stored user profile:", error);
+          }
+
+          setState({
+            isInitialized: true,
+            isLoggedIn: true,
+            idToken: storedIdToken,
+            userProfile: userProfile || globalUserData?.userProfile,
+            error: null,
+            isLoading: false,
+          });
+
+          console.log("✅ Restored state from localStorage");
+        }
+      }
+
       return;
     }
 
     // 🔥 新增：檢查是否已經有有效的 access_token
     const existingToken = localStorage.getItem("access_token");
+    if (existingToken) {
+      try {
+        const payload = JSON.parse(atob(existingToken.split(".")[1]));
+        const exp = new Date(payload.exp * 1000);
+        const now = new Date();
+        console.log("Token expires at:", exp);
+        console.log("Current time:", now);
+        console.log("Time until expiry:", exp.getTime() - now.getTime(), "ms");
+      } catch {
+        console.log("Failed to parse token");
+      }
+    }
     const existingBotUUID = localStorage.getItem("bot_uuid");
     const existingRefreshToken = localStorage.getItem("refresh_token");
 
@@ -150,6 +262,7 @@ export const useLiff = () => {
       tokenValid: isTokenValid(existingToken),
       botMatches: existingBotUUID === botUUID,
       hasRefreshToken: !!existingRefreshToken,
+      refreshTokenValid: isRefreshTokenValid(existingRefreshToken),
     });
 
     if (
@@ -160,6 +273,7 @@ export const useLiff = () => {
       // 有有效 token，但仍需初始化 LIFF 來獲取用戶資訊
       console.log("✅ Has valid token, initializing LIFF to get user profile");
       didInitRef.current = true;
+      globalLiffInitialized = true;
 
       const initLiffForProfile = async () => {
         try {
@@ -174,6 +288,16 @@ export const useLiff = () => {
             const idToken = liff.getIDToken();
             const userProfile = await liff.getProfile();
 
+            // 更新全局快取
+            globalUserData = {
+              idToken,
+              userProfile: {
+                displayName: userProfile.displayName,
+                userId: userProfile.userId,
+                pictureUrl: userProfile.pictureUrl ?? "",
+              },
+            };
+
             setState((prev) => ({
               ...prev,
               isInitialized: true,
@@ -187,10 +311,9 @@ export const useLiff = () => {
             console.log("✅ Got user profile from LIFF without re-login");
           } else {
             // LIFF 顯示未登入，但我們有 token，可能 LIFF session 過期
-            // 這時可以選擇使用存儲的資訊或強制重新登入
             console.log("⚠️ LIFF session expired, but we have valid token");
 
-            // 從 localStorage 恢復用戶資訊（如果有的話）
+            // 從 localStorage 恢復用戶資訊
             const storedIdToken = localStorage.getItem("id_token");
             const storedUserProfile = localStorage.getItem("user_profile");
 
@@ -202,6 +325,9 @@ export const useLiff = () => {
             } catch (error) {
               console.warn("Failed to parse stored user profile:", error);
             }
+
+            // 更新全局快取
+            globalUserData = { idToken: storedIdToken, userProfile };
 
             setState((prev) => ({
               ...prev,
@@ -230,6 +356,9 @@ export const useLiff = () => {
             console.warn("Failed to parse stored user profile:", error);
           }
 
+          // 更新全局快取
+          globalUserData = { idToken: storedIdToken, userProfile };
+
           setState((prev) => ({
             ...prev,
             isInitialized: true,
@@ -248,20 +377,66 @@ export const useLiff = () => {
       return;
     }
 
-    // 如果 token 無效但有 refresh token，可以考慮先嘗試刷新
+    // If token is invalid but has valid refresh token, attempt to refresh
     if (
       !isTokenValid(existingToken) &&
       existingRefreshToken &&
-      existingBotUUID === botUUID
+      existingBotUUID === botUUID &&
+      isRefreshTokenValid(existingRefreshToken)
     ) {
       console.log(
-        "🔄 Token expired but has refresh token, will need to refresh or re-login"
+        "🔄 Token expired but has valid refresh token, attempting refresh"
       );
-      // 這裡可以加入 refresh token 的邏輯，或者繼續走下面的 LIFF 流程
+      didInitRef.current = true;
+      globalLiffInitialized = true;
+
+      const handleTokenRefresh = async () => {
+        const newAccessToken = await attemptTokenRefresh(existingRefreshToken);
+
+        if (newAccessToken) {
+          // Token refresh successful, restore user session
+          const storedIdToken = localStorage.getItem("id_token");
+          const storedUserProfile = localStorage.getItem("user_profile");
+
+          let userProfile = null;
+          try {
+            userProfile = storedUserProfile
+              ? JSON.parse(storedUserProfile)
+              : null;
+          } catch (error) {
+            console.warn("Failed to parse stored user profile:", error);
+          }
+
+          // 更新全局快取
+          globalUserData = { idToken: storedIdToken, userProfile };
+
+          setState((prev) => ({
+            ...prev,
+            isInitialized: true,
+            isLoggedIn: true,
+            idToken: storedIdToken,
+            userProfile,
+            isLoading: false,
+            error: null,
+          }));
+
+          clearURLParams();
+          return;
+        } else {
+          // Refresh failed, fall back to LIFF login flow
+          console.log("🔄 Token refresh failed, falling back to LIFF login");
+          didInitRef.current = false;
+          globalLiffInitialized = false;
+        }
+      };
+
+      void handleTokenRefresh();
+      return;
     }
 
     console.log("🚀 Starting LIFF initialization...");
     didInitRef.current = true;
+    globalLiffInitialized = true;
 
     const initLiff = async () => {
       const loginGuardKey = "liff_login_in_progress";
@@ -312,6 +487,16 @@ export const useLiff = () => {
         localStorage.setItem("id_token", idToken);
         localStorage.setItem("user_profile", JSON.stringify(userProfile));
 
+        // 更新全局快取
+        globalUserData = {
+          idToken,
+          userProfile: {
+            displayName: userProfile.displayName,
+            userId: userProfile.userId,
+            pictureUrl: userProfile.pictureUrl ?? "",
+          },
+        };
+
         setState({
           isInitialized: true,
           isLoggedIn: true,
@@ -336,6 +521,7 @@ export const useLiff = () => {
       } catch (error) {
         sessionStorage.removeItem("liff_login_in_progress");
         didInitRef.current = false; // 失敗允許重試
+        globalLiffInitialized = false;
         const errorMessage =
           error instanceof Error ? error.message : String(error);
         console.log("❌ initLiff error:", errorMessage);
@@ -348,7 +534,7 @@ export const useLiff = () => {
     };
 
     void initLiff();
-  }, [botInfo?.liff_id, botUUID]); // 只依賴具體的值而不是整個 botInfo 對象
+  }, [botInfo?.liff_id, botUUID, attemptTokenRefresh]); // 移除會變化的依賴項
 
   // Step 3: bot 查詢錯誤處理
   useEffect(() => {
@@ -364,15 +550,12 @@ export const useLiff = () => {
     }
   }, [botError]);
 
-  // ✅ isLoading 僅代表初始化/登入階段，不混入資料載入階段
-  // 若要在頁面顯示「資料載入中」，請各頁面自行看 isBotLoading/isLoginLoading
   return {
     ...state,
-    // ❌ 不再把 isBotLoading/isLoginLoading OR 進來，避免永遠 true
     botInfo,
     botUUID,
-    // 額外回傳「資料階段」的 loading 狀態，讓頁面自己決定要不要顯示 skeleton
     botLoading: isBotLoading,
     loginLoading: isLoginLoading,
+    refreshLoading: isRefreshLoading,
   };
 };
