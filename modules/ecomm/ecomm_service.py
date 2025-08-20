@@ -542,7 +542,15 @@ class EcommService:
 
     async def insert_order(self, body: InsertOrderRequest, user_id: str):
         bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+        bot_group = self.group_service.validate_group_exist_in_bot(
+            bot.class_id, "Users"
+        )
+        if not is_user_in_group(self.session, bot_group.group_id, user_id):
+            raise GlobalErrorException(
+                error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
+                error_message="User is not a member of this bot's group.",
+            )
+
         order_class_id = self.validate_order_class(bot.class_id)
 
         # Get shipping setting and fee
