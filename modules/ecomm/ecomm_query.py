@@ -192,6 +192,16 @@ class EcommQuery:
             .order_by(ProductImage.created_at)
         ).all()
 
+    def get_product_images_by_object_ids(self, object_ids: List[int]) -> List[ProductImage]:
+        """根據 object_id 列表取得產品圖片"""
+        if not object_ids:
+            return []
+        return self.session.exec(
+            select(ProductImage)
+            .where(ProductImage.object_id.in_(object_ids))
+            .order_by(ProductImage.created_at)
+        ).all()
+
     def get_product_image_by_id(self, image_id: int) -> ProductImage | None:
         """根據 image_id 取得產品圖片"""
         return self.session.get(ProductImage, image_id)
@@ -200,6 +210,16 @@ class EcommQuery:
         """根據 object_id 取得產品變體"""
         return self.session.exec(
             select(ProductVariant).where(ProductVariant.object_id == object_id)
+        ).all()
+
+    def get_product_variants_by_object_ids(
+        self, object_ids: List[int]
+    ) -> List[ProductVariant]:
+        """根據 object_id 列表取得產品變體"""
+        if not object_ids:
+            return []
+        return self.session.exec(
+            select(ProductVariant).where(ProductVariant.object_id.in_(object_ids))
         ).all()
 
     def get_variant_by_id(self, variant_id: UUID) -> ProductVariant | None:

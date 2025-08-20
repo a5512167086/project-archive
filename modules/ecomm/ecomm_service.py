@@ -271,23 +271,37 @@ class EcommService:
         all_category_ids = [cat.class_id for cat in category_ids]
         all_category_ids.append(category_class_id)
         products_data = self.query.get_all_products_view(all_category_ids)
-        products = []
-        for product_data in products_data:
-            images_orm = self.query.get_product_images_by_object_id(
-                product_data.object_id
-            )
-            variants = self.query.get_product_variants_by_object_id(
-                product_data.object_id
-            )
-            images = [
+
+        if not products_data:
+            return []
+
+        object_ids = [p.object_id for p in products_data]
+        all_images = self.query.get_product_images_by_object_ids(object_ids)
+        all_variants = self.query.get_product_variants_by_object_ids(object_ids)
+
+        images_map = {}
+        for img in all_images:
+            if img.object_id not in images_map:
+                images_map[img.object_id] = []
+            images_map[img.object_id].append(
                 ProductImageResponse(
                     image_id=img.image_id,
                     filename=img.filename,
                     image_url=f"{BACKEND_URL}/products/images/{img.filename}",
                     is_primary=img.is_primary,
                 )
-                for img in images_orm
-            ]
+            )
+
+        variants_map = {}
+        for var in all_variants:
+            if var.object_id not in variants_map:
+                variants_map[var.object_id] = []
+            variants_map[var.object_id].append(var)
+
+        products = []
+        for product_data in products_data:
+            images = images_map.get(product_data.object_id, [])
+            variants = variants_map.get(product_data.object_id, [])
             products.append(
                 ProductResponse(
                     product_id=product_data.product_id,
