@@ -7,11 +7,12 @@ import { store } from '@/store/store'
 import { SnackbarProvider } from 'notistack'
 import { useAppDispatch, useAppSelector } from './utils/hook'
 import { useLazyGetUserMeQuery } from './store/apis/userApi'
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { setAuthenticated } from './store/modules/userSlice'
 import { clearUserToken } from './utils/helper'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { CustomLoader } from './components/CustomLoader'
 
 function AppInitializer() {
   const dispatch = useAppDispatch()
@@ -48,14 +49,16 @@ function App() {
   return (
     <Provider store={store}>
       <AppInitializer />
-      <ThemeProvider theme={theme}>
-        <SnackbarProvider maxSnack={3} autoHideDuration={2000}>
-          <CssBaseline />
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <RouterProvider router={router} />
-          </LocalizationProvider>
-        </SnackbarProvider>
-      </ThemeProvider>
+      <Suspense fallback={<CustomLoader />}>
+        <ThemeProvider theme={theme}>
+          <SnackbarProvider maxSnack={3} autoHideDuration={2000}>
+            <CssBaseline />
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <RouterProvider router={router} />
+            </LocalizationProvider>
+          </SnackbarProvider>
+        </ThemeProvider>
+      </Suspense>
     </Provider>
   )
 }
