@@ -17,6 +17,21 @@ def get_channel_access_token(channel_id: str, channel_secret: str) -> str:
         return None
 
 
+def get_all_liff_apps(channel_access_token: str):
+    url = "https://api.line.me/liff/v1/apps"
+    headers = {
+        "Authorization": f"Bearer {channel_access_token}",
+        "Content-Type": "application/json",
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code == 404:
+        return None  # No LIFF apps found
+    if response.status_code != 200:
+        response.raise_for_status()
+
+    return response.json()["apps"]
+
+
 def create_liff_app(channel_access_token: str):
     url = "https://api.line.me/liff/v1/apps"
     headers = {
@@ -37,3 +52,14 @@ def create_liff_app(channel_access_token: str):
         response.raise_for_status()
 
     return response.json()
+
+
+def delete_liff_app(channel_access_token: str, liffId: str):
+    url = f"https://api.line.me/liff/v1/apps/{liffId}"
+    headers = {
+        "Authorization": f"Bearer {channel_access_token}",
+        "Content-Type": "application/json",
+    }
+    response = requests.delete(url, headers=headers)
+    if response.status_code != 200:
+        response.raise_for_status()

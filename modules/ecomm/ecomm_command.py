@@ -472,11 +472,10 @@ class EcommCommand:
             )
             await new_setting.insert()
 
-    async def delete_shipping_setting(self, bot_uuid: str):
-        """刪除運送設定"""
-        setting = await ShippingSetting.find_one(ShippingSetting.bot_uuid == bot_uuid)
-        if setting:
-            await setting.delete()
+    async def delete_all_shipping_setting(self, bot_uuid: str):
+        settings = await ShippingSetting.find_all(ShippingSetting.bot_uuid == bot_uuid)
+        if settings:
+            await settings.delete()
 
     # Order command functions
     def insert_order(
@@ -604,7 +603,9 @@ class EcommCommand:
         """刪除產品圖片"""
         self.session.exec(delete(ProductImage).where(ProductImage.image_id == image_id))
 
-    def update_product_image(self, image_id: int, is_primary: Optional[bool] = None) -> bool:
+    def update_product_image(
+        self, image_id: int, is_primary: Optional[bool] = None
+    ) -> bool:
         """更新產品圖片"""
         image = self.session.get(ProductImage, image_id)
         if not image:

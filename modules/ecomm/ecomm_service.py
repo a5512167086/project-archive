@@ -483,6 +483,12 @@ class EcommService:
             bot_uuid_str, setting.shipping_options
         )
 
+    async def delete_all_shipping_settings(self, bot_uuid: UUID, current_user_id: UUID):
+        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
+        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
+        bot_uuid_str = str(bot.bot_detail_id)
+        self.command.delete_all_shipping_setting(bot_uuid_str)
+
     # Order service methods
     def validate_order_class(self, bot_class_id: int) -> int:
         order_class_id = self.query.get_order_class_id_by_bot_class_id(bot_class_id)
