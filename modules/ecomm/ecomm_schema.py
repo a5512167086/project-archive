@@ -5,7 +5,12 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 from modules.ecomm.ecomm_model import ProductVariant
-from shared.constants.common import PaymentMethod, ShippingMethod
+from shared.constants.common import (
+    OrderStatus,
+    PaymentMethod,
+    PaymentStatus,
+    ShippingMethod,
+)
 
 
 class InsertBrandRequest(BaseModel):
@@ -238,13 +243,14 @@ class OrderResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     items: List[OrderItemSchema] = []
+    notes: Optional[str] = None
 
 
 class UpdateOrderRequest(BaseModel):
     bot_uuid: UUID
     order_id: UUID
-    status: Optional[str] = None
-    payment_status: Optional[str] = None
+    status: Optional[OrderStatus] = None
+    payment_status: Optional[PaymentStatus] = None
     tracking_number: Optional[str] = None
 
 

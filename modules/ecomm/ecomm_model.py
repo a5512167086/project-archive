@@ -7,7 +7,12 @@ from pydantic import BaseModel
 from pydantic import Field as PydanticField
 from sqlmodel import Field, SQLModel, UniqueConstraint
 
-from shared.constants.common import PaymentMethod, PaymentStatus, ShippingMethod
+from shared.constants.common import (
+    OrderStatus,
+    PaymentMethod,
+    PaymentStatus,
+    ShippingMethod,
+)
 
 
 class BrandListView(SQLModel, table=True):
@@ -107,7 +112,7 @@ class OrderDetail(SQLModel, table=True):
     order_id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
     object_id: int = Field(index=True)
     total_amount: int
-    status: str = Field(default="pending", max_length=16)
+    status: OrderStatus = Field(default=OrderStatus.pending, max_length=16)
     payment_method: Optional[PaymentMethod] = Field(default=None, max_length=32)
     payment_status: Optional[PaymentStatus] = Field(default=None, max_length=16)
     shipping_method: Optional[ShippingMethod] = Field(default=None, max_length=32)
@@ -148,5 +153,6 @@ class OrderListView(SQLModel, table=True):
     recipient_name: Optional[str] = None
     recipient_phone: Optional[str] = None
     shipping_address: Optional[str] = None
+    notes: Optional[str] = None
     created_at: datetime
     updated_at: datetime

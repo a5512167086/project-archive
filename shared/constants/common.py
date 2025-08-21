@@ -8,6 +8,13 @@ class ReservationStatus(str, Enum):
     completed = "completed"
 
 
+class OrderStatus(str, Enum):
+    pending = "pending"
+    confirmed = "confirmed"
+    cancelled = "cancelled"
+    completed = "completed"
+
+
 class PaymentMethod(str, Enum):
     cash = "cash"
     bank_transfer = "bank_transfer"
