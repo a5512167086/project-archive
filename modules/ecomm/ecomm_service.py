@@ -537,7 +537,7 @@ class EcommService:
                 error_message="User is not a member of this bot's group.",
             )
         order_class_id = self.validate_order_class(bot.class_id)
-        orders_data = self.query.get_all_orders_view(order_class_id)
+        orders_data = self.query.get_all_user_orders_view(user_id, order_class_id)
         orders = []
         for order_data in orders_data:
             order_items_data = self.query.get_order_items_by_object_id(
@@ -633,6 +633,7 @@ class EcommService:
             shipping_address=body.shipping_address,
             items=processed_items,
             owner_id=user_id,
+            notes=body.notes,
         )
 
     def update_order_by_id(self, body: UpdateOrderRequest, user_id: str):

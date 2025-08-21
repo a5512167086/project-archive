@@ -491,6 +491,7 @@ class EcommCommand:
         shipping_address: str,
         items: List[dict],
         owner_id: Optional[str] = None,
+        notes: Optional[str] = None,
     ) -> UUID:
         """建立訂單"""
         order_entity_id = get_entity_id_by_name(self.session, "訂單")
@@ -521,6 +522,7 @@ class EcommCommand:
             recipient_name=recipient_name,
             recipient_phone=recipient_phone,
             shipping_address=shipping_address,
+            notes=notes,
         )
         self.session.add(order_detail)
         self.session.flush()
