@@ -72,14 +72,8 @@ const ReservationManagementPage = () => {
       reservation_id: reservation.reservation_id,
       reservation_date: reservation.reservation_date,
       start_time: reservation.start_time,
-      payment_method: reservation.payment_method as
-        | 'cash'
-        | 'bank_transfer'
-        | 'credit_card',
-      payment_status: reservation.payment_status as
-        | 'paid'
-        | 'unpaid'
-        | 'refunded',
+      payment_method: reservation.payment_method,
+      payment_status: reservation.payment_status,
       status: reservation.status,
       note: reservation.notes || ''
     })
@@ -87,9 +81,9 @@ const ReservationManagementPage = () => {
   }
 
   // Handle form change
-  const handleFormChange = (
-    field: keyof UpdateReservationRequest,
-    value: string
+  const handleFormChange = <T extends keyof UpdateReservationRequest>(
+    field: T,
+    value: UpdateReservationRequest[T]
   ) => {
     setEditForm((prev) => {
       const updated = { ...prev, [field]: value }
@@ -214,13 +208,8 @@ const ReservationManagementPage = () => {
           allDaySlot={false}
           events={calendarEvents}
           eventClick={(info) => {
-            // Handle event click - show modal with reservation details
             const reservation = info.event.extendedProps.reservation
             handleReservationClick(reservation)
-          }}
-          loading={(loading) => {
-            // Handle loading state
-            console.log('Calendar loading:', loading)
           }}
         />
       </Box>
@@ -300,7 +289,10 @@ const ReservationManagementPage = () => {
                       value={editForm.status || ''}
                       label={t('reservationManagementPage.status')}
                       onChange={(e) =>
-                        handleFormChange('status', e.target.value)
+                        handleFormChange(
+                          'status',
+                          e.target.value as UpdateReservationRequest['status']
+                        )
                       }
                     >
                       <MenuItem value="pending">
@@ -327,7 +319,11 @@ const ReservationManagementPage = () => {
                       value={editForm.payment_method || ''}
                       label={t('reservationManagementPage.paymentMethod')}
                       onChange={(e) =>
-                        handleFormChange('payment_method', e.target.value)
+                        handleFormChange(
+                          'payment_method',
+                          e.target
+                            .value as UpdateReservationRequest['payment_method']
+                        )
                       }
                     >
                       <MenuItem value="cash">
@@ -349,7 +345,11 @@ const ReservationManagementPage = () => {
                         value={editForm.payment_status || ''}
                         label={t('reservationManagementPage.paymentStatus')}
                         onChange={(e) =>
-                          handleFormChange('payment_status', e.target.value)
+                          handleFormChange(
+                            'payment_status',
+                            e.target
+                              .value as UpdateReservationRequest['payment_status']
+                          )
                         }
                       >
                         <MenuItem value="paid">

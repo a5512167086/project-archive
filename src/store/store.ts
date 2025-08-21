@@ -8,6 +8,7 @@ import brandReducer from './modules/brandSlice'
 import categoryReducer from './modules/categorySlice'
 import productReducer from './modules/productSlice'
 import ecommReducer from './modules/ecommSlice'
+import orderReducer from './modules/orderSlice'
 import { userApi } from './apis/userApi'
 import { botApi } from './apis/botApi'
 import { moduleApi } from './apis/moduleApi'
@@ -17,6 +18,7 @@ import { brandApi } from './apis/brandApi'
 import { categoryApi } from './apis/categoryApi'
 import { productApi } from './apis/productApi'
 import { ecommApi } from './apis/ecommApi'
+import { orderApi } from './apis/orderApi'
 
 export const store = configureStore({
   reducer: {
@@ -29,6 +31,7 @@ export const store = configureStore({
     category: categoryReducer,
     product: productReducer,
     ecomm: ecommReducer,
+    order: orderReducer,
     [userApi.reducerPath]: userApi.reducer,
     [botApi.reducerPath]: botApi.reducer,
     [moduleApi.reducerPath]: moduleApi.reducer,
@@ -37,7 +40,8 @@ export const store = configureStore({
     [brandApi.reducerPath]: brandApi.reducer,
     [categoryApi.reducerPath]: categoryApi.reducer,
     [productApi.reducerPath]: productApi.reducer,
-    [ecommApi.reducerPath]: ecommApi.reducer
+    [ecommApi.reducerPath]: ecommApi.reducer,
+    [orderApi.reducerPath]: orderApi.reducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
@@ -50,6 +54,7 @@ export const store = configureStore({
       .concat(categoryApi.middleware)
       .concat(productApi.middleware)
       .concat(ecommApi.middleware)
+      .concat(orderApi.middleware)
 })
 
 export type RootState = ReturnType<typeof store.getState>

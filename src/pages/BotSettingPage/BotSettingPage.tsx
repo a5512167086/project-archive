@@ -219,8 +219,7 @@ const BotSettingPage = () => {
               fontSize: 16
             }}
             onClick={() => {
-              // 這裡可以取得所有欄位的值
-              // 目前僅console.log，未串API
+              // TODO: Add update bot credential api
               console.log({
                 channelId,
                 channelSecret,

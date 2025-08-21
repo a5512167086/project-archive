@@ -106,7 +106,6 @@ export const BrandManagement = () => {
     brand_name: string
     brand_description: string
   }) => {
-    console.log(data)
     await createBrand({
       bot_uuid: currentBot!.bot_detail_id,
       ...data

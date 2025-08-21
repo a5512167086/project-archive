@@ -14,9 +14,9 @@ export type ReservationData = {
   reservation_date: string
   start_time: string
   end_time: string
-  status: string
-  payment_method: string
-  payment_status: string | null
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed'
+  payment_method: 'cash' | 'bank_transfer'
+  payment_status: 'paid' | 'unpaid' | 'refunded' | null
   created_at: string
   selected_option_groups: {
     option_group_id: string
@@ -38,9 +38,9 @@ export type UpdateReservationRequest = {
   reservation_id: string
   reservation_date?: string
   start_time?: string
-  payment_method?: 'cash' | 'bank_transfer' | 'credit_card'
+  payment_method?: 'cash' | 'bank_transfer'
   payment_status?: 'paid' | 'unpaid' | 'refunded' | null
-  status?: string
+  status?: 'pending' | 'confirmed' | 'cancelled' | 'completed'
   note?: string
 }
 

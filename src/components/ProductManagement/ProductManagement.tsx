@@ -129,6 +129,7 @@ export const ProductManagement = () => {
 
   const [createProduct] = useCreateProductsMutation()
   const [deleteProduct] = useDeleteProductsMutation()
+  const flattenCategoryList = flattenCategories(categoryList)
 
   const genProductFields = (productFields: FieldProps[]) =>
     productFields.map((field) => {
@@ -177,14 +178,13 @@ export const ProductManagement = () => {
       const brand = brandList.find(
         (brand) => brand.object_id === product.brand_id
       )
-      const category = categoryList.find(
-        (category) => category.class_id === product.category_id
+      const category = flattenCategoryList.find(
+        (category) => parseInt(category.value) === product.category_id
       )
       return {
         ...product,
         brand_name: brand?.brand_name || t('productManagementPage.noBrand'),
-        category_name:
-          category?.category_name || t('productManagementPage.noCategory')
+        category_name: category?.label || t('productManagementPage.noCategory')
       }
     })
   }, [products, brandList, categoryList, t])
