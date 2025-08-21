@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SearchInput } from "../../components/SearchInput";
-import { FeaturedItem } from "@/components/features/reservations/components/FeaturedItem";
-import { ReservationDialog } from "@/components/features/reservations/components/ReservationDialog";
+import { FeaturedItem } from "@/components/features/reservations/FeaturedItem";
+import { ReservationDialog } from "@/components/features/reservations/ReservationDialog";
 import {
   useGetReservationItemsQuery,
   type ReservationItem,

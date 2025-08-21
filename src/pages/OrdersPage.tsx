@@ -8,7 +8,7 @@ import { useLiff } from "@/hooks/useLiff";
 import type { UserOrder } from "@/store/apis/userApi";
 import { PackageSearch } from "lucide-react";
 import { useGetProductsQuery } from "@/store/apis/ecommApi";
-import { OrderDetailModal } from "@/components/features/orders/components/OrderDetailModal";
+import { OrderDetailModal } from "@/components/features/orders/OrderDetailModal";
 import { EmptyState } from "@/components/common/EmptyState";
 
 // 狀態映射和顏色定義

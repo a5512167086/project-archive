@@ -44,6 +44,7 @@ export interface UserOrder {
   recipient_phone: string;
   shipping_address: string;
   items: OrderItem[];
+  notes: string;
   created_at: string;
   updated_at: string;
 }

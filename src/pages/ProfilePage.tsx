@@ -6,8 +6,8 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
-import { QuickActionCard } from "@/components/features/profile/components/QuickActionCard";
-import { UserProfileCard } from "@/components/features/profile/components/UserProfileCard";
+import { QuickActionCard } from "@/components/features/profile/QuickActionCard";
+import { UserProfileCard } from "@/components/features/profile/UserProfileCard";
 import { moduleRegistry } from "../lib/module-registry";
 import { useLiff } from "../hooks/useLiff";
 

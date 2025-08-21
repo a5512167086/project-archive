@@ -20,7 +20,7 @@ const statusMap = {
   completed: { label: "已完成", color: "green" as const },
 };
 
-import { ReservationDetailModal } from "@/components/features/reservations/components/ReservationDetailModal";
+import { ReservationDetailModal } from "@/components/features/reservations/ReservationDetailModal";
 import { EmptyState } from "@/components/common/EmptyState";
 import { PackageSearch } from "lucide-react";
 

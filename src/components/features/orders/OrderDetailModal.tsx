@@ -129,6 +129,15 @@ export function OrderDetailModal({
               </div>
             </div>
 
+            {order.notes && (
+              <div className="space-y-2">
+                <h4 className="font-medium text-gray-700">訂單備註：</h4>
+                <div className="bg-gray-50 p-3 rounded-md text-sm">
+                  <p>{order.notes}</p>
+                </div>
+              </div>
+            )}
+
             <div className="text-xs text-gray-500 pt-2 border-t">
               訂單建立時間：
               {new Date(order.created_at).toLocaleString("zh-TW")}

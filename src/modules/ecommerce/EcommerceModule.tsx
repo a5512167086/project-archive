@@ -2,9 +2,9 @@ import { useState } from "react";
 import { ShoppingBag, ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SearchInput } from "@/components/SearchInput";
-import { ProductCard } from "@/components/features/ecommerce/components/ProductCard";
+import { ProductCard } from "@/components/features/ecommerce/ProductCard";
 import type { AppModule } from "@/types/module";
-import { ProductDialog } from "@/components/features/ecommerce/components/ProductDialog";
+import { ProductDialog } from "@/components/features/ecommerce/ProductDialog";
 import {
   useGetProductsQuery,
   useGetCategoriesQuery,
@@ -12,7 +12,7 @@ import {
 } from "@/store/apis/ecommApi";
 import { useLiff } from "@/hooks/useLiff";
 import placeholder from "@/assets/placeholder.svg";
-import { FilterDialog } from "@/components/features/ecommerce/components/FilterDialog";
+import { FilterDialog } from "@/components/features/ecommerce/FilterDialog";
 import { Link } from "react-router";
 import { useAppSelector } from "@/store";
 import { Button } from "@/components/ui/button";
