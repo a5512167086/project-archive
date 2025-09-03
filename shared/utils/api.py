@@ -1,5 +1,7 @@
 import requests
 
+from shared.constants.config import RAG_BACKEND_URL
+
 
 def get_channel_access_token(channel_id: str, channel_secret: str) -> str:
     url = "https://api.line.me/oauth2/v3/token"
@@ -63,3 +65,20 @@ def delete_liff_app(channel_access_token: str, liffId: str):
     response = requests.delete(url, headers=headers)
     if response.status_code != 200:
         response.raise_for_status()
+
+
+def rag_customer_service(bot_uuid: str, query: str, top_k: str, score_threshold: str):
+    url = f"{RAG_BACKEND_URL}/query"
+    response = requests.post(
+        url,
+        json={
+            "bot_uuid": bot_uuid,
+            "query": query,
+            "top_k": top_k,
+            "score_threshold": score_threshold,
+        },
+    )
+    if response.status_code != 200:
+        response.raise_for_status()
+
+    return response.json()

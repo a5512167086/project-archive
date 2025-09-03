@@ -15,6 +15,7 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 
 FRONTEND_URL = os.getenv("FRONTEND_URL")
 BACKEND_URL = os.getenv("BACKEND_URL")
+RAG_BACKEND_URL = os.getenv("RAG_BACKEND_URL")
 
 EMAIL = os.getenv("EMAIL")
 EMAIL_APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
