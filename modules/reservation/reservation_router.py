@@ -17,7 +17,11 @@ from modules.reservation.reservation_schema import (
 )
 from modules.reservation.reservation_service import ReservationService
 from shared.clients.database import SessionDep
+from shared.constants.error_code import ErrorCode
 from shared.dependencies import get_current_user
+from shared.exception import GlobalErrorException
+from shared.queries.group_query import is_user_in_group
+from shared.services.group_service import GroupService
 
 
 def get_reservation_service(session: SessionDep) -> ReservationService:
@@ -30,6 +34,11 @@ def get_bot_service(session: SessionDep) -> BotService:
     return BotService(session)
 
 
+def get_group_service(session: SessionDep) -> GroupService:
+    """依賴注入 GroupService"""
+    return GroupService(session)
+
+
 reservation_router = APIRouter(prefix="/reservations", tags=["reservations"])
 service_router = APIRouter(prefix="/services", tags=["services"])
 
@@ -40,8 +49,10 @@ def list_services(
     reservation_service: Annotated[
         ReservationService, Depends(get_reservation_service)
     ],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
-    return reservation_service.get_services_by_bot_class_id(bot_uuid)
+    bot = bot_service.validate_line_bot_exists(bot_uuid)
+    return reservation_service.get_services_by_bot_class_id(bot.class_id)
 
 
 @service_router.post("")
@@ -54,8 +65,8 @@ def create_service(
     bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
-    bot_service.validate_bot_ownership(user_id, service.bot_uuid)
-    reservation_service.insert_new_service(service, user_id)
+    bot = bot_service.validate_bot_ownership(user_id, service.bot_uuid)
+    reservation_service.insert_new_service(service, bot.class_id)
     reservation_service.session.commit()
 
 
@@ -69,11 +80,10 @@ def delete_service(
     bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
-    bot_service.validate_bot_ownership(user_id, delete_service.bot_uuid)
+    bot = bot_service.validate_bot_ownership(user_id, delete_service.bot_uuid)
     reservation_service.delete_service_by_service_id(
-        delete_service.bot_uuid,
+        bot.class_id,
         delete_service.delete_service_list,
-        user_id,
     )
     reservation_service.session.commit()
 
@@ -88,8 +98,8 @@ def update_service(
     bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
-    bot_service.validate_bot_ownership(user_id, service_patch.bot_uuid)
-    reservation_service.update_service_by_service_id(service_patch, user_id)
+    bot = bot_service.validate_bot_ownership(user_id, service_patch.bot_uuid)
+    reservation_service.update_service_by_service_id(service_patch, bot.class_id)
     reservation_service.session.commit()
 
 
@@ -112,10 +122,21 @@ def create_reservation(
     reservation_service: Annotated[
         ReservationService, Depends(get_reservation_service)
     ],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
+    group_service: Annotated[GroupService, Depends(get_group_service)],
 ):
     user_id = current_user["user_id"]
+    bot = bot_service.validate_line_bot_exists(reservation.bot_uuid)
+    bot_group = group_service.validate_group_exist_in_bot(bot.class_id, "Users")
+
+    if not is_user_in_group(reservation_service.session, bot_group.group_id, user_id):
+        raise GlobalErrorException(
+            error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
+            error_message="User is not a member of this bot's group.",
+        )
+
     reservation_detail = reservation_service.create_user_reservation(
-        user_id, reservation
+        user_id, reservation, bot.class_id
     )
     reservation_service.session.commit()
 
@@ -142,10 +163,12 @@ def delete_reservation(
     reservation_service: Annotated[
         ReservationService, Depends(get_reservation_service)
     ],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     """Delete a reservation by reservation ID"""
     user_id = current_user["user_id"]
-    reservation_service.delete_user_reservation(user_id, bot_uuid, reservation_id)
+    bot_service.validate_bot_ownership(user_id, bot_uuid)
+    reservation_service.delete_user_reservation(reservation_id)
     reservation_service.session.commit()
 
 
@@ -158,11 +181,20 @@ def get_user_reservations_in_bot(
     reservation_service: Annotated[
         ReservationService, Depends(get_reservation_service)
     ],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
+    group_service: Annotated[GroupService, Depends(get_group_service)],
 ):
     """Get user's reservations in a specific bot"""
     user_id = current_user["user_id"]
+    bot = bot_service.validate_line_bot_exists(bot_uuid)
+    bot_group = group_service.validate_group_exist_in_bot(bot.class_id, "Users")
+    if not is_user_in_group(reservation_service.session, bot_group.group_id, user_id):
+        raise GlobalErrorException(
+            error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
+            error_message="User is not a member of this bot's group.",
+        )
     reservations = reservation_service.get_user_reservations_in_bot_list(
-        bot_uuid, user_id
+        bot.class_id, user_id
     )
     return reservations
 
@@ -174,10 +206,12 @@ def get_bot_reservations(
     reservation_service: Annotated[
         ReservationService, Depends(get_reservation_service)
     ],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     """Get all reservations for a bot (bot owner only)"""
     user_id = current_user["user_id"]
-    reservations = reservation_service.get_bot_reservations_list(bot_uuid, user_id)
+    bot = bot_service.validate_bot_ownership(user_id, bot_uuid)
+    reservations = reservation_service.get_bot_reservations_list(bot.class_id)
     return reservations
 
 
@@ -188,11 +222,13 @@ def update_reservation(
     reservation_service: Annotated[
         ReservationService, Depends(get_reservation_service)
     ],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     """Update a reservation"""
     user_id = current_user["user_id"]
+    bot_service.validate_bot_ownership(user_id, reservation_patch.bot_uuid)
     updated_reservation = reservation_service.update_reservation_by_owner(
-        user_id, reservation_patch
+        reservation_patch
     )
     reservation_service.session.commit()
 

@@ -4,7 +4,6 @@ from uuid import UUID
 
 from sqlmodel import Session
 
-from modules.bot.bot_service import BotService
 from modules.reservation.reservation_command import ReservationCommand
 from modules.reservation.reservation_query import ReservationQuery
 from modules.reservation.reservation_schema import (
@@ -23,8 +22,6 @@ from shared.constants.common import PaymentMethod, PaymentStatus
 from shared.constants.config import TAIWAN_TZ
 from shared.constants.error_code import ErrorCode
 from shared.exception import GlobalErrorException
-from shared.queries.group_query import is_user_in_group
-from shared.services.group_service import GroupService
 
 
 class ReservationService:
@@ -32,11 +29,11 @@ class ReservationService:
         self.session = session
         self.command = ReservationCommand(session)
         self.query = ReservationQuery(session)
-        self.bot_service = BotService(session)
-        self.group_service = GroupService(session)
 
     def validate_service_class(self, bot_class_id: int) -> int:
-        service_class_id = self.query.get_service_class_id_by_bot_class_id(bot_class_id)
+        service_class_id = self.query.get_service_class_id_by_bot_class_id(
+            bot_class_id
+        )
         if not service_class_id:
             raise GlobalErrorException(
                 error_code=ErrorCode.SERVICE_CLASS_NOT_FOUND,
@@ -55,16 +52,12 @@ class ReservationService:
             )
         return reservation_class_id
 
-    def get_services_by_bot_class_id(self, bot_uuid: UUID):
-        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
-        service_class_id = self.validate_service_class(bot.class_id)
+    def get_services_by_bot_class_id(self, bot_class_id: int):
+        service_class_id = self.validate_service_class(bot_class_id)
         return self.query.get_services(service_class_id)
 
-    def insert_new_service(self, new_service: ServiceCreate, current_user_id: UUID):
-        bot = self.bot_service.validate_line_bot_exists(new_service.bot_uuid)
-        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
-
-        service_class_id = self.validate_service_class(bot.class_id)
+    def insert_new_service(self, new_service: ServiceCreate, bot_class_id: int):
+        service_class_id = self.validate_service_class(bot_class_id)
         self.command.insert_reservation_item(
             service_class_id=service_class_id,
             service_name=new_service.service_name,
@@ -76,12 +69,9 @@ class ReservationService:
         )
 
     def delete_service_by_service_id(
-        self, bot_uuid: UUID, service_id_list: List[UUID], current_user_id: UUID
+        self, bot_class_id: int, service_id_list: List[UUID]
     ):
-        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
-        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
-
-        service_class_id = self.validate_service_class(bot.class_id)
+        service_class_id = self.validate_service_class(bot_class_id)
         # Get object_ids from service_ids first
         object_id_list = []
         for service_id in service_id_list:
@@ -92,11 +82,9 @@ class ReservationService:
         self.command.delete_reservation_items(service_class_id, object_id_list)
 
     def update_service_by_service_id(
-        self, service_patch: ServicePatch, current_user_id: UUID
+        self, service_patch: ServicePatch, bot_class_id: int
     ):
-        bot = self.bot_service.validate_line_bot_exists(service_patch.bot_uuid)
-        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
-        self.validate_service_class(bot.class_id)
+        self.validate_service_class(bot_class_id)
 
         object_id = self.query.get_object_id_by_service_id(service_patch.service_id)
 
@@ -116,20 +104,13 @@ class ReservationService:
 
         self.command.update_reservation_item(object_patch)
 
-    def create_user_reservation(self, user_id: UUID, reservation: ReservationCreate):
-        bot = self.bot_service.validate_line_bot_exists(reservation.bot_uuid)
-        bot_group = self.group_service.validate_group_exist_in_bot(
-            bot.class_id, "Users"
+    def create_user_reservation(
+        self, user_id: UUID, reservation: ReservationCreate, bot_class_id: int
+    ):
+        service_class_id = self.validate_service_class(bot_class_id)
+        service = self.query.get_service_by_id(
+            service_class_id, reservation.service_id
         )
-
-        if not is_user_in_group(self.session, bot_group.group_id, user_id):
-            raise GlobalErrorException(
-                error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
-                error_message="User is not a member of this bot's group.",
-            )
-
-        service_class_id = self.validate_service_class(bot.class_id)
-        service = self.query.get_service_by_id(service_class_id, reservation.service_id)
 
         if not service:
             raise GlobalErrorException(
@@ -186,7 +167,7 @@ class ReservationService:
             for option in options:
                 total_price += option.price
 
-        reservation_class_id = self.validate_reservation_class(bot.class_id)
+        reservation_class_id = self.validate_reservation_class(bot_class_id)
 
         # Determine payment status based on payment method
         payment_status = PaymentStatus.unpaid.value
@@ -307,21 +288,15 @@ class ReservationService:
 
         return list(daily_slots_map.values())
 
-    def delete_user_reservation(
-        self, user_id: UUID, bot_uuid: UUID, reservation_id: UUID
-    ):
+    def delete_user_reservation(self, reservation_id: UUID):
         """Delete a user's reservation"""
-        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
-        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
         self.command.delete_reservation_by_id(reservation_id)
 
     def get_bot_reservations_list(
-        self, bot_uuid: UUID, current_user_id: UUID
+        self, bot_class_id: int
     ) -> List[ReservationListResponse]:
         """Get all reservations for a bot (bot owner only)"""
-        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
-        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
-        reservation_class_id = self.validate_reservation_class(bot.class_id)
+        reservation_class_id = self.validate_reservation_class(bot_class_id)
         reservations = self.query.get_bot_reservations(reservation_class_id)
 
         if not reservations:
@@ -379,19 +354,10 @@ class ReservationService:
         return result
 
     def get_user_reservations_in_bot_list(
-        self, bot_uuid: UUID, current_user_id: UUID
+        self, bot_class_id: int, current_user_id: UUID
     ) -> List[ReservationListResponse]:
         """Get user's reservations in a specific bot"""
-        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
-        bot_group = self.group_service.validate_group_exist_in_bot(
-            bot.class_id, "Users"
-        )
-        reservation_class_id = self.validate_reservation_class(bot.class_id)
-        if not is_user_in_group(self.session, bot_group.group_id, current_user_id):
-            raise GlobalErrorException(
-                error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
-                error_message="User is not a member of this bot's group.",
-            )
+        reservation_class_id = self.validate_reservation_class(bot_class_id)
 
         # 獲取用戶在該 bot 下的預約
         reservations = self.query.get_user_reservations_in_bot(
@@ -452,21 +418,17 @@ class ReservationService:
 
         return result
 
-    def update_reservation_by_owner(
-        self, user_id: UUID, reservation_patch: ReservationPatch
-    ):
+    def update_reservation_by_owner(self, reservation_patch: ReservationPatch):
         """Update reservation (reservation owner or bot owner can update)"""
         # 檢查 reservation 是否存在
-        reservation = self.query.get_reservation_by_id(reservation_patch.reservation_id)
+        reservation = self.query.get_reservation_by_id(
+            reservation_patch.reservation_id
+        )
         if not reservation:
             raise GlobalErrorException(
                 error_code=ErrorCode.RESERVATION_NOT_FOUND,
                 error_message="Reservation not found",
             )
-
-        # 檢查是否為 bot 擁有者
-        bot = self.bot_service.validate_line_bot_exists(reservation_patch.bot_uuid)
-        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
 
         # 如果要更新時間相關欄位，需要重新檢查排程和容量
         if reservation_patch.reservation_date or reservation_patch.start_time:

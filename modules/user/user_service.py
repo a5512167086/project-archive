@@ -9,7 +9,7 @@ from jwt.exceptions import (
 )
 from sqlmodel import Session
 
-from modules.bot.bot_service import BotService
+from modules.bot.bot_model import BotListWithCredentialView
 from modules.user.auth_service import (
     _verify_jwt_token,
     create_jwt_token,
@@ -32,7 +32,6 @@ from shared.constants.config import (
 )
 from shared.constants.error_code import ErrorCode
 from shared.exception import GlobalErrorException
-from shared.services.group_service import validate_group_exist_in_bot
 from shared.services.mail_service import send_reset_email
 from shared.utils.common import (
     authenticate_with_google,
@@ -54,7 +53,6 @@ class UserService:
         self.session = session
         self.command = UserCommand(session)
         self.query = UserQuery(session)
-        self.bot_service = BotService(session)
 
     def create_new_user(self, username: str, email: str, password: str) -> str:
         existing_user = self.query.get_user_by_email(email)
@@ -251,10 +249,12 @@ class UserService:
                 error_message="Invalid reset token",
             )
 
-    def customer_login(self, customer: CustomerLoginRequest):
-        bot = self.bot_service.validate_line_bot_exists(customer.bot_id)
-        group = validate_group_exist_in_bot(self.session, bot.class_id, "Users")
-
+    def customer_login(
+        self,
+        group_id: int,
+        customer: CustomerLoginRequest,
+        bot: BotListWithCredentialView,
+    ):
         user_info = get_line_oauth_info(customer.line_id_token, bot.login_channel_id)
 
         user = self.query.get_user_by_email(user_info["email"])
@@ -270,9 +270,7 @@ class UserService:
             self.command.create_oauth(new_user.user_id, "line", user_info["id"])
 
             # Add to the bot's Users group
-            insert_group_member(
-                self.session, group.group_id, new_user.user_id, 2, None, True
-            )
+            insert_group_member(self.session, group_id, new_user.user_id, 2, None, True)
 
             # Generate and return token
             token = generate_token_pair(new_user.user_id, new_user.email)
@@ -285,7 +283,7 @@ class UserService:
                 "User already exists, please login and bind.",
             )
 
-        insert_group_member(self.session, group.group_id, user.user_id, 2, None, True)
+        insert_group_member(self.session, group_id, user.user_id, 2, None, True)
         return oauth_user_info
 
     def change_password(self, email: str, old_password: str, new_password: str):
@@ -307,8 +305,3 @@ class UserService:
         # Hash and update new password
         hashed_password = hash_password(new_password)
         self.command.update_user_password(user.user_id, hashed_password)
-
-
-def customer_login(session: Session, customer: CustomerLoginRequest):
-    service = UserService(session)
-    return service.customer_login(customer)

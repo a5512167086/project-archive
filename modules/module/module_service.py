@@ -1,8 +1,6 @@
-from uuid import UUID
-
 from sqlmodel import Session
 
-from modules.bot.bot_service import BotService
+from modules.bot.bot_model import BotListWithCredentialView
 from modules.module.module_command import ModuleCommand
 from modules.module.module_query import ModuleQuery
 from shared.constants.error_code import ErrorCode
@@ -14,7 +12,6 @@ class ModuleService:
         self.session = session
         self.command = ModuleCommand(session)
         self.query = ModuleQuery(session)
-        self.bot_service = BotService(session)
 
     def validate_setting_class(self, bot_class_id: int) -> int:
         setting_class_id = self.query.get_setting_class_id_by_bot_class_id(bot_class_id)
@@ -25,21 +22,16 @@ class ModuleService:
             )
         return setting_class_id
 
-    def get_all_module_settings(self, bot_uuid: UUID):
-        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
+    def get_all_module_settings(self, bot: BotListWithCredentialView):
         setting_class_id = self.validate_setting_class(bot.class_id)
         return self.query.get_all_settings_by_class_id(setting_class_id)
 
     def insert_new_module_setting(
         self,
-        bot_uuid: UUID,
+        bot: BotListWithCredentialView,
         module_name: str,
         is_enabled: bool,
-        current_user_id: UUID,
     ):
-        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
-        self.bot_service.validate_bot_ownership(current_user_id, bot_uuid)
-
         setting_class_id = self.validate_setting_class(bot.class_id)
         existing_setting = self.query.get_single_module_setting(
             setting_class_id, module_name

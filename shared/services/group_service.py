@@ -20,9 +20,3 @@ class GroupService:
             )
 
         return group
-
-
-# 向後兼容的函數包裝器，供現有代碼調用
-def validate_group_exist_in_bot(session: Session, bot_class_id: int, group_name: str):
-    service = GroupService(session)
-    return service.validate_group_exist_in_bot(bot_class_id, group_name)

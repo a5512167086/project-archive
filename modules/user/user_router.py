@@ -2,6 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
+from modules.bot.bot_service import BotService
 from modules.user.user_schema import (
     ChangePasswordRequest,
     CustomerLoginRequest,
@@ -19,11 +20,22 @@ from modules.user.user_schema import (
 from modules.user.user_service import UserService
 from shared.clients.database import SessionDep
 from shared.dependencies import get_current_user
+from shared.services.group_service import GroupService
 
 
 def get_user_service(session: SessionDep) -> UserService:
-    """依賴注入 UserService""" 
+    """依賴注入 UserService"""
     return UserService(session)
+
+
+def get_bot_service(session: SessionDep) -> BotService:
+    """依賴注入 BotService"""
+    return BotService(session)
+
+
+def get_group_service(session: SessionDep) -> GroupService:
+    """依賴注入 GroupService"""
+    return GroupService(session)
 
 
 user_router = APIRouter(prefix="/users", tags=["users"])
@@ -127,7 +139,11 @@ async def change_user_password(
 async def user_customer_login(
     body: CustomerLoginRequest,
     user_service: Annotated[UserService, Depends(get_user_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
+    group_service: Annotated[GroupService, Depends(get_group_service)],
 ):
-    token_response = user_service.customer_login(body)
+    bot = bot_service.validate_line_bot_exists(body.bot_id)
+    group = group_service.validate_group_exist_in_bot(bot.class_id, "Users")
+    token_response = user_service.customer_login(group.group_id, body, bot)
     user_service.session.commit()
     return token_response

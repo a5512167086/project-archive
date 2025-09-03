@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import UploadFile
 from sqlmodel import Session
 
-from modules.bot.bot_service import BotService
+from modules.bot.bot_model import BotListWithCredentialView
 from modules.ecomm.ecomm_command import EcommCommand
 from modules.ecomm.ecomm_model import (
     BrandListView,
@@ -39,8 +39,8 @@ from modules.ecomm.ecomm_schema import (
 from shared.constants.config import BACKEND_URL
 from shared.constants.error_code import ErrorCode
 from shared.exception import GlobalErrorException
+from shared.models.group_model import Group
 from shared.queries.group_query import is_user_in_group
-from shared.services.group_service import GroupService
 from shared.services.minio_service import (
     delete_product_image,
     upload_product_images,
@@ -52,8 +52,6 @@ class EcommService:
         self.session = session
         self.command = EcommCommand(session)
         self.query = EcommQuery(session)
-        self.bot_service = BotService(session)
-        self.group_service = GroupService(session)
 
     def get_nested_categories(
         self, category_class_id: int, category_list: List[CategoryListView]
@@ -97,13 +95,11 @@ class EcommService:
             )
         return category_class_id
 
-    def insert_single_brand(self, body: InsertBrandRequest, current_user_id: UUID):
-        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
-
+    def insert_single_brand(
+        self, bot: BotListWithCredentialView, body: InsertBrandRequest
+    ):
         brand_class_id = self.validate_brand_class(bot.class_id)
 
-        # 檢查品牌名稱是否已存在
         if self.query.check_brand_name_exists(brand_class_id, body.brand_name):
             raise GlobalErrorException(
                 error_code=ErrorCode.BRAND_ALREADY_EXISTS,
@@ -114,15 +110,15 @@ class EcommService:
             brand_class_id, body.brand_name, body.brand_description
         )
 
-    def get_all_brands(self, bot_uuid: UUID) -> List[BrandListView]:
-        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
+    def get_all_brands(
+        self, bot: BotListWithCredentialView
+    ) -> List[BrandListView]:
         brand_class_id = self.validate_brand_class(bot.class_id)
         return self.query.get_all_brands_by_class_id(brand_class_id)
 
-    def delete_brands_by_ids(self, body: DeleteBrandRequest, current_user_id: UUID):
-        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
-
+    def delete_brands_by_ids(
+        self, bot: BotListWithCredentialView, body: DeleteBrandRequest
+    ):
         brand_class_id = self.validate_brand_class(bot.class_id)
 
         if not body.deleted_id_list:
@@ -133,13 +129,11 @@ class EcommService:
 
         self.command.delete_brands(brand_class_id, body.deleted_id_list)
 
-    def update_brand_by_id(self, body: UpdateBrandRequest, current_user_id: UUID):
-        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
-
+    def update_brand_by_id(
+        self, bot: BotListWithCredentialView, body: UpdateBrandRequest
+    ):
         brand_class_id = self.validate_brand_class(bot.class_id)
 
-        # 如果有提供 brand_name，檢查是否重複（排除自己）
         if body.brand_name is not None:
             if self.query.check_brand_name_exists_exclude_self(
                 brand_class_id, body.brand_name, body.object_id
@@ -149,7 +143,6 @@ class EcommService:
                     error_message=f"Brand name '{body.brand_name}' already exists",
                 )
 
-        # 執行更新
         success = self.command.update_brand(
             brand_class_id,
             body.object_id,
@@ -163,23 +156,20 @@ class EcommService:
                 error_message="Brand not found or does not belong to this bot",
             )
 
-    # Category service methods
     def insert_single_category(
-        self, body: InsertCategoryRequest, current_user_id: UUID
+        self,
+        bot: BotListWithCredentialView,
+        body: InsertCategoryRequest,
+        current_user_id: UUID,
     ):
-        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
-
         category_class_id = self.validate_category_class(bot.class_id)
 
-        # 檢查類別名稱是否已存在
         if self.query.check_category_name_exists(category_class_id, body.category_name):
             raise GlobalErrorException(
                 error_code=ErrorCode.CATEGORY_ALREADY_EXISTS,
                 error_message=f"Category name '{body.category_name}' already exists",
             )
 
-        # 檢查父類別是否存在（如果有提供）
         if body.parent_category_id:
             if not self.query.check_parent_category_exists(body.parent_category_id):
                 raise GlobalErrorException(
@@ -192,22 +182,20 @@ class EcommService:
             body.category_name,
             body.category_description,
             body.parent_category_id,
-            str(current_user_id),  # 傳遞 owner_id
+            str(current_user_id),
         )
 
-    def get_all_categories(self, bot_uuid: UUID) -> List[CategoryListView]:
-        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
+    def get_all_categories(
+        self, bot: BotListWithCredentialView
+    ) -> List[CategoryListView]:
         category_class_id = self.validate_category_class(bot.class_id)
         return self.query.get_all_categories_by_class_id(
             category_class_id
         ), category_class_id
 
     def delete_categories_by_ids(
-        self, body: DeleteCategoryRequest, current_user_id: UUID
+        self, bot: BotListWithCredentialView, body: DeleteCategoryRequest
     ):
-        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
-
         category_class_id = self.validate_category_class(bot.class_id)
         self.command.move_products_to_root_category(
             category_class_id, body.deleted_class_id_list
@@ -225,9 +213,9 @@ class EcommService:
 
         self.command.delete_categories(body.deleted_class_id_list)
 
-    def update_category_by_id(self, body: UpdateCategoryRequest, current_user_id: UUID):
-        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
+    def update_category_by_id(
+        self, bot: BotListWithCredentialView, body: UpdateCategoryRequest
+    ):
         category_class_id = self.validate_category_class(bot.class_id)
 
         if body.category_name is not None:
@@ -263,9 +251,9 @@ class EcommService:
                 error_message="Invalid category hierarchy: circular reference detected",
             )
 
-    # Product service methods
-    def get_all_products(self, bot_uuid: UUID) -> List[ProductResponse]:
-        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
+    def get_all_products(
+        self, bot: BotListWithCredentialView
+    ) -> List[ProductResponse]:
         category_class_id = self.validate_category_class(bot.class_id)
         category_ids = self.query.get_all_categories_by_class_id(category_class_id)
         all_category_ids = [cat.class_id for cat in category_ids]
@@ -327,7 +315,7 @@ class EcommService:
 
     def insert_product(
         self,
-        bot_uuid: UUID,
+        bot: BotListWithCredentialView,
         product_name: str,
         product_description: str,
         sku_code: Optional[str],
@@ -339,37 +327,26 @@ class EcommService:
         category_id: int = None,
         brand_id: int = None,
     ):
-        """建立單一產品並上傳圖片到 MinIO"""
-        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
-        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
-
-        # 如果沒有提供 category_id，使用根 Category class
         if category_id is None:
             product_class_id = self.validate_category_class(bot.class_id)
         else:
-            # 如果提供了 category_id，使用指定的類別
             product_class_id = category_id
 
-        # 檢查 SKU 是否已存在
         if sku_code and self.query.check_product_sku_exists(sku_code):
             raise GlobalErrorException(
                 error_code=ErrorCode.PRODUCT_SKU_ALREADY_EXISTS,
                 error_message=f"SKU '{sku_code}' already exists",
             )
 
-        # 在確定要創建產品時，才上傳圖片到 MinIO
         uploaded_images = []
-        if images and len(images) > 0:
-            # 檢查是否有實際的圖片檔案（不是空檔案）
+        if images and any(img.filename and img.size > 0 for img in images):
             valid_images = [img for img in images if img.filename and img.size > 0]
             if valid_images:
                 uploaded_images = upload_product_images(valid_images)
-                # Set is_primary for the first image
                 if uploaded_images:
                     for i, img_data in enumerate(uploaded_images):
                         img_data["is_primary"] = i == 0
 
-        # 建立產品
         self.command.insert_product(
             product_class_id=product_class_id,
             product_name=product_name,
@@ -383,20 +360,17 @@ class EcommService:
             owner_id=user_id,
         )
 
-    def delete_products_by_ids(self, body: DeleteProductRequest, user_id: str):
-        """刪除產品"""
-        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    def delete_products_by_ids(
+        self, bot: BotListWithCredentialView, body: DeleteProductRequest
+    ):
         self.validate_brand_class(bot.class_id)
         self.command.delete_products(body.product_ids)
 
-    def update_product_by_id(self, body: UpdateProductRequest, user_id: str):
-        """更新產品"""
-        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    def update_product_by_id(
+        self, bot: BotListWithCredentialView, body: UpdateProductRequest
+    ):
         self.validate_brand_class(bot.class_id)
 
-        # 如果更新 SKU，檢查是否重複（排除自己）
         if body.sku_code is not None:
             if self.query.check_product_sku_exists_exclude_self(
                 body.sku_code, body.product_id
@@ -408,11 +382,11 @@ class EcommService:
         if body.sku_code == "":
             body.sku_code = None
 
-        category_id_to_use = None
-        if body.category_id is None:
-            category_id_to_use = self.validate_category_class(bot.class_id)
-        else:
-            category_id_to_use = body.category_id
+        category_id_to_use = (
+            self.validate_category_class(bot.class_id)
+            if body.category_id is None
+            else body.category_id
+        )
 
         success = self.command.update_product(
             product_id=body.product_id,
@@ -432,19 +406,15 @@ class EcommService:
                 error_message="Product not found",
             )
 
-    # Shipping service methods
-    async def get_shipping_setting(self, bot_uuid: UUID) -> ShippingSetting:
-        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
+    async def get_shipping_setting(
+        self, bot: BotListWithCredentialView
+    ) -> ShippingSetting:
         bot_uuid_str = str(bot.bot_detail_id)
-        setting = await self.query.get_shipping_setting_by_bot_uuid(bot_uuid_str)
-        return setting
+        return await self.query.get_shipping_setting_by_bot_uuid(bot_uuid_str)
 
     async def update_shipping_setting(
-        self, body: UpdateShippingSettingRequest, current_user_id: UUID
+        self, bot: BotListWithCredentialView, body: UpdateShippingSettingRequest
     ):
-        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
-
         methods = [option.method for option in body.shipping_options]
         if len(methods) != len(set(methods)):
             raise GlobalErrorException(
@@ -460,11 +430,8 @@ class EcommService:
         await self.command.update_shipping_setting(bot_uuid_str, converted_options)
 
     async def delete_shipping_setting(
-        self, body: DeleteShippingMethodRequest, current_user_id: UUID
+        self, bot: BotListWithCredentialView, body: DeleteShippingMethodRequest
     ):
-        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
-
         bot_uuid_str = str(bot.bot_detail_id)
         setting = await self.query.get_shipping_setting_by_bot_uuid(bot_uuid_str)
         if not setting:
@@ -483,13 +450,10 @@ class EcommService:
             bot_uuid_str, setting.shipping_options
         )
 
-    async def delete_all_shipping_settings(self, bot_uuid: UUID, current_user_id: UUID):
-        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
-        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
+    async def delete_all_shipping_settings(self, bot: BotListWithCredentialView):
         bot_uuid_str = str(bot.bot_detail_id)
         self.command.delete_all_shipping_setting(bot_uuid_str)
 
-    # Order service methods
     def validate_order_class(self, bot_class_id: int) -> int:
         order_class_id = self.query.get_order_class_id_by_bot_class_id(bot_class_id)
         if not order_class_id:
@@ -499,9 +463,9 @@ class EcommService:
             )
         return order_class_id
 
-    def get_all_orders(self, user_id: UUID, bot_uuid: UUID) -> List[OrderResponse]:
-        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
-        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    def get_all_orders(
+        self, bot: BotListWithCredentialView
+    ) -> List[OrderResponse]:
         order_class_id = self.validate_order_class(bot.class_id)
         orders_data = self.query.get_all_orders_view(order_class_id)
         orders = []
@@ -509,28 +473,24 @@ class EcommService:
             order_items_data = self.query.get_order_items_by_object_id(
                 order_data.object_id
             )
-            order_items_schema = []
-            for item_data in order_items_data:
-                order_items_schema.append({
-                    "product_id": item_data.product_id,
-                    "variant_id": item_data.variant_id,
-                    "quantity": item_data.quantity,
-                    "unit_price": item_data.unit_price,
-                    "subtotal": item_data.subtotal,
-                })
+            order_items_schema = [
+                {
+                    "product_id": item.product_id,
+                    "variant_id": item.variant_id,
+                    "quantity": item.quantity,
+                    "unit_price": item.unit_price,
+                    "subtotal": item.subtotal,
+                }
+                for item in order_items_data
+            ]
             orders.append(
-                OrderResponse(
-                    **order_data.model_dump(),
-                    items=order_items_schema,
-                )
+                OrderResponse(**order_data.model_dump(), items=order_items_schema)
             )
         return orders
 
-    def get_all_user_orders(self, user_id: UUID, bot_uuid: UUID) -> List[OrderResponse]:
-        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
-        bot_group = self.group_service.validate_group_exist_in_bot(
-            bot.class_id, "Users"
-        )
+    def get_all_user_orders(
+        self, bot: BotListWithCredentialView, bot_group: Group, user_id: UUID
+    ) -> List[OrderResponse]:
         if not is_user_in_group(self.session, bot_group.group_id, user_id):
             raise GlobalErrorException(
                 error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
@@ -543,28 +503,28 @@ class EcommService:
             order_items_data = self.query.get_order_items_by_object_id(
                 order_data.object_id
             )
-            order_items_schema = []
-            for item_data in order_items_data:
-                order_items_schema.append({
-                    "product_id": item_data.product_id,
-                    "variant_id": item_data.variant_id,
-                    "quantity": item_data.quantity,
-                    "unit_price": item_data.unit_price,
-                    "subtotal": item_data.subtotal,
-                })
+            order_items_schema = [
+                {
+                    "product_id": item.product_id,
+                    "variant_id": item.variant_id,
+                    "quantity": item.quantity,
+                    "unit_price": item.unit_price,
+                    "subtotal": item.subtotal,
+                }
+                for item in order_items_data
+            ]
             orders.append(
-                OrderResponse(
-                    **order_data.model_dump(),
-                    items=order_items_schema,
-                )
+                OrderResponse(**order_data.model_dump(), items=order_items_schema)
             )
         return orders
 
-    async def insert_order(self, body: InsertOrderRequest, user_id: str):
-        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        bot_group = self.group_service.validate_group_exist_in_bot(
-            bot.class_id, "Users"
-        )
+    async def insert_order(
+        self,
+        bot: BotListWithCredentialView,
+        bot_group: Group,
+        body: InsertOrderRequest,
+        user_id: str,
+    ):
         if not is_user_in_group(self.session, bot_group.group_id, user_id):
             raise GlobalErrorException(
                 error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
@@ -572,8 +532,6 @@ class EcommService:
             )
 
         order_class_id = self.validate_order_class(bot.class_id)
-
-        # Get shipping setting and fee
         shipping_setting = await self.query.get_shipping_setting_by_bot_uuid(
             str(body.bot_uuid)
         )
@@ -583,21 +541,20 @@ class EcommService:
                 error_message="Shipping settings not found for this bot.",
             )
 
-        shipping_fee = 0
-        found_shipping_method = False
-        for option in shipping_setting.shipping_options:
-            if option.method == body.shipping_method:
-                shipping_fee = option.fee
-                found_shipping_method = True
-                break
-
-        if not found_shipping_method:
+        shipping_fee = next(
+            (
+                option.fee
+                for option in shipping_setting.shipping_options
+                if option.method == body.shipping_method
+            ),
+            None,
+        )
+        if shipping_fee is None:
             raise GlobalErrorException(
                 error_code=ErrorCode.INVALID_INPUT,
                 error_message=f"Shipping method '{body.shipping_method}' is not valid or enabled.",
             )
 
-        # Fetch product details for each item to get unit_price and subtotal
         processed_items = []
         for item in body.items:
             product_detail = self.query.get_product_by_id(item.product_id)
@@ -606,19 +563,17 @@ class EcommService:
                     error_code=ErrorCode.PRODUCT_NOT_FOUND,
                     error_message=f"Product with ID {item.product_id} not found",
                 )
-
             unit_price = product_detail.price
-            subtotal = unit_price * item.quantity
+            processed_items.append(
+                {
+                    "product_id": item.product_id,
+                    "variant_id": item.variant_id,
+                    "quantity": item.quantity,
+                    "unit_price": unit_price,
+                    "subtotal": unit_price * item.quantity,
+                }
+            )
 
-            processed_items.append({
-                "product_id": item.product_id,
-                "variant_id": item.variant_id,
-                "quantity": item.quantity,
-                "unit_price": unit_price,
-                "subtotal": subtotal,
-            })
-
-        # Calculate total_amount based on processed_items
         total_amount = sum(item["subtotal"] for item in processed_items) + shipping_fee
 
         self.command.insert_order(
@@ -636,37 +591,30 @@ class EcommService:
             notes=body.notes,
         )
 
-    def update_order_by_id(self, body: UpdateOrderRequest, user_id: str):
-        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    def update_order_by_id(
+        self, bot: BotListWithCredentialView, body: UpdateOrderRequest
+    ):
         self.validate_order_class(bot.class_id)
-
-        success = self.command.update_order(
+        if not self.command.update_order(
             order_id=body.order_id,
             status=body.status,
             payment_status=body.payment_status,
             tracking_number=body.tracking_number,
-        )
-
-        if not success:
+        ):
             raise GlobalErrorException(
                 error_code=ErrorCode.ORDER_NOT_FOUND,
                 error_message="Order not found",
             )
 
-    def delete_orders_by_ids(self, body: DeleteOrderRequest, user_id: str):
-        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    def delete_orders_by_ids(
+        self, bot: BotListWithCredentialView, body: DeleteOrderRequest
+    ):
         self.validate_order_class(bot.class_id)
         self.command.delete_orders(body.order_ids)
 
-    # Product Variant service methods
-    def insert_product_variant(self, body: InsertProductVariantRequest, user_id: str):
-        """建立產品變體"""
-        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
-
-        # 驗證產品是否存在
+    def insert_product_variant(
+        self, bot: BotListWithCredentialView, body: InsertProductVariantRequest
+    ):
         product = self.query.get_product_by_id(body.product_id)
         if not product:
             raise GlobalErrorException(
@@ -674,15 +622,14 @@ class EcommService:
                 error_message="Product not found",
             )
 
-        # 檢查 SKU 是否重複
-        if body.sku_code:
-            if self.query.check_product_sku_exists(
-                body.sku_code
-            ) or self.query.check_variant_sku_exists(body.sku_code):
-                raise GlobalErrorException(
-                    error_code=ErrorCode.PRODUCT_SKU_ALREADY_EXISTS,
-                    error_message=f"SKU '{body.sku_code}' already exists",
-                )
+        if body.sku_code and (
+            self.query.check_product_sku_exists(body.sku_code)
+            or self.query.check_variant_sku_exists(body.sku_code)
+        ):
+            raise GlobalErrorException(
+                error_code=ErrorCode.PRODUCT_SKU_ALREADY_EXISTS,
+                error_message=f"SKU '{body.sku_code}' already exists",
+            )
 
         return self.command.insert_product_variant(
             object_id=product.object_id,
@@ -692,63 +639,57 @@ class EcommService:
             stock=body.stock,
         )
 
-    def update_product_variant(self, body: UpdateProductVariantRequest, user_id: str):
-        """更新產品變體"""
-        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
-
-        # 驗證變體是否存在
-        variant = self.query.get_variant_by_id(body.variant_id)
-        if not variant:
+    def update_product_variant(
+        self, bot: BotListWithCredentialView, body: UpdateProductVariantRequest
+    ):
+        if not self.query.get_variant_by_id(body.variant_id):
             raise GlobalErrorException(
                 error_code=ErrorCode.PRODUCT_VARIANT_NOT_FOUND,
                 error_message="Product variant not found",
             )
 
-        # 檢查 SKU 是否重複
-        if body.sku_code:
-            if self.query.check_variant_sku_exists_exclude_self(
+        if body.sku_code and (
+            self.query.check_variant_sku_exists_exclude_self(
                 body.sku_code, body.variant_id
-            ) or (body.sku_code and self.query.check_product_sku_exists(body.sku_code)):
-                raise GlobalErrorException(
-                    error_code=ErrorCode.PRODUCT_SKU_ALREADY_EXISTS,
-                    error_message=f"SKU '{body.sku_code}' already exists",
-                )
+            )
+            or self.query.check_product_sku_exists(body.sku_code)
+        ):
+            raise GlobalErrorException(
+                error_code=ErrorCode.PRODUCT_SKU_ALREADY_EXISTS,
+                error_message=f"SKU '{body.sku_code}' already exists",
+            )
         if body.sku_code == "":
             body.sku_code = None
 
-        success = self.command.update_product_variant(
+        if not self.command.update_product_variant(
             variant_id=body.variant_id,
             variant_name=body.variant_name,
             sku_code=body.sku_code,
             price=body.price,
             stock=body.stock,
-        )
-
-        if not success:
+        ):
             raise GlobalErrorException(
                 error_code=ErrorCode.PRODUCT_VARIANT_NOT_FOUND,
                 error_message="Product variant not found",
             )
 
-    def delete_product_variants(self, body: DeleteProductVariantRequest, user_id: str):
-        """刪除產品變體"""
-        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    def delete_product_variants(
+        self, bot: BotListWithCredentialView, body: DeleteProductVariantRequest
+    ):
         self.command.delete_product_variants(body.variant_ids)
 
     def upload_product_image(
-        self, bot_uuid: UUID, product_id: UUID, user_id: str, images: List[UploadFile]
+        self,
+        bot: BotListWithCredentialView,
+        product_id: UUID,
+        images: List[UploadFile],
     ):
-        """Uploads new product images."""
         product = self.query.get_product_by_id(product_id)
         if not product:
             raise GlobalErrorException(
                 error_code=ErrorCode.PRODUCT_NOT_FOUND,
                 error_message="Product not found",
             )
-
-        self.bot_service.validate_bot_ownership(user_id, bot_uuid)
 
         if not images:
             raise GlobalErrorException(
@@ -757,41 +698,31 @@ class EcommService:
             )
 
         uploaded_images = upload_product_images(images)
-
         for img_data in uploaded_images:
             self.command.insert_product_image(
                 product.object_id, img_data["filename"], is_primary=False
             )
 
-    def update_product_image(self, body: UpdateProductImageRequest, user_id: str):
-        """更新產品圖片資訊"""
-        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
-
-        # 驗證圖片是否存在
-        image = self.query.get_product_image_by_id(body.image_id)
-        if not image:
+    def update_product_image(
+        self, bot: BotListWithCredentialView, body: UpdateProductImageRequest
+    ):
+        if not self.query.get_product_image_by_id(body.image_id):
             raise GlobalErrorException(
                 error_code=ErrorCode.PRODUCT_IMAGE_NOT_FOUND,
                 error_message="Product image not found",
             )
 
-        success = self.command.update_product_image(
+        if not self.command.update_product_image(
             image_id=body.image_id, is_primary=body.is_primary
-        )
-
-        if not success:
+        ):
             raise GlobalErrorException(
                 error_code=ErrorCode.PRODUCT_IMAGE_NOT_FOUND,
                 error_message="Product image not found",
             )
 
-    def delete_product_image(self, body: DeleteProductImageRequest, user_id: str):
-        """刪除產品圖片"""
-        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        self.bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
-
-        # 驗證圖片是否存在
+    def delete_product_image(
+        self, bot: BotListWithCredentialView, body: DeleteProductImageRequest
+    ):
         image = self.query.get_product_image_by_id(body.image_id)
         if not image:
             raise GlobalErrorException(
@@ -799,8 +730,5 @@ class EcommService:
                 error_message="Product image not found",
             )
 
-        # 從 MinIO 刪除
         delete_product_image(image.filename)
-
-        # 從資料庫刪除
         self.command.delete_product_image(body.image_id)

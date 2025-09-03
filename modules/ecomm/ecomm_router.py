@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from minio.error import S3Error
 
+from modules.bot.bot_service import BotService
 from modules.ecomm.ecomm_model import ProductVariant
 from modules.ecomm.ecomm_schema import (
     BrandResponse,
@@ -37,6 +38,7 @@ from shared.clients.database import SessionDep
 from shared.constants.error_code import ErrorCode
 from shared.dependencies import get_current_user
 from shared.exception import GlobalErrorException
+from shared.services.group_service import GroupService
 from shared.services.minio_service import MinioService
 
 
@@ -50,11 +52,20 @@ def get_minio_service() -> MinioService:
     return MinioService()
 
 
+def get_bot_service(session: SessionDep) -> BotService:
+    """依賴注入 BotService"""
+    return BotService(session)
+
+
+def get_group_service(session: SessionDep) -> GroupService:
+    """依賴注入 GroupService"""
+    return GroupService(session)
+
+
 ecomm_router = APIRouter(prefix="/ecomm", tags=["ecomm"])
 brand_router = APIRouter(prefix="/brands", tags=["brands"])
 category_router = APIRouter(prefix="/categories", tags=["categories"])
 product_router = APIRouter(prefix="/products", tags=["products"])
-
 order_router = APIRouter(prefix="/orders", tags=["orders"])
 
 
@@ -62,8 +73,10 @@ order_router = APIRouter(prefix="/orders", tags=["orders"])
 async def get_shipping_settings(
     bot_uuid: UUID,
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
-    return await ecomm_service.get_shipping_setting(bot_uuid)
+    bot = bot_service.validate_line_bot_exists(bot_uuid)
+    return await ecomm_service.get_shipping_setting(bot)
 
 
 @ecomm_router.patch("")
@@ -71,9 +84,12 @@ async def update_shipping_settings(
     update_request: UpdateShippingSettingRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
-    await ecomm_service.update_shipping_setting(update_request, user_id)
+    bot = bot_service.validate_line_bot_exists(update_request.bot_uuid)
+    bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    await ecomm_service.update_shipping_setting(bot, update_request)
 
 
 @ecomm_router.delete("")
@@ -81,16 +97,22 @@ async def delete_shipping_settings(
     body: DeleteShippingMethodRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
-    await ecomm_service.delete_shipping_setting(body, user_id)
+    bot = bot_service.validate_line_bot_exists(body.bot_uuid)
+    bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    await ecomm_service.delete_shipping_setting(bot, body)
 
 
 @brand_router.get("/{bot_uuid}", response_model=List[BrandResponse])
 def list_brands(
-    bot_uuid: UUID, ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)]
+    bot_uuid: UUID,
+    ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
-    return ecomm_service.get_all_brands(bot_uuid)
+    bot = bot_service.validate_line_bot_exists(bot_uuid)
+    return ecomm_service.get_all_brands(bot)
 
 
 @brand_router.post("")
@@ -98,9 +120,12 @@ def create_brand(
     brand: InsertBrandRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
-    ecomm_service.insert_single_brand(brand, user_id)
+    bot = bot_service.validate_line_bot_exists(brand.bot_uuid)
+    bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    ecomm_service.insert_single_brand(bot, brand)
     ecomm_service.session.commit()
 
 
@@ -109,9 +134,12 @@ def delete_brands(
     delete_request: DeleteBrandRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
-    ecomm_service.delete_brands_by_ids(delete_request, user_id)
+    bot = bot_service.validate_line_bot_exists(delete_request.bot_uuid)
+    bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    ecomm_service.delete_brands_by_ids(bot, delete_request)
     ecomm_service.session.commit()
 
 
@@ -120,18 +148,23 @@ def update_brand(
     update_request: UpdateBrandRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
-    ecomm_service.update_brand_by_id(update_request, user_id)
+    bot = bot_service.validate_line_bot_exists(update_request.bot_uuid)
+    bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    ecomm_service.update_brand_by_id(bot, update_request)
     ecomm_service.session.commit()
 
 
-# Category endpoints
 @category_router.get("/{bot_uuid}", response_model=List[CategoryResponse])
 def list_categories(
-    bot_uuid: UUID, ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)]
+    bot_uuid: UUID,
+    ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
-    category_list, category_class_id = ecomm_service.get_all_categories(bot_uuid)
+    bot = bot_service.validate_line_bot_exists(bot_uuid)
+    category_list, category_class_id = ecomm_service.get_all_categories(bot)
     return ecomm_service.get_nested_categories(category_class_id, category_list)
 
 
@@ -140,9 +173,12 @@ def create_category(
     category: InsertCategoryRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
-    ecomm_service.insert_single_category(category, user_id)
+    bot = bot_service.validate_line_bot_exists(category.bot_uuid)
+    bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    ecomm_service.insert_single_category(bot, category, user_id)
     ecomm_service.session.commit()
 
 
@@ -151,9 +187,12 @@ def delete_categories(
     delete_request: DeleteCategoryRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
-    ecomm_service.delete_categories_by_ids(delete_request, user_id)
+    bot = bot_service.validate_line_bot_exists(delete_request.bot_uuid)
+    bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    ecomm_service.delete_categories_by_ids(bot, delete_request)
     ecomm_service.session.commit()
 
 
@@ -162,24 +201,30 @@ def update_category(
     update_request: UpdateCategoryRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
-    ecomm_service.update_category_by_id(update_request, user_id)
+    bot = bot_service.validate_line_bot_exists(update_request.bot_uuid)
+    bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    ecomm_service.update_category_by_id(bot, update_request)
     ecomm_service.session.commit()
 
 
-# Product endpoints
 @product_router.get("/{bot_uuid}", response_model=List[ProductResponse])
 def list_products(
-    bot_uuid: UUID, ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)]
+    bot_uuid: UUID,
+    ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
-    return ecomm_service.get_all_products(bot_uuid)
+    bot = bot_service.validate_line_bot_exists(bot_uuid)
+    return ecomm_service.get_all_products(bot)
 
 
 @product_router.post("")
 def create_product(
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
     bot_uuid: UUID = Form(...),
     product_name: str = Form(...),
     product_description: str = Form(...),
@@ -192,12 +237,10 @@ def create_product(
     images: List[UploadFile] = File([], description="產品圖片檔案"),
 ):
     user_id = current_user["user_id"]
+    bot = bot_service.validate_line_bot_exists(bot_uuid)
+    bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
 
-    # 處理可選的整數參數
     parsed_category_id = None
-    parsed_brand_id = None
-    parsed_stock: Optional[int] = None
-
     if category_id and category_id.strip():
         try:
             parsed_category_id = int(category_id)
@@ -207,6 +250,7 @@ def create_product(
                 error_message="Invalid category_id format",
             )
 
+    parsed_brand_id = None
     if brand_id and brand_id.strip():
         try:
             parsed_brand_id = int(brand_id)
@@ -216,17 +260,17 @@ def create_product(
                 error_message="Invalid brand_id format",
             )
 
+    parsed_stock: Optional[int] = None
     if stock and stock.strip():
         try:
             parsed_stock = int(stock)
         except ValueError:
             raise GlobalErrorException(
-                error_code=ErrorCode.INVALID_INPUT,
-                error_message="Invalid stock format",
+                error_code=ErrorCode.INVALID_INPUT, error_message="Invalid stock format"
             )
 
     ecomm_service.insert_product(
-        bot_uuid=bot_uuid,
+        bot=bot,
         product_name=product_name,
         product_description=product_description,
         category_id=parsed_category_id,
@@ -246,9 +290,12 @@ def delete_products(
     delete_request: DeleteProductRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
-    ecomm_service.delete_products_by_ids(delete_request, user_id)
+    bot = bot_service.validate_line_bot_exists(delete_request.bot_uuid)
+    bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    ecomm_service.delete_products_by_ids(bot, delete_request)
     ecomm_service.session.commit()
 
 
@@ -257,9 +304,12 @@ def update_product(
     update_request: UpdateProductRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
-    ecomm_service.update_product_by_id(update_request, user_id)
+    bot = bot_service.validate_line_bot_exists(update_request.bot_uuid)
+    bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    ecomm_service.update_product_by_id(bot, update_request)
     ecomm_service.session.commit()
 
 
@@ -268,9 +318,12 @@ def create_product_variant(
     variant: InsertProductVariantRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
-    new_variant = ecomm_service.insert_product_variant(variant, user_id)
+    bot = bot_service.validate_line_bot_exists(variant.bot_uuid)
+    bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    new_variant = ecomm_service.insert_product_variant(bot, variant)
     ecomm_service.session.commit()
     return new_variant
 
@@ -280,9 +333,12 @@ def update_product_variant(
     update_request: UpdateProductVariantRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
-    ecomm_service.update_product_variant(update_request, user_id)
+    bot = bot_service.validate_line_bot_exists(update_request.bot_uuid)
+    bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    ecomm_service.update_product_variant(bot, update_request)
     ecomm_service.session.commit()
 
 
@@ -291,13 +347,15 @@ def delete_product_variants(
     delete_request: DeleteProductVariantRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
-    ecomm_service.delete_product_variants(delete_request, user_id)
+    bot = bot_service.validate_line_bot_exists(delete_request.bot_uuid)
+    bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    ecomm_service.delete_product_variants(bot, delete_request)
     ecomm_service.session.commit()
 
 
-# Product Image proxy endpoints
 @product_router.get("/images/{file_name}")
 async def get_product_image(
     file_name: str,
@@ -345,12 +403,15 @@ async def get_product_image(
 def upload_product_image(
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
     bot_uuid: UUID = Form(...),
     product_id: UUID = Form(...),
     images: List[UploadFile] = File(...),
 ):
     user_id = current_user["user_id"]
-    ecomm_service.upload_product_image(bot_uuid, product_id, user_id, images)
+    bot = bot_service.validate_line_bot_exists(bot_uuid)
+    bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    ecomm_service.upload_product_image(bot, product_id, images)
     ecomm_service.session.commit()
 
 
@@ -359,9 +420,12 @@ def update_product_image(
     update_request: UpdateProductImageRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
-    ecomm_service.update_product_image(update_request, user_id)
+    bot = bot_service.validate_line_bot_exists(update_request.bot_uuid)
+    bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    ecomm_service.update_product_image(bot, update_request)
     ecomm_service.session.commit()
 
 
@@ -370,21 +434,26 @@ def delete_product_image(
     delete_request: DeleteProductImageRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
-    ecomm_service.delete_product_image(delete_request, user_id)
+    bot = bot_service.validate_line_bot_exists(delete_request.bot_uuid)
+    bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    ecomm_service.delete_product_image(bot, delete_request)
     ecomm_service.session.commit()
 
 
-# Order endpoints
 @order_router.get("/{bot_uuid}", response_model=List[OrderResponse])
 def list_bot_orders(
     bot_uuid: UUID,
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
-    return ecomm_service.get_all_orders(user_id, bot_uuid)
+    bot = bot_service.validate_line_bot_exists(bot_uuid)
+    bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    return ecomm_service.get_all_orders(bot)
 
 
 @order_router.get("/user/{bot_uuid}", response_model=List[OrderResponse])
@@ -392,9 +461,13 @@ def list_user_orders(
     bot_uuid: UUID,
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
+    group_service: Annotated[GroupService, Depends(get_group_service)],
 ):
     user_id = current_user["user_id"]
-    return ecomm_service.get_all_user_orders(user_id, bot_uuid)
+    bot = bot_service.validate_line_bot_exists(bot_uuid)
+    bot_group = group_service.validate_group_exist_in_bot(bot.class_id, "Users")
+    return ecomm_service.get_all_user_orders(bot, bot_group, user_id)
 
 
 @order_router.post("")
@@ -402,9 +475,13 @@ async def create_order(
     order: InsertOrderRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
+    group_service: Annotated[GroupService, Depends(get_group_service)],
 ):
     user_id = current_user["user_id"]
-    await ecomm_service.insert_order(order, user_id)
+    bot = bot_service.validate_line_bot_exists(order.bot_uuid)
+    bot_group = group_service.validate_group_exist_in_bot(bot.class_id, "Users")
+    await ecomm_service.insert_order(bot, bot_group, order, user_id)
     ecomm_service.session.commit()
 
 
@@ -413,9 +490,12 @@ def update_order(
     update_request: UpdateOrderRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
-    ecomm_service.update_order_by_id(update_request, user_id)
+    bot = bot_service.validate_line_bot_exists(update_request.bot_uuid)
+    bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    ecomm_service.update_order_by_id(bot, update_request)
     ecomm_service.session.commit()
 
 
@@ -424,7 +504,10 @@ def delete_orders(
     delete_request: DeleteOrderRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
     user_id = current_user["user_id"]
-    ecomm_service.delete_orders_by_ids(delete_request, user_id)
+    bot = bot_service.validate_line_bot_exists(delete_request.bot_uuid)
+    bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    ecomm_service.delete_orders_by_ids(bot, delete_request)
     ecomm_service.session.commit()

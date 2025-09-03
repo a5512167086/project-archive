@@ -1,10 +1,8 @@
-from uuid import UUID
-
 import pandas as pd
 from fastapi import UploadFile
 from sqlmodel import Session
 
-from modules.bot.bot_service import BotService
+from modules.bot.bot_model import BotListWithCredentialView
 from modules.knowledge.knowledge_command import KnowledgeCommand
 from modules.knowledge.knowledge_query import KnowledgeQuery
 from modules.knowledge.knowledge_schema import (
@@ -20,7 +18,6 @@ class KnowledgeService:
         self.session = session
         self.command = KnowledgeCommand(session)
         self.query = KnowledgeQuery(session)
-        self.bot_service = BotService(session)
 
     def validate_knowledge_class(self, bot_class_id: int) -> int:
         knowledge_class_id = self.query.get_knowledge_class_id_by_bot_class_id(
@@ -52,43 +49,33 @@ class KnowledgeService:
         return knowledge_list
 
     def insert_single_knowledge(
-        self, body: InsertKnowledgeRequest, current_user_id: UUID
+        self, bot: BotListWithCredentialView, body: InsertKnowledgeRequest
     ):
-        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
-
         knowledge_class_id = self.validate_knowledge_class(bot.class_id)
         self.command.insert_knowledge_item(
             knowledge_class_id, body.question, body.answer
         )
 
     def insert_knowledges_by_csv(
-        self, bot_uuid: UUID, csv_file: UploadFile, current_user_id: UUID
+        self, bot: BotListWithCredentialView, csv_file: UploadFile
     ):
         knowledge_list = self.validate_csv_file(csv_file)
-        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
-        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
-
         knowledge_class_id = self.validate_knowledge_class(bot.class_id)
         self.command.insert_knowledge_items(knowledge_class_id, knowledge_list)
 
-    def get_all_knowledge_list(self, bot_uuid: UUID):
-        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
+    def get_all_knowledge_list(self, bot: BotListWithCredentialView):
         knowledge_class_id = self.validate_knowledge_class(bot.class_id)
         return self.query.get_all_knowledge_items_by_class_id(knowledge_class_id)
 
     def delete_knowledges_by_bot_class_id(
-        self, bot_uuid: UUID, deleted_id_list: list, current_user_id: UUID
+        self, bot: BotListWithCredentialView, deleted_id_list: list
     ):
-        bot = self.bot_service.validate_line_bot_exists(bot_uuid)
-        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
-
         knowledge_class_id = self.validate_knowledge_class(bot.class_id)
         self.command.delete_knowledge_items(knowledge_class_id, deleted_id_list)
 
-    def update_knowledge(self, body: UpdateKnowledgeRequest, current_user_id: UUID):
-        bot = self.bot_service.validate_line_bot_exists(body.bot_uuid)
-        self.bot_service.validate_bot_ownership(current_user_id, bot.bot_detail_id)
+    def update_knowledge(
+        self, bot: BotListWithCredentialView, body: UpdateKnowledgeRequest
+    ):
         knowledge_class_id = self.validate_knowledge_class(bot.class_id)
         knowledge = self.query.get_knowledge_item_by_id(
             knowledge_class_id, body.object_id
