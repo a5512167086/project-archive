@@ -18,7 +18,7 @@ class BotQuery:
     def __init__(self, session: Session):
         self.session = session
 
-    def get_all_bots_by_user_id(self, user_id: str) -> List[BotListView]:
+    def get_all_bots_by_user_id(self, user_id: UUID) -> List[BotListView]:
         logger.info(f"Fetching all bots for user_id: {user_id}")
         statement = select(BotListView).where(BotListView.owner_id == user_id)
         bot_list = self.session.exec(statement).all()
@@ -70,7 +70,9 @@ class BotQuery:
         result = self.session.exec(stmt).first()
 
         if result:
-            logger.info(f"Successfully fetched credentials for bot_uuid: {bot_uuid}")
+            logger.info(
+                f"Successfully fetched credentials for bot_uuid: {str(bot_uuid)}"
+            )
         else:
             logger.warning(f"No credentials found for bot_uuid: {bot_uuid}")
 

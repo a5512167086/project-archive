@@ -121,8 +121,8 @@ def line_webhook(
     bot_service.check_x_line_signature(x_line_signature)
     configuration = Configuration(access_token=credentials.channel_access_token)
     custom_webhook(
-        credentials.class_id,
         credentials.channel_secret,
+        bot_uuid,
         configuration,
         bot_body,
         x_line_signature,
