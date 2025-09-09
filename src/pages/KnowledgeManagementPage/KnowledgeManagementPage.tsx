@@ -22,6 +22,7 @@ import { showErrorToast, showSuccessToast } from '@/utils/toast'
 const knowledgeManagementPageContent = {
   title: 'knowledgeSettingPage.title',
   addButtonText: 'knowledgeSettingPage.addKnowledgeItemButton',
+  syncButtonText: 'knowledgeSettingPage.syncKnowledgeItemsButton',
   editButtonText: 'knowledgeSettingPage.editKnowledgeItemButton',
   addButtonTextByCSV: 'knowledgeSettingPage.addKnowledgeItemFromCSVButton',
   deleteButtonText: 'knowledgeSettingPage.deleteSelectedKnowledgeItems',
@@ -257,6 +258,9 @@ const KnowledgeManagementPage = () => {
               {t(knowledgeManagementPageContent.deleteButtonText)}
             </Button>
           )}
+          <Button variant="outlined" sx={{ marginRight: '10px' }}>
+            {t(knowledgeManagementPageContent.syncButtonText)}
+          </Button>
           <Button
             variant="outlined"
             onClick={handleAddSingleKnowledge}
