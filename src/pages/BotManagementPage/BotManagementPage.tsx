@@ -57,7 +57,7 @@ const BotManagementPage = () => {
       linkText: modulePageContent.botPageTitle
     },
     {
-      link: PAGE_PATHS.BOT_LIST + `/${currentBotObjectId}`,
+      link: PAGE_PATHS.BOT_LIST + `/${currentBot?.bot_detail_id}`,
       linkText: currentBot!.chinese_name
     }
   ]

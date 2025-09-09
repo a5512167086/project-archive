@@ -43,6 +43,7 @@ export const SidebarWrapper = () => {
   const { t } = useTranslation()
   const { uuid } = useParams()
   const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
+  const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
   const { isAuthenticated } = useAppSelector((state) => state.user)
   const { isAuthFailed, setIsAuthFailed, logout } = useUser()
   const [open, setOpen] = useState(false)
@@ -68,7 +69,7 @@ export const SidebarWrapper = () => {
 
   const handleNavigate = (route: string, key: string) => {
     if (key === 'moduleList') {
-      navigate(route + `/${currentBotObjectId}`)
+      navigate(route + `/${currentBot?.bot_detail_id}`)
     } else {
       navigate(route)
     }
