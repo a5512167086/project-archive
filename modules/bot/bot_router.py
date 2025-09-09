@@ -4,10 +4,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Header, Request
 from linebot.v3.messaging import Configuration
 
-from modules.bot.bot_model import BotListView, BotListWithCredentialView
+from modules.bot.bot_model import BotListView
 from modules.bot.bot_schema import (
     BotBodies,
     BotHeaders,
+    BotWithPublicCredential,
     InsertBotRequest,
     InsertBotResponse,
     UpdateBotRequest,
@@ -46,7 +47,7 @@ def get_bots(
     return bot_service.get_all_bots(user_id)
 
 
-@bot_router.get("/{bot_uuid}", response_model=BotListWithCredentialView)
+@bot_router.get("/{bot_uuid}", response_model=BotWithPublicCredential)
 def get_bot_credential_by_uuid(
     bot_uuid: UUID, bot_service: Annotated[BotService, Depends(get_bot_service)]
 ):

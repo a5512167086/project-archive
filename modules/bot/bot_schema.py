@@ -79,3 +79,14 @@ class UpdateBotRequest(BaseModel):
 class ErrorResponse(BaseModel):
     error_code: str
     error_message: str
+
+
+class BotWithPublicCredential(BaseModel):
+    bot_detail_id: UUID
+    class_id: int
+    object_id: int
+    chinese_name: str
+    channel_id: str
+    login_channel_id: str
+    liff_id: str
+    owner_id: UUID
