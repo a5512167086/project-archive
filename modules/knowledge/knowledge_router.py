@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, File, Form, UploadFile
 from modules.bot.bot_service import BotService
 from modules.knowledge.knowledge_model import KnowledgeListView
 from modules.knowledge.knowledge_schema import (
+    CreateOrUpdateKnowledgeVectorDBStatus,
     DeleteKnowledgeRequest,
     InsertKnowledgeRequest,
     UpdateKnowledgeRequest,
@@ -93,3 +94,16 @@ def update_knowledge(
     bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
     knowledge_service.update_knowledge(bot, body)
     knowledge_service.session.commit()
+
+
+@knowledge_router.patch("/sync-status")
+async def create_or_update_knowledge_sync_status(
+    body: CreateOrUpdateKnowledgeVectorDBStatus,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    knowledge_service: Annotated[KnowledgeService, Depends(get_knowledge_service)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
+):
+    user_id = current_user["user_id"]
+    bot = bot_service.validate_line_bot_exists(body.bot_uuid)
+    bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
+    await knowledge_service.update_knowledge_sync_status(bot, body)

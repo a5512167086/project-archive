@@ -6,6 +6,7 @@ from modules.bot.bot_model import BotListWithCredentialView
 from modules.knowledge.knowledge_command import KnowledgeCommand
 from modules.knowledge.knowledge_query import KnowledgeQuery
 from modules.knowledge.knowledge_schema import (
+    CreateOrUpdateKnowledgeVectorDBStatus,
     InsertKnowledgeRequest,
     UpdateKnowledgeRequest,
 )
@@ -88,4 +89,17 @@ class KnowledgeService:
 
         self.command.update_knowledge_item(
             knowledge.object_id, body.question, body.answer
+        )
+
+    async def update_knowledge_sync_status(
+        self,
+        bot: BotListWithCredentialView,
+        body: CreateOrUpdateKnowledgeVectorDBStatus,
+    ):
+        bot_uuid_str = str(bot.bot_detail_id)
+
+        update_payload = body.model_dump(exclude_unset=True, exclude={"bot_uuid"})
+
+        await self.command.update_knowledge_vector_db_status(
+            bot_uuid=bot_uuid_str, **update_payload
         )

@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
-from typing import List, Literal, Optional
+from typing import Annotated, List, Literal, Optional
 from uuid import UUID, uuid4
 
-from beanie import Document
+from beanie import Document, Indexed
 from pydantic import BaseModel
 from pydantic import Field as PydanticField
 from sqlmodel import Field, SQLModel, UniqueConstraint
@@ -99,7 +99,7 @@ class ShippingOption(BaseModel):
 
 
 class ShippingSetting(Document):
-    bot_uuid: str = PydanticField(description="bot_id")
+    bot_uuid: Annotated[str, Indexed(unique=True)]
     shipping_options: List[ShippingOption] = PydanticField(default_factory=list)
 
     class Settings:

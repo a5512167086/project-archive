@@ -461,7 +461,6 @@ class EcommCommand:
     async def update_shipping_setting(
         self, bot_uuid: str, shipping_options: List[ShippingOption]
     ):
-        """更新或建立運送設定"""
         setting = await ShippingSetting.find_one(ShippingSetting.bot_uuid == bot_uuid)
         if setting:
             setting.shipping_options = shipping_options

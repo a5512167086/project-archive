@@ -1,7 +1,10 @@
-from typing import List
+from datetime import datetime
+from typing import List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel
+
+from shared.constants.common import SyncStatus
 
 
 class InsertKnowledgeRequest(BaseModel):
@@ -20,3 +23,12 @@ class UpdateKnowledgeRequest(BaseModel):
     object_id: int
     question: str | None = None
     answer: str | None = None
+
+
+class CreateOrUpdateKnowledgeVectorDBStatus(BaseModel):
+    bot_uuid: str
+    status: SyncStatus = SyncStatus.COMPLETED
+    has_pending_changes: bool = False
+    last_sync_start_time: Optional[datetime] = None
+    last_sync_end_time: Optional[datetime] = None
+    last_successful_sync_time: Optional[datetime] = None

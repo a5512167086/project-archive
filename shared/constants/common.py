@@ -45,3 +45,10 @@ class OptionType(str, Enum):
 class SelectionType(str, Enum):
     single = "single"
     multiple = "multiple"
+
+
+class SyncStatus(str, Enum):
+    COMPLETED = "COMPLETED"
+    RUNNING = "RUNNING"
+    PENDING = "PENDING"
+    FAILED = "FAILED"

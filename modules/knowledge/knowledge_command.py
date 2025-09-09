@@ -1,8 +1,11 @@
 import logging
-from typing import List
+from datetime import datetime
+from typing import List, Optional
 
 from sqlmodel import Session, delete, select
 
+from modules.knowledge.knowledge_model import KnowledgeVectorDBStatus
+from shared.constants.common import SyncStatus
 from shared.models.class_object_relation_model import ClassObjectRelation
 from shared.models.object_model import Object
 from shared.queries.entity_query import get_entity_id_by_name
@@ -84,7 +87,6 @@ class KnowledgeCommand:
 
         self.session.exec(delete(Object).where(Object.object_id.in_(found_ids)))
 
-
     def update_knowledge_item(
         self, object_id: int, question: str | None, answer: str | None
     ):
@@ -94,3 +96,34 @@ class KnowledgeCommand:
                 knowledge.chinese_name = question
             if answer is not None:
                 knowledge.english_name = answer
+
+    async def update_knowledge_vector_db_status(
+        self,
+        bot_uuid: str,
+        status: Optional[SyncStatus] = None,
+        has_pending_changes: Optional[bool] = None,
+        last_sync_start_time: Optional[datetime] = None,
+        last_sync_end_time: Optional[datetime] = None,
+        last_successful_sync_time: Optional[datetime] = None,
+    ):
+        print(bot_uuid, status, has_pending_changes)
+        status_doc = await KnowledgeVectorDBStatus.find_one(
+            KnowledgeVectorDBStatus.bot_uuid == bot_uuid
+        )
+
+        update_data = {
+            "status": status,
+            "has_pending_changes": has_pending_changes,
+            "last_sync_start_time": last_sync_start_time,
+            "last_sync_end_time": last_sync_end_time,
+            "last_successful_sync_time": last_successful_sync_time,
+        }
+        update_data = {k: v for k, v in update_data.items() if v is not None}
+
+        if status_doc:
+            if update_data:
+                await status_doc.set(update_data)
+                await status_doc.save()
+        else:
+            status_doc = KnowledgeVectorDBStatus(bot_uuid=bot_uuid, **update_data)
+            await status_doc.insert()
