@@ -89,11 +89,11 @@ const ServiceManagementPage = () => {
   const breadcrumbItems = [
     { link: PAGE_PATHS.BOT_LIST, linkText: t(TEXT.botPageTitle) },
     {
-      link: `${PAGE_PATHS.BOT_LIST}/${currentBotObjectId}`,
+      link: `${PAGE_PATHS.BOT_LIST}/${currentBot?.bot_detail_id}`,
       linkText: currentBot?.chinese_name ?? ''
     },
     {
-      link: `${PAGE_PATHS.BOT_LIST}/${currentBotObjectId}/${PAGE_PATHS.KNOWLEDGE_MOUDLE}`,
+      link: `${PAGE_PATHS.BOT_LIST}/${currentBot?.bot_detail_id}/${PAGE_PATHS.KNOWLEDGE_MOUDLE}`,
       linkText: t(TEXT.title)
     }
   ]

@@ -27,11 +27,11 @@ const ProductManagementPage = () => {
   const breadcrumbItems = [
     { link: PAGE_PATHS.BOT_LIST, linkText: 'botPage.myBot' },
     {
-      link: `${PAGE_PATHS.BOT_LIST}/${currentBotObjectId}`,
+      link: `${PAGE_PATHS.BOT_LIST}/${currentBot?.bot_detail_id}`,
       linkText: currentBot?.chinese_name ?? ''
     },
     {
-      link: `${PAGE_PATHS.BOT_LIST}/${currentBotObjectId}/product`,
+      link: `${PAGE_PATHS.BOT_LIST}/${currentBot?.bot_detail_id}/product`,
       linkText: 'productManagementPage.title'
     }
   ]

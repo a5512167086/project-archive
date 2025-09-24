@@ -54,11 +54,11 @@ const BotSettingPage = () => {
       linkText: botSettingPageContent.botPageTitle
     },
     {
-      link: PAGE_PATHS.BOT_LIST + `/${currentBotObjectId}`,
+      link: PAGE_PATHS.BOT_LIST + `/${currentBot?.bot_detail_id}`,
       linkText: currentBot!.chinese_name
     },
     {
-      link: `${PAGE_PATHS.BOT_LIST}/${currentBotObjectId}/${PAGE_PATHS.BOT_SETTING}`,
+      link: `${PAGE_PATHS.BOT_LIST}/${currentBot?.bot_detail_id}/${PAGE_PATHS.BOT_SETTING}`,
       linkText: botSettingPageContent.title
     }
   ]
