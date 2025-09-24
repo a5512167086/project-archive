@@ -76,7 +76,7 @@ def rag_customer_service(bot_uuid: str, query: str, top_k: str, score_threshold:
             "query": query,
             "top_k": top_k,
             "score_threshold": score_threshold,
-            "models": ["gpt35_azure", "ollama_local"],
+            "models": ["gpt35_azure", "huggingface_local"],
         },
     )
     if response.status_code != 200:

@@ -34,7 +34,8 @@ def handle_text_message(
                         text="Azure ChatGPT 3.5:\n" + response["answers"]["gpt35_azure"]
                     ),
                     TextMessage(
-                        text="Local Qwen3 4B:\n" + response["answers"]["ollama_local"]
+                        text="Local Qwen3 4B:\n"
+                        + response["answers"]["huggingface_local"]
                     ),
                     TextMessage(text="Hits:\n" + hits_json_string),
                 ],
