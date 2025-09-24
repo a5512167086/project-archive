@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=3 uv run fastapi dev --host 0.0.0.0 --port 5832
