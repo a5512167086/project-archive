@@ -89,7 +89,7 @@ async def update_shipping_settings(
     user_id = current_user["user_id"]
     bot = bot_service.validate_line_bot_exists(update_request.bot_uuid)
     bot_service.validate_bot_ownership(user_id, bot.bot_detail_id)
-    await ecomm_service.update_shipping_setting(bot, update_request)
+    await ecomm_service.update_shipping_setting(bot.bot_detail_id, update_request)
 
 
 @ecomm_router.delete("")

@@ -110,9 +110,7 @@ class EcommService:
             brand_class_id, body.brand_name, body.brand_description
         )
 
-    def get_all_brands(
-        self, bot: BotListWithCredentialView
-    ) -> List[BrandListView]:
+    def get_all_brands(self, bot: BotListWithCredentialView) -> List[BrandListView]:
         brand_class_id = self.validate_brand_class(bot.class_id)
         return self.query.get_all_brands_by_class_id(brand_class_id)
 
@@ -251,9 +249,7 @@ class EcommService:
                 error_message="Invalid category hierarchy: circular reference detected",
             )
 
-    def get_all_products(
-        self, bot: BotListWithCredentialView
-    ) -> List[ProductResponse]:
+    def get_all_products(self, bot: BotListWithCredentialView) -> List[ProductResponse]:
         category_class_id = self.validate_category_class(bot.class_id)
         category_ids = self.query.get_all_categories_by_class_id(category_class_id)
         all_category_ids = [cat.class_id for cat in category_ids]
@@ -413,7 +409,7 @@ class EcommService:
         return await self.query.get_shipping_setting_by_bot_uuid(bot_uuid_str)
 
     async def update_shipping_setting(
-        self, bot: BotListWithCredentialView, body: UpdateShippingSettingRequest
+        self, bot_uuid: str, body: UpdateShippingSettingRequest
     ):
         methods = [option.method for option in body.shipping_options]
         if len(methods) != len(set(methods)):
@@ -422,7 +418,7 @@ class EcommService:
                 error_message="Duplicate shipping methods are not allowed",
             )
 
-        bot_uuid_str = str(bot.bot_detail_id)
+        bot_uuid_str = str(bot_uuid)
         converted_options = [
             ShippingOption(**option.model_dump()) for option in body.shipping_options
         ]
@@ -463,9 +459,7 @@ class EcommService:
             )
         return order_class_id
 
-    def get_all_orders(
-        self, bot: BotListWithCredentialView
-    ) -> List[OrderResponse]:
+    def get_all_orders(self, bot: BotListWithCredentialView) -> List[OrderResponse]:
         order_class_id = self.validate_order_class(bot.class_id)
         orders_data = self.query.get_all_orders_view(order_class_id)
         orders = []
@@ -564,15 +558,13 @@ class EcommService:
                     error_message=f"Product with ID {item.product_id} not found",
                 )
             unit_price = product_detail.price
-            processed_items.append(
-                {
-                    "product_id": item.product_id,
-                    "variant_id": item.variant_id,
-                    "quantity": item.quantity,
-                    "unit_price": unit_price,
-                    "subtotal": unit_price * item.quantity,
-                }
-            )
+            processed_items.append({
+                "product_id": item.product_id,
+                "variant_id": item.variant_id,
+                "quantity": item.quantity,
+                "unit_price": unit_price,
+                "subtotal": unit_price * item.quantity,
+            })
 
         total_amount = sum(item["subtotal"] for item in processed_items) + shipping_fee
 

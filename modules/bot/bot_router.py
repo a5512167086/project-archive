@@ -80,7 +80,7 @@ async def create_bot(
             ),
         ],
     )
-    await ecomm_service.update_shipping_setting(init_shipping_option, user_id)
+    await ecomm_service.update_shipping_setting(bot_uuid, init_shipping_option)
     bot_service.session.commit()
     return {"webhook_url": f"{base_url}/bots/webhook/{bot_uuid}"}
 
