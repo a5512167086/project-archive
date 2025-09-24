@@ -1,5 +1,4 @@
 from contextlib import contextmanager
-from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 from uuid import UUID, uuid5
 
@@ -10,40 +9,10 @@ from qdrant_client import models as qmodels
 
 from app.configs.config import QDRANT_COLLECTION, QDRANT_URL
 from app.logger import logger
-
-
-@dataclass
-class SearchResult:
-    """搜索結果的數據類"""
-
-    id: Optional[str]
-    score: float
-    object_id: Optional[int]
-    question: str
-    answer: str
-    text: str
-    metadata: Dict[str, Any]
-
-
-@dataclass
-class KnowledgeItem:
-    """知識項目的數據類"""
-
-    object_id: int
-    question: str
-    answer: Optional[str] = None
-
-
-class VectorServiceError(Exception):
-    """向量服務相關的異常"""
-
-    pass
+from app.schemas import KnowledgeItem
 
 
 class VectorService:
-    """重構版本的向量服務，使用 LangChain Qdrant 集成"""
-
-    # 類常數
     DEFAULT_BATCH_SIZE = 250
     DEFAULT_TIMEOUT = 30.0
     DEFAULT_TOP_K = 5
@@ -85,7 +54,6 @@ class VectorService:
             logger.info(f"Connected to Qdrant at {self.url}")
         except Exception as e:
             logger.error(f"Failed to connect to Qdrant: {e}")
-            raise VectorServiceError(f"Failed to initialize Qdrant client: {e}") from e
 
     def _init_vector_store(self) -> None:
         """初始化 LangChain Vector Store"""
@@ -98,7 +66,6 @@ class VectorService:
             logger.info(f"Initialized vector store for collection '{self.collection}'")
         except Exception as e:
             logger.error(f"Failed to initialize vector store: {e}")
-            raise VectorServiceError(f"Failed to initialize vector store: {e}") from e
 
     @contextmanager
     def _error_handler(self, operation: str):
@@ -107,7 +74,6 @@ class VectorService:
             yield
         except Exception as e:
             logger.error(f"Failed to {operation}: {e}")
-            raise VectorServiceError(f"Failed to {operation}: {e}") from e
 
     def get_object_ids_by_bot_uuid(
         self, bot_uuid: UUID, batch_size: int = DEFAULT_BATCH_SIZE

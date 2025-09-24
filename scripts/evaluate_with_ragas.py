@@ -80,14 +80,14 @@ azure_llm_for_eval = AzureChatOpenAI(
     azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT", "IT108_gpt35"),
     openai_api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2023-07-01-preview"),
     temperature=0.3,  # 稍微提高
-    max_tokens=1024,  # 增加 token 限制
+    max_tokens=2048,  # 增加 token 限制
     request_timeout=60,  # 增加超時時間
 )
 
 # --- 1. 載入並驗證資料 ---
 print("載入評估資料...")
 try:
-    with open("ragas_eval_data.json", "r", encoding="utf-8") as f:
+    with open("./data/ragas_eval_data.json", "r", encoding="utf-8") as f:
         raw_data = json.load(f)
         print(f"載入 {len(raw_data)} 筆資料")
     # 驗證和清理資料

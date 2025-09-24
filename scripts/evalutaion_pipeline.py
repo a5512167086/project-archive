@@ -6,14 +6,30 @@ from uuid import UUID
 import pandas as pd
 import torch
 from dotenv import load_dotenv
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_huggingface import (
+    ChatHuggingFace,
+    HuggingFaceEmbeddings,
+    HuggingFacePipeline,
+)
 
-from app.services.llm_service import LLMFactory  # 假設 LLMFactory 在此路徑
+from app.services.llm_service import LLMFactory
 from app.services.vector_service import VectorService
 
 load_dotenv()
+chat_model_name = os.getenv("CHAT_MODEL")
+device = 0 if torch.cuda.is_available() else -1
+chat_pipeline = HuggingFacePipeline.from_model_id(
+    task="text-generation",
+    model_id=chat_model_name,
+    device=device,
+    model_kwargs={"torch_dtype": torch.bfloat16},
+    pipeline_kwargs={"max_new_tokens": 512},
+)
+
+chat_model = ChatHuggingFace(llm=chat_pipeline)
+
 TEST_BOT_UUID = "fbc137c9-85f7-411b-81c5-d221cc943399"
-FAQ_DATASET_PATH = "./data/faq_dataset.csv"
+FAQ_DATASET_PATH = "./data/ecomm_faq_dataset.csv"
 
 # 用於記錄詳細資料的全域變數
 detailed_logs = []
@@ -111,9 +127,9 @@ def generate_evaluation_data(test_data: List[Dict[str, str]]) -> List[Dict[str, 
 
     # 載入 LLM 服務
     try:
-        llm_factory = LLMFactory()
-        llm_service = llm_factory.get_service("ollama_local")
-        print("LLM service for 'ollama_local' initialized.")
+        llm_factory = LLMFactory(chat_model=chat_model)
+        llm_service = llm_factory.get_service("gpt35_azure")
+        print("LLM service for 'gpt35_azure' initialized.")
     except Exception as e:
         print(f"初始化 LLM 服務時發生錯誤：{e}")
         return []
@@ -216,7 +232,7 @@ def generate_evaluation_data(test_data: List[Dict[str, str]]) -> List[Dict[str, 
 
 
 def save_evaluation_data(
-    results: List[Dict[str, Any]], filename: str = "ragas_eval_data.json"
+    results: List[Dict[str, Any]], filename: str = "./data/ragas_eval_data.json"
 ):
     """儲存評估資料並進行最終驗證"""
     if not results:
@@ -358,8 +374,6 @@ def main():
         print("\n🎉 資料集生成完成")
         print("📁 檔案已生成:")
         print("   - ragas_eval_data.json (RAGAS 評估用)")
-        print("   - detailed_rag_logs.json (詳細記錄)")
-        print("   - detailed_rag_logs.csv (CSV 格式)")
         print("\n▶️  接下來可以執行 RAGAS 評估")
     else:
         print("❌ 儲存資料時發生錯誤")

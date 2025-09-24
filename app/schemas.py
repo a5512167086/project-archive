@@ -30,3 +30,9 @@ class QueryHit(BaseModel):
 class QueryResponse(BaseModel):
     answers: Dict[str, str]
     hits: List[QueryHit]
+
+
+class KnowledgeItem(BaseModel):
+    object_id: int
+    question: str
+    answer: Optional[str] = None
