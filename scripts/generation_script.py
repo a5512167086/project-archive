@@ -78,10 +78,6 @@ def generate_evaluation_data(
             if not final_answer or not isinstance(final_answer, str):
                 final_answer = "無法生成回答"
 
-            # ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
-            # START OF MODIFICATION: Print details for each item
-            # ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
-
             print("-" * 60)
             print(f"➡️  Processing Item #{idx + 1}")
             print(f"📝 Question: {question}")
@@ -96,10 +92,6 @@ def generate_evaluation_data(
 
             print(f"🤖 Generated Answer:\n {final_answer.strip()}")
             print("-" * 60 + "\n")
-
-            # ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-            # END OF MODIFICATION
-            # ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
             # 3. Collect for RAGAS
             result_item = {

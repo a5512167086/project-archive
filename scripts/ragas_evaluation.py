@@ -98,8 +98,8 @@ def main():
             openai_api_version=os.getenv(
                 "AZURE_OPENAI_API_VERSION", "2023-07-01-preview"
             ),
-            temperature=0.2,
-            max_tokens=2048,
+            temperature=0.1,
+            max_tokens=4096,
             request_timeout=60,
         )
     except Exception as e:
@@ -174,7 +174,7 @@ def main():
             # Store summary scores
             summary = {
                 "dataset": filename.replace("ragas_eval_", "").replace(".json", "")
-            }   
+            }
             summary.update(df.mean(numeric_only=True).to_dict())
             all_results_summary.append(summary)
 
