@@ -297,6 +297,11 @@ class VectorService:
                 )
             )
 
+            print("--- Relevance Scores ---")
+            for doc, score in docs_with_scores:
+                print(f"Score: {score:.4f}, Content: {doc.page_content[:50]}...")
+            print("------------------------")
+
             results = self._format_search_results(docs_with_scores)
             logger.info(f"Found {len(results)} results for query")
             return results

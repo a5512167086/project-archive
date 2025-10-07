@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from typing import Any, Dict, List
 
 import pandas as pd
@@ -66,7 +67,7 @@ def generate_evaluation_data(
         try:
             # 1. Retrieval
             retrieved_docs = vector_service.search_faq(
-                bot_uuid=bot_uuid, query_text=question, top_k=3, score_threshold=0.3
+                bot_uuid=bot_uuid, query_text=question, top_k=2, score_threshold=0.8
             )
             raw_contexts = [doc.get("answer", "") for doc in retrieved_docs if doc]
             contexts = validate_retrieved_contexts(raw_contexts)
@@ -75,6 +76,7 @@ def generate_evaluation_data(
             final_answer = llm_service.generate(
                 question, [{"answer": c} for c in contexts]
             )
+            print(final_answer)
             if not final_answer or not isinstance(final_answer, str):
                 final_answer = "無法生成回答"
 
@@ -105,6 +107,7 @@ def generate_evaluation_data(
         except Exception as e:
             print(f"ERROR processing question #{idx + 1}: {e}")
             continue
+        time.sleep(10)
 
     return evaluation_results
 
@@ -139,7 +142,11 @@ def main():
             "bot_uuid": "642b5430-3ff9-49e1-b6d1-c489043d23e4",
         },
     }
-    MODELS_TO_RUN = ["huggingface_local", "gpt35_azure"]
+    MODELS_TO_RUN = [
+        "gemini_google",
+        "huggingface_local",
+        "gpt35_azure",
+    ]
 
     # --- Load Models Once ---
     print("🚀 Loading models...")
@@ -151,7 +158,7 @@ def main():
         model_id=chat_model_name,
         device=device,
         model_kwargs={"torch_dtype": torch.bfloat16},
-        pipeline_kwargs={"max_new_tokens": 512},
+        pipeline_kwargs={"max_new_tokens": 1024, "temperature": 0.1},
     )
     qwen_chat_model = ChatHuggingFace(llm=chat_pipeline)
 

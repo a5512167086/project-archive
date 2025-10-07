@@ -2,6 +2,7 @@ import os
 from abc import ABC, abstractmethod
 
 from langchain.schema import HumanMessage, SystemMessage
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_huggingface import ChatHuggingFace
 from langchain_openai import AzureChatOpenAI
 
@@ -47,6 +48,26 @@ class BaseLLMService(ABC):
     @abstractmethod
     def generate(self, user_query: str, contexts: list[dict]) -> str:
         pass
+
+
+class GeminiLLMService(BaseLLMService):
+    """对应 Google Gemini (透过 Google AI API)"""
+
+    def __init__(self) -> None:
+        if "GOOGLE_API_KEY" not in os.environ:
+            raise ValueError("GOOGLE_API_KEY environment variable not set.")
+
+        self.llm = ChatGoogleGenerativeAI(
+            model="gemini-pro",
+            temperature=float(os.getenv("LLM_TEMPERATURE", "0.3")),
+            max_output_tokens=int(os.getenv("LLM_MAX_NEW_TOKENS", "1024")),
+        )
+
+    def generate(self, user_query: str, contexts: list[dict]) -> str:
+        messages = self._build_messages(user_query, contexts)
+        langchain_messages = self._to_langchain_messages(messages)
+        response = self.llm.invoke(langchain_messages)
+        return response.content
 
 
 class AzureLLMService(BaseLLMService):
