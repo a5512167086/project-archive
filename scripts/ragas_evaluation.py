@@ -1,4 +1,5 @@
 import json
+import math  # Added for ceiling division
 import os
 
 import pandas as pd
@@ -100,7 +101,7 @@ def main():
             ),
             temperature=0.1,
             max_tokens=4096,
-            request_timeout=60,
+            request_timeout=120,  # Increased timeout for robustness
         )
     except Exception as e:
         print(f"Error initializing models: {e}")
@@ -122,6 +123,9 @@ def main():
 
     all_results_summary = []
 
+    # Define batch size
+    BATCH_SIZE = 10
+
     for filename in files_to_evaluate:
         print(f"\n{'=' * 80}")
         print(f"🔥 Starting Evaluation for: {filename}")
@@ -130,7 +134,7 @@ def main():
         file_path = os.path.join(data_dir, filename)
 
         try:
-            # Load and validate data
+            # Load and validate the entire dataset first
             with open(file_path, "r", encoding="utf-8") as f:
                 raw_data = json.load(f)
 
@@ -139,30 +143,55 @@ def main():
                 print("No valid data after validation. Skipping file.")
                 continue
 
-            # Convert to Hugging Face Dataset
-            ragas_dataset = Dataset.from_list(evaluation_data)
+            # This list will store the DataFrames from each batch evaluation
+            all_batch_results_df = []
 
-            # Define metrics
-            metrics = [
-                faithfulness,
-                answer_relevancy,
-                context_precision,
-                context_recall,
-                answer_correctness,
-            ]
+            num_items = len(evaluation_data)
+            num_batches = math.ceil(num_items / BATCH_SIZE)
 
-            # Execute RAGAS evaluation
-            print(f"Running RAGAS on {len(ragas_dataset)} items...")
-            result = evaluate(
-                dataset=ragas_dataset,
-                metrics=metrics,
-                llm=azure_llm_for_eval,
-                embeddings=embedding_model,
-                raise_exceptions=False,  # Continue even if a single row fails
-            )
+            # --- Start Batch Processing Loop ---
+            for i in range(0, num_items, BATCH_SIZE):
+                batch_data = evaluation_data[i : i + BATCH_SIZE]
+                batch_number = (i // BATCH_SIZE) + 1
 
-            print("Evaluation complete.")
-            df = result.to_pandas()
+                print(
+                    f"\n--- Processing Batch {batch_number}/{num_batches} for {filename} ({len(batch_data)} items) ---"
+                )
+
+                # Convert the current batch to a Hugging Face Dataset
+                ragas_dataset_batch = Dataset.from_list(batch_data)
+
+                # Define metrics
+                metrics = [
+                    faithfulness,
+                    answer_relevancy,
+                    context_precision,
+                    context_recall,
+                    answer_correctness,
+                ]
+
+                # Execute RAGAS evaluation on the batch
+                result_batch = evaluate(
+                    dataset=ragas_dataset_batch,
+                    metrics=metrics,
+                    llm=azure_llm_for_eval,
+                    embeddings=embedding_model,
+                    raise_exceptions=False,  # Continue even if a single row fails
+                )
+
+                print(f"Batch {batch_number} evaluation complete.")
+
+                # Append the results of the current batch to our list
+                all_batch_results_df.append(result_batch.to_pandas())
+            # --- End Batch Processing Loop ---
+
+            # Combine all batch results into a single DataFrame for this file
+            if not all_batch_results_df:
+                print(f"No results were generated for {filename}. Skipping.")
+                continue
+
+            df = pd.concat(all_batch_results_df, ignore_index=True)
+            print(f"\nAll {num_batches} batches for {filename} processed and combined.")
 
             # Save detailed results for this file
             output_csv_path = os.path.join(

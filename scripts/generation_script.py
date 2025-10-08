@@ -51,6 +51,7 @@ def generate_evaluation_data(
     llm_service: BaseLLMService,
     vector_service: VectorService,
     bot_uuid: str,
+    model_name: str,
 ) -> List[Dict[str, Any]]:
     """Generates evaluation data for a given dataset and LLM service."""
 
@@ -107,7 +108,11 @@ def generate_evaluation_data(
         except Exception as e:
             print(f"ERROR processing question #{idx + 1}: {e}")
             continue
-        time.sleep(10)
+        if model_name == "gemini_google":
+            print(
+                "INFO: Gemini model detected, sleeping for 10 seconds to avoid rate limits..."
+            )
+            time.sleep(10)
 
     return evaluation_results
 
@@ -192,6 +197,7 @@ def main():
                 llm_service=llm_service,
                 vector_service=vector_service,
                 bot_uuid=config["bot_uuid"],
+                model_name=model_name,
             )
 
             output_filename = f"./data/ragas_eval_{model_name}_{dataset_key}.json"
