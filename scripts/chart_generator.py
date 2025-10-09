@@ -12,7 +12,9 @@ def main():
     """
     主執行函數，讀取 Ragas CSV 檔案，產生分析圖表與表格。
     """
-    print("--- Running RAG Model Evaluation Analysis Script (Streamlined Version) ---")
+    print(
+        "--- Running RAG Model Evaluation Analysis Script (with Low-Score Analysis) ---"
+    )
     warnings.filterwarnings("ignore", category=UserWarning)
 
     # 1. 穩健地讀取並整合所有評估資料
@@ -43,6 +45,9 @@ def main():
     # 4. 產生用於質化分析的並列比較表
     create_qualitative_comparison_table(all_data)
 
+    # 5. 【新增功能】分析並儲存分數低於 0.5 的案例
+    analyze_low_score_cases(all_data)
+
     print("\n--- All tasks completed! All files have been successfully generated. ---")
 
 
@@ -52,7 +57,7 @@ def load_and_process_data():
     """
     print("\n--- Step 1: Loading and processing CSV files ---")
     file_pattern = "./data/ragas_result/ragas_results_*.csv"
-    csv_files = glob.glob(file_pattern)
+    csv_files = glob.glob(file_pattern, recursive=True)
 
     if not csv_files:
         # If not found in ./data/ragas_result, try the current directory
@@ -64,7 +69,7 @@ def load_and_process_data():
 
     if not csv_files:
         print(
-            f"Error: No files matching '{file_pattern}' found in ./data or the current directory."
+            "Error: No files matching pattern found in ./data/ragas_result/ or the current directory."
         )
         return None
 
@@ -145,7 +150,9 @@ def create_bar_chart(df, dataset_name, metrics):
     ax.grid(axis="y", linestyle="--", alpha=0.7)
     plt.tight_layout()
 
-    output_filename = f"./data/chart/bar_chart_{dataset_name}.png"
+    output_dir = "./data/chart/"
+    os.makedirs(output_dir, exist_ok=True)
+    output_filename = os.path.join(output_dir, f"bar_chart_{dataset_name}.png")
     plt.savefig(output_filename, dpi=300)
     plt.close()
     print(f"✓ Generated bar chart: {output_filename}")
@@ -182,7 +189,9 @@ def create_radar_chart(df, dataset_name, metrics):
     )
     ax.legend(loc="upper right", bbox_to_anchor=(1.3, 1.1))
 
-    output_filename = f"./data/chart/radar_chart_{dataset_name}.png"
+    output_dir = "./data/chart/"
+    os.makedirs(output_dir, exist_ok=True)
+    output_filename = os.path.join(output_dir, f"radar_chart_{dataset_name}.png")
     plt.savefig(output_filename, dpi=300)
     plt.close()
     print(f"✓ Generated radar chart: {output_filename}")
@@ -206,11 +215,62 @@ def create_qualitative_comparison_table(all_data):
             comparison_table[model] = np.nan
 
     column_order = ["dataset", "user_input"] + all_models + ["retrieved_contexts"]
-    comparison_table = comparison_table[column_order]
+    # Reorder to ensure all columns exist before indexing
+    final_cols = [col for col in column_order if col in comparison_table.columns]
+    comparison_table = comparison_table[final_cols]
 
-    output_filename = "./data/chart/qualitative_comparison_table.csv"
+    output_dir = "./data/chart/"
+    os.makedirs(output_dir, exist_ok=True)
+    output_filename = os.path.join(output_dir, "qualitative_comparison_table.csv")
     comparison_table.to_csv(output_filename, index=False, encoding="utf-8-sig")
     print(f"✓ Generated qualitative comparison table: {output_filename}")
+
+
+def analyze_low_score_cases(all_data):
+    """
+    【新增功能】
+    篩選出 answer_relevancy 或 answer_correctness 低於 0.5 的案例，並儲存成報告。
+    """
+    print("\n--- Step 5: Analyzing low-score cases (score < 0.5) ---")
+
+    # 設定篩選條件
+    low_score_condition = (all_data["answer_relevancy"] < 0.5) | (
+        all_data["answer_correctness"] < 0.5
+    )
+
+    # 篩選出符合條件的資料
+    low_score_df = all_data[low_score_condition]
+
+    if low_score_df.empty:
+        print(
+            "✓ No cases with answer_relevancy or answer_correctness below 0.5 found. Great!"
+        )
+        return
+
+    # 選擇要顯示的欄位，並依照資料集和模型排序
+    columns_to_show = [
+        "dataset",
+        "model",
+        "user_input",
+        "response",
+        "answer_relevancy",
+        "answer_correctness",
+        "retrieved_contexts",
+    ]
+
+    # 確保所有欄位都存在
+    final_columns = [col for col in columns_to_show if col in low_score_df.columns]
+
+    report_df = low_score_df[final_columns].sort_values(by=["dataset", "model"])
+
+    # 儲存報告
+    output_dir = "./data/chart/"
+    os.makedirs(output_dir, exist_ok=True)
+    output_filename = os.path.join(output_dir, "low_score_analysis_report.csv")
+
+    report_df.to_csv(output_filename, index=False, encoding="utf-8-sig")
+
+    print(f"✓ Generated low-score analysis report: {output_filename}")
 
 
 if __name__ == "__main__":

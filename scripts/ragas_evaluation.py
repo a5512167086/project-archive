@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import traceback
 
 import pandas as pd
 from datasets import Dataset
@@ -75,7 +76,7 @@ def validate_evaluation_data(data):
 
 
 async def main():
-    # --- 新增的程式碼 START ---
+    # 定義輸出結果的資料夾
     data_dir = "./data/ragas_result"
     summary_filename = "_ragas_evaluation_summary.csv"
     summary_csv_path = os.path.join(data_dir, summary_filename)
@@ -92,7 +93,6 @@ async def main():
         except Exception as e:
             print(f"❌ 讀取總結報告失敗: {e}")
         return  # 直接結束函式
-    # --- 新增的程式碼 END ---
 
     print("Setting up evaluation models...")
     try:
@@ -112,25 +112,44 @@ async def main():
             request_timeout=120,
         )
         adapted_prompts_llm = LangchainLLMWrapper(azure_llm_for_eval)
-        adapted_prompts = await answer_relevancy.adapt_prompts(
-            language="chinese", llm=adapted_prompts_llm
+        answer_relevancy_adapted_prompts = await answer_relevancy.adapt_prompts(
+            language="traditional-chinese", llm=adapted_prompts_llm
         )
-        print(adapted_prompts)
-        answer_relevancy.set_prompts(**adapted_prompts)
+        answer_relevancy.set_prompts(**answer_relevancy_adapted_prompts)
+        answer_correctness_adapted_prompts = await answer_correctness.adapt_prompts(
+            language="traditional-chinese", llm=adapted_prompts_llm
+        )
+        answer_correctness.set_prompts(**answer_correctness_adapted_prompts)
+        faithfulness_adapted_prompts = await faithfulness.adapt_prompts(
+            language="traditional-chinese", llm=adapted_prompts_llm
+        )
+        faithfulness.set_prompts(**faithfulness_adapted_prompts)
+        context_precision_adapted_prompts = await context_precision.adapt_prompts(
+            language="traditional-chinese", llm=adapted_prompts_llm
+        )
+        context_precision.set_prompts(**context_precision_adapted_prompts)
+        context_recall_adapted_prompts = await context_recall.adapt_prompts(
+            language="traditional-chinese", llm=adapted_prompts_llm
+        )
+        context_recall.set_prompts(**context_recall_adapted_prompts)
     except Exception as e:
         print(f"Error initializing models: {e}")
         return
 
-    # `data_dir` 已在前面定義，此處無需重複
+    # --- 程式碼修正 START ---
+    # 明確定義評估檔案的來源資料夾
+    input_data_dir = "./data/eval_dataset/"
+
     files_to_evaluate = [
         f
-        for f in os.listdir(data_dir)
+        for f in os.listdir(input_data_dir)  # 從正確的來源資料夾讀取檔案列表
         if f.startswith("ragas_eval_") and f.endswith(".json")
     ]
+    # --- 程式碼修正 END ---
 
     if not files_to_evaluate:
         print(
-            f"ERROR: No evaluation files found in '{data_dir}'. Please run the generation script first."
+            f"ERROR: No evaluation files found in '{input_data_dir}'. Please run the generation script first."
         )
         return
 
@@ -141,7 +160,11 @@ async def main():
         print(f"🔥 Starting Evaluation for: {filename}")
         print(f"{'=' * 80}")
 
-        file_path = os.path.join(data_dir, filename)
+        # --- 程式碼修正 START ---
+        # 使用來源資料夾和檔案名稱組合出正確的完整路徑
+        file_path = os.path.join(input_data_dir, filename)
+        # --- 程式碼修正 END ---
+
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 raw_data = json.load(f)
@@ -187,8 +210,6 @@ async def main():
 
         except Exception as e:
             print(f"❌ An error occurred while processing {filename}: {e}")
-            import traceback
-
             traceback.print_exc()
 
     if not all_results_summary:
@@ -202,7 +223,6 @@ async def main():
     summary_df = pd.DataFrame(all_results_summary).set_index("dataset")
     print(summary_df.round(4))
 
-    # `summary_csv_path` 已在前面定義，此處無需重複
     summary_df.to_csv(summary_csv_path, encoding="utf-8-sig")
     print(f"\n✅ Summary report saved to: {summary_csv_path}")
     print(f"{'=' * 80}")
