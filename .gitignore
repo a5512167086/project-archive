@@ -12,6 +12,7 @@ wheels/
 .env
 
 data/*.json
-data/ragas_results*
-data/_ragas*
+data/ragas_result/*
+data/eval_dataset
+data/chart/*
 cache

@@ -139,11 +139,11 @@ def main():
     # --- Configuration ---
     DATASET_CONFIG = {
         "ecomm": {
-            "path": "./data/ecomm_faq_dataset.csv",
+            "path": "./data/dataset/ecomm_faq_dataset.csv",
             "bot_uuid": "fbc137c9-85f7-411b-81c5-d221cc943399",
         },
         "wke": {
-            "path": "./data/wke_faq_dataset.csv",
+            "path": "./data/dataset/wke_faq_dataset.csv",
             "bot_uuid": "642b5430-3ff9-49e1-b6d1-c489043d23e4",
         },
     }
@@ -200,7 +200,9 @@ def main():
                 model_name=model_name,
             )
 
-            output_filename = f"./data/ragas_eval_{model_name}_{dataset_key}.json"
+            output_filename = (
+                f"./data/eval_dataset/ragas_eval_{model_name}_{dataset_key}.json"
+            )
             save_evaluation_data(results, output_filename)
 
     print("\n🎉 All generation tasks complete.")

@@ -76,7 +76,7 @@ def validate_evaluation_data(data):
 
 async def main():
     # --- 新增的程式碼 START ---
-    data_dir = "./data"
+    data_dir = "./data/ragas_result"
     summary_filename = "_ragas_evaluation_summary.csv"
     summary_csv_path = os.path.join(data_dir, summary_filename)
 
