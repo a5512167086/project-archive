@@ -138,12 +138,12 @@ def main():
 
     # --- Configuration ---
     DATASET_CONFIG = {
-        "ecomm": {
-            "path": "./data/dataset/ecomm_faq_dataset.csv",
-            "bot_uuid": "fbc137c9-85f7-411b-81c5-d221cc943399",
-        },
+        # "ecomm": {
+        #     "path": "./data/dataset/ecomm_faq_dataset.csv",
+        #     "bot_uuid": "fbc137c9-85f7-411b-81c5-d221cc943399",
+        # },
         "wke": {
-            "path": "./data/dataset/wke_faq_dataset.csv",
+            "path": "./data/test_dataset/wke_faq_test_dataset.csv",
             "bot_uuid": "642b5430-3ff9-49e1-b6d1-c489043d23e4",
         },
     }
