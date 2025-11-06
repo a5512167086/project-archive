@@ -24,19 +24,21 @@ WKE Lab 建議碩士班新生如何選修課程？,碩士班新生應修8門3學
 撰寫報告或論文時需要注意什麼？,撰寫報告、計畫書或論文時，務必使用Word並遵守格式規範，方便老師修改。
 應該使用什麼範本來撰寫文件？,務必使用Normal.dotm範本來撰寫文件。
 如何處理圖片插入的問題？,圖片不要用Ctrl+V，要用選擇性貼上【Alt+e s】選【圖片增強】，避免圖片浮動難以編輯 (文繞圖：設定圖片為字元格式)。
-如何處理表格的格式？,表格建立後，選擇【全選表格】【表格內容置中】，並設置表格欄位名稱【置中】，其餘內容左右對齊，但欄位名稱置中對齊，欄位內容為數字一律【靠右】對齊。
+如何處理表格的格式（表格內容格式）？,表格建立後，選擇【全選表格】【表格內容置中】，並設置表格欄位名稱【置中】，其餘內容左右對齊，但欄位名稱置中對齊，欄位內容為數字一律【靠右】對齊。
 如何正確引用表格和圖表？,任何圖表標示都必須在內容中提及，如Table 1所示，或As shown in Table 1。圖說明在圖下面，表說明在表上面。表格就該是WORD插入圖表的表格，不要PPT擷圖充當Table，用在畢業論文更是降低個人工作品質，而且還留在論文當證據。
 應該注意哪些細節和名詞大小寫？,注意名詞大小寫的正確性，尤其是公司或產品名稱，如YouTube、Yahoo!、Ptt、App。
-論文參考文獻撰寫與格式？,"格式參考要投稿論文的template或以發表論文PDF，注意閱讀論文參考文獻順序，例如：作者姓lastname (作者序) + 年，或是參考引用的出現順序都有可能。交互參照可能是數字 (e.g. [1], [10, 12, 8])，或是 (Lin & Chen 2023)，認真模仿論文就可以理解。還要注意期刊 (journal)、會議或研討會 (conference or workshop)、書籍等不同格式。"
+論文參考文獻撰寫與格式？,"格式參考要投稿論文的template或以發表論文PDF，注意閱讀論文參考文獻順序，例如：作者姓lastname (作者序) + 年，或是參考引用的出現順序都有可能。交互參照可能是數字 (e.g. [1], [10, 12, 8])，或是 (Lin & Chen 2023)，認真模仿論文就可以理解。還要注意期刊 (journal)、會議或研討會 (conference or workshop)、書籍等不同格式。若有中英文，先列出英文，在列中文論文。"
 論文章節開始要概述各小節之脈絡關係？,例如【2. 文獻探討與相關技術】就要說明針對論文題目，為何survey這些相關研究或技術的脈絡，而不是完全空白就接 2.1 小節。
-論文出現專有名詞縮寫如何處理?,論文第一次出現專有名詞縮寫，就要括號寫清楚，例如：ICM (Integrated Crop Management)。之後提到ICM就不需再括號說明。若摘要提到，寫ICM (Integrated Crop Management) 沒錯，但後續例如在Introduction第一次提到，還是要寫ICM (Integrated Crop Management)。
+專有名詞縮寫？,論文第一次出現專有名詞縮寫，就要括號寫清楚，例如：ICM (Integrated Crop Management)。之後提到ICM就不需再括號說明。若摘要提到，寫ICM (Integrated Crop Management) 沒錯，但後續例如在Introduction第一次提到，還是要寫ICM (Integrated Crop Management)。
 論文擷圖注意？,"擷取PPT內容圖片，勿使用螢幕擷圖連投影片底圖或底色都擷取了。應該選取所有該張slide的物件，到WORD用選擇性貼上【Alt+E,S】，選擇【圖片(xxx)】，xxx格式看狀況自選。"
 論文口試前要準備那些事項？,口試前一周，寄信給口試委員，禮貌邀請，並附件簡報和論文初稿PDF。準備好系統demo應用情境，並將demo錄製影片，以免demo出問題立刻切換撥放影片。
 口試申請流程？,畢業生口試務必主動了解各期限之截止日期，例如：成果展海報、精簡版論文、口試申請與口試委員名冊，口試後論文繳交期限 (超過就會晚一學期畢業)。
-論文字體選擇?,字形一致，可各自選中英文字體；若不分，建議微軟正黑。
-調整圖形大小要確定等比例縮放,按住SHIFT再click圖片角落挑拉，就可以等比例縮放。
-調整表格大小,左上角hover選取表格，click右鍵選【表格內容】，對齊方式選【置中】，文繞圖選【無】。click右鍵選【自動調整】，若內容少，小於頁寬選【內容大小】，內容多到須換行，就選【視窗大小】。就算以PPT或Excel做表格，也要注意此細節。
-口試後流程,口試後盡快按照口試委員建議，完成論文完稿給老師改。確認後，才會給委員簽名之論文審定書，完稿送印。
+字形一致，可各自選中英文字體；若不分，建議微軟正黑？,"中文與英文不須加空白，若用半形括號，建議空白，e.g. 使用長短期記憶網路 (Long Short-Term Memory, LSTM) 方法。若用全形括號，就不須空白，e.g. 使用長短期記憶網路（Long Short-Term Memory, LSTM）方法。半形括號後若為標點符號也不須空白，e.g. 使用長短期記憶網路 (Long Short-Term Memory, LSTM)，將 ..."
+調整圖形大小要確定等比例縮放？,按住SHIFT再click圖片角落挑拉，就可以等比例縮放。
+調整表格大小？,左上角hover選取表格，click右鍵選【表格內容】，對齊方式選【置中】，文繞圖選【無】。click右鍵選【自動調整】，若內容少，小於頁寬選【內容大小】，內容多到須換行，就選【視窗大小】。就算以PPT或Excel做表格，也要注意此細節。
+中英文摘要？,摘要是要簡短統整主要解決的問題、用何方法？做何實驗驗證效能？主要具體貢獻？不是把簡介開頭冗長問題動機說明重複一次。中文寫好後，在交給AI產生英文摘要，並仔細看過確認文意通順。
+找不到【交互參照】問題？,WORD內容複製到另一檔案編輯時，可能因為【交互參照】(e.g. 參考文獻[1][2]...) 未複製到而導致此問題。文件完成後，要仔細檢查前：關閉追蹤修訂 > Ctrl+A (全選) > F9 (更新功能變數，若被【交互參照】物件未複製到，就會出現此問題。到原複製文件複製被【交互參照】物件可解決，或是重新加入【交互參照】)。
+口試申請？,口試後盡快按照口試委員建議，完成論文完稿給老師改。確認後，才會給委員簽名之論文審定書，完稿送印。
 所有與老師溝通之文件一律用Qsync,Qsync提供個人PC與NAS同步服務，自己帳號的Qsync資料，只有自己和老師能存取。因次，進入LAB後，最好完成Qsync設定，並建立meeting目錄，將所有要老師檢閱、修改、server or db資料放在此，以方便老師檔案總管打開>修改>存檔，然後自己就看到修改版。
 Qsync的網址是什麼？,Qsync的網址是https://syncwke.csie.ncnu.edu.tw。
 如何網頁登入Qsync？,網頁登入Qsync，帳號格式為WKE+[Account]。
@@ -54,66 +56,11 @@ WKE帳號的使用者描述如何修改？,可以在使用者內容中修改人�
 申請WKE AD帳號後可以使用哪些服務？,申請WKE AD帳號後，可以登入實驗室架設的Gitlab、HackMD、SyncWKE、以及WKES。
 什麼是 WKE Gitlab?,WKE Gitlab是一個用來託管 Git 專案的平台，類似 GitHub。上面也有許多學長姊留下來的專案可以參考使用。
 使用 WKE Gitlab 的前提是什麼?,你需要擁有 WKE AD 帳號才能使用 WKE Gitlab。
-如何登入 WKE Gitlab?,你可以使用 WKE AD 登入，不需要輸入 WKE\。
+如何登入 WKE Gitlab?,你可以使用 WKE AD 登入，不需要輸入 WKE。
 WKE Gitlab 上有哪些實用的群組?,一些實用的群組包括 'Components' 用於尋找或製作組件，還有 'react_component' 群組。
 WKE Lab 的IP與服務清單有哪些？,WKE Lab 的IP與服務清單僅供內部成員檢視，需登入gitlab：https://gitlab.wke.csie.ncnu.edu.tw/rookie/rookiereadme/-/wikis/home
 WKE Lab 撰寫報告或論文等該注意哪些？,按規定使用normal.dotm，需登入gitlab詳細觀看注意：https://gitlab.wke.csie.ncnu.edu.tw/rookie/rookiereadme/-/wikis/home#%E8%AB%96%E6%96%87
 VM管理人員會提供什麼服務？,VM管理人員會根據需求視情況建立VM，並在建立好後提供IP。
 如何建立對外可以展示的Web Apps？,1. 找 demo.wke的IIS管理人。2. 設定IIS URL Rewrite指向run localhost的IP，例如：https://demo.wke.csie.ncnu.edu.tw/chatbot指向http://10.10.10.10/。
 WKE Lab 提供哪些對外服務？,WKE Lab執行很多產學計畫，數十個網站使用中，不逐一列出。內部目前提供wiseling學寫程式的社群平台作為對外服務。
-在哪裡可以找到 React 框架的參考?,你可以參考 Redux 專案並修改成自己的專案。
-在哪裡可以找到 C# ASP.NET Core API 的參考?,你可以參考 'WebApi' 專案，它是一個 ASP.NET Core 6.0 API 專案。
-如何在 WKE Gitlab 上建立新專案?,依序輸入專案名稱、專案 URL 標誌，設定專案公開程度，並且可以選擇取消勾選 '使用自述文件初始化版本庫'。
-如何為 WKE Gitlab 全域設定 Git?,"運行以下指令：
- 'git config --global user.name [您的姓名]'
- 'git config --global user.email ""[您的帳號]@wke.csie.ncnu.edu.tw""'"
-如何在 WKE Gitlab 上建立一個新版本庫?,"1. 克隆版本庫：'git clone https://gitlab.wke.csie.ncnu.edu.tw/WHL/[專案名稱].git'
- 2. 進入專案目錄：'cd [專案名稱]'
- 3. 創建並切換到新分支：'git switch --create main'
- 4. 創建 README 文件：'touch README.md'
- 5. 添加 README 文件：'git add README.md'
- 6. 提交更改：'git commit -m ""add README""'
- 7. 推送到版本庫：'git push --set-upstream origin main'"
-如何學習前端技術？,可以先製作一個作品當作練習，例如：自我介紹的網頁。學習技術包括 HTML、CSS、JS、React 等。
-爬蟲與SQL語法學習的用途是什麼？,若確定好自己的題目且需要自行收集資料，可以使用爬蟲技術將資料存入資料庫 (Raw DB)。
-專題計畫書需要包含哪些內容？,1. 問題與動機：描述為何要做這個題目以及所遇到的問題。
-如何安裝Selenium的環境？,2. 心智圖：列出想做的功能和資料來源。
-如何下載並設置Web Driver？,3. 需求說明：詳細說明你要提供的功能。
-Selenium常用的package有哪些？,4. 情境說明：假設使用者如何使用你的系統並說明提供的服務。
-如何設置Selenium瀏覽器選項？,使用Options來設置瀏覽器選項，例如最大化視窗（--start-maximized）或開啟無痕模式（--incognito）。
-如何啟動Selenium的WebDriver？,啟動Selenium的WebDriver步驟：1. 設置WebDriver路徑，2. 使用webdriver.Chrome(service=webdriver_path、options=options)來啟動。
-如何使用Selenium前往指定網頁？,使用Selenium的driver.get('URL')方法前往指定的網頁。
-如何使用Selenium定位DOM元素？,Selenium可以使用多種方法來定位DOM元素，如By.ID、By.CLASS_NAME、By.CSS_SELECTOR、By.LINK_TEXT、By.XPATH等。
-如何使用Selenium取資料或與元素互動？,定位到物件後，可以使用obj.text來取文字，obj.get_attribute來取屬性值，obj.click()來點擊，obj.send_keys來輸入文字。
-如何處理Selenium中的例外事件？,Selenium常見的例外事件包括：NoSuchElementException、StaleElementReferenceException、ElementNotInteractableException等，需根據不同情況進行處理。
-如何安裝Beautiful Soup的環境？,安裝Beautiful Soup環境：1. 安裝Python，2. 使用pip install bs4與pip install requests。
-如何使用Beautiful Soup解析HTML？,使用Beautiful Soup解析HTML的步驟：1. 使用requests.get(url).content來獲取完整的HTML，2. 使用BeautifulSoup(response、'html.parser')來解析。
-如何開始進行前端開發？,開始進行前端開發時，首先需要思考一個目標，這有助於讓開發更順利，並且可以學到更多程式技巧。
-前端開發需要使用哪些開發工具？,前端開發需要使用的工具包括：Code editor（如VS Code）、基本概念（HTML、CSS、JavaScript）、React及其相關框架、Lint、以及React UI Library。
-什麼是React？,React 是一種Javascript框架，讓我們更容易進行Web App開發。
-React的主要優點是什麼？,React 的主要優點包括組件化開發、可讀性提高、生態系統大、學習資源多、以及組件可重用。
-什麼是React framework？,React framework 是基於React之上的框架，讓React開發更輕鬆，並且提供了許多好用的功能，如Next.js。
-為什麼要設定Lint？,設定Lint可以提高開發體驗，在開發過程中立刻找出錯誤並及早修正。
-推薦使用哪些React UI Library？,推薦使用的React UI Library包括Material UI和Shadcn/UI。
-如何架設前端開發環境？,架設前端開發環境的步驟包括：安裝Node.js（包括NPM package）、安裝PNPM（可選），然後利用npx指令來啟動React專案。
-如何開始學習前端開發？,開始學習前端開發的方法是先決定想做的專案，設定好開發環境，然後從專案中學習，做中學。
-有哪些推薦的學習資源？,推薦的學習資源包括學長姐的文章、WKE IT108課程以及官方文檔和範例。
-強制型別判斷在React中怎麼使用？,強制型別判斷在React中使用三個等於（===）來判斷。
-如何使用Template string？,Template string 是將字串與變數組合成新的字串的方式，如`const string = `this is a template string ${var}`。
-如何使用Arrow function？,Arrow function 是一種函數表達式的簡寫形式，語法為 `const foo = () => { ... return ... }`。
-什麼是Nullish coalescing operator？,Nullish coalescing operator用來處理變數為null或undefined的情況，語法為`const foo = var1 ?? var2`。
-如何在React中進行Element operation？,在React中，可以使用三元運算或邏輯與運算符來進行Element operation，根據state的值來決定顯示哪個元素。
-如何安裝MSSQL？,安裝MSSQL可以從Microsoft官方網站下載Developer版本。
-如何開啟SQL Server登入？,開啟SQL Server登入，步驟：物件總管 > 伺服器 > 屬性 > 安全性 > 點選SQL Server及Windows驗證模式。
-如何停用sa帳號？,停用sa帳號，步驟：物件總管 > 安全性 > sa > 屬性 > 狀態 > 登入已停用。
-如何新建MSSQL帳號？,新建帳號，步驟：物件總管 > 安全性 > 新增登入 > 創建新帳號並選擇SQL Server驗證。
-如何開啟連線通道？,開啟連線通道，步驟：SQL Server網路組態 > MSSQLSERVER的通訊協定 > TCP/IP > 已啟用選擇是。
-如何設置SQL Server的字型？,設置SQL Server字型，步驟：工具 > 選項 > 環境 > 字型與色彩 > 文字編輯器 > 字型選擇Consolas。
-如何開啟Hyper-V功能？,開啟Hyper-V功能後，重開機並開啟Hyper-V管理員。
-如何使用Hyper-V建立虛擬機？,使用Hyper-V建立虛擬機的步驟：1. 重開機後開啟Hyper-V管理員，2. 選擇新增→虛擬機器，3. 設定虛擬機名稱和位置，4. 選擇第二代世代，5. 指派記憶體，6. 設定網路功能，7. 連接虛擬硬碟，8. 從CD/DVD-ROM安裝作業系統。
-如何指定虛擬機的世代？,在設定虛擬機時，指定世代應選擇第二代。
-如何指派虛擬機的記憶體？,指派記憶體時，建議範圍在4096MB至8192MB之間，並取消動態記憶體。
-如何設定Hyper-V的網路功能？,網路功能的設定還在Todo清單中，未完成。
-如何設定虛擬硬碟？,虛擬硬碟的大小可以根據需求選擇，並在設定中連接虛擬硬碟。
-如何從CD/DVD-ROM安裝作業系統？,從CD/DVD-ROM安裝作業系統，可以選擇安裝Windows Server。
-如何提供VM的自訂名稱？,提供自訂名稱、所需密碼、所需CPU核心數以及記憶體。
+專題計畫書需要包含哪些內容？,1. 問題與動機：描述為何要做這個題目以及所遇到的問題。2. 心智圖：列出想做的功能和資料來源。3. 需求說明：詳細說明你要提供的功能。4. 情境說明：假設使用者如何使用你的系統並說明提供的服務。

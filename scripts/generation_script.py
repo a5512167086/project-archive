@@ -143,7 +143,7 @@ def main():
         #     "bot_uuid": "fbc137c9-85f7-411b-81c5-d221cc943399",
         # },
         "wke": {
-            "path": "./data/test_dataset/wke_faq_test_dataset.csv",
+            "path": "./data/testset/wke_faq_testset.csv",
             "bot_uuid": "642b5430-3ff9-49e1-b6d1-c489043d23e4",
         },
     }

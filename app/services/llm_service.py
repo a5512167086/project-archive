@@ -10,7 +10,13 @@ from langchain_openai import AzureChatOpenAI
 class BaseLLMService(ABC):
     def _build_messages(self, user_query: str, contexts: list[dict]) -> list[dict]:
         ctx = contexts[:3]
-        context_block = "".join(f"{c.get('answer', '').strip()}\n" for c in ctx) or "無"
+        answers = [
+            c.get("answer", "").strip() for c in ctx if c.get("answer", "").strip()
+        ]
+        if not answers:
+            context_block = "無"
+        else:
+            context_block = "\n".join(f"{i}. {ans}" for i, ans in enumerate(answers, 1))
         system = (
             "/no_think \n"
             "你是一位專業且嚴謹的電商客服知識庫助理，請嚴格遵守以下規則：\n\n"

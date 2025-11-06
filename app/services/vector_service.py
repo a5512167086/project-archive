@@ -31,15 +31,9 @@ class VectorService:
         self.url = url or QDRANT_URL
         self.collection = collection_name or QDRANT_COLLECTION
         self.model = model
-
-        # 初始化 Qdrant 客戶端
         self._init_client(timeout)
-
-        # 初始化 LangChain Vector Store
-        self._init_vector_store()
-
-        # 確保集合和索引存在
         self._ensure_collection_and_indexes()
+        self._init_vector_store()
 
     def _init_client(self, timeout: float) -> None:
         """初始化 Qdrant 客戶端"""
@@ -120,17 +114,6 @@ class VectorService:
             yield scrolled_points
             if next_offset is None:
                 break
-
-    def _create_bot_filter(self, bot_uuid: UUID) -> qmodels.Filter:
-        """創建 bot UUID 過濾條件 (注意：此函數現在未使用，由 _create_knowledge_filter 取代)"""
-        return qmodels.Filter(
-            must=[
-                qmodels.FieldCondition(
-                    key="metadata.bot_uuid",  # 保持巢狀結構
-                    match=qmodels.MatchValue(value=str(bot_uuid)),
-                )
-            ]
-        )
 
     def _create_knowledge_filter(self, bot_uuid: UUID) -> qmodels.Filter:
         """創建知識項目過濾條件 (此函數已是正確的巢狀結構)"""
