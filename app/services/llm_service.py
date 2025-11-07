@@ -66,7 +66,7 @@ class GeminiLLMService(BaseLLMService):
             raise ValueError("GOOGLE_API_KEY environment variable not set.")
 
         self.llm = ChatGoogleGenerativeAI(
-            model="gemini-pro",
+            model="gemini-2.5-flash",
             temperature=float(os.getenv("LLM_TEMPERATURE", "0.3")),
             max_output_tokens=int(os.getenv("LLM_MAX_NEW_TOKENS", "1024")),
         )
