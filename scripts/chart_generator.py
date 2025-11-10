@@ -77,7 +77,7 @@ def load_and_process_data():
     all_data_list = []
 
     model_name_map = {
-        "gemini_google": "Gemini 2.5 flash",
+        "gemini_flash": "Gemini 2.5 flash",
         "gpt35_azure": "GPT-3.5 Turbo",
         "huggingface_local": "Qwen-4B",
     }

@@ -68,7 +68,7 @@ def generate_evaluation_data(
         try:
             # 1. Retrieval
             retrieved_docs = vector_service.search_faq(
-                bot_uuid=bot_uuid, query_text=question, top_k=2, score_threshold=0.8
+                bot_uuid=bot_uuid, query_text=question, top_k=3, score_threshold=0.7
             )
             raw_contexts = [doc.get("answer", "") for doc in retrieved_docs if doc]
             contexts = validate_retrieved_contexts(raw_contexts)
@@ -108,11 +108,11 @@ def generate_evaluation_data(
         except Exception as e:
             print(f"ERROR processing question #{idx + 1}: {e}")
             continue
-        if model_name == "gemini_google":
+        if model_name == "gemini_flash":
             print(
-                "INFO: Gemini model detected, sleeping for 10 seconds to avoid rate limits..."
+                "INFO: Gemini model detected, sleeping for 6.5 seconds to avoid rate limits..."
             )
-            time.sleep(10)
+            time.sleep(6.5)
 
     return evaluation_results
 
@@ -148,9 +148,9 @@ def main():
         },
     }
     MODELS_TO_RUN = [
-        "gemini_google",
-        "huggingface_local",
+        "gemini_flash",
         "gpt35_azure",
+        "huggingface_local",
     ]
 
     # --- Load Models Once ---

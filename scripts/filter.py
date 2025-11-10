@@ -1,29 +1,25 @@
 import ast
 import json
-import os
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 import pandas as pd
 
 # === 檔案設定 ===
 CONFIG = {
     # 基礎路徑
-    "base_path": "./data/ragas_result/",
-    "output_path": "./data/chart/",
-    # 檔案名稱中包含的資料集標籤
+    "base_path": Path("./data/ragas_result/"),
+    "output_path": Path("./data/chart/"),
+    # 資料集與模型定義
     "datasets": ["ecomm", "wke"],
-    # 模型設定
-    # key: 檔案名稱中的模型標籤 (e.g., "gemini_google")
-    # value: "name" 是 JSON 輸出時的顯示名稱
     "models": {
         "gemini_google": {"name": "Gemini 2.5 flash"},
         "gpt35_azure": {"name": "GPT 3.5 Turbo"},
         "huggingface_local": {"name": "Qwen3 4B"},
     },
-    # 檔案名稱模板
+    # 檔案與欄位模板
     "filename_template": "ragas_results_ragas_eval_{model}_{dataset}.csv",
-    # 用於合併的基準欄位 (這些欄位在所有 CSV 中都相同)
     "key_cols": ["user_input", "retrieved_contexts", "reference"],
-    # 需要為每個模型加上前綴的欄位
     "metrics_cols": [
         "response",
         "faithfulness",
@@ -32,41 +28,82 @@ CONFIG = {
         "context_recall",
         "answer_correctness",
     ],
+    # 💡 重構重點：篩選條件由設定檔驅動
+    # 在此定義所有要篩選並獨立輸出的條件
+    # 鍵名 (例如 'low_relevancy') 是內部標識符
+    "filter_criteria": {
+        "low_relevancy": {
+            "metric": "answer_relevancy",  # 要檢查的指標
+            "threshold": 0.5,  # 閾值
+            "operator": "<",  # 運算符 (目前僅支援 <)
+            "output_filename": "relevancy_low_{dataset}.json",
+            "log_message": "low relevancy (< 0.5)",
+        },
+        "low_correctness": {
+            "metric": "answer_correctness",  # 要檢查的指標
+            "threshold": 0.3,  # 閾值
+            "operator": "<",  # 運算符 (目前僅支援 <)
+            "output_filename": "correctness_low_{dataset}.json",
+            "log_message": "low correctness (< 0.3)",
+        },
+    },
 }
 
-# === 輔助函數 (來自前一個腳本) ===
+ModelConfig = Dict[str, Dict[str, str]]
 
 
-def safe_parse_contexts(value):
+def safe_parse_contexts(value: Any) -> List[str]:
     """
     嘗試把 retrieved_contexts 字串轉成 list[str]
     - 支援 JSON list
     - 支援 Python list 字串 (單引號)
     - fallback 成單一字串 list
     """
-    if pd.isna(value) or str(value).strip() == "":
+    if pd.isna(value) or value is None:
         return ["無內容"]
+
     if isinstance(value, list):
         return value
+
     if not isinstance(value, str):
         return [str(value)]
 
     value = value.strip()
+    if value == "":
+        return ["無內容"]
+
     if value.startswith("[") and value.endswith("]"):
         try:
+            # 嘗試 JSON (最標準)
             return json.loads(value)
         except json.JSONDecodeError:
             try:
+                # 嘗試 ast (可處理單引號)
                 return ast.literal_eval(value)
             except Exception:
-                pass
+                # 如果解析失敗，當作單一字串處理 (去除方括號)
+                return [value[1:-1]]
+
+    # 最終 fallback
     return [value]
 
 
-def df_to_grouped_json(df, model_config):
+def df_to_grouped_json(
+    df: pd.DataFrame, model_config: ModelConfig
+) -> List[Dict[str, Any]]:
     """
     將 "寬" DataFrame 轉換為分組的 JSON 結構
     """
+
+    def _to_json_number(val: Any) -> Optional[float]:
+        """輔助函數：確保 NaN 值在 JSON 中顯示為 null"""
+        if pd.isna(val):
+            return None
+        try:
+            return float(val)
+        except (ValueError, TypeError):
+            return None
+
     output_data = []
     for _, row in df.iterrows():
         answers_data = {}
@@ -74,13 +111,12 @@ def df_to_grouped_json(df, model_config):
             model_name = config["name"]
             answers_data[model_name] = {
                 "answer": row.get(f"{prefix}_response"),
-                # 確保 NaN 值在 JSON 中顯示為 null
-                "answer_relevancy": row.get(f"{prefix}_answer_relevancy")
-                if not pd.isna(row.get(f"{prefix}_answer_relevancy"))
-                else None,
-                "answer_correctness": row.get(f"{prefix}_answer_correctness")
-                if not pd.isna(row.get(f"{prefix}_answer_correctness"))
-                else None,
+                "answer_relevancy": _to_json_number(
+                    row.get(f"{prefix}_answer_relevancy")
+                ),
+                "answer_correctness": _to_json_number(
+                    row.get(f"{prefix}_answer_correctness")
+                ),
             }
 
         output_data.append({
@@ -92,25 +128,19 @@ def df_to_grouped_json(df, model_config):
     return output_data
 
 
-# === 主處理邏輯 ===
+def load_and_merge_data(dataset: str, config: Dict[str, Any]) -> Optional[pd.DataFrame]:
+    """
+    為指定的資料集讀取所有模型的 CSV 檔案，並將它們合併。
+    """
+    print(f"\n--- 正在讀取與合併資料集: {dataset} ---")
 
-print("🚀 開始處理 Ragas 評估結果...")
+    merged_df: Optional[pd.DataFrame] = None
+    model_prefixes = list(config["models"].keys())
+    base_path: Path = config["base_path"]
 
-# 確保輸出目錄存在
-os.makedirs(CONFIG["output_path"], exist_ok=True)
-
-# 遍歷每個資料集 (ecomm, wke)
-for dataset in CONFIG["datasets"]:
-    print(f"\n--- 正在處理資料集: {dataset} ---")
-
-    merged_df = None
-    model_prefixes = list(CONFIG["models"].keys())
-
-    # 1. 讀取並合併每個模型的 CSV
     for prefix in model_prefixes:
-        model_config = CONFIG["models"][prefix]
-        filename = CONFIG["filename_template"].format(model=prefix, dataset=dataset)
-        filepath = os.path.join(CONFIG["base_path"], filename)
+        filename = config["filename_template"].format(model=prefix, dataset=dataset)
+        filepath = base_path / filename
 
         try:
             df = pd.read_csv(filepath)
@@ -122,7 +152,7 @@ for dataset in CONFIG["datasets"]:
             continue
 
         # 檢查 key_cols 是否存在
-        missing_keys = [k for k in CONFIG["key_cols"] if k not in df.columns]
+        missing_keys = [k for k in config["key_cols"] if k not in df.columns]
         if missing_keys:
             print(
                 f"❌ 錯誤: {filepath} 缺少合併所需的欄位: {missing_keys}。跳過此檔案。"
@@ -132,7 +162,7 @@ for dataset in CONFIG["datasets"]:
         # 建立要重命名的欄位
         rename_map = {
             col: f"{prefix}_{col}"
-            for col in CONFIG["metrics_cols"]
+            for col in config["metrics_cols"]
             if col in df.columns
         }
         df.rename(columns=rename_map, inplace=True)
@@ -142,82 +172,95 @@ for dataset in CONFIG["datasets"]:
             merged_df = df
         else:
             # 使用 outer join 以保留所有問題，即使某個模型沒有回答
-            merged_df = pd.merge(merged_df, df, on=CONFIG["key_cols"], how="outer")
+            merged_df = pd.merge(merged_df, df, on=config["key_cols"], how="outer")
 
     if merged_df is None or merged_df.empty:
         print(f"ℹ️ {dataset} 資料集沒有載入任何資料，跳過。")
-        continue
+        return None
 
     print(f"✅ {dataset} 資料集已合併，共 {len(merged_df)} 筆資料。")
+    return merged_df
 
-    # 2. 數值欄位處理
-    relevancy_cols_to_check = []
-    correctness_cols_to_check = []
 
-    for prefix in model_prefixes:
-        rel_col = f"{prefix}_answer_relevancy"
-        cor_col = f"{prefix}_answer_correctness"
+def main():
+    """
+    主處理邏輯
+    """
+    print("🚀 開始處理 Ragas 評估結果...")
 
-        if rel_col in merged_df.columns:
-            merged_df[rel_col] = pd.to_numeric(merged_df[rel_col], errors="coerce")
-            relevancy_cols_to_check.append(rel_col)
+    config = CONFIG
+    output_path: Path = config["output_path"]
 
-        if cor_col in merged_df.columns:
-            merged_df[cor_col] = pd.to_numeric(merged_df[cor_col], errors="coerce")
-            correctness_cols_to_check.append(cor_col)
+    # 確保輸出目錄存在
+    output_path.mkdir(parents=True, exist_ok=True)
 
-    # 3. 篩選
-    # 篩選：只要「任一」模型的 relevancy 分數為 0 或 NaN
-    relevancy_mask = (merged_df[relevancy_cols_to_check] == 0).any(axis=1) | (
-        merged_df[relevancy_cols_to_check].isna()
-    ).any(axis=1)
-    relevancy_zero_df = merged_df[relevancy_mask]
+    # 遍歷每個資料集 (ecomm, wke)
+    for dataset in config["datasets"]:
+        merged_df = load_and_merge_data(dataset, config)
 
-    # --- 💡 修改點 (1) ---
-    # 篩選：只要「任一」模型的 correctness 分數低於 0.3 或 NaN
-    correctness_mask = (merged_df[correctness_cols_to_check] < 0.3).any(axis=1) | (
-        merged_df[correctness_cols_to_check].isna()
-    ).any(axis=1)
-    correctness_low_df = merged_df[correctness_mask]  # 變數名稱更新
-    # --- 💡 修改結束 ---
+        if merged_df is None:
+            continue
 
-    # 4. 轉換成 JSON
-    relevancy_json = df_to_grouped_json(relevancy_zero_df, CONFIG["models"])
+        model_prefixes = list(config["models"].keys())
 
-    # --- 💡 修改點 (2) ---
-    correctness_low_json = df_to_grouped_json(
-        correctness_low_df, CONFIG["models"]
-    )  # 變數名稱更新
-    # --- 💡 修改結束 ---
+        # 2. 數值欄位處理
+        # 收集所有需要被篩選的指標
+        metrics_to_process = {
+            criteria["metric"] for criteria in config["filter_criteria"].values()
+        }
 
-    # 5. 寫出檔案
-    relevancy_file = os.path.join(
-        CONFIG["output_path"], f"relevancy_zero_{dataset}.json"
-    )
+        all_metric_cols = []
+        for prefix in model_prefixes:
+            for metric in metrics_to_process:
+                col_name = f"{prefix}_{metric}"
+                if col_name in merged_df.columns:
+                    all_metric_cols.append(col_name)
 
-    # --- 💡 修改點 (3) ---
-    correctness_file = os.path.join(
-        CONFIG["output_path"],
-        f"correctness_low_{dataset}.json",  # 檔名更新
-    )
-    # --- 💡 修改結束 ---
+        # 一次性轉換所有相關欄位為數值
+        for col in all_metric_cols:
+            merged_df[col] = pd.to_numeric(merged_df[col], errors="coerce")
 
-    with open(relevancy_file, "w", encoding="utf-8") as f:
-        json.dump(relevancy_json, f, ensure_ascii=False, indent=2)
+        print(f"📊 {dataset} 資料集開始進行篩選...")
 
-    # --- 💡 修改點 (4) ---
-    with open(correctness_file, "w", encoding="utf-8") as f:
-        json.dump(correctness_low_json, f, ensure_ascii=False, indent=2)  # 變數名稱更新
-    # --- 💡 修改結束 ---
+        # 3. 篩選、轉換、寫出 (Data-Driven Loop)
+        for filter_name, criteria in config["filter_criteria"].items():
+            metric = criteria["metric"]
+            threshold = criteria["threshold"]
+            # 找到所有模型中對應此指標的欄位
+            metric_cols = [
+                f"{p}_{metric}"
+                for p in model_prefixes
+                if f"{p}_{metric}" in merged_df.columns
+            ]
 
-    print(
-        f"  ➡️ 已輸出 {len(relevancy_json)} 筆 low relevancy (=0) 資料到 {relevancy_file}"
-    )
+            if not metric_cols:
+                print(f"ℹ️ 找不到 {metric} 的欄位，跳過 {filter_name} 篩選。")
+                continue
 
-    # --- 💡 修改點 (5) ---
-    print(
-        f"  ➡️ 已輸出 {len(correctness_low_json)} 筆 low correctness (<0.3) 資料到 {correctness_file}"  # 變數與文字更新
-    )
-    # --- 💡 修改結束 ---
+            # 建立篩選遮罩：
+            # 只要「任一」模型的指標分數 < threshold 或為 NaN
+            mask = (merged_df[metric_cols] < threshold).any(axis=1) | (
+                merged_df[metric_cols].isna()
+            ).any(axis=1)
 
-print("\n🎉 全部處理完畢！")
+            filtered_df = merged_df[mask]
+
+            # 4. 轉換成 JSON
+            grouped_json = df_to_grouped_json(filtered_df, config["models"])
+
+            # 5. 寫出檔案
+            output_filename = criteria["output_filename"].format(dataset=dataset)
+            output_file_path = output_path / output_filename
+
+            with open(output_file_path, "w", encoding="utf-8") as f:
+                json.dump(grouped_json, f, ensure_ascii=False, indent=2)
+
+            print(
+                f" ➡️ 已輸出 {len(grouped_json):>3} 筆 {criteria['log_message']} 資料到 {output_file_path}"
+            )
+
+    print("\n🎉 全部處理完畢！")
+
+
+if __name__ == "__main__":
+    main()

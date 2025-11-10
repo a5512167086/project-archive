@@ -19,24 +19,23 @@ class BaseLLMService(ABC):
             context_block = "\n".join(f"{i}. {ans}" for i, ans in enumerate(answers, 1))
         system = (
             "/no_think \n"
-            "你是一位專業且嚴謹的電商客服知識庫助理，請嚴格遵守以下規則：\n\n"
+            "你是一位專業的客服知識庫助理，請嚴格遵守以下規則：\n\n"
             "1. 必須根據提供的[知識片段]回覆，並確保回覆能直接解答使用者的問題。\n"
-            "2. 當使用者使用第一人稱（如「我」、「我的」）提問，而知識片段提供的是通用性資訊時，請自然地將通用資訊套用到使用者問題中，不要直接回覆「沒有資訊」。\n"
-            "3. 回答時，請優先聚焦在與問題最相關的重點，再補充其他可能有用的資訊。\n"
-            "4. 若知識片段包含多個要點，請用條列或簡短句子組織，使回答既完整又易讀。\n"
-            "5. 如果知識片段沒有提供明確答案，但有相關條件或方向，請整理並提供給使用者，而不是直接說沒有。\n"
-            "6. 只有在知識片段完全沒有任何相關內容時，才回答：「目前知識庫中沒有找到與此問題相關的資訊。」\n"
-            "7. 回答必須使用清晰、簡潔的繁體中文，避免任何前言、結語或寒暄。\n"
+            "2. 當使用者使用第一人稱（如「我」、「我的」）提問，而知識片段提供的是通用性資訊時，請自然地將通用資訊套用到使用者問題中。\n"
+            "3. 回答時，請優先聚焦在與問題最相關的知識片段，與問題不相關的知識片段則應忽略。\n"
+            "4. 如果知識片段沒有提供明確答案，但有相關條件或方向，請整理並提供給使用者。\n"
+            "5. 關鍵性的事實需逐字複製片段原文，確保答案的正確性。\n"
+            "6. 在知識片段完全沒有任何相關內容時，才回答：「目前知識庫中沒有找到與此問題相關的資訊。」\n"
+            "7. 回答必須使用清晰、簡潔的繁體中文，避免任何前言、結語或寒暄，並將回答字數限制在100字內。\n"
             "8. 嚴禁輸出任何思考過程、推理文字或 XML 標籤（如 <think>）\n"
-            "9. 請使用繁體中文回答，並將回答字數限制在100到200字。\n"
             "---"
         )
         print(context_block)
         user = (
-            f"以下是與使用者問題相關的知識片段：\n"
-            f"```\n{context_block}\n```\n\n"
             f"使用者問題：\n"
             f"「{user_query}」\n\n"
+            f"以下是與使用者問題相關的知識片段：\n"
+            f"```\n{context_block}\n```\n\n"
             f"請根據上述資訊，提供簡潔易懂且完整的回答。"
         )
         return [
@@ -145,6 +144,8 @@ class LLMFactory:
         print(f"Initializing service for model: '{model_name}'")
         if model_name == "gpt35_azure":
             service = AzureLLMService()
+        elif model_name == "gemini_flash":
+            service = GeminiLLMService()
         elif model_name == "huggingface_local":
             if self.preloaded_chat_model:
                 service = HuggingFaceLLMService(self.preloaded_chat_model)

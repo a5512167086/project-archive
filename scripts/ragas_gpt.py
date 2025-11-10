@@ -14,8 +14,7 @@ from langchain_openai import AzureChatOpenAI
 from ragas import evaluate
 from ragas.llms import LangchainLLMWrapper
 from ragas.metrics import (
-    AnswerCorrectness,
-    FactualCorrectness,
+    answer_correctness,
     answer_relevancy,
     context_precision,
     context_recall,
@@ -143,11 +142,10 @@ async def setup_evaluation_models(
         # 在一處定義所有指標
         all_metrics = [
             faithfulness,
-            answer_relevancy,
             context_precision,
             context_recall,
-            AnswerCorrectness(),
-            FactualCorrectness(),
+            answer_relevancy,
+            answer_correctness,
         ]
 
         # 使用 asyncio.gather 平行處理所有提示詞適配，速度更快
