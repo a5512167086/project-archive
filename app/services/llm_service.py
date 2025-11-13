@@ -6,6 +6,13 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_huggingface import ChatHuggingFace
 from langchain_openai import AzureChatOpenAI
 
+from app.configs.config import (
+    AZURE_OPENAI_API_VERSION,
+    AZURE_OPENAI_DEPLOYMENT,
+    LLM_MAX_NEW_TOKENS,
+    LLM_TEMPERATURE,
+)
+
 
 class BaseLLMService(ABC):
     def _build_messages(self, user_query: str, contexts: list[dict]) -> list[dict]:
@@ -66,8 +73,8 @@ class GeminiLLMService(BaseLLMService):
 
         self.llm = ChatGoogleGenerativeAI(
             model="gemini-2.5-flash",
-            temperature=float(os.getenv("LLM_TEMPERATURE", "0.3")),
-            max_output_tokens=int(os.getenv("LLM_MAX_NEW_TOKENS", "1024")),
+            temperature=LLM_TEMPERATURE,
+            max_output_tokens=LLM_MAX_NEW_TOKENS,
         )
 
     def generate(self, user_query: str, contexts: list[dict]) -> str:
@@ -82,12 +89,10 @@ class AzureLLMService(BaseLLMService):
 
     def __init__(self) -> None:
         self.llm = AzureChatOpenAI(
-            azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT", "IT108_gpt35"),
-            openai_api_version=os.getenv(
-                "AZURE_OPENAI_API_VERSION", "2023-07-01-preview"
-            ),
-            temperature=float(os.getenv("LLM_TEMPERATURE", "0.3")),
-            max_tokens=int(os.getenv("LLM_MAX_NEW_TOKENS", "1024")),
+            azure_deployment=AZURE_OPENAI_DEPLOYMENT,
+            openai_api_version=AZURE_OPENAI_API_VERSION,
+            temperature=LLM_TEMPERATURE,
+            max_tokens=LLM_MAX_NEW_TOKENS,
         )
 
     def generate(self, user_query: str, contexts: list[dict]) -> str:

@@ -22,6 +22,12 @@ from ragas.metrics import (
 )
 from ragas.metrics.base import Metric
 
+from app.configs.config import (
+    AZURE_OPENAI_API_VERSION,
+    AZURE_OPENAI_DEPLOYMENT,
+    EMBEDDING_MODEL,
+)
+
 # --- 1. 組態設定 (Configuration) ---
 # 將所有路徑和常數集中管理
 load_dotenv()
@@ -34,12 +40,6 @@ CACHE_DIR = "./cache"
 SUMMARY_FILENAME = "_ragas_evaluation_summary.csv"
 SUMMARY_CSV_PATH = os.path.join(OUTPUT_DATA_DIR, SUMMARY_FILENAME)
 
-# 環境變數鍵值
-EMBEDDING_MODEL_ENV = "EMBEDDING_MODEL"
-AZURE_DEPLOYMENT_ENV = "AZURE_OPENAI_DEPLOYMENT"
-AZURE_API_VERSION_ENV = "AZURE_OPENAI_API_VERSION"
-DEFAULT_AZURE_DEPLOYMENT = "IT108_gpt35"
-DEFAULT_AZURE_API_VERSION = "2023-07-01-preview"
 
 # --- 2. 核心輔助函式 (Core Helper Functions) ---
 
@@ -123,16 +123,14 @@ async def setup_evaluation_models(
     print("Setting up evaluation models...")
     try:
         embedding_model = HuggingFaceEmbeddings(
-            model_name=os.getenv(EMBEDDING_MODEL_ENV),
+            model_name=EMBEDDING_MODEL,
             model_kwargs={"device": "cuda"},
             cache_folder=CACHE_DIR,
         )
 
         azure_llm = AzureChatOpenAI(
-            azure_deployment=os.getenv(AZURE_DEPLOYMENT_ENV, DEFAULT_AZURE_DEPLOYMENT),
-            openai_api_version=os.getenv(
-                AZURE_API_VERSION_ENV, DEFAULT_AZURE_API_VERSION
-            ),
+            azure_deployment=AZURE_OPENAI_DEPLOYMENT,
+            openai_api_version=AZURE_OPENAI_API_VERSION,
             temperature=0.1,
             max_tokens=4096,
             request_timeout=120,

@@ -9,13 +9,8 @@ from datasets import Dataset
 from dotenv import load_dotenv
 from langchain.callbacks.manager import tracing_v2_enabled
 from langchain.globals import set_verbose
-
-# --- MODIFIED: Imports ---
-# 移除了 AzureChatOpenAI，加入了 ChatGoogleGenerativeAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_huggingface import HuggingFaceEmbeddings
-
-# --- END MODIFIED ---
 from ragas import evaluate
 from ragas.llms import LangchainLLMWrapper
 from ragas.metrics import (
@@ -28,6 +23,13 @@ from ragas.metrics import (
 )
 from ragas.metrics.base import Metric
 
+from app.configs.config import (
+    EMBEDDING_MODEL,
+    GOOGLE_API_KEY,
+    LLM_MAX_NEW_TOKENS,
+    LLM_TEMPERATURE,
+)
+
 # --- 1. 組態設定 (Configuration) ---
 load_dotenv()
 set_verbose(True)
@@ -39,11 +41,6 @@ CACHE_DIR = "./cache"
 SUMMARY_FILENAME = "_ragas_evaluation_summary.csv"
 SUMMARY_CSV_PATH = os.path.join(OUTPUT_DATA_DIR, SUMMARY_FILENAME)
 
-# --- MODIFIED: 環境變數鍵值 ---
-# 移除了 Azure 相關變數，改用 Google
-EMBEDDING_MODEL_ENV = "EMBEDDING_MODEL"
-GOOGLE_API_KEY_ENV = "GOOGLE_API_KEY"
-# --- END MODIFIED ---
 
 # --- 2. 核心輔助函式 (Core Helper Functions) ---
 
@@ -124,34 +121,29 @@ async def setup_evaluation_models(
 ) -> Tuple[
     Optional[ChatGoogleGenerativeAI], Optional[HuggingFaceEmbeddings], List[Metric]
 ]:
-    """
-    (新函式) 職責分離：初始化 LLM、Embeddings，並適配所有指標的提示詞。
-    ---
-    (!! 這是主要修改的函式 !!)
-    """
     print("Setting up evaluation models...")
     try:
         # --- MODIFIED: LLM Initialization ---
         # 1. (Embedding 模型保持不變)
         embedding_model = HuggingFaceEmbeddings(
-            model_name=os.getenv(EMBEDDING_MODEL_ENV),
+            model_name=EMBEDDING_MODEL,
             model_kwargs={"device": "cuda"},
             cache_folder=CACHE_DIR,
         )
 
         # 2. 檢查 Google API Key
-        google_api_key = os.getenv(GOOGLE_API_KEY_ENV)
+        google_api_key = GOOGLE_API_KEY
         if not google_api_key:
             raise ValueError(
-                f"❌ {GOOGLE_API_KEY_ENV} environment variable not set. Please add it to your .env file."
+                "❌ GOOGLE_API_KEY environment variable not set. Please add it to your .env file."
             )
 
         # 3. 初始化 Gemini 1.5 Flash
         print("Initializing Judge LLM: Gemini 1.5 Flash...")
         gemini_llm = ChatGoogleGenerativeAI(
             model="gemini-2.5-flash",
-            temperature=float(os.getenv("LLM_TEMPERATURE", "0.3")),
-            max_output_tokens=int(os.getenv("LLM_MAX_NEW_TOKENS", "1024")),
+            temperature=LLM_TEMPERATURE,
+            max_output_tokens=LLM_MAX_NEW_TOKENS,
         )
         wrapped_llm = LangchainLLMWrapper(gemini_llm)
         # --- END MODIFIED ---

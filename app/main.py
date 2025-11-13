@@ -1,5 +1,4 @@
 import asyncio
-import os
 from contextlib import asynccontextmanager
 from typing import Annotated
 
@@ -11,6 +10,7 @@ from langchain_huggingface import (
     HuggingFacePipeline,
 )
 
+from app.configs.config import CHAT_MODEL, EMBEDDING_MODEL
 from app.database import SessionDep
 from app.schemas import IngestRequest, QueryHit, QueryRequest, QueryResponse
 from app.services.knowledge_service import KnowledgeService
@@ -21,17 +21,16 @@ from app.services.vector_service import VectorService
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Application startup: Loading models...")
-    embedding_model_name = os.getenv("EMBEDDING_MODEL")
-    chat_model_name = os.getenv("CHAT_MODEL")
+
     device = 0 if torch.cuda.is_available() else -1
     embedding_model = HuggingFaceEmbeddings(
-        model_name=embedding_model_name,
+        model_name=EMBEDDING_MODEL,
         model_kwargs={"device": device},
         cache_folder="../cache",
     )
     chat_pipeline = HuggingFacePipeline.from_model_id(
         task="text-generation",
-        model_id=chat_model_name,
+        model_id=CHAT_MODEL,
         device=device,
         model_kwargs={"torch_dtype": torch.bfloat16},
         pipeline_kwargs={"max_new_tokens": 512},
@@ -41,8 +40,8 @@ async def lifespan(app: FastAPI):
 
     app.state.embedding_model = embedding_model
     app.state.chat_model = chat_model
-    print(f"Embedding model '{embedding_model_name}' loaded successfully on {device}.")
-    print(f"Chat model '{chat_model_name}' loaded successfully on {device}.")
+    print(f"Embedding model '{EMBEDDING_MODEL}' loaded successfully on {device}.")
+    print(f"Chat model '{CHAT_MODEL}' loaded successfully on {device}.")
 
     # 初始化工廠時，傳入預載的 chat_model
     llm_factory = LLMFactory(chat_model=app.state.chat_model)

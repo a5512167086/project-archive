@@ -1,5 +1,4 @@
 import json
-import os
 import time
 from typing import Any, Dict, List
 
@@ -9,7 +8,7 @@ from dotenv import load_dotenv
 from langchain_huggingface import HuggingFaceEmbeddings, HuggingFacePipeline
 from langchain_huggingface.chat_models import ChatHuggingFace
 
-# Make sure these imports point to your actual service files
+from app.configs.config import CHAT_MODEL, EMBEDDING_MODEL
 from app.services.llm_service import BaseLLMService, LLMFactory
 from app.services.vector_service import VectorService
 
@@ -157,19 +156,17 @@ def main():
     print("🚀 Loading models...")
     device = 0 if torch.cuda.is_available() else -1
 
-    chat_model_name = os.getenv("CHAT_MODEL")
     chat_pipeline = HuggingFacePipeline.from_model_id(
         task="text-generation",
-        model_id=chat_model_name,
+        model_id=CHAT_MODEL,
         device=device,
         model_kwargs={"torch_dtype": torch.bfloat16},
         pipeline_kwargs={"max_new_tokens": 1024, "temperature": 0.1},
     )
     qwen_chat_model = ChatHuggingFace(llm=chat_pipeline)
 
-    embedding_model_name = os.getenv("EMBEDDING_MODEL")
     embedding_model = HuggingFaceEmbeddings(
-        model_name=embedding_model_name,
+        model_name=EMBEDDING_MODEL,
         model_kwargs={"device": "cuda" if torch.cuda.is_available() else "cpu"},
         cache_folder="./cache",
     )
