@@ -77,9 +77,9 @@ def load_and_process_data():
     all_data_list = []
 
     model_name_map = {
-        "gemini_flash": "Gemini 2.5 flash",
-        "gpt35_azure": "GPT-3.5 Turbo",
-        "huggingface_local": "Qwen-4B",
+        "gemini_2.5_flash": "Gemini 2.5 flash",
+        "gpt_o4_azure": "GPT o4 mini",
+        "qwen3_local": "Qwen3 4B",
     }
 
     for file_path in csv_files:
@@ -123,7 +123,7 @@ def create_bar_chart(df, dataset_name, metrics):
     fig, ax = plt.subplots(figsize=(16, 9))
 
     df["model"] = pd.Categorical(
-        df["model"], ["GPT-3.5 Turbo", "Gemini 2.5 flash", "Qwen-4B"], ordered=True
+        df["model"], ["GPT o4 mini", "Gemini 2.5 flash", "Qwen-4B"], ordered=True
     )
     df = df.sort_values("model")
     models = df["model"].unique()
@@ -167,7 +167,7 @@ def create_radar_chart(df, dataset_name, metrics):
     fig, ax = plt.subplots(figsize=(10, 10), subplot_kw=dict(polar=True))
 
     df["model"] = pd.Categorical(
-        df["model"], ["GPT-3.5 Turbo", "Gemini 2.5 flash", "Qwen-4B"], ordered=True
+        df["model"], ["GPT o4 mini", "Gemini 2.5 flash", "Qwen-4B"], ordered=True
     )
     df = df.sort_values("model")
 
@@ -209,7 +209,7 @@ def create_qualitative_comparison_table(all_data):
         aggfunc="first",
     ).reset_index()
 
-    all_models = ["GPT-3.5 Turbo", "Gemini 2.5 flash", "Qwen-4B"]
+    all_models = ["GPT o4 mini", "Gemini 2.5 flash", "Qwen-4B"]
     for model in all_models:
         if model not in comparison_table.columns:
             comparison_table[model] = np.nan

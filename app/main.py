@@ -49,8 +49,8 @@ async def lifespan(app: FastAPI):
     print("LLMFactory initialized.")
 
     # 預載指定的 LLM 服務 (已移除 ollama_local)
-    await asyncio.to_thread(llm_factory.get_service, "gpt35_azure")
-    print("Pre-loaded LLM services: gpt35_azure.")
+    await asyncio.to_thread(llm_factory.get_service, "gpt_o4_azure")
+    print("Pre-loaded LLM services: gpt_o4_azure.")
     print("--- Models loaded. Application is ready. ---")
 
     yield

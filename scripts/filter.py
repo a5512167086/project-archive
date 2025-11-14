@@ -13,9 +13,9 @@ CONFIG = {
     # 資料集與模型定義
     "datasets": ["ecomm", "wke"],
     "models": {
-        "gemini_google": {"name": "Gemini 2.5 flash"},
-        "gpt35_azure": {"name": "GPT 3.5 Turbo"},
-        "huggingface_local": {"name": "Qwen3 4B"},
+        "gemini_2.5_flash": {"name": "Gemini 2.5 flash"},
+        "gpt_o4_azure": {"name": "GPT o4 mini"},
+        "qwen3_local": {"name": "Qwen3 4B"},
     },
     # 檔案與欄位模板
     "filename_template": "ragas_results_ragas_eval_{model}_{dataset}.csv",

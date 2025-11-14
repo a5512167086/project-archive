@@ -107,7 +107,7 @@ def generate_evaluation_data(
         except Exception as e:
             print(f"ERROR processing question #{idx + 1}: {e}")
             continue
-        if model_name == "gemini_flash":
+        if model_name == "gemini_2.5_flash":
             print(
                 "INFO: Gemini model detected, sleeping for 6.5 seconds to avoid rate limits..."
             )
@@ -147,9 +147,9 @@ def main():
         },
     }
     MODELS_TO_RUN = [
-        "gemini_flash",
-        "gpt35_azure",
-        "huggingface_local",
+        "gemini_2.5_flash",
+        "gpt_o4_azure",
+        "qwen3_local",
     ]
 
     # --- Load Models Once ---

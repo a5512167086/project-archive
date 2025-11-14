@@ -1,7 +1,7 @@
 import os
 from abc import ABC, abstractmethod
 
-from langchain.schema import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_huggingface import ChatHuggingFace
 from langchain_openai import AzureChatOpenAI
@@ -73,8 +73,8 @@ class GeminiLLMService(BaseLLMService):
 
         self.llm = ChatGoogleGenerativeAI(
             model="gemini-2.5-flash",
-            temperature=LLM_TEMPERATURE,
-            max_output_tokens=LLM_MAX_NEW_TOKENS,
+            temperature=float(LLM_TEMPERATURE),
+            max_output_tokens=int(LLM_MAX_NEW_TOKENS),
         )
 
     def generate(self, user_query: str, contexts: list[dict]) -> str:
@@ -85,14 +85,13 @@ class GeminiLLMService(BaseLLMService):
 
 
 class AzureLLMService(BaseLLMService):
-    """對應 ChatGPT 3.5 (透過 Azure API)"""
+    """對應 ChatGPT o4 mini (透過 Azure API)"""
 
     def __init__(self) -> None:
         self.llm = AzureChatOpenAI(
             azure_deployment=AZURE_OPENAI_DEPLOYMENT,
             openai_api_version=AZURE_OPENAI_API_VERSION,
-            temperature=LLM_TEMPERATURE,
-            max_tokens=LLM_MAX_NEW_TOKENS,
+            model_kwargs={"max_completion_tokens": 1500},
         )
 
     def generate(self, user_query: str, contexts: list[dict]) -> str:
@@ -147,11 +146,11 @@ class LLMFactory:
             return self._instances[model_name]
 
         print(f"Initializing service for model: '{model_name}'")
-        if model_name == "gpt35_azure":
+        if model_name == "gpt_o4_azure":
             service = AzureLLMService()
-        elif model_name == "gemini_flash":
+        elif model_name == "gemini_2.5_flash":
             service = GeminiLLMService()
-        elif model_name == "huggingface_local":
+        elif model_name == "qwen3_local":
             if self.preloaded_chat_model:
                 service = HuggingFaceLLMService(self.preloaded_chat_model)
             else:
@@ -160,10 +159,10 @@ class LLMFactory:
                 )
         else:
             print(
-                f"Warning: Model '{model_name}' not found. Defaulting to 'gpt35_azure'."
+                f"Warning: Model '{model_name}' not found. Defaulting to 'gpt_o4_azure'."
             )
             service = AzureLLMService()
-            model_name = "gpt35_azure"
+            model_name = "gpt_o4_azure"
 
         self._instances[model_name] = service
         return service

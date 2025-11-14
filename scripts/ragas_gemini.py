@@ -7,8 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import pandas as pd
 from datasets import Dataset
 from dotenv import load_dotenv
-from langchain.callbacks.manager import tracing_v2_enabled
-from langchain.globals import set_verbose
+from langchain_core.tracers.context import tracing_v2_enabled
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_huggingface import HuggingFaceEmbeddings
 from ragas import evaluate
@@ -32,7 +31,6 @@ from app.configs.config import (
 
 # --- 1. 組態設定 (Configuration) ---
 load_dotenv()
-set_verbose(True)
 
 BASE_DATA_DIR = "./data"
 INPUT_DATA_DIR = os.path.join(BASE_DATA_DIR, "eval_dataset")
@@ -99,9 +97,7 @@ def validate_evaluation_data(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]
     return cleaned_data
 
 
-async def adapt_prompt_for_metric(
-    metric: Metric, language: str, llm: LangchainLLMWrapper
-):
+async def adapt_prompt_for_metric(metric: Metric, language: str, llm):
     """
     (新函式) 抽象化：為單一 RAGAS 指標適配提示詞。
     (!! 這就是您用來關閉 translate_statements log 的地方 !!)
@@ -138,12 +134,12 @@ async def setup_evaluation_models(
                 "❌ GOOGLE_API_KEY environment variable not set. Please add it to your .env file."
             )
 
-        # 3. 初始化 Gemini 1.5 Flash
-        print("Initializing Judge LLM: Gemini 1.5 Flash...")
+        # 3. 初始化 Gemini 2.5 Flash
+        print("Initializing Judge LLM: Gemini 2.5 Flash...")
         gemini_llm = ChatGoogleGenerativeAI(
             model="gemini-2.5-flash",
-            temperature=LLM_TEMPERATURE,
-            max_output_tokens=LLM_MAX_NEW_TOKENS,
+            temperature=float(LLM_TEMPERATURE),
+            max_output_tokens=int(LLM_MAX_NEW_TOKENS),
         )
         wrapped_llm = LangchainLLMWrapper(gemini_llm)
         # --- END MODIFIED ---

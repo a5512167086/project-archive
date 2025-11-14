@@ -14,8 +14,7 @@ class QueryRequest(BaseModel):
     top_k: int = 5
     score_threshold: float = 0.3
     models: List[str] = Field(
-        default=["gpt35_azure", "huggingface_local"],
-        description="要使用的 LLM 模型列表 (例如: ['gpt35_azure', 'huggingface_local'])",
+        default=["gpt_o4_azure", "qwen3_local", "gemini_2.5_flash"]
     )
 
 

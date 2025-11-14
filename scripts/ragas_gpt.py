@@ -7,8 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import pandas as pd
 from datasets import Dataset
 from dotenv import load_dotenv
-from langchain.callbacks.manager import tracing_v2_enabled
-from langchain.globals import set_verbose
+from langchain_core.tracers.context import tracing_v2_enabled
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import AzureChatOpenAI
 from ragas import evaluate
@@ -31,7 +30,6 @@ from app.configs.config import (
 # --- 1. 組態設定 (Configuration) ---
 # 將所有路徑和常數集中管理
 load_dotenv()
-set_verbose(True)
 
 BASE_DATA_DIR = "./data"
 INPUT_DATA_DIR = os.path.join(BASE_DATA_DIR, "eval_dataset")
@@ -40,10 +38,10 @@ CACHE_DIR = "./cache"
 SUMMARY_FILENAME = "_ragas_evaluation_summary.csv"
 SUMMARY_CSV_PATH = os.path.join(OUTPUT_DATA_DIR, SUMMARY_FILENAME)
 
+answer_relevancy.strictness = 1
+
 
 # --- 2. 核心輔助函式 (Core Helper Functions) ---
-
-
 def validate_evaluation_data(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
     驗證並清理評估資料，確保欄位名稱和格式正確。
@@ -99,9 +97,7 @@ def validate_evaluation_data(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]
     return cleaned_data
 
 
-async def adapt_prompt_for_metric(
-    metric: Metric, language: str, llm: LangchainLLMWrapper
-):
+async def adapt_prompt_for_metric(metric: Metric, language: str, llm):
     """
     (新函式) 抽象化：為單一 RAGAS 指標適配提示詞。
     """
@@ -131,9 +127,8 @@ async def setup_evaluation_models(
         azure_llm = AzureChatOpenAI(
             azure_deployment=AZURE_OPENAI_DEPLOYMENT,
             openai_api_version=AZURE_OPENAI_API_VERSION,
-            temperature=0.1,
-            max_tokens=4096,
-            request_timeout=120,
+            temperature=1,
+            model_kwargs={"max_completion_tokens": 4096},
         )
         wrapped_llm = LangchainLLMWrapper(azure_llm)
 
@@ -154,7 +149,7 @@ async def setup_evaluation_models(
         await asyncio.gather(*tasks)
 
         print("✅ Model and prompt setup complete.")
-        return azure_llm, embedding_model, all_metrics
+        return wrapped_llm, embedding_model, all_metrics
 
     except Exception as e:
         print(f"❌ Error initializing models: {e}")
