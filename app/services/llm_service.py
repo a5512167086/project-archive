@@ -4,17 +4,21 @@ from abc import ABC, abstractmethod
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_huggingface import ChatHuggingFace
-from langchain_openai import AzureChatOpenAI
+from langchain_openai import ChatOpenAI
 
 from app.configs.config import (
-    AZURE_OPENAI_API_VERSION,
+    AZURE_OPENAI_API_KEY,
     AZURE_OPENAI_DEPLOYMENT,
+    AZURE_OPENAI_ENDPOINT,
     LLM_MAX_NEW_TOKENS,
     LLM_TEMPERATURE,
 )
 
 
 class BaseLLMService(ABC):
+    # 預設不加 /no_think
+    USE_NO_THINK: bool = False
+
     def _build_messages(self, user_query: str, contexts: list[dict]) -> list[dict]:
         ctx = contexts[:3]
         answers = [
@@ -24,8 +28,11 @@ class BaseLLMService(ABC):
             context_block = "無"
         else:
             context_block = "\n".join(f"{i}. {ans}" for i, ans in enumerate(answers, 1))
+
+        no_think_prefix = "/no_think \n" if self.USE_NO_THINK else ""
+
         system = (
-            "/no_think \n"
+            f"{no_think_prefix}"
             "你是一位專業的客服知識庫助理，請嚴格遵守以下規則：\n\n"
             "1. 必須根據提供的[知識片段]回覆，並確保回覆能直接解答使用者的問題。\n"
             "2. 當使用者使用第一人稱（如「我」、「我的」）提問，而知識片段提供的是通用性資訊時，請自然地將通用資訊套用到使用者問題中。\n"
@@ -37,14 +44,15 @@ class BaseLLMService(ABC):
             "8. 嚴禁輸出任何思考過程、推理文字或 XML 標籤（如 <think>）\n"
             "---"
         )
-        print(context_block)
+
         user = (
             f"使用者問題：\n"
             f"「{user_query}」\n\n"
             f"以下是與使用者問題相關的知識片段：\n"
             f"```\n{context_block}\n```\n\n"
-            f"請根據上述資訊，提供簡潔易懂且完整的回答。"
+            f"請根據上述資訊，直接提供最終答案的一段文字，不要描述分析過程。"
         )
+
         return [
             {"role": "system", "content": system},
             {"role": "user", "content": user},
@@ -67,6 +75,8 @@ class BaseLLMService(ABC):
 class GeminiLLMService(BaseLLMService):
     """对应 Google Gemini (透过 Google AI API)"""
 
+    USE_NO_THINK = False
+
     def __init__(self) -> None:
         if "GOOGLE_API_KEY" not in os.environ:
             raise ValueError("GOOGLE_API_KEY environment variable not set.")
@@ -81,28 +91,35 @@ class GeminiLLMService(BaseLLMService):
         messages = self._build_messages(user_query, contexts)
         langchain_messages = self._to_langchain_messages(messages)
         response = self.llm.invoke(langchain_messages)
-        return response.content
+        return response.text
 
 
 class AzureLLMService(BaseLLMService):
     """對應 ChatGPT o4 mini (透過 Azure API)"""
 
+    USE_NO_THINK = False
+
     def __init__(self) -> None:
-        self.llm = AzureChatOpenAI(
-            azure_deployment=AZURE_OPENAI_DEPLOYMENT,
-            openai_api_version=AZURE_OPENAI_API_VERSION,
-            model_kwargs={"max_completion_tokens": 1500},
+        self.llm = ChatOpenAI(
+            base_url=f"{AZURE_OPENAI_ENDPOINT.rstrip('/')}/openai/v1",
+            api_key=AZURE_OPENAI_API_KEY,
+            model=AZURE_OPENAI_DEPLOYMENT,
+            temperature=float(LLM_TEMPERATURE),
+            max_tokens=int(LLM_MAX_NEW_TOKENS),
         )
 
     def generate(self, user_query: str, contexts: list[dict]) -> str:
         messages = self._build_messages(user_query, contexts)
         langchain_messages = self._to_langchain_messages(messages)
         response = self.llm.invoke(langchain_messages)
+        print(response)
         return response.content
 
 
 class HuggingFaceLLMService(BaseLLMService):
     """對應預先載入的本地 HuggingFace 模型"""
+
+    USE_NO_THINK = True
 
     def __init__(self, chat_model: ChatHuggingFace):
         print("Initializing HuggingFace service with pre-loaded model...")
@@ -146,7 +163,7 @@ class LLMFactory:
             return self._instances[model_name]
 
         print(f"Initializing service for model: '{model_name}'")
-        if model_name == "gpt_o4_azure":
+        if model_name == "gpt_5_mini":
             service = AzureLLMService()
         elif model_name == "gemini_2.5_flash":
             service = GeminiLLMService()
@@ -159,10 +176,10 @@ class LLMFactory:
                 )
         else:
             print(
-                f"Warning: Model '{model_name}' not found. Defaulting to 'gpt_o4_azure'."
+                f"Warning: Model '{model_name}' not found. Defaulting to 'gpt_5_mini'."
             )
             service = AzureLLMService()
-            model_name = "gpt_o4_azure"
+            model_name = "gpt_5_mini"
 
         self._instances[model_name] = service
         return service

@@ -13,9 +13,7 @@ class QueryRequest(BaseModel):
     query: str
     top_k: int = 5
     score_threshold: float = 0.3
-    models: List[str] = Field(
-        default=["gpt_o4_azure", "qwen3_local", "gemini_2.5_flash"]
-    )
+    models: List[str] = Field(default=["gpt_5_mini", "qwen3_local", "gemini_2.5_flash"])
 
 
 class QueryHit(BaseModel):

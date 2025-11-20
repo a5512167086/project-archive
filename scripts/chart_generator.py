@@ -78,7 +78,7 @@ def load_and_process_data():
 
     model_name_map = {
         "gemini_2.5_flash": "Gemini 2.5 flash",
-        "gpt_o4_azure": "GPT o4 mini",
+        "gpt_5_mini": "GPT o4 mini",
         "qwen3_local": "Qwen3 4B",
     }
 

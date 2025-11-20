@@ -38,10 +38,10 @@ CACHE_DIR = "./cache"
 SUMMARY_FILENAME = "_ragas_evaluation_summary.csv"
 SUMMARY_CSV_PATH = os.path.join(OUTPUT_DATA_DIR, SUMMARY_FILENAME)
 
-answer_relevancy.strictness = 1
-
 
 # --- 2. 核心輔助函式 (Core Helper Functions) ---
+
+
 def validate_evaluation_data(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
     驗證並清理評估資料，確保欄位名稱和格式正確。
@@ -127,8 +127,9 @@ async def setup_evaluation_models(
         azure_llm = AzureChatOpenAI(
             azure_deployment=AZURE_OPENAI_DEPLOYMENT,
             openai_api_version=AZURE_OPENAI_API_VERSION,
-            temperature=1,
-            model_kwargs={"max_completion_tokens": 4096},
+            temperature=0.1,
+            max_tokens=4096,
+            request_timeout=120,
         )
         wrapped_llm = LangchainLLMWrapper(azure_llm)
 
@@ -149,7 +150,7 @@ async def setup_evaluation_models(
         await asyncio.gather(*tasks)
 
         print("✅ Model and prompt setup complete.")
-        return wrapped_llm, embedding_model, all_metrics
+        return azure_llm, embedding_model, all_metrics
 
     except Exception as e:
         print(f"❌ Error initializing models: {e}")

@@ -14,7 +14,7 @@ CONFIG = {
     "datasets": ["ecomm", "wke"],
     "models": {
         "gemini_2.5_flash": {"name": "Gemini 2.5 flash"},
-        "gpt_o4_azure": {"name": "GPT o4 mini"},
+        "gpt_5_mini": {"name": "GPT o4 mini"},
         "qwen3_local": {"name": "Qwen3 4B"},
     },
     # 檔案與欄位模板

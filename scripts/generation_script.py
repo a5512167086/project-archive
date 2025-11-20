@@ -148,7 +148,7 @@ def main():
     }
     MODELS_TO_RUN = [
         "gemini_2.5_flash",
-        "gpt_o4_azure",
+        "gpt_5_mini",
         "qwen3_local",
     ]
 
