@@ -137,10 +137,10 @@ def main():
 
     # --- Configuration ---
     DATASET_CONFIG = {
-        # "ecomm": {
-        #     "path": "./data/dataset/ecomm_faq_dataset.csv",
-        #     "bot_uuid": "fbc137c9-85f7-411b-81c5-d221cc943399",
-        # },
+        "wke_opt": {
+            "path": "./data/testset/wke_faq_testset.csv",
+            "bot_uuid": "fbc137c9-85f7-411b-81c5-d221cc943399",
+        },
         "wke": {
             "path": "./data/testset/wke_faq_testset.csv",
             "bot_uuid": "642b5430-3ff9-49e1-b6d1-c489043d23e4",
@@ -161,7 +161,7 @@ def main():
         model_id=CHAT_MODEL,
         device=device,
         model_kwargs={"torch_dtype": torch.bfloat16},
-        pipeline_kwargs={"max_new_tokens": 1024, "temperature": 0.1},
+        pipeline_kwargs={"max_new_tokens": 2048, "temperature": 0.1},
     )
     qwen_chat_model = ChatHuggingFace(llm=chat_pipeline)
 

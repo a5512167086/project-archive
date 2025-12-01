@@ -16,3 +16,5 @@ data/ragas_result/*
 data/eval_dataset
 data/chart/*
 cache
+
+experiments/*

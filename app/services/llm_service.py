@@ -10,7 +10,6 @@ from app.configs.config import (
     AZURE_OPENAI_API_KEY,
     AZURE_OPENAI_DEPLOYMENT,
     AZURE_OPENAI_ENDPOINT,
-    LLM_MAX_NEW_TOKENS,
     LLM_TEMPERATURE,
 )
 
@@ -84,7 +83,7 @@ class GeminiLLMService(BaseLLMService):
         self.llm = ChatGoogleGenerativeAI(
             model="gemini-2.5-flash",
             temperature=float(LLM_TEMPERATURE),
-            max_output_tokens=int(LLM_MAX_NEW_TOKENS),
+            max_output_tokens=2048,
         )
 
     def generate(self, user_query: str, contexts: list[dict]) -> str:
@@ -105,7 +104,8 @@ class AzureLLMService(BaseLLMService):
             api_key=AZURE_OPENAI_API_KEY,
             model=AZURE_OPENAI_DEPLOYMENT,
             temperature=float(LLM_TEMPERATURE),
-            max_tokens=int(LLM_MAX_NEW_TOKENS),
+            max_tokens=4096,
+            reasoning_effort="low",
         )
 
     def generate(self, user_query: str, contexts: list[dict]) -> str:
