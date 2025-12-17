@@ -82,11 +82,17 @@ async def query(
     rag: Annotated[RAGService, Depends(get_rag_service)],
 ):
     # 檢索只做一次
-    hits = rag.search_faq(
+    history_model = "gpt_5_mini" if "gpt_5_mini" in req.models else req.models[0]
+
+    final_query, hits = rag.search_history_aware(
         bot_uuid=req.bot_uuid,
+        line_id=req.line_id,
+        history_model_name=history_model,
         query_text=req.query,
         top_k=req.top_k,
         score_threshold=req.score_threshold,
+        history_rounds=5,
+        rewrite_model="gpt_5_mini",
     )
 
     if not hits:
@@ -97,7 +103,15 @@ async def query(
 
     # 多模型並行生成（不重跑檢索）
     tasks = [
-        asyncio.to_thread(rag.generate, req.query, hits, model_name=model_name)
+        asyncio.to_thread(
+            rag.generate,
+            req.bot_uuid,
+            req.line_id,
+            req.query,  # original_query
+            final_query,  # rewritten_query
+            hits,
+            model_name,
+        )
         for model_name in req.models
     ]
     results = await asyncio.gather(*tasks)

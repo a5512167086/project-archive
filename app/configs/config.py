@@ -15,6 +15,11 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 QDRANT_URL = os.getenv("QDRANT_URL")
 QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION")
 
+# MongoDB Configuration
+MONGODB_URI = os.getenv("MONGODB_URI")
+MONGODB_DB_NAME = os.getenv("MONGODB_DB_NAME")
+MONGODB_CHAT_COLLECTION = os.getenv("MONGODB_CHAT_COLLECTION")
+
 # Embedding Model（可換成 Qwen3-0.6B 以開發方便）
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")
 EMBEDDING_DEVICE = os.getenv("EMBEDDING_DEVICE")

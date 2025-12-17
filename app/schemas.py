@@ -10,6 +10,7 @@ class IngestRequest(BaseModel):
 
 class QueryRequest(BaseModel):
     bot_uuid: UUID
+    line_id: Optional[str] = None
     query: str
     top_k: int = 5
     score_threshold: float = 0.3

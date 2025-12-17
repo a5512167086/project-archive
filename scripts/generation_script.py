@@ -1,6 +1,7 @@
 import json
 import time
 from typing import Any, Dict, List
+from uuid import UUID
 
 import pandas as pd
 import torch
@@ -9,133 +10,34 @@ from langchain_huggingface import HuggingFaceEmbeddings, HuggingFacePipeline
 from langchain_huggingface.chat_models import ChatHuggingFace
 
 from app.configs.config import CHAT_MODEL, EMBEDDING_MODEL
-from app.services.llm_service import BaseLLMService, LLMFactory
-from app.services.vector_service import VectorService
+from app.services.rag_service import RAGService
 
 
 def load_test_data(faq_dataset_path: str) -> List[Dict[str, str]]:
-    """Loads test data from a given CSV file path."""
-    try:
-        df = pd.read_csv(faq_dataset_path)
-        test_data = []
-        for _, row in df.iterrows():
-            question = str(row["question"]).strip()
-            answer = str(row["answer"]).strip()
-            if not question or not answer or question == "nan" or answer == "nan":
-                continue
-            test_data.append({"question": question, "ground_truth": answer})
-        print(
-            f"Successfully loaded {len(test_data)} valid test records from {faq_dataset_path}"
-        )
-        return test_data
-    except FileNotFoundError:
-        print(f"ERROR: File not found at {faq_dataset_path}")
-        return []
-    except Exception as e:
-        print(f"ERROR loading data: {e}")
-        return []
-
-
-def validate_retrieved_contexts(contexts: List[str]) -> List[str]:
-    valid_contexts = [
-        ctx.strip() for ctx in contexts if ctx and isinstance(ctx, str) and ctx.strip()
-    ]
-    if not valid_contexts:
-        return ["沒有找到相關的上下文資訊"]
-    return valid_contexts
-
-
-def generate_evaluation_data(
-    test_data: List[Dict[str, str]],
-    llm_service: BaseLLMService,
-    vector_service: VectorService,
-    bot_uuid: str,
-    model_name: str,
-) -> List[Dict[str, Any]]:
-    """Generates evaluation data for a given dataset and LLM service."""
-
-    if not test_data:
-        print("ERROR: No test data provided.")
-        return []
-
-    evaluation_results = []
-
-    for idx, item in enumerate(test_data):
-        question = item["question"]
-        ground_truth = item["ground_truth"]
-
-        try:
-            # 1. Retrieval
-            retrieved_docs = vector_service.search_faq(
-                bot_uuid=bot_uuid, query_text=question, top_k=3, score_threshold=0.7
-            )
-            raw_contexts = [doc.get("answer", "") for doc in retrieved_docs if doc]
-            contexts = validate_retrieved_contexts(raw_contexts)
-
-            # 2. Generation
-            final_answer = llm_service.generate(
-                question, [{"answer": c} for c in contexts]
-            )
-            print(final_answer)
-            if not final_answer or not isinstance(final_answer, str):
-                final_answer = "無法生成回答"
-
-            print("-" * 60)
-            print(f"➡️  Processing Item #{idx + 1}")
-            print(f"📝 Question: {question}")
-            print("📚 Retrieved Contexts:")
-            if contexts and contexts[0] != "沒有找到相關的上下文資訊":
-                for i, ctx in enumerate(contexts, 1):
-                    # Print a snippet of the context
-                    preview = ctx[:100] + "..." if len(ctx) > 100 else ctx
-                    print(f"   [{i}] {preview}")
-            else:
-                print("   [1] 沒有找到相關的上下文資訊")
-
-            print(f"🤖 Generated Answer:\n {final_answer.strip()}")
-            print("-" * 60 + "\n")
-
-            # 3. Collect for RAGAS
-            result_item = {
-                "question": question,
-                "contexts": contexts,
-                "answer": final_answer.strip(),
-                "ground_truth": ground_truth,
-            }
-            evaluation_results.append(result_item)
-
-        except Exception as e:
-            print(f"ERROR processing question #{idx + 1}: {e}")
+    df = pd.read_csv(faq_dataset_path)
+    test_data: List[Dict[str, str]] = []
+    for _, row in df.iterrows():
+        q = str(row["question"]).strip()
+        a = str(row["answer"]).strip()
+        if not q or not a or q == "nan" or a == "nan":
             continue
-        if model_name == "gemini_2.5_flash":
-            print(
-                "INFO: Gemini model detected, sleeping for 6.5 seconds to avoid rate limits..."
-            )
-            time.sleep(6.5)
-
-    return evaluation_results
+        test_data.append({"question": q, "ground_truth": a})
+    print(f"Loaded {len(test_data)} test records from {faq_dataset_path}")
+    return test_data
 
 
-def save_evaluation_data(results: List[Dict[str, Any]], filename: str):
-    """Saves the generated data to a JSON file."""
+def save_json(results: List[Dict[str, Any]], filename: str) -> None:
     if not results:
         print("No results to save.")
         return
-    try:
-        with open(filename, "w", encoding="utf-8") as f:
-            json.dump(results, f, ensure_ascii=False, indent=2)
-        print(
-            f"✅ Evaluation data successfully saved to {filename} ({len(results)} records)"
-        )
-    except Exception as e:
-        print(f"ERROR saving file: {e}")
+    with open(filename, "w", encoding="utf-8") as f:
+        json.dump(results, f, ensure_ascii=False, indent=2)
+    print(f"Saved: {filename} ({len(results)} records)")
 
 
 def main():
-    """Main function to run the entire generation pipeline."""
     load_dotenv()
 
-    # --- Configuration ---
     DATASET_CONFIG = {
         "wke_opt": {
             "path": "./data/testset/wke_faq_testset.csv",
@@ -146,63 +48,100 @@ def main():
             "bot_uuid": "642b5430-3ff9-49e1-b6d1-c489043d23e4",
         },
     }
+
     MODELS_TO_RUN = [
         "gemini_2.5_flash",
         "gpt_5_mini",
         "qwen3_local",
     ]
 
-    # --- Load Models Once ---
-    print("🚀 Loading models...")
     device = 0 if torch.cuda.is_available() else -1
+    print(f"Device: {'cuda' if device == 0 else 'cpu'}")
 
+    # 1) embeddings（給 QdrantVectorStore）
+    embeddings = HuggingFaceEmbeddings(
+        model_name=EMBEDDING_MODEL,
+        model_kwargs={"device": device},
+        cache_folder="./cache",
+    )
+
+    # 2) 本地 qwen（只給 qwen3_local 用；其它模型會走 _get_llm）
     chat_pipeline = HuggingFacePipeline.from_model_id(
         task="text-generation",
         model_id=CHAT_MODEL,
         device=device,
-        model_kwargs={"torch_dtype": torch.bfloat16},
+        model_kwargs={"torch_dtype": torch.bfloat16} if device == 0 else {},
         pipeline_kwargs={"max_new_tokens": 2048, "temperature": 0.1},
     )
     qwen_chat_model = ChatHuggingFace(llm=chat_pipeline)
 
-    embedding_model = HuggingFaceEmbeddings(
-        model_name=EMBEDDING_MODEL,
-        model_kwargs={"device": "cuda" if torch.cuda.is_available() else "cpu"},
-        cache_folder="./cache",
+    # 3) New RAGService
+    rag = RAGService(
+        embeddings=embeddings,
+        preloaded_hf_chat_model=qwen_chat_model,
+        ensure_collection_and_indexes=True,
     )
 
-    # --- Initialize Services ---
-    llm_factory = LLMFactory(chat_model=qwen_chat_model)
-    vector_service = VectorService(model=embedding_model)
-
-    # --- Run Generation for Each Combination ---
+    # 4) Run
     for model_name in MODELS_TO_RUN:
-        for dataset_key, config in DATASET_CONFIG.items():
-            print(f"\n{'=' * 80}")
-            print(
-                f"🔥 Starting generation for Model: '{model_name}' on Dataset: '{dataset_key}'"
-            )
-            print(f"{'=' * 80}")
+        for dataset_key, cfg in DATASET_CONFIG.items():
+            bot_uuid = UUID(cfg["bot_uuid"])
+            test_data = load_test_data(cfg["path"])
 
-            llm_service = llm_factory.get_service(model_name)
-            test_data = load_test_data(config["path"])
-            if not test_data:
-                continue
+            results: List[Dict[str, Any]] = []
+            print("=" * 80)
+            print(f"Model={model_name} Dataset={dataset_key} Bot={bot_uuid}")
+            print("=" * 80)
 
-            results = generate_evaluation_data(
-                test_data=test_data,
-                llm_service=llm_service,
-                vector_service=vector_service,
-                bot_uuid=config["bot_uuid"],
-                model_name=model_name,
-            )
+            for idx, item in enumerate(test_data):
+                question = item["question"]
+                ground_truth = item["ground_truth"]
 
-            output_filename = (
-                f"./data/eval_dataset/ragas_eval_{model_name}_{dataset_key}.json"
-            )
-            save_evaluation_data(results, output_filename)
+                # (A) Retrieval（一次）
+                hits = rag.search(
+                    bot_uuid=bot_uuid,
+                    query_text=question,
+                    top_k=3,
+                    score_threshold=0.7,
+                )
 
-    print("\n🎉 All generation tasks complete.")
+                # 給 RAGAS 的 contexts：用 Q/A 組合（不要只放 answer）
+                contexts_for_ragas = [
+                    f"Q: {h.get('question', '').strip()}\nA: {h.get('answer', '').strip()}"
+                    for h in hits
+                    if (h.get("question") or "").strip()
+                    or (h.get("answer") or "").strip()
+                ]
+                if not contexts_for_ragas:
+                    contexts_for_ragas = ["沒有找到相關的上下文資訊"]
+
+                # (B) Generation（不寫 memory：line_id=None）
+                answer = rag.generate(
+                    bot_uuid=bot_uuid,
+                    line_id=None,
+                    user_query=question,
+                    contexts=hits,
+                    model_name=model_name,
+                )
+
+                results.append({
+                    "question": question,
+                    "contexts": contexts_for_ragas,
+                    "answer": (answer or "").strip() or "無法生成回答",
+                    "ground_truth": ground_truth,
+                })
+
+                if (idx + 1) % 10 == 0:
+                    print(f"Processed {idx + 1}/{len(test_data)}")
+
+                # 避免 Gemini rate limit
+                if model_name == "gemini_2.5_flash":
+                    time.sleep(6.5)
+
+            out = f"./data/eval_dataset/ragas_eval_{model_name}_{dataset_key}.json"
+            save_json(results, out)
+
+    print("Done.")
 
 
 if __name__ == "__main__":
