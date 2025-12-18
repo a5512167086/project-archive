@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { baseApi } from './baseApi'
 
 export type ModuleSetting = {
   module_id: string
@@ -20,22 +20,7 @@ type InsertModuleSettingsRequest = {
   is_enabled: boolean
 }
 
-export const moduleApi = createApi({
-  reducerPath: 'moduleApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_BACKEND_URL,
-    prepareHeaders: (headers) => {
-      if (!headers.has('Authorization')) {
-        const token =
-          localStorage.getItem('access_token') ||
-          sessionStorage.getItem('access_token')
-        if (token) {
-          headers.set('Authorization', `Bearer ${token}`)
-        }
-      }
-      return headers
-    }
-  }),
+export const moduleApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getModuleSettings: builder.query<ModuleSetting[], GetModuleSettingsRequest>(
       {

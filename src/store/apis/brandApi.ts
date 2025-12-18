@@ -1,5 +1,6 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { baseApi } from './baseApi' 
 
+// Types 保持不變
 export type Brand = {
   object_id: number
   class_id: number
@@ -27,23 +28,8 @@ export type DeleteBrandRequest = {
   deleted_id_list: number[]
 }
 
-export const brandApi = createApi({
-  reducerPath: 'brandApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_BACKEND_URL,
-    prepareHeaders: (headers) => {
-      if (!headers.has('Authorization')) {
-        const token =
-          localStorage.getItem('access_token') ||
-          sessionStorage.getItem('access_token')
-        if (token) {
-          headers.set('Authorization', `Bearer ${token}`)
-        }
-      }
-      return headers
-    }
-  }),
-  tagTypes: ['Brand'],
+// 改用 injectEndpoints
+export const brandApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getBrands: builder.query<BrandsResponse, string>({
       query: (botUuid) => ({

@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { baseApi } from './baseApi'
 
 type GetServicesRequest = {
   bot_uuid: string
@@ -185,22 +185,7 @@ export type PatchServiceRequest = {
   schedules?: ServiceScheduleUpdate[]
 }
 
-export const reservationApi = createApi({
-  reducerPath: 'reservationApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_BACKEND_URL,
-    prepareHeaders: (headers) => {
-      if (!headers.has('Authorization')) {
-        const token =
-          localStorage.getItem('access_token') ||
-          sessionStorage.getItem('access_token')
-        if (token) {
-          headers.set('Authorization', `Bearer ${token}`)
-        }
-      }
-      return headers
-    }
-  }),
+export const reservationApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getServices: builder.query<ServiceResponse[], GetServicesRequest>({
       query: (data) => ({

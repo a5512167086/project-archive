@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { baseApi } from './baseApi'
 
 export type ShippingOption = {
   method: 'home_delivery' | 'store_pickup'
@@ -26,23 +26,7 @@ export type DeleteEcommRequest = {
   method: 'home_delivery' | 'store_pickup'
 }
 
-export const ecommApi = createApi({
-  reducerPath: 'ecommApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_BACKEND_URL,
-    prepareHeaders: (headers) => {
-      if (!headers.has('Authorization')) {
-        const token =
-          localStorage.getItem('access_token') ||
-          sessionStorage.getItem('access_token')
-        if (token) {
-          headers.set('Authorization', `Bearer ${token}`)
-        }
-      }
-      return headers
-    }
-  }),
-  tagTypes: ['Ecomm'],
+export const ecommApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getEcommSettings: builder.query<EcommResponse, string>({
       query: (botUuid) => ({

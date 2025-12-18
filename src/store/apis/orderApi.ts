@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { baseApi } from './baseApi'
 
 type OrderItem = {
   product_id: string
@@ -40,22 +40,7 @@ export type UpdateOrderRequest = {
   tracking_number?: string
 }
 
-export const orderApi = createApi({
-  reducerPath: 'orderApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_BACKEND_URL,
-    prepareHeaders: (headers) => {
-      if (!headers.has('Authorization')) {
-        const token =
-          localStorage.getItem('access_token') ||
-          sessionStorage.getItem('access_token')
-        if (token) {
-          headers.set('Authorization', `Bearer ${token}`)
-        }
-      }
-      return headers
-    }
-  }),
+export const orderApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getOrders: builder.query<GetOrdersResponse[], GetOrdersRequest>({
       query: (data) => ({

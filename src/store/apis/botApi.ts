@@ -1,5 +1,6 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { baseApi } from './baseApi'
 
+// Types 保持不變
 export type BotsResponse = {
   bot_detail_id: string
   class_id: number
@@ -33,52 +34,47 @@ export type UpdateBotRequest = {
   channel_access_token?: string
   channel_secret?: string
 }
-export const botApi = createApi({
-  reducerPath: 'botApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_BACKEND_URL,
-    prepareHeaders: (headers) => {
-      if (!headers.has('Authorization')) {
-        const token =
-          localStorage.getItem('access_token') ||
-          sessionStorage.getItem('access_token')
-        if (token) {
-          headers.set('Authorization', `Bearer ${token}`)
-        }
-      }
-      return headers
-    }
-  }),
+
+// 2. 改用 baseApi.injectEndpoints
+// 這裡不需要再寫 reducerPath 和 baseQuery，因為已經繼承自 baseApi 了
+export const botApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getBots: builder.query<BotsResponse[], void>({
       query: () => ({
         url: 'bots',
         method: 'GET'
-      })
+      }),
+      // 建議加入 Tag，這樣新增/刪除後列表會自動重整
+      providesTags: ['Bot']
     }),
     createBot: builder.mutation<CreateBotResponse, CreateBotRequest>({
       query: (bot) => ({
         url: 'bots',
         method: 'POST',
         body: bot
-      })
+      }),
+      // 新增成功後，讓 getBots 自動重抓
+      invalidatesTags: ['Bot']
     }),
     updateBot: builder.mutation<void, UpdateBotRequest>({
       query: (bot) => ({
         url: `bots/${bot.bot_uuid}`,
         method: 'PATCH',
         body: bot
-      })
+      }),
+      invalidatesTags: ['Bot']
     }),
     deleteBot: builder.mutation<void, DeleteBotRequest>({
       query: (bot) => ({
         url: `bots/${bot.bot_uuid}`,
         method: 'DELETE'
-      })
+      }),
+      invalidatesTags: ['Bot']
     })
   })
 })
 
+// 3. Export Hooks 保持不變
 export const {
   useLazyGetBotsQuery,
   useCreateBotMutation,

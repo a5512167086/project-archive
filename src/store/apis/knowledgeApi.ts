@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { baseApi } from './baseApi'
 
 export type KnowledgeItem = {
   class_id: number
@@ -34,22 +34,7 @@ type UpdateKnowledgeItemRequest = {
   answer: string
 }
 
-export const knowledgeApi = createApi({
-  reducerPath: 'knowledgeApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_BACKEND_URL,
-    prepareHeaders: (headers) => {
-      if (!headers.has('Authorization')) {
-        const token =
-          localStorage.getItem('access_token') ||
-          sessionStorage.getItem('access_token')
-        if (token) {
-          headers.set('Authorization', `Bearer ${token}`)
-        }
-      }
-      return headers
-    }
-  }),
+export const knowledgeApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getKnowledgeItems: builder.query<KnowledgeItem[], GetKnowledgeItemsRequest>(
       {

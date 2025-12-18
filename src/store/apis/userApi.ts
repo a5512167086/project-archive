@@ -1,40 +1,4 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import type {
-  BaseQueryFn,
-  FetchArgs,
-  FetchBaseQueryError
-} from '@reduxjs/toolkit/query'
-
-// Custom base query that properly handles all HTTP errors including 500s
-const customBaseQuery: BaseQueryFn<
-  string | FetchArgs,
-  unknown,
-  FetchBaseQueryError
-> = async (args, api, extraOptions) => {
-  const baseQuery = fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_BACKEND_URL,
-    prepareHeaders: (headers) => {
-      if (!headers.has('Authorization')) {
-        const access_token =
-          localStorage.getItem('access_token') ||
-          sessionStorage.getItem('access_token')
-        if (access_token) {
-          headers.set('Authorization', `Bearer ${access_token}`)
-        }
-      }
-      return headers
-    }
-  })
-
-  const result = await baseQuery(args, api, extraOptions)
-
-  // Ensure any HTTP error status (including 500+) is treated as an error
-  if (result.error) {
-    return result
-  }
-
-  return result
-}
+import { baseApi } from './baseApi'
 
 export enum OAuthProvider {
   Google = 'google',
@@ -94,23 +58,23 @@ export type OAuthStatusResponse = {
   line: boolean
 }
 
-export const userApi = createApi({
-  reducerPath: 'userApi',
-  baseQuery: customBaseQuery,
+export const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     loginUser: builder.mutation<LoginResponse, LoginRequest>({
       query: (credentials) => ({
         url: 'users/login',
         method: 'POST',
         body: credentials
-      })
+      }),
+      invalidatesTags: ['User']
     }),
     oauthLoginUser: builder.mutation<LoginResponse, OAuthLoginRequest>({
       query: (oauthUser) => ({
         url: 'users/oauth-login',
         method: 'POST',
         body: oauthUser
-      })
+      }),
+      invalidatesTags: ['User']
     }),
     oauthBindUser: builder.mutation<LoginResponse, OAuthBindRequest>({
       query: (oauthUser) => ({
@@ -137,7 +101,8 @@ export const userApi = createApi({
       })
     }),
     getUserMe: builder.query<UserMeResponse, void>({
-      query: () => 'users/me'
+      query: () => 'users/me',
+      providesTags: ['User']
     }),
     resetPassword: builder.mutation<void, ResetPasswordRequest>({
       query: (data) => ({
@@ -153,6 +118,13 @@ export const userApi = createApi({
         method: 'POST',
         body: data
       })
+    }),
+    refreshToken: builder.mutation<LoginResponse, { refresh_token: string }>({
+      query: (body) => ({
+        url: 'users/token-refresh',
+        method: 'POST',
+        body
+      })
     })
   })
 })
@@ -166,5 +138,6 @@ export const {
   useChangePasswordMutation,
   useForgotPasswordMutation,
   useLazyGetUserMeQuery,
-  useResetPasswordMutation
+  useResetPasswordMutation,
+  useRefreshTokenMutation
 } = userApi

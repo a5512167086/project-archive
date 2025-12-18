@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { baseApi } from './baseApi' 
 
 export interface Category {
   parent_class_id: number | null
@@ -30,23 +30,7 @@ export type DeleteCategoryRequest = {
   deleted_class_id_list: number[]
 }
 
-export const categoryApi = createApi({
-  reducerPath: 'categoryApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_BACKEND_URL,
-    prepareHeaders: (headers) => {
-      if (!headers.has('Authorization')) {
-        const token =
-          localStorage.getItem('access_token') ||
-          sessionStorage.getItem('access_token')
-        if (token) {
-          headers.set('Authorization', `Bearer ${token}`)
-        }
-      }
-      return headers
-    }
-  }),
-  tagTypes: ['Category'],
+export const categoryApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getCategories: builder.query<CategoriesResponse, string>({
       query: (botUuid) => `categories/${botUuid}`,
