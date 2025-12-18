@@ -7,6 +7,7 @@ import type {
 } from '@reduxjs/toolkit/query'
 import { Mutex } from 'async-mutex'
 import { CustomError } from '@/configs/type'
+import { PAGE_PATHS } from '@/routes'
 
 // 定義 LoginResponse 型別 (為了 refresh token 用)
 interface LoginResponse {
@@ -73,10 +74,10 @@ const customBaseQuery: BaseQueryFn<
           } else {
             localStorage.clear()
             sessionStorage.clear()
-            window.location.href = '/login'
+            window.location.href = PAGE_PATHS.BASE
           }
         } else {
-          window.location.href = '/login'
+          window.location.href = PAGE_PATHS.BASE
         }
       } finally {
         release()

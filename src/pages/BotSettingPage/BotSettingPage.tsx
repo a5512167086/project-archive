@@ -131,106 +131,84 @@ const BotSettingPage = () => {
           sx={{
             display: 'flex',
             flexDirection: 'column',
-            gap: 3,
-            background: '#fafbfc',
-            borderRadius: 2,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-            p: 3,
-            position: 'relative',
+            gap: 2, // 欄位之間的間距
             width: '100%',
-            minWidth: 0,
-            maxWidth: 'none',
-            margin: 0
+            mt: 2 // 與 Divider 的距離
+            // 已移除 background, boxShadow, p, borderRadius 以符合上方風格
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-            <img
-              src="/src/assets/line_logo.svg"
-              alt="Line"
-              style={{ width: 28, height: 28 }}
-            />
-            <Typography variant="subtitle1" fontWeight={600}>
-              Bot Channel
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
+          {/* Bot Channel Section */}
+          <Box>
+            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+              <TextField
+                label="Channel ID"
+                variant="outlined"
+                size="small"
+                fullWidth
+                value={channelId}
+                onChange={(e) => setChannelId(e.target.value)}
+              />
+              <TextField
+                label="Channel Secret"
+                variant="outlined"
+                size="small"
+                fullWidth
+                value={channelSecret}
+                onChange={(e) => setChannelSecret(e.target.value)}
+              />
+            </Box>
             <TextField
-              label="Channel ID"
+              label="Channel Access Token"
               variant="outlined"
               size="small"
-              value={channelId}
-              onChange={(e) => setChannelId(e.target.value)}
-              sx={{ width: '100%' }}
-            />
-            <TextField
-              label="Channel Secret"
-              variant="outlined"
-              size="small"
-              value={channelSecret}
-              onChange={(e) => setChannelSecret(e.target.value)}
-              sx={{ width: '100%' }}
+              fullWidth
+              value={channelAccessToken}
+              onChange={(e) => setChannelAccessToken(e.target.value)}
             />
           </Box>
-          <TextField
-            label="Channel Access Token"
-            variant="outlined"
-            size="small"
-            value={channelAccessToken}
-            onChange={(e) => setChannelAccessToken(e.target.value)}
-            sx={{ width: '100%' }}
-          />
-          <Box
-            sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2, mb: 1 }}
-          >
-            <img
-              src="/src/assets/line_logo.svg"
-              style={{ width: 28, height: 28, opacity: 0.7 }}
-            />
-            <Typography variant="subtitle1" fontWeight={600}>
-              Login Channel
-            </Typography>
+
+          {/* Login Channel Section */}
+          <Box>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <TextField
+                label="Login Channel ID"
+                variant="outlined"
+                size="small"
+                fullWidth
+                value={loginChannelId}
+                onChange={(e) => setLoginChannelId(e.target.value)}
+              />
+              <TextField
+                label="Login Channel Secret"
+                variant="outlined"
+                size="small"
+                fullWidth
+                value={loginChannelSecret}
+                onChange={(e) => setLoginChannelSecret(e.target.value)}
+              />
+            </Box>
           </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField
-              label="Login Channel ID"
-              variant="outlined"
-              size="small"
-              value={loginChannelId}
-              onChange={(e) => setLoginChannelId(e.target.value)}
-              sx={{ width: '100%' }}
-            />
-            <TextField
-              label="Login Channel Secret"
-              variant="outlined"
-              size="small"
-              value={loginChannelSecret}
-              onChange={(e) => setLoginChannelSecret(e.target.value)}
-              sx={{ width: '100%' }}
-            />
+
+          {/* Action Button */}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+            <Button
+              className="setting_formButton" // 使用與上方一致的 class (若 style 有定義)
+              variant="outlined" // 或改成 "contained"
+              color="primary"
+              onClick={() => {
+                // TODO: 這裡記得串接 updateBot API
+                console.log({
+                  channelId,
+                  channelSecret,
+                  channelAccessToken,
+                  loginChannelId,
+                  loginChannelSecret
+                })
+              }}
+            >
+              更新設定
+            </Button>
           </Box>
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{
-              mt: 3,
-              alignSelf: 'flex-end',
-              minWidth: 160,
-              fontWeight: 600,
-              fontSize: 16
-            }}
-            onClick={() => {
-              // TODO: Add update bot credential api
-              console.log({
-                channelId,
-                channelSecret,
-                channelAccessToken,
-                loginChannelId,
-                loginChannelSecret
-              })
-            }}
-          >
-            更新BOT SETTING
-          </Button>
         </Box>
       </Box>
       <Box className="setting__settingBox">
