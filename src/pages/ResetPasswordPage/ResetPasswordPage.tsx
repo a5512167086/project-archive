@@ -11,7 +11,8 @@ import { useResetPasswordMutation } from '@/store/apis/userApi'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { useAppDispatch } from '@/utils/hook'
 import { clearUserError } from '@/store/modules/userSlice'
-import { showSuccessToast } from '@/utils/toast'
+import { showErrorToast, showSuccessToast } from '@/utils/toast'
+import { CustomError } from '@/configs/type'
 
 const resetPasswordContent = {
   title: 'signPage.resetPassword',
@@ -85,6 +86,7 @@ const ResetPasswordPage = () => {
       await resetPassword({ token: token!, new_password: password }).unwrap()
       showSuccessToast('success.password_reset_success', t)
       setIsSuccess(true)
+
       if (!isEmpty(token)) {
         searchParams.delete('token')
         navigate(
@@ -94,6 +96,17 @@ const ResetPasswordPage = () => {
           },
           { replace: true }
         )
+      }
+      // 修改這裡：
+    } catch (err) {
+      console.log(err)
+      const error = err as { status: number; data: CustomError }
+      if (error?.status === 400) {
+        showErrorToast(error.data.error_code, t)
+        showErrorToast(null, t, '將在5秒後返回首頁')
+        setTimeout(() => {
+          navigate(PAGE_PATHS.BASE)
+        }, 5000)
       }
     } finally {
       setIsLoading(false)

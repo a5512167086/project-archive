@@ -12,6 +12,7 @@ export const showErrorToast = (
   t: TFunction,
   customMessage?: string
 ) => {
+  console.log('showErrorToast errorCode:', errorCode)
   const errorMessage =
     errorCode &&
     ERROR_CODE_MESSAGE_MAPPING[
