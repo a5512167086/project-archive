@@ -1,19 +1,15 @@
 import logging
 from datetime import timedelta
 
-import jwt
-from jwt.exceptions import (
-    DecodeError,
-    ExpiredSignatureError,
-    InvalidTokenError,
-)
+from fastapi import status
 from sqlmodel import Session
 
 from modules.bot.bot_model import BotListWithCredentialView
 from modules.user.auth_service import (
-    _verify_jwt_token,
     create_jwt_token,
     generate_token_pair,
+    verify_refresh,
+    verify_reset,
 )
 from modules.user.user_command import UserCommand
 from modules.user.user_query import UserQuery
@@ -26,8 +22,6 @@ from modules.user.user_schema import (
 )
 from shared.commands.group_command import insert_group_member
 from shared.constants.config import (
-    ACCESS_TOKEN_EXPIRE_SECONDS,
-    JWT_REFRESH_SECRET,
     JWT_RESET_SECRET,
 )
 from shared.constants.error_code import ErrorCode
@@ -102,11 +96,11 @@ class UserService:
 
     def refresh_token(self, refresh_token: str):
         try:
-            payload = _verify_jwt_token(refresh_token, JWT_REFRESH_SECRET)
+            payload = verify_refresh.decode_token(refresh_token)
         except GlobalErrorException as e:
             if e.error_code == ErrorCode.TOKEN_EXPIRED:
                 raise GlobalErrorException(
-                    status_code=403,
+                    status_code=status.HTTP_403_FORBIDDEN,
                     error_code=ErrorCode.TOKEN_EXPIRED,
                     error_message="Refresh token has expired, please login again",
                 )
@@ -197,9 +191,8 @@ class UserService:
         reset_token = create_jwt_token(
             {"sub": str(user.user_id), "email": user.email},
             JWT_RESET_SECRET,
-            timedelta(seconds=ACCESS_TOKEN_EXPIRE_SECONDS),
+            timedelta(minutes=15),
         )
-
         send_reset_email(user.email, reset_token)
 
     def reset_password(self, user_id: str, new_password: str):
@@ -215,39 +208,28 @@ class UserService:
 
     def reset_password_with_token(self, reset_token: str, new_password: str):
         """Reset password using reset token from email"""
-        try:
-            # Decode the reset token
-            payload = jwt.decode(reset_token, JWT_RESET_SECRET, algorithms=["HS256"])
-            user_id = payload.get("sub")
-
-            if not user_id:
-                raise GlobalErrorException(
-                    error_code=ErrorCode.TOKEN_PAYLOAD_INVALID,
-                    error_message="Invalid reset token payload",
-                )
-
-            # Verify user exists
-            user = self.query.get_user_by_id(user_id)
-            if not user:
-                raise GlobalErrorException(
-                    error_code=ErrorCode.USER_NOT_EXISTS,
-                    error_message="User not found",
-                )
-
-            # Update password
-            hashed_password = hash_password(new_password)
-            self.command.update_user_password(user_id, hashed_password)
-
-        except ExpiredSignatureError:
-            raise GlobalErrorException(
-                error_code=ErrorCode.TOKEN_EXPIRED,
-                error_message="Reset token has expired",
-            )
-        except (DecodeError, InvalidTokenError):
+        if self.query.is_token_in_blacklist(reset_token):
             raise GlobalErrorException(
                 error_code=ErrorCode.TOKEN_INVALID,
-                error_message="Invalid reset token",
+                error_message="This reset link has already been used.",
             )
+        payload = verify_reset.decode_token(reset_token)
+        user_id = payload.get("sub")
+
+        user = self.query.get_user_by_id(user_id)
+        if not user:
+            raise GlobalErrorException(
+                error_code=ErrorCode.USER_NOT_EXISTS,
+                error_message="User not found",
+            )
+
+        hashed_password = hash_password(new_password)
+        self.command.update_user_password(user_id, hashed_password)
+
+        try:
+            self.command.add_token_to_blacklist(reset_token, 900)  # 15 分鐘
+        except Exception as e:
+            logger.error(f"Failed to add token to blacklist: {e}")
 
     def customer_login(
         self,

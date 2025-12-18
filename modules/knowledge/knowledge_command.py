@@ -106,7 +106,6 @@ class KnowledgeCommand:
         last_sync_end_time: Optional[datetime] = None,
         last_successful_sync_time: Optional[datetime] = None,
     ):
-        print(bot_uuid, status, has_pending_changes)
         status_doc = await KnowledgeVectorDBStatus.find_one(
             KnowledgeVectorDBStatus.bot_uuid == bot_uuid
         )

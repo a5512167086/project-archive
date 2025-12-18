@@ -2,6 +2,7 @@ from sqlmodel import Session
 
 from modules.user.oauth_model import OAuth
 from modules.user.user_model import User
+from shared.clients.redis import redis_client
 
 
 class UserCommand:
@@ -29,3 +30,7 @@ class UserCommand:
         user = self.session.get(User, update_user_id)
         user.password = new_password
         self.session.add(user)
+
+    def add_token_to_blacklist(self, token: str, ttl_seconds: int) -> None:
+        key = f"reset_token_used:{token}"
+        redis_client.setex(name=key, time=ttl_seconds, value="1")

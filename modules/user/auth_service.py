@@ -7,41 +7,44 @@ from fastapi import Depends, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt import DecodeError, ExpiredSignatureError, InvalidTokenError
 
-from shared.constants.config import JWT_REFRESH_SECRET, JWT_SECRET
+from shared.constants.config import JWT_REFRESH_SECRET, JWT_RESET_SECRET, JWT_SECRET
 from shared.constants.error_code import ErrorCode
 from shared.exception import GlobalErrorException
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+
 
 ACCESS_TOKEN_EXPIRE = timedelta(days=1)
-REFRESH_TOKEN_EXPIRE = timedelta(days=14)
+REFRESH_TOKEN_EXPIRE = timedelta(days=7)
+REFRESH_TOKEN_REMEMBER_EXPIRE = timedelta(days=30)
 
 
 def create_jwt_token(
     data: Dict[str, Any], secret: str, expires_delta: timedelta
 ) -> str:
-    """建立 JWT Token"""
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + expires_delta
     to_encode.update({"exp": expire})
+    to_encode.update({"iat": datetime.now(timezone.utc)})
 
     token = jwt.encode(to_encode, secret, algorithm="HS256")
-    logger.info(f"JWT created with exp: {expire}")
     return token
 
 
 def generate_token_pair(
     user_id: str, email: str, is_remember: bool = False
 ) -> Dict[str, str]:
-    """產生 access/refresh token pair"""
-    payload = {"sub": str(user_id), "email": email}
-    access_exp = timedelta(days=7) if is_remember else ACCESS_TOKEN_EXPIRE
+    access_payload = {"sub": str(user_id), "email": email, "type": "access"}
+    refresh_payload = {"sub": str(user_id), "email": email, "type": "refresh"}
 
-    access_token = create_jwt_token(payload, JWT_SECRET, access_exp)
-    refresh_token = create_jwt_token(payload, JWT_REFRESH_SECRET, REFRESH_TOKEN_EXPIRE)
+    access_exp = ACCESS_TOKEN_EXPIRE
+    refresh_exp = REFRESH_TOKEN_REMEMBER_EXPIRE if is_remember else REFRESH_TOKEN_EXPIRE
 
-    logger.info(f"Generated token pair for user: {user_id}")
+    access_token = create_jwt_token(access_payload, JWT_SECRET, access_exp)
+    refresh_token = create_jwt_token(refresh_payload, JWT_REFRESH_SECRET, refresh_exp)
+
+    logger.info(f"Generated token pair for user: {user_id}, remember: {is_remember}")
+
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
@@ -49,42 +52,61 @@ def generate_token_pair(
     }
 
 
-def _verify_jwt_token(
-    token: str,
-    secret: str,
-) -> Dict[str, Any]:
-    try:
-        payload = jwt.decode(token, secret, algorithms=["HS256"])
-        user_id = payload.get("sub")
-        email = payload.get("email")
+class JWTValidator:
+    def __init__(self, secret: str, token_type: str = "access"):
+        self.secret = secret
+        self.token_type = token_type
+        self.security = HTTPBearer()
 
-        if not user_id or not email:
+    def decode_token(self, token: str) -> Dict[str, Any]:
+        try:
+            payload = jwt.decode(token, self.secret, algorithms=["HS256"])
+
+            if payload.get("type") and payload.get("type") != self.token_type:
+                raise GlobalErrorException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    error_code=ErrorCode.TOKEN_INVALID,
+                    error_message=f"Invalid token type. Expected {self.token_type}",
+                )
+
+            user_id = payload.get("sub")
+            email = payload.get("email")
+
+            if not user_id or not email:
+                raise GlobalErrorException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    error_code=ErrorCode.TOKEN_PAYLOAD_INVALID,
+                    error_message="Invalid user payload",
+                )
+
+            return payload
+
+        except ExpiredSignatureError:
+            msg = "Token has expired"
+            if self.token_type == "refresh":
+                msg = "Refresh token has expired, please login again"
+
             raise GlobalErrorException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                error_code=ErrorCode.TOKEN_PAYLOAD_INVALID,
-                error_message="Invalid user payload",
+                error_code=ErrorCode.TOKEN_EXPIRED,
+                error_message=msg,
+            )
+        except (DecodeError, InvalidTokenError):
+            raise GlobalErrorException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                error_code=ErrorCode.TOKEN_INVALID,
+                error_message="Invalid token",
             )
 
-        return payload
-
-    except ExpiredSignatureError:
-        raise GlobalErrorException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            error_code=ErrorCode.TOKEN_EXPIRED,
-            error_message="Token has expired",
-        )
-    except (DecodeError, InvalidTokenError):
-        raise GlobalErrorException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            error_code=ErrorCode.TOKEN_INVALID,
-            error_message="Invalid token",
-        )
+    def __call__(
+        self, credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer())
+    ) -> Dict[str, Any]:
+        return self.decode_token(credentials.credentials)
 
 
-# For dependency
-def verify_jwt_token(
-    secret: str,
-    credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer()),
-) -> Dict[str, Any]:
-    token = credentials.credentials
-    return _verify_jwt_token(token, secret)
+# 1. 一般 API 驗證用
+verify_auth = JWTValidator(secret=JWT_SECRET, token_type="access")
+# 2. 刷新 Token API 用 (通常在 Dependency)
+verify_refresh = JWTValidator(secret=JWT_REFRESH_SECRET, token_type="refresh")
+# 3. 重設密碼 Token 用
+verify_reset = JWTValidator(secret=JWT_RESET_SECRET, token_type="reset")

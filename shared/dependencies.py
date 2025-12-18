@@ -1,25 +1,21 @@
+from typing import Any, Dict
+
 from fastapi import Depends
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from modules.user.auth_service import verify_jwt_token
-from shared.constants.config import JWT_RESET_SECRET, JWT_SECRET
-
-security = HTTPBearer()
+from modules.user.auth_service import verify_auth, verify_reset
 
 
-def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-):
-    payload = verify_jwt_token(JWT_SECRET, credentials)
+def get_current_user(payload: Dict[str, Any] = Depends(verify_auth)) -> Dict[str, str]:
+
     return {
         "user_id": payload["sub"],
-        "email": payload["email"],
+        "email": payload.get("email"),
     }
 
 
-def get_reset_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    payload = verify_jwt_token(JWT_RESET_SECRET, credentials)
+def get_reset_user(payload: Dict[str, Any] = Depends(verify_reset)) -> Dict[str, str]:
+
     return {
         "user_id": payload["sub"],
-        "email": payload["email"],
+        "email": payload.get("email"),
     }
