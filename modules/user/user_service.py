@@ -119,7 +119,7 @@ class UserService:
                 error_message="User not found",
             )
 
-        return generate_token_pair(user.user_id, user.email)
+        return generate_token_pair(user.user_id, user.email, True)
 
     def handle_new_oauth_user(self, oauth_user_info, provider):
         random_password = generate_random_password()
@@ -131,7 +131,7 @@ class UserService:
 
         self.command.create_oauth(new_user.user_id, provider, oauth_user_info["id"])
 
-        token = generate_token_pair(new_user.user_id, new_user.email)
+        token = generate_token_pair(new_user.user_id, new_user.email, True)
 
         return token
 
@@ -139,7 +139,7 @@ class UserService:
         oauth_record = self.query.get_oauth_by_oauth_user_id(provider, oauth_user_id)
         if oauth_record:
             user = self.query.get_user_by_id(oauth_record.user_id)
-            return generate_token_pair(user.user_id, user.email)
+            return generate_token_pair(user.user_id, user.email, True)
         return "USER_ALREADY_EXISTS"
 
     def oauth_login(self, oauth: OAuthLoginRequest):
@@ -273,7 +273,7 @@ class UserService:
             insert_group_member(self.session, group_id, new_user.user_id, 2, None, True)
 
             # Generate and return token
-            token = generate_token_pair(new_user.user_id, new_user.email)
+            token = generate_token_pair(new_user.user_id, new_user.email, True)
             return token
 
         oauth_user_info = self.handle_existed_oauth_user("line", user_info["id"])

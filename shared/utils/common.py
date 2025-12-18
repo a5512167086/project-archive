@@ -172,24 +172,3 @@ def get_enabled_commands(
             })
 
     return enabled_commands
-
-
-def get_full_commands(
-    command_list: List[Dict[str, Any]], module_list: List[Dict[str, Any]]
-) -> List[Dict[str, Any]]:
-    full_commands = []
-    for command in command_list:
-        status = False
-
-        for module in module_list:
-            if module["chinese_name"] == command["type"]:
-                status = module["is_enabled"]
-                break
-
-        full_commands.append({
-            "command_keyword": command["command_keyword"],
-            "type": command["type"],
-            "status": status,
-        })
-
-    return full_commands
