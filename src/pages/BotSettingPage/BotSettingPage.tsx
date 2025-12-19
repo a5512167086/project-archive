@@ -3,7 +3,7 @@ import { StyledBotSettingPage } from './BotSettingPage.style'
 import { CustomDivider } from '@/components/CustomDivider'
 import { CustomDialog } from '@/components/CustomDialog'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { PAGE_PATHS } from '@/routes'
 import { useTranslation } from 'react-i18next'
 import {
@@ -33,10 +33,9 @@ const botSettingPageContent = {
 const BotSettingPage = () => {
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { botList, currentBotObjectId, status } = useAppSelector(
-    (state) => state.bot
-  )
-  const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
+  const { uuid } = useParams()
+  const { botList, status } = useAppSelector((state) => state.bot)
+  const currentBot = botList.find((bot) => bot.bot_detail_id === uuid)
   const [botName, setBotName] = useState(currentBot!.chinese_name)
   // 新增Bot Channel相關欄位
   const [channelId, setChannelId] = useState('')

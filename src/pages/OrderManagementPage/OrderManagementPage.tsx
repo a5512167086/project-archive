@@ -41,6 +41,7 @@ import { PAGE_PATHS } from '@/routes'
 import { showSuccessToast } from '@/utils/toast'
 import { StyledOrderManagementPage } from './OrderManagementPage.style'
 import { useLazyGetProductsQuery } from '@/store/apis/productApi'
+import { useParams } from 'react-router-dom'
 
 const orderManagementPageContent = {
   title: 'orderManagementPage.title',
@@ -75,11 +76,11 @@ function getComparator(
 
 const OrderManagementPage = () => {
   const { t } = useTranslation()
-  const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
+  const { uuid } = useParams()
+  const { botList } = useAppSelector((state) => state.bot)
   const { orders } = useAppSelector((state) => state.order)
   const { products } = useAppSelector((state) => state.product)
-  const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
-
+  const currentBot = botList.find((bot) => bot.bot_detail_id === uuid)
   // API hooks
   const [getOrders] = useLazyGetOrdersQuery()
   const [getProducts] = useLazyGetProductsQuery()

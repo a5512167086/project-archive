@@ -33,14 +33,16 @@ import { isEmpty } from '@/utils/helper'
 import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
 import { PAGE_PATHS } from '@/routes'
 import { CustomLoader } from '@/components/CustomLoader'
+import { useParams } from 'react-router-dom'
 
 export const EcommSettingPage = () => {
   const { t } = useTranslation()
-  const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
+  const { uuid } = useParams()
+  const { botList } = useAppSelector((state) => state.bot)
+  const currentBot = botList.find((bot) => bot.bot_detail_id === uuid)
   const { shippingOptions: initialShippingOptions } = useAppSelector(
     (state) => state.ecomm
   )
-  const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
 
   const [getEcommSettings] = useLazyGetEcommSettingsQuery()
   const [updateEcommSettings] = useUpdateEcommSettingsMutation()

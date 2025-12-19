@@ -15,8 +15,7 @@ import {
   useCreateBotMutation,
   useLazyGetBotsQuery
 } from '@/store/apis/botApi'
-import { useAppDispatch, useAppSelector } from '@/utils/hook'
-import { clearCurrentBot, setCurrentBot } from '@/store/modules/botSlice'
+import { useAppSelector } from '@/utils/hook'
 import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
 import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
 import { showSuccessToast } from '@/utils/toast'
@@ -77,7 +76,6 @@ const botPageContent = {
 
 const BotPage = () => {
   const navigate = useNavigate()
-  const dispatch = useAppDispatch()
   const { t } = useTranslation()
   const { botList } = useAppSelector((state) => state.bot)
   const [getBots] = useLazyGetBotsQuery()
@@ -111,7 +109,6 @@ const BotPage = () => {
   }
 
   const handleBotSetting = (bot: BotsResponse) => {
-    dispatch(setCurrentBot(bot.object_id))
     navigate(PAGE_PATHS.BOT_LIST + `/${bot.bot_detail_id}`)
   }
 
@@ -139,7 +136,6 @@ const BotPage = () => {
 
   useEffect(() => {
     getBots()
-    dispatch(clearCurrentBot())
   }, [])
 
   return (

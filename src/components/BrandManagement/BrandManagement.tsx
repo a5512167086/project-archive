@@ -15,6 +15,7 @@ import { CustomDialog } from '@/components/CustomDialog/CustomDialog'
 import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
 import { showSuccessToast } from '@/utils/toast'
 import { isEmpty } from '@/utils/helper'
+import { useParams } from 'react-router-dom'
 
 const brandColumns = [
   { id: 'brand_name', label: 'productManagementPage.brandName' },
@@ -42,9 +43,10 @@ const createBrandFields: FieldProps[] = [
 
 export const BrandManagement = () => {
   const { t } = useTranslation()
-  const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
+  const { uuid } = useParams()
+  const { botList } = useAppSelector((state) => state.bot)
+  const currentBot = botList.find((bot) => bot.bot_detail_id === uuid)
   const { brandList } = useAppSelector((state) => state.brand)
-  const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
   const [getBrands] = useLazyGetBrandsQuery()
   const [selected, setSelected] = useState<number[]>([])
   const [isInsertDialogOpen, setIsInsertDialogOpen] = useState(false)

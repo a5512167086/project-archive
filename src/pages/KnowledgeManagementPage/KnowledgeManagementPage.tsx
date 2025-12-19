@@ -18,6 +18,7 @@ import { CustomDialog } from '@/components/CustomDialog'
 import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
 import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
 import { showErrorToast, showSuccessToast } from '@/utils/toast'
+import { useParams } from 'react-router-dom'
 
 const knowledgeManagementPageContent = {
   title: 'knowledgeSettingPage.title',
@@ -67,6 +68,7 @@ const insertKnowledgesFields: FieldProps[] = [
 ]
 
 const KnowledgeManagementPage = () => {
+  const { uuid } = useParams()
   const [getKnowledges] = useLazyGetKnowledgeItemsQuery()
   const [insertKnowledge] = useInsertKnowledgeItemMutation()
   const [updateKnowledge] = useUpdateKnowledgeItemMutation()
@@ -85,8 +87,8 @@ const KnowledgeManagementPage = () => {
     useState<KnowledgeItem | null>(null)
   const { t } = useTranslation()
   const { knowledgeItems } = useAppSelector((state) => state.knowledge)
-  const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
-  const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
+  const { botList } = useAppSelector((state) => state.bot)
+  const currentBot = botList.find((bot) => bot.bot_detail_id === uuid)
   const breadcrumbItems = [
     {
       link: PAGE_PATHS.BOT_LIST,

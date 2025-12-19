@@ -126,9 +126,9 @@ const updateProductFields: FieldProps[] = [
 
 const UpdateProductPage = () => {
   const { t } = useTranslation()
-  const { productId } = useParams<{ productId: string }>()
-  const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
-  const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
+  const { productId, uuid } = useParams()
+  const { botList } = useAppSelector((state) => state.bot)
+  const currentBot = botList.find((bot) => bot.bot_detail_id === uuid)
   const navigate = useNavigate()
   const { products } = useAppSelector((state) => state.product)
   const { brandList } = useAppSelector((state) => state.brand)

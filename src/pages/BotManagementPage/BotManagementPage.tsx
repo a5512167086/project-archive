@@ -14,6 +14,7 @@ import {
   useInsertModuleSettingMutation
 } from '@/store/apis/moduleApi'
 import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
+import { useParams } from 'react-router-dom'
 
 const modulePageContent = {
   botPageTitle: 'botPage.myBot',
@@ -44,9 +45,10 @@ const moduleData = [
 
 const BotManagementPage = () => {
   const { t } = useTranslation()
-  const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
+  const { uuid } = useParams()
+  const { botList } = useAppSelector((state) => state.bot)
   const { moduleSettings } = useAppSelector((state) => state.module)
-  const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
+  const currentBot = botList.find((bot) => bot.bot_detail_id === uuid)
   const { refetch: refreshModuleSettings } = useGetModuleSettingsQuery({
     bot_uuid: currentBot!.bot_detail_id
   })

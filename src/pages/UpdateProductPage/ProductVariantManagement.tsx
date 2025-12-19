@@ -14,6 +14,7 @@ import { CustomDialog } from '@/components/CustomDialog/CustomDialog'
 import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
 import { showSuccessToast } from '@/utils/toast'
 import { useAppSelector } from '@/utils/hook'
+import { useParams } from 'react-router-dom'
 
 type ProductVariantManagementProps = {
   variants: ProductVariantResponse[]
@@ -69,8 +70,9 @@ export const ProductVariantManagement = ({
   onVariantsUpdate
 }: ProductVariantManagementProps) => {
   const { t } = useTranslation()
-  const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
-  const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
+  const { uuid } = useParams()
+  const { botList } = useAppSelector((state) => state.bot)
+  const currentBot = botList.find((bot) => bot.bot_detail_id === uuid)
   const [selected, setSelected] = useState<number[]>([])
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)

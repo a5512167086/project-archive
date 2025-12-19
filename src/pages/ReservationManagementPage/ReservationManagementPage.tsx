@@ -33,6 +33,7 @@ import {
   UpdateReservationRequest
 } from '@/store/apis/reservationApi'
 import { showSuccessToast } from '@/utils/toast'
+import { useParams } from 'react-router-dom'
 
 const reservationManagementPageContent = {
   title: 'reservationManagementPage.title',
@@ -41,8 +42,9 @@ const reservationManagementPageContent = {
 
 const ReservationManagementPage = () => {
   const { t } = useTranslation()
-  const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
-  const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
+  const { uuid } = useParams()
+  const { botList } = useAppSelector((state) => state.bot)
+  const currentBot = botList.find((bot) => bot.bot_detail_id === uuid)
 
   // API hooks
   const [getReservations, { data: reservations = [] }] =

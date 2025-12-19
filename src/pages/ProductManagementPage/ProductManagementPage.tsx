@@ -10,6 +10,7 @@ import { useAppSelector } from '@/utils/hook'
 import { BrandManagement } from '@/components/BrandManagement'
 import { CategoryManagement } from '@/components/CategoryManagement'
 import { ProductManagement } from '@/components/ProductManagement'
+import { useParams } from 'react-router-dom'
 
 function a11yProps(index: number) {
   return {
@@ -20,8 +21,9 @@ function a11yProps(index: number) {
 
 const ProductManagementPage = () => {
   const { t } = useTranslation()
-  const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
-  const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
+  const { uuid } = useParams()
+  const { botList } = useAppSelector((state) => state.bot)
+  const currentBot = botList.find((bot) => bot.bot_detail_id === uuid)
   const [activeTab, setActiveTab] = useState(0)
 
   const breadcrumbItems = [

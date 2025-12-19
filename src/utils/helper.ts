@@ -1,5 +1,4 @@
 import { OAuthActionType } from '@/configs/type'
-import { BotsResponse } from '@/store/apis/botApi'
 import { jwtDecode } from 'jwt-decode'
 import { Category } from '@/store/apis/categoryApi'
 
@@ -39,15 +38,6 @@ export const clearUserToken = () => {
   if (sessionStorage.getItem('access_token')) {
     sessionStorage.removeItem('access_token')
   }
-}
-
-export const getBotClassId = (
-  botList: BotsResponse[],
-  currentBotObjectId: number
-) => {
-  return botList
-    .filter((bot) => bot.object_id === currentBotObjectId)
-    .map((bot) => bot.class_id)[0]
 }
 
 export const isValidHttpUrl = (url: string): boolean => {

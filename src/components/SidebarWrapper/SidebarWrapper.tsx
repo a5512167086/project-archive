@@ -12,7 +12,7 @@ import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import LogoIcon from '@/assets/header_logo.svg?react'
-import { Outlet, useNavigate } from 'react-router-dom'
+import { Outlet, useNavigate, useParams } from 'react-router-dom' // 確保引入 useParams
 import {
   StyledDrawerHeader,
   StyledDrawer,
@@ -25,11 +25,9 @@ import { useTranslation } from 'react-i18next'
 import { useUser } from '@/hooks/useUser'
 import { CustomLoader } from '../CustomLoader'
 import { PAGE_PATHS, SIDEBAR_NAVIGATION_ROUTE } from '@/routes'
-import { useAppSelector, useAppDispatch } from '@/utils/hook'
+import { useAppSelector } from '@/utils/hook'
 import { useHandleAuthRedirect } from '@/hooks/useHandleAuthRedirect'
 import { CustomAlert } from '../CustomAlert/CustomAlert'
-import { useParams } from 'react-router-dom'
-import { setCurrentBot } from '@/store/modules/botSlice'
 import { useErrorHandler } from '@/hooks/useErrorHandler'
 
 const sidebarWrapperContent = {
@@ -38,17 +36,18 @@ const sidebarWrapperContent = {
 }
 
 export const SidebarWrapper = () => {
-  const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { t } = useTranslation()
+
   const { uuid } = useParams()
-  const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
-  const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
+  const { botList } = useAppSelector((state) => state.bot)
+  const currentBot = botList.find((bot) => bot.bot_detail_id === uuid)
+
   const { isAuthenticated } = useAppSelector((state) => state.user)
   const { isAuthFailed, setIsAuthFailed, logout } = useUser()
   const [open, setOpen] = useState(false)
   const [isAlertOpen, setAlertOpen] = useState(false)
-  const [getBots] = useLazyGetBotsQuery()
+  const [getBots, { isLoading: isFetchingBots }] = useLazyGetBotsQuery() // 加上 loading 狀態
 
   useErrorHandler()
 
@@ -67,37 +66,51 @@ export const SidebarWrapper = () => {
     setOpen(false)
   }
 
-  const handleNavigate = (route: string, key: string) => {
-    if (key === 'moduleList') {
-      navigate(route + `/${currentBot?.bot_detail_id}`)
-    } else {
-      navigate(route)
+  const handleNavigate = (routeLink: string, key: string) => {
+    if (key === 'backToBotList') {
+      navigate(PAGE_PATHS.BOT_LIST)
+      return
     }
+
+    if (key === 'moduleList') {
+      navigate(`/bot-list/${uuid}`)
+      return
+    }
+    navigate(`/bot-list/${uuid}/${routeLink}`)
   }
 
   useEffect(() => {
-    const fetchAndSetBot = async () => {
-      let bots = botList
-
-      if (bots.length === 0) {
-        const res = await getBots().unwrap()
-        if (res && Array.isArray(res)) {
-          bots = res
-        }
-      }
-
-      if (uuid && bots.length > 0 && !currentBotObjectId) {
-        const matchedBot = bots.find((bot) => bot.bot_detail_id === uuid)
-        if (matchedBot) {
-          dispatch(setCurrentBot(matchedBot.object_id))
-        } else {
-          navigate(PAGE_PATHS.BOT_LIST)
-        }
+    const fetchBotsIfNeeded = async () => {
+      if (botList.length === 0) {
+        await getBots().unwrap()
       }
     }
+    fetchBotsIfNeeded()
+  }, [botList.length, getBots])
 
-    fetchAndSetBot()
-  }, [uuid, botList, currentBotObjectId])
+  if (!currentBot) {
+    if (botList.length === 0 || isFetchingBots) {
+      return (
+        <CustomLoader size="100vh" text={t(sidebarWrapperContent.loaderText)} />
+      )
+    }
+
+    return (
+      <Box
+        sx={{
+          p: 4,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
+        }}
+      >
+        <Typography variant="h5">Bot Not Found</Typography>
+        <Button onClick={() => navigate(PAGE_PATHS.BOT_LIST)}>
+          Back to List
+        </Button>
+      </Box>
+    )
+  }
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -116,15 +129,18 @@ export const SidebarWrapper = () => {
             <MenuIcon />
           </IconButton>
           <LogoIcon className="header__logo" />
+
           <Typography variant="h6" component="div" className="header__title">
-            EasyBot
+            {currentBot.chinese_name || 'EasyBot'}
           </Typography>
+
           <Button className="header__navLink" onClick={logout}>
             {t(sidebarWrapperContent.logout)}
           </Button>
           <LanguageChanger />
         </Toolbar>
       </StyledSidebarHeader>
+
       <StyledDrawer variant="permanent" open={open}>
         <StyledDrawerHeader>
           <IconButton onClick={handleDrawerClose}>
@@ -170,6 +186,7 @@ export const SidebarWrapper = () => {
           ))}
         </List>
       </StyledDrawer>
+
       <Box
         component="main"
         className="wrapper__content"

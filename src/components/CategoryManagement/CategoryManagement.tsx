@@ -23,12 +23,14 @@ import { CustomDialog } from '@/components/CustomDialog'
 import { isEmpty } from '@/utils/helper'
 import { showSuccessToast } from '@/utils/toast'
 import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
+import { useParams } from 'react-router-dom'
 
 export const CategoryManagement = () => {
   const { t } = useTranslation()
-  const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
+  const { uuid } = useParams()
+  const { botList } = useAppSelector((state) => state.bot)
+  const currentBot = botList.find((bot) => bot.bot_detail_id === uuid)
   const { categoryList } = useAppSelector((state) => state.category)
-  const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
   const [getCategories] = useLazyGetCategoriesQuery()
   const [createCategory] = useCreateCategoryMutation()
   const [updateCategory] = useUpdateCategoryMutation()

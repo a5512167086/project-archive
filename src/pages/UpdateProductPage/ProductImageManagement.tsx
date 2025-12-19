@@ -26,6 +26,7 @@ import { showSuccessToast } from '@/utils/toast'
 import { useAppSelector } from '@/utils/hook'
 import { ProductImageManagementProps } from './ProductImageManagement.type'
 import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
+import { useParams } from 'react-router-dom'
 
 const createProductImagesFields: FieldProps[] = [
   {
@@ -46,8 +47,9 @@ export const ProductImageManagement = ({
   onImagesUpdate
 }: ProductImageManagementProps) => {
   const { t } = useTranslation()
-  const { botList, currentBotObjectId } = useAppSelector((state) => state.bot)
-  const currentBot = botList.find((bot) => bot.object_id === currentBotObjectId)
+  const { uuid } = useParams()
+  const { botList } = useAppSelector((state) => state.bot)
+  const currentBot = botList.find((bot) => bot.bot_detail_id === uuid)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedImage, setSelectedImage] =
