@@ -94,7 +94,7 @@ def delete_bot(
 ):
     user_id = current_user["user_id"]
     bot_service.delete_current_bot(user_id, bot_uuid)
-    ecomm_service.delete_all_shipping_settings(bot_uuid, user_id)
+    ecomm_service.delete_all_shipping_settings(bot_uuid)
     bot_service.session.commit()
 
 

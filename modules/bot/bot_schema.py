@@ -60,6 +60,8 @@ class UpdateBotRequest(BaseModel):
     channel_id: Optional[str] = None
     channel_access_token: Optional[str] = None
     channel_secret: Optional[str] = None
+    login_channel_id: Optional[str] = None
+    login_channel_secret: Optional[str] = None
 
     @model_validator(mode="before")
     def prevent_empty_strings(cls, values):

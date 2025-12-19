@@ -258,12 +258,78 @@ class BotService:
         logger.info(
             f"Updating bot for user_id: {user_id}, bot_uuid: {update_bot_uuid} with data: {update_bot}"
         )
+
         bot_data = self.validate_bot_ownership(user_id, update_bot_uuid)
+
         cleared_update_bot_data = update_bot.model_dump(exclude_unset=True)
         if not cleared_update_bot_data:
             self.raise_global_error(
                 ErrorCode.NO_UPDATE_DATA, "No data provided for update"
             )
+
+        credential_fields = {
+            "channel_id",
+            "channel_access_token",
+            "channel_secret",
+            "login_channel_id",
+            "login_channel_secret",
+        }
+
+        is_credential_changed = any(
+            field in cleared_update_bot_data for field in credential_fields
+        )
+
+        if is_credential_changed:
+            logger.info("Credentials changed. Starting safe update process...")
+
+            new_login_id = cleared_update_bot_data.get(
+                "login_channel_id", bot_data.login_channel_id
+            )
+            new_login_secret = cleared_update_bot_data.get(
+                "login_channel_secret", bot_data.login_channel_secret
+            )
+            new_msg_access_token = cleared_update_bot_data.get(
+                "channel_access_token", bot_data.channel_access_token
+            )
+
+            try:
+                new_login_token = self.safe_get_channel_access_token(
+                    new_login_id, new_login_secret
+                )
+                print(new_login_id, new_login_secret)
+                liff_response = self.safe_create_liff_app(new_login_token)
+                new_liff_id = liff_response["liffId"]
+                logger.info(f"New LIFF app created: {new_liff_id}")
+                self.init_rich_menu(
+                    new_msg_access_token, new_liff_id, str(update_bot_uuid)
+                )
+
+                cleared_update_bot_data["liff_id"] = new_liff_id
+
+            except Exception as e:
+                logger.error(f"Failed to provision new LINE resources: {e}")
+                self.raise_global_error(
+                    ErrorCode.INVALID_LINE_BOT,
+                    f"New credentials invalid or failed to create resources: {str(e)}",
+                )
+            logger.info(
+                "New resources created successfully. Cleaning up old resources..."
+            )
+            try:
+                self.delete_default_rich_menu(bot_data.channel_access_token)
+            except Exception as e:
+                logger.warning(f"Failed to delete old rich menu (non-critical): {e}")
+
+            try:
+                if bot_data.liff_id and bot_data.liff_id != new_liff_id:
+                    old_login_token = self.safe_get_channel_access_token(
+                        bot_data.login_channel_id, bot_data.login_channel_secret
+                    )
+                    if old_login_token:
+                        self.safe_delete_liff_app(old_login_token, bot_data.liff_id)
+            except Exception as e:
+                logger.warning(f"Failed to delete old LIFF app (non-critical): {e}")
+
         self.command.update_bot_by_id(bot_data.object_id, cleared_update_bot_data)
         logger.info(f"Bot updated successfully for bot_uuid: {update_bot_uuid}")
 
