@@ -33,10 +33,11 @@ export type UpdateBotRequest = {
   channel_id?: string
   channel_access_token?: string
   channel_secret?: string
+  login_channel_id?: string
+  login_channel_secret?: string
 }
 
 // 2. 改用 baseApi.injectEndpoints
-// 這裡不需要再寫 reducerPath 和 baseQuery，因為已經繼承自 baseApi 了
 export const botApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getBots: builder.query<BotsResponse[], void>({
