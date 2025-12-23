@@ -15,7 +15,7 @@ CONFIG = {
     "models": {
         "gemini_2.5_flash": {"name": "Gemini 2.5 flash"},
         "gpt_5_mini": {"name": "GPT o4 mini"},
-        "qwen3_local": {"name": "Qwen3 4B"},
+        "qwen3_local": {"name": "Qwen3 8B"},
     },
     # 檔案與欄位模板
     "filename_template": "ragas_results_ragas_eval_{model}_{dataset}.csv",

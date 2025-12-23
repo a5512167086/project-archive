@@ -1,7 +1,9 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Literal, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
+
+ModelName = Literal["gpt_5_mini", "qwen3_local", "gemini_2.5_flash"]
 
 
 class IngestRequest(BaseModel):
@@ -14,7 +16,7 @@ class QueryRequest(BaseModel):
     query: str
     top_k: int = 5
     score_threshold: float = 0.3
-    models: List[str] = Field(default=["gpt_5_mini", "qwen3_local", "gemini_2.5_flash"])
+    model: ModelName = Field(default="gpt_5_mini")
 
 
 class QueryHit(BaseModel):

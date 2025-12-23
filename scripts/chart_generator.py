@@ -79,7 +79,7 @@ def load_and_process_data():
     model_name_map = {
         "gemini_2.5_flash": "Gemini 2.5 flash",
         "gpt_5_mini": "GPT o4 mini",
-        "qwen3_local": "Qwen3 4B",
+        "qwen3_local": "Qwen3 8B",
     }
 
     for file_path in csv_files:

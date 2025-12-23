@@ -10,10 +10,17 @@ from langchain_huggingface import (
     HuggingFacePipeline,
 )
 
-from app.configs.config import CHAT_MODEL, EMBEDDING_MODEL
+from app.configs.config import (
+    CHAT_MODEL,
+    EMBEDDING_MODEL,
+    MONGODB_CHAT_COLLECTION,
+    MONGODB_DB_NAME,
+    MONGODB_URI,
+)
 from app.database import SessionDep
 from app.schemas import IngestRequest, QueryHit, QueryRequest, QueryResponse
 from app.services.knowledge_service import KnowledgeService
+from app.services.memory.summary import MongoSummaryMemory
 from app.services.rag_service import RAGService
 
 
@@ -36,12 +43,24 @@ async def lifespan(app: FastAPI):
     )
     chat_model = ChatHuggingFace(llm=chat_pipeline)
 
-    app.state.rag_service = RAGService(
+    rag = RAGService(
         embeddings=embedding_model,
         preloaded_hf_chat_model=chat_model,
         ensure_collection_and_indexes=True,
+        # 也可以直接 memory=... rewriter=... 但 summary memory 通常需要 rag._get_llm
     )
 
+    # 注入「會產 summary」的 memory，並印出 summary
+    rag.memory = MongoSummaryMemory(
+        mongo_uri=MONGODB_URI,
+        mongo_db_name=MONGODB_DB_NAME,
+        mongo_collection=MONGODB_CHAT_COLLECTION,
+        get_llm=rag._get_llm,  # 直接用 rag 的 LLM factory
+        summary_model="gpt_5_mini",
+        summary_trigger_threshold=6,
+    )
+
+    app.state.rag_service = rag
     yield
 
     app.state.rag_service = None
@@ -81,8 +100,7 @@ async def query(
     req: QueryRequest,
     rag: Annotated[RAGService, Depends(get_rag_service)],
 ):
-    # 檢索只做一次
-    history_model = "gpt_5_mini" if "gpt_5_mini" in req.models else req.models[0]
+    history_model = req.model  # 單一模型
 
     final_query, hits = rag.search_history_aware(
         bot_uuid=req.bot_uuid,
@@ -101,25 +119,18 @@ async def query(
             hits=[],
         )
 
-    # 多模型並行生成（不重跑檢索）
-    tasks = [
-        asyncio.to_thread(
-            rag.generate,
-            req.bot_uuid,
-            req.line_id,
-            req.query,  # original_query
-            final_query,  # rewritten_query
-            hits,
-            model_name,
-        )
-        for model_name in req.models
-    ]
-    results = await asyncio.gather(*tasks)
-
-    answers_dict = {m: r for m, r in zip(req.models, results)}
+    answer = await asyncio.to_thread(
+        rag.generate,
+        req.bot_uuid,
+        req.line_id,
+        req.query,  # original_query
+        final_query,  # rewritten_query
+        hits,
+        req.model,
+    )
 
     return QueryResponse(
-        answers=answers_dict,
+        answers={req.model: answer},
         hits=[
             QueryHit(**{k: v for k, v in h.items() if k in QueryHit.model_fields})
             for h in hits

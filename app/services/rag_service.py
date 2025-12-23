@@ -3,11 +3,8 @@ from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 from uuid import UUID, uuid5
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_huggingface import ChatHuggingFace, HuggingFaceEmbeddings
-from langchain_mongodb.chat_message_histories import MongoDBChatMessageHistory
 from langchain_openai import ChatOpenAI
 from langchain_qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
@@ -26,6 +23,9 @@ from app.configs.config import (
 )
 from app.logger import logger
 from app.schemas import KnowledgeItem
+from app.services.memory.base import MemoryModule, QueryRewriter
+from app.services.memory.buffer import MongoBufferMemory
+from app.services.memory.rewriter import HistoryQueryRewriter
 
 
 class RAGService:
@@ -35,8 +35,8 @@ class RAGService:
     DEFAULT_BATCH_SIZE = 250
 
     # Memory (store conversation)
-    DEFAULT_MAX_HISTORY_ROUNDS = 5  # 你要的：保留最新 5 輪
-    DEFAULT_MAX_HISTORY_MESSAGES = 10  # 5 輪 = 10 則 (Human+AI)
+    DEFAULT_MAX_HISTORY_ROUNDS = 5  # keep last 5 rounds
+    DEFAULT_MAX_HISTORY_MESSAGES = 10  # 5 rounds = 10 messages (Human+AI)
     DEFAULT_MAX_CONTEXTS_FOR_PROMPT = 3
 
     def __init__(
@@ -47,10 +47,13 @@ class RAGService:
         collection_name: str = QDRANT_COLLECTION,
         timeout: float = DEFAULT_TIMEOUT,
         ensure_collection_and_indexes: bool = True,
-        # MongoDB memory
+        # MongoDB (for default memory)
         mongo_uri: str = MONGODB_URI,
         mongo_db_name: str = MONGODB_DB_NAME,
         mongo_collection: str = MONGODB_CHAT_COLLECTION,
+        # Pluggable modules
+        memory: Optional[MemoryModule] = None,
+        rewriter: Optional[QueryRewriter] = None,
     ) -> None:
         self.embeddings = embeddings
         self.qdrant_url = qdrant_url
@@ -71,11 +74,20 @@ class RAGService:
         self._preloaded_hf = preloaded_hf_chat_model
         self._llm_cache: Dict[str, Any] = {}
 
-        # MongoDB memory
+        # keep mongo config for session key building etc.
         self.mongo_uri = mongo_uri
         self.mongo_db_name = mongo_db_name
         self.mongo_collection = mongo_collection
-        self._history_cache: Dict[str, MongoDBChatMessageHistory] = {}
+
+        # Default behavior: if user doesn't inject a memory module, use Mongo buffer memory.
+        self.memory: MemoryModule = memory or MongoBufferMemory(
+            mongo_uri=mongo_uri,
+            mongo_db_name=mongo_db_name,
+            mongo_collection=mongo_collection,
+        )
+
+        # Default behavior: if user doesn't inject a rewriter, use history-aware rewriter.
+        self.rewriter: QueryRewriter = rewriter or HistoryQueryRewriter(self._get_llm)
 
     # =====================
     # Qdrant ensure/index
@@ -271,38 +283,10 @@ class RAGService:
         return True
 
     # =====================
-    # MongoDB Memory
+    # Session Key
     # =====================
-    def _build_session_key(self, bot_uuid: UUID, line_id: str, model_name: str) -> str:
-        return f"{str(bot_uuid)}:{line_id}:{model_name}"
-
-    def _get_history(self, session_key: str) -> MongoDBChatMessageHistory:
-        if session_key in self._history_cache:
-            return self._history_cache[session_key]
-
-        h = MongoDBChatMessageHistory(
-            connection_string=self.mongo_uri,
-            session_id=session_key,
-            database_name=self.mongo_db_name,
-            collection_name=self.mongo_collection,
-        )
-        self._history_cache[session_key] = h
-        return h
-
-    def _get_recent_history(
-        self, session_key: str, max_messages: int = DEFAULT_MAX_HISTORY_MESSAGES
-    ) -> List[BaseMessage]:
-        h = self._get_history(session_key)
-        msgs = h.messages or []
-        if max_messages <= 0:
-            return []
-        return msgs[-max_messages:]
-
-    def _get_recent_history_rounds(
-        self, session_key: str, rounds: int = DEFAULT_MAX_HISTORY_ROUNDS
-    ) -> List[BaseMessage]:
-        max_messages = max(0, rounds * 2)  # 1 round = human+ai
-        return self._get_recent_history(session_key, max_messages=max_messages)
+    def _build_session_key(self, bot_uuid: UUID, line_id: str) -> str:
+        return f"{str(bot_uuid)}:{line_id}"
 
     # =====================
     # LLM (minimal factory)
@@ -338,45 +322,8 @@ class RAGService:
         return llm
 
     # =====================
-    # History-aware query rewrite (standalone question)
+    # History-aware search (pluggable memory + rewriter)
     # =====================
-    def _rewrite_query_with_history(
-        self,
-        user_query: str,
-        history: List[BaseMessage],
-        rewrite_model: str = "gpt_5_mini",
-    ) -> str:
-        """
-        用 chat_history 把追問補齊成可獨立理解的問題（只改寫，不回答）。
-        """
-        llm = self._get_llm(rewrite_model)
-
-        system_prompt = (
-            "你是一個對話上下文解析器。"
-            "請把「最新使用者問題」改寫成「完整、可獨立理解」的問題。"
-            "只輸出改寫後的問題，不要回答。"
-            "輸出必須使用繁體中文，不得使用簡體中文。"
-        )
-
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", system_prompt),
-            MessagesPlaceholder("chat_history"),
-            ("human", "{input}"),
-        ])
-
-        # 只保留 Human/AI，避免 system 混入
-        clean_history: List[BaseMessage] = []
-        for m in history:
-            if isinstance(m, HumanMessage) or isinstance(m, AIMessage):
-                clean_history.append(m)
-
-        chain = prompt | llm | StrOutputParser()
-        rewritten = chain.invoke({
-            "input": user_query,
-            "chat_history": clean_history,
-        }).strip()
-        return rewritten if rewritten else user_query
-
     def search_history_aware(
         self,
         bot_uuid: UUID,
@@ -388,7 +335,7 @@ class RAGService:
         history_rounds: int = DEFAULT_MAX_HISTORY_ROUNDS,
         rewrite_model: str = "gpt_5_mini",
     ) -> Tuple[str, List[Dict[str, Any]]]:
-        # single-turn：不 rewrite
+        # single-turn：不 rewrite、不讀 memory
         if not line_id:
             hits = self.search(
                 bot_uuid=bot_uuid,
@@ -398,14 +345,23 @@ class RAGService:
             )
             return query_text, hits
 
-        session_key = self._build_session_key(bot_uuid, line_id, history_model_name)
-        history = self._get_recent_history_rounds(session_key, rounds=history_rounds)
+        session_key = self._build_session_key(bot_uuid, line_id)
 
-        rewritten_query = self._rewrite_query_with_history(
-            query_text, history, rewrite_model=rewrite_model
+        # 1) memory load
+        snapshot = self.memory.load(
+            session_key, max_messages=max(0, history_rounds * 2)
         )
-
-        final_query = rewritten_query.strip() or query_text
+        if snapshot.summary:
+            logger.info(
+                f"[RAGService] conversation_summary(session={session_key}): {snapshot.summary}"
+            )
+        # 2) rewrite
+        rr = self.rewriter.rewrite(
+            user_query=query_text,
+            snapshot=snapshot,
+            rewrite_model=rewrite_model,
+        )
+        final_query = rr.rewritten.strip() or query_text
 
         logger.info(f"[RAGService] rewritten_query='{final_query}' from '{query_text}'")
 
@@ -462,7 +418,7 @@ class RAGService:
 
         msgs: List[BaseMessage] = [SystemMessage(content=system)]
 
-        # 只加入 Human/AI 訊息，避免歷史內不小心混入 system 指令
+        # only Human/AI history
         if history:
             for m in history:
                 if isinstance(m, HumanMessage) or isinstance(m, AIMessage):
@@ -481,7 +437,7 @@ class RAGService:
         return raw.strip()
 
     # =====================
-    # Generate with Memory
+    # Generate with Memory (pluggable)
     # =====================
     def generate(
         self,
@@ -499,31 +455,29 @@ class RAGService:
         history: Optional[List[BaseMessage]] = None
         session_key: Optional[str] = None
 
-        if use_memory:
-            session_key = self._build_session_key(bot_uuid, line_id, model_name)  # type: ignore[arg-type]
-            history = self._get_recent_history(
-                session_key, max_messages=max_history_messages
-            )
+        if use_memory and line_id:
+            session_key = self._build_session_key(bot_uuid, line_id)
+            snapshot = self.memory.load(session_key, max_messages=max_history_messages)
+            history = snapshot.recent_messages
 
         messages = self._build_messages(
-            original_query,
-            rewritten_query,
-            contexts,
+            original_query=original_query,
+            rewritten_query=rewritten_query,
+            contexts=contexts,
             use_no_think=(model_name == "qwen3_local"),
             history=history,
         )
-        print(messages)
+
         try:
             resp = llm.invoke(messages)
         except Exception as e:
             logger.exception(f"[RAGService] LLM invoke failed: {e}")
             return "系統目前無法產生回覆，請稍後再試。"
 
-        if hasattr(resp, "content") and isinstance(resp.content, str):
-            text = resp.content
-        elif hasattr(resp, "text"):
-            text = resp.text
-        else:
+        text = getattr(resp, "content", None) if hasattr(resp, "content") else None
+        if not isinstance(text, str) or not text:
+            text = getattr(resp, "text", None) if hasattr(resp, "text") else None
+        if not isinstance(text, str) or not text:
             text = str(resp)
 
         if model_name == "qwen3_local":
@@ -531,33 +485,38 @@ class RAGService:
 
         answer = text.strip()
 
-        # 只有 use_memory=True 才寫回 MongoDB
+        # Persist turn via pluggable memory
         if use_memory and session_key:
-            try:
-                h = self._get_history(session_key)
-                h.add_user_message(original_query)
-                h.add_ai_message(answer)
-            except Exception as e:
-                logger.warning(f"[RAGService] Memory write skipped/failed: {e}")
+            self.memory.append_turn(session_key, human=original_query, ai=answer)
 
         return answer
 
-    # One-shot query pipeline (search + generate)
+    # =====================
+    # One-shot pipeline (search + rewrite + generate)
+    # =====================
     def query(
         self,
         bot_uuid: UUID,
-        line_id: str,
+        line_id: Optional[str],
         question: str,
         model_name: str = "gpt_5_mini",
         top_k: int = DEFAULT_TOP_K,
         score_threshold: Optional[float] = DEFAULT_SCORE_THRESHOLD,
+        history_model_name: Optional[str] = None,
+        rewrite_model: str = "gpt_5_mini",
+        history_rounds: int = DEFAULT_MAX_HISTORY_ROUNDS,
     ) -> Dict[str, Any]:
-        hits = self.search(
+        rewritten_q, hits = self.search_history_aware(
             bot_uuid=bot_uuid,
+            line_id=line_id,  # None -> single-turn
+            history_model_name=history_model_name or model_name,
             query_text=question,
             top_k=top_k,
             score_threshold=score_threshold,
+            history_rounds=history_rounds,
+            rewrite_model=rewrite_model,
         )
+
         if not hits:
             return {
                 "answer": "目前知識庫中沒有找到與此問題相關的資訊。",
@@ -566,8 +525,9 @@ class RAGService:
 
         answer = self.generate(
             bot_uuid=bot_uuid,
-            line_id=line_id,
-            user_query=question,
+            line_id=line_id,  # None -> single-turn
+            original_query=question,
+            rewritten_query=rewritten_q,
             contexts=hits,
             model_name=model_name,
         )
