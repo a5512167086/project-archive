@@ -1,9 +1,10 @@
 import asyncio
+import time
 from contextlib import asynccontextmanager
-from typing import Annotated
+from typing import Annotated, cast
 
 import torch
-from fastapi import Depends, FastAPI, Request
+from fastapi import BackgroundTasks, Depends, FastAPI, Request
 from langchain_huggingface import (
     ChatHuggingFace,
     HuggingFaceEmbeddings,
@@ -18,6 +19,7 @@ from app.configs.config import (
     MONGODB_URI,
 )
 from app.database import SessionDep
+from app.logger import logger
 from app.schemas import IngestRequest, QueryHit, QueryRequest, QueryResponse
 from app.services.knowledge_service import KnowledgeService
 from app.services.memory.summary import MongoSummaryMemory
@@ -47,17 +49,19 @@ async def lifespan(app: FastAPI):
         embeddings=embedding_model,
         preloaded_hf_chat_model=chat_model,
         ensure_collection_and_indexes=True,
-        # 也可以直接 memory=... rewriter=... 但 summary memory 通常需要 rag._get_llm
     )
 
-    # 注入「會產 summary」的 memory，並印出 summary
+    # Memory: cache-only load + background summary update
     rag.memory = MongoSummaryMemory(
         mongo_uri=MONGODB_URI,
         mongo_db_name=MONGODB_DB_NAME,
         mongo_collection=MONGODB_CHAT_COLLECTION,
-        get_llm=rag._get_llm,  # 直接用 rag 的 LLM factory
+        get_llm=rag._get_llm,
         summary_model="gpt_5_mini",
         summary_trigger_threshold=6,
+        max_summary_messages=30,
+        refresh_min_interval_sec=60,  # 1 分鐘內不重算
+        refresh_every_n_new_msgs=4,  # 新增>=4則 human/ai 才重算
     )
 
     app.state.rag_service = rag
@@ -86,7 +90,6 @@ def ingest(
     rag: Annotated[RAGService, Depends(get_rag_service)],
 ):
     sync_results = knowledge_service.sync_knowledge_vectors(req.bot_uuid, rag)
-
     return {
         "bot_uuid": str(req.bot_uuid),
         "upserted": sync_results["upserted"],
@@ -99,26 +102,37 @@ def ingest(
 async def query(
     req: QueryRequest,
     rag: Annotated[RAGService, Depends(get_rag_service)],
+    background_tasks: BackgroundTasks,
 ):
-    history_model = req.model  # 單一模型
+    start_total = time.perf_counter()
 
+    # 1) Search + Rewrite
+    start_search = time.perf_counter()
     final_query, hits = rag.search_history_aware(
         bot_uuid=req.bot_uuid,
         line_id=req.line_id,
-        history_model_name=history_model,
         query_text=req.query,
         top_k=req.top_k,
         score_threshold=req.score_threshold,
         history_rounds=5,
         rewrite_model="gpt_5_mini",
     )
+    search_duration = time.perf_counter() - start_search
+    logger.info(
+        f"[Timer] 1. Search & Rewrite: {search_duration:.3f}s | Hits: {len(hits)}"
+    )
 
     if not hits:
+        logger.info(
+            f"[Timer] Total (No Hits): {time.perf_counter() - start_total:.3f}s"
+        )
         return QueryResponse(
             answers={"default": "抱歉，知識庫目前沒有足夠資訊可以回答這個問題。"},
             hits=[],
         )
 
+    # 2) Generate
+    start_gen = time.perf_counter()
     answer = await asyncio.to_thread(
         rag.generate,
         req.bot_uuid,
@@ -128,6 +142,17 @@ async def query(
         hits,
         req.model,
     )
+    gen_duration = time.perf_counter() - start_gen
+    logger.info(f"[Timer] 2. Generation: {gen_duration:.3f}s")
+
+    # 3) Background summary update (NOT in critical path)
+    if req.line_id:
+        session_key = f"{req.bot_uuid}:{req.line_id}"
+        mem = cast(MongoSummaryMemory, rag.memory)
+        background_tasks.add_task(mem.maybe_update_summary, session_key)
+
+    total_duration = time.perf_counter() - start_total
+    logger.info(f"[Timer] === Total Request: {total_duration:.3f}s ===")
 
     return QueryResponse(
         answers={req.model: answer},

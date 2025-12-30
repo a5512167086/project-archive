@@ -1,12 +1,12 @@
-# app/services/rag_modules/rewriter/history_rewriter.py
 from __future__ import annotations
 
+import time
 from typing import Any, Callable, List
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
-from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
+from app.logger import logger
 from app.services.memory.base import MemorySnapshot, QueryRewriter, RewriteResult
 
 
@@ -28,13 +28,25 @@ class HistoryQueryRewriter(QueryRewriter):
     def rewrite(
         self, user_query: str, snapshot: MemorySnapshot, rewrite_model: str
     ) -> RewriteResult:
-        llm = self.get_llm(rewrite_model)
+        t0 = time.perf_counter()
 
-        # 只保留 Human/AI，避免 system 混入
-        clean_history: List[BaseMessage] = []
-        for m in snapshot.recent_messages:
-            if isinstance(m, HumanMessage) or isinstance(m, AIMessage):
-                clean_history.append(m)
+        # 1) get llm
+        t_llm = time.perf_counter()
+        llm = self.get_llm(rewrite_model)
+        llm_dur = time.perf_counter() - t_llm
+        logger.info(f"[Timer] Rewrite Get LLM: {llm_dur:.3f}s")
+
+        # 2) clean history
+        t_clean = time.perf_counter()
+        clean_history: List[BaseMessage] = [
+            m
+            for m in snapshot.recent_messages
+            if isinstance(m, (HumanMessage, AIMessage))
+        ]
+        clean_dur = time.perf_counter() - t_clean
+        logger.info(
+            f"[Timer] Rewrite Clean History: {clean_dur:.3f}s | Used: {len(clean_history)}"
+        )
 
         summary_context = ""
         used_summary = False
@@ -56,13 +68,24 @@ class HistoryQueryRewriter(QueryRewriter):
             ("human", "{input}"),
         ])
 
-        chain = prompt | llm | StrOutputParser()
-        rewritten = chain.invoke({
-            "input": user_query,
-            "chat_history": clean_history,
-        }).strip()
+        # 3) format messages
+        t_fmt = time.perf_counter()
+        messages = prompt.format_messages(input=user_query, chat_history=clean_history)
+        fmt_dur = time.perf_counter() - t_fmt
+        logger.info(f"[Timer] Rewrite Prompt Format: {fmt_dur:.3f}s")
 
+        # 4) invoke
+        t_inv = time.perf_counter()
+        response = llm.invoke(messages)
+        inv_dur = time.perf_counter() - t_inv
+        logger.info(f"[Timer] Rewrite LLM Invoke: {inv_dur:.3f}s")
+
+        rewritten = response.content if hasattr(response, "content") else str(response)
+        rewritten = rewritten.strip()
         final_q = rewritten if rewritten else user_query
+
+        total = time.perf_counter() - t0
+        logger.info(f"[Timer] Rewrite Total: {total:.3f}s")
 
         return RewriteResult(
             original=user_query,

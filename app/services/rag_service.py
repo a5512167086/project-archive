@@ -1,4 +1,5 @@
 import os
+import time
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 from uuid import UUID, uuid5
 
@@ -215,7 +216,7 @@ class RAGService:
         return f"Q: {q}\nA: {a}" if a else f"Q: {q}"
 
     # =====================
-    # Search (base)
+    # Search (base) + timers
     # =====================
     def search(
         self,
@@ -224,13 +225,21 @@ class RAGService:
         top_k: int = DEFAULT_TOP_K,
         score_threshold: Optional[float] = DEFAULT_SCORE_THRESHOLD,
     ) -> List[Dict[str, Any]]:
+        t0 = time.perf_counter()
+
+        t_vs = time.perf_counter()
         pairs = self.vs.similarity_search_with_relevance_scores(
             query=query_text,
             k=top_k,
             filter=self._filter_knowledge(bot_uuid),
             score_threshold=score_threshold,
         )
+        vs_dur = time.perf_counter() - t_vs
+        logger.info(
+            f"[Timer] Vector Search Call (Qdrant): {vs_dur:.3f}s | Pairs: {len(pairs)}"
+        )
 
+        t_map = time.perf_counter()
         results: List[Dict[str, Any]] = []
         for doc, score in pairs:
             md = doc.metadata or {}
@@ -241,7 +250,10 @@ class RAGService:
                 "question": md.get("question", ""),
                 "answer": md.get("answer", ""),
             })
+        map_dur = time.perf_counter() - t_map
+        logger.info(f"[Timer] Vector Search Transform: {map_dur:.3f}s")
 
+        t_post = time.perf_counter()
         results.sort(key=lambda x: x["score"], reverse=True)
         seen = set()
         deduped = []
@@ -251,7 +263,13 @@ class RAGService:
                 continue
             seen.add(key)
             deduped.append(r)
+        post_dur = time.perf_counter() - t_post
+        logger.info(
+            f"[Timer] Vector Search PostProcess: {post_dur:.3f}s | Deduped: {len(deduped)}"
+        )
 
+        total = time.perf_counter() - t0
+        logger.info(f"[Timer] Search Total: {total:.3f}s")
         return deduped
 
     def delete_knowledge_items(
@@ -300,8 +318,8 @@ class RAGService:
                 base_url=f"{AZURE_OPENAI_ENDPOINT.rstrip('/')}/openai/v1",
                 api_key=AZURE_OPENAI_API_KEY,
                 model=AZURE_OPENAI_DEPLOYMENT,
+                max_completion_tokens=1024,
                 reasoning_effort="low",
-                max_completion_tokens=4096,
             )
         elif model_name == "gemini_2.5_flash":
             if "GOOGLE_API_KEY" not in os.environ:
@@ -322,19 +340,20 @@ class RAGService:
         return llm
 
     # =====================
-    # History-aware search (pluggable memory + rewriter)
+    # History-aware search (timers)
     # =====================
     def search_history_aware(
         self,
         bot_uuid: UUID,
         line_id: Optional[str],
-        history_model_name: str,
         query_text: str,
         top_k: int = DEFAULT_TOP_K,
         score_threshold: Optional[float] = DEFAULT_SCORE_THRESHOLD,
         history_rounds: int = DEFAULT_MAX_HISTORY_ROUNDS,
         rewrite_model: str = "gpt_5_mini",
     ) -> Tuple[str, List[Dict[str, Any]]]:
+        t0 = time.perf_counter()
+
         # single-turn：不 rewrite、不讀 memory
         if not line_id:
             hits = self.search(
@@ -343,34 +362,55 @@ class RAGService:
                 top_k=top_k,
                 score_threshold=score_threshold,
             )
+            logger.info(
+                f"[Timer] SearchHistoryAware Total (SingleTurn): {(time.perf_counter() - t0):.3f}s"
+            )
             return query_text, hits
 
         session_key = self._build_session_key(bot_uuid, line_id)
 
-        # 1) memory load
+        # 1) memory load (含 summary)
+        t_mem = time.perf_counter()
         snapshot = self.memory.load(
             session_key, max_messages=max(0, history_rounds * 2)
         )
+        mem_dur = time.perf_counter() - t_mem
+        logger.info(f"[Timer] Memory Load (Summary Included): {mem_dur:.3f}s")
+
         if snapshot.summary:
             logger.info(
                 f"[RAGService] conversation_summary(session={session_key}): {snapshot.summary}"
             )
+
         # 2) rewrite
+        t_rewrite = time.perf_counter()
         rr = self.rewriter.rewrite(
             user_query=query_text,
             snapshot=snapshot,
             rewrite_model=rewrite_model,
         )
-        final_query = rr.rewritten.strip() or query_text
+        rewrite_dur = time.perf_counter() - t_rewrite
+        logger.info(f"[Timer] Query Rewrite (Wrapper): {rewrite_dur:.3f}s")
 
+        final_query = rr.rewritten.strip() or query_text
         logger.info(f"[RAGService] rewritten_query='{final_query}' from '{query_text}'")
 
+        # 3) vector search（search() 內部也會印細節）
+        t_search = time.perf_counter()
         hits = self.search(
             bot_uuid=bot_uuid,
             query_text=final_query,
             top_k=top_k,
             score_threshold=score_threshold,
         )
+        search_dur = time.perf_counter() - t_search
+        logger.info(
+            f"[Timer] Vector Search (Wrapper): {search_dur:.3f}s | Hits: {len(hits)}"
+        )
+
+        total = time.perf_counter() - t0
+        logger.info(f"[Timer] SearchHistoryAware Total: {total:.3f}s")
+
         return final_query, hits
 
     # =====================
@@ -395,34 +435,31 @@ class RAGService:
 
         system = (
             f"{no_think_prefix}"
-            "你是一位專業的客服知識庫助理，請嚴格遵守以下規則：\n"
-            "1. 必須根據提供的[知識片段]回覆，並確保回覆能直接解答使用者的問題。\n"
-            "2. 當使用者使用第一人稱（如「我」、「我的」）提問，而知識片段提供的是通用性資訊時，請自然地將通用資訊套用到使用者問題中。\n"
-            "3. 回答時，請優先聚焦在與問題最相關的知識片段，與問題不相關的知識片段則應忽略。\n"
-            "4. 如果知識片段沒有提供明確答案，但有相關條件或方向，請整理並提供給使用者。\n"
-            "5. 關鍵性的事實需逐字複製片段原文，確保答案的正確性。\n"
-            "6. 只要提供的知識片段不為『無』，就從知識片段中找尋相關知識整理作答\n"
-            "7. 回答必須使用清晰、簡潔的繁體中文，避免任何前言、結語或寒暄，並將回答字數限制在100字內。\n"
-            "8. 嚴禁輸出任何思考過程、推理文字或 XML 標籤（如 <think> ）\n"
-            "9. 歷史對話僅供參考語意（如解析『它』是指什麼）。若[知識片段]的內容與歷史對話內容不同，請務必以本次提供的[知識片段]為準來回答。\n"
-            "---"
+            "你是指南客服助理。請依據下方[知識庫]回答問題。\n"
+            "【核心原則】\n"
+            "1. 絕對忠實：答案必須來自[知識庫]，嚴禁使用外部知識。若無答案請直說。\n"
+            "2. 最高權重：若[知識庫]與歷史對話衝突，以[知識庫]為準。\n"
+            "3. 格式限制：繁體中文，100字內。直接回答，免寒暄，禁輸出思考標籤(<think>)。\n"
+            "4. 語氣轉換：將通用資訊轉化為針對使用者的回答(如處理第一人稱提問)。"
         )
 
         user = (
-            f"使用者原始問題：\n「{original_query}」\n\n"
-            f"參考用的補齊後問題（若與知識片段衝突請忽略）：\n「{rewritten_query}」\n\n"
-            "以下是與問題相關的Q&A知識：\n"
-            f"```\n{context_block}\n```\n\n"
-            "請以「使用者原始問題」為準，並優先依據上述知識片段回答。"
+            f"原始提問：{original_query}\n"
+            f"語意參照：{rewritten_query}\n\n"
+            f"[知識庫]：\n{context_block}\n\n"
+            "請依據[知識庫]回答原始提問。"
         )
 
         msgs: List[BaseMessage] = [SystemMessage(content=system)]
 
-        # only Human/AI history
         if history:
             for m in history:
-                if isinstance(m, HumanMessage) or isinstance(m, AIMessage):
+                if isinstance(m, (HumanMessage, AIMessage)):
                     msgs.append(m)
+
+        logger.info("[RAGService] prompt")
+        logger.info(system)
+        logger.info(user)
 
         msgs.append(HumanMessage(content=user))
         return msgs
@@ -437,7 +474,7 @@ class RAGService:
         return raw.strip()
 
     # =====================
-    # Generate with Memory (pluggable)
+    # Generate with Memory (Optimization A applied)
     # =====================
     def generate(
         self,
@@ -449,17 +486,41 @@ class RAGService:
         model_name: str,
         max_history_messages: int = DEFAULT_MAX_HISTORY_MESSAGES,
     ) -> str:
+        t0 = time.perf_counter()
+
         llm = self._get_llm(model_name)
         use_memory = bool(line_id)
 
         history: Optional[List[BaseMessage]] = None
         session_key: Optional[str] = None
 
+        # 1) memory load for generation history
+        #    IMPORTANT: avoid summary LLM here (Optimization A)
         if use_memory and line_id:
             session_key = self._build_session_key(bot_uuid, line_id)
-            snapshot = self.memory.load(session_key, max_messages=max_history_messages)
+
+            t_mem = time.perf_counter()
+            if hasattr(self.memory, "load_recent_only"):
+                snapshot = self.memory.load_recent_only(
+                    session_key, max_messages=max_history_messages
+                )
+                mem_dur = time.perf_counter() - t_mem
+                logger.info(
+                    f"[Timer] Generate Memory Load (RecentOnly): {mem_dur:.3f}s | Hist: {len(snapshot.recent_messages)}"
+                )
+            else:
+                snapshot = self.memory.load(
+                    session_key, max_messages=max_history_messages
+                )
+                mem_dur = time.perf_counter() - t_mem
+                logger.info(
+                    f"[Timer] Generate Memory Load: {mem_dur:.3f}s | Hist: {len(snapshot.recent_messages)}"
+                )
+
             history = snapshot.recent_messages
 
+        # 2) build prompt
+        t_prompt = time.perf_counter()
         messages = self._build_messages(
             original_query=original_query,
             rewritten_query=rewritten_query,
@@ -467,13 +528,23 @@ class RAGService:
             use_no_think=(model_name == "qwen3_local"),
             history=history,
         )
+        prompt_dur = time.perf_counter() - t_prompt
+        logger.info(
+            f"[Timer] Generate Build Prompt: {prompt_dur:.3f}s | Msgs: {len(messages)}"
+        )
 
+        # 3) invoke
+        t_inv = time.perf_counter()
         try:
             resp = llm.invoke(messages)
         except Exception as e:
             logger.exception(f"[RAGService] LLM invoke failed: {e}")
             return "系統目前無法產生回覆，請稍後再試。"
+        inv_dur = time.perf_counter() - t_inv
+        logger.info(f"[Timer] Answer Generation (LLM): {inv_dur:.3f}s")
 
+        # 4) parse output
+        t_parse = time.perf_counter()
         text = getattr(resp, "content", None) if hasattr(resp, "content") else None
         if not isinstance(text, str) or not text:
             text = getattr(resp, "text", None) if hasattr(resp, "text") else None
@@ -484,52 +555,17 @@ class RAGService:
             text = self._clean_hf_output(text)
 
         answer = text.strip()
+        parse_dur = time.perf_counter() - t_parse
+        logger.info(f"[Timer] Generate Parse Output: {parse_dur:.3f}s")
 
-        # Persist turn via pluggable memory
+        # 5) append turn
         if use_memory and session_key:
+            t_app = time.perf_counter()
             self.memory.append_turn(session_key, human=original_query, ai=answer)
+            app_dur = time.perf_counter() - t_app
+            logger.info(f"[Timer] Generate Append Turn: {app_dur:.3f}s")
+
+        total = time.perf_counter() - t0
+        logger.info(f"[Timer] Generate Total: {total:.3f}s")
 
         return answer
-
-    # =====================
-    # One-shot pipeline (search + rewrite + generate)
-    # =====================
-    def query(
-        self,
-        bot_uuid: UUID,
-        line_id: Optional[str],
-        question: str,
-        model_name: str = "gpt_5_mini",
-        top_k: int = DEFAULT_TOP_K,
-        score_threshold: Optional[float] = DEFAULT_SCORE_THRESHOLD,
-        history_model_name: Optional[str] = None,
-        rewrite_model: str = "gpt_5_mini",
-        history_rounds: int = DEFAULT_MAX_HISTORY_ROUNDS,
-    ) -> Dict[str, Any]:
-        rewritten_q, hits = self.search_history_aware(
-            bot_uuid=bot_uuid,
-            line_id=line_id,  # None -> single-turn
-            history_model_name=history_model_name or model_name,
-            query_text=question,
-            top_k=top_k,
-            score_threshold=score_threshold,
-            history_rounds=history_rounds,
-            rewrite_model=rewrite_model,
-        )
-
-        if not hits:
-            return {
-                "answer": "目前知識庫中沒有找到與此問題相關的資訊。",
-                "contexts": [],
-            }
-
-        answer = self.generate(
-            bot_uuid=bot_uuid,
-            line_id=line_id,  # None -> single-turn
-            original_query=question,
-            rewritten_query=rewritten_q,
-            contexts=hits,
-            model_name=model_name,
-        )
-
-        return {"answer": answer, "contexts": hits}

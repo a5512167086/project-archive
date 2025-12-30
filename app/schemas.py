@@ -14,7 +14,7 @@ class QueryRequest(BaseModel):
     bot_uuid: UUID
     line_id: Optional[str] = None
     query: str
-    top_k: int = 5
+    top_k: int = 3
     score_threshold: float = 0.3
     model: ModelName = Field(default="gpt_5_mini")
 
