@@ -9,7 +9,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 from app.logger import logger
 from app.services.memory.base import MemorySnapshot
-from app.services.memory.buffer import MongoBufferMemory
+from app.services.memory.buffer import BufferMemory
 
 try:
     from pymongo import MongoClient
@@ -17,7 +17,7 @@ except Exception:  # pragma: no cover
     MongoClient = None  # type: ignore
 
 
-class MongoSummaryMemory(MongoBufferMemory):
+class SummaryMemory(BufferMemory):
     """
     Summary is moved out of critical path:
     - load(): returns recent buffer + cached summary (no LLM)
@@ -67,12 +67,12 @@ class MongoSummaryMemory(MongoBufferMemory):
                 self._cache_col.create_index("session_key", unique=True)
                 self._cache_col.create_index("updated_at")
             except Exception as e:
-                logger.warning(f"[MongoSummaryMemory] summary cache init failed: {e}")
+                logger.warning(f"[SummaryMemory] summary cache init failed: {e}")
                 self._cache_enabled = False
                 self._cache_col = None
         else:
             logger.warning(
-                "[MongoSummaryMemory] pymongo not available; summary cache disabled."
+                "[SummaryMemory] pymongo not available; summary cache disabled."
             )
 
     # ---------------------

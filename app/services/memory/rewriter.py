@@ -10,7 +10,7 @@ from app.logger import logger
 from app.services.memory.base import MemorySnapshot, QueryRewriter, RewriteResult
 
 
-class HistoryQueryRewriter(QueryRewriter):
+class QueryRewriter(QueryRewriter):
     """
     Uses recent chat history (and optionally summary from snapshot) to rewrite
     the latest user query into a standalone question.

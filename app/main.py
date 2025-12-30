@@ -1,3 +1,4 @@
+# main.py
 import asyncio
 import time
 from contextlib import asynccontextmanager
@@ -17,25 +18,35 @@ from app.configs.config import (
     MONGODB_CHAT_COLLECTION,
     MONGODB_DB_NAME,
     MONGODB_URI,
+    QDRANT_COLLECTION,
+    QDRANT_URL,
 )
 from app.database import SessionDep
 from app.logger import logger
 from app.schemas import IngestRequest, QueryHit, QueryRequest, QueryResponse
 from app.services.knowledge_service import KnowledgeService
-from app.services.memory.summary import MongoSummaryMemory
+from app.services.llm_service import LLMService
+from app.services.memory.summary import SummaryMemory
+from app.services.prompt_service import PromptService
 from app.services.rag_service import RAGService
+from app.services.vector_service import VectorService
 
 
+# =========================
+# Lifespan: init singletons
+# =========================
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     device = 0 if torch.cuda.is_available() else -1
 
+    # 1) Embeddings (singleton)
     embedding_model = HuggingFaceEmbeddings(
         model_name=EMBEDDING_MODEL,
         model_kwargs={"device": device},
         cache_folder="../cache",
     )
 
+    # 2) Local HF chat model (optional; for qwen3_local)
     chat_pipeline = HuggingFacePipeline.from_model_id(
         task="text-generation",
         model_id=CHAT_MODEL,
@@ -45,23 +56,40 @@ async def lifespan(app: FastAPI):
     )
     chat_model = ChatHuggingFace(llm=chat_pipeline)
 
-    rag = RAGService(
+    # 3) Extracted services (singleton)
+    llm_service = LLMService(preloaded_hf_chat_model=chat_model)
+    prompt_service = PromptService(
+        max_contexts_for_prompt=RAGService.DEFAULT_MAX_CONTEXTS_FOR_PROMPT
+    )
+    vector_service = VectorService(
         embeddings=embedding_model,
-        preloaded_hf_chat_model=chat_model,
+        qdrant_url=QDRANT_URL,
+        collection_name=QDRANT_COLLECTION,
+        timeout=RAGService.DEFAULT_TIMEOUT,
         ensure_collection_and_indexes=True,
     )
 
-    # Memory: cache-only load + background summary update
-    rag.memory = MongoSummaryMemory(
+    # 4) RAG service (singleton)
+    rag = RAGService(
+        embeddings=embedding_model,
+        preloaded_hf_chat_model=chat_model,
+        llm_service=llm_service,
+        prompt_service=prompt_service,
+        vector_service=vector_service,
+        ensure_collection_and_indexes=False,  # vector_service 已處理過了，避免重複 ensure
+    )
+
+    # 5) Memory: cache-only load + background summary update
+    rag.memory = SummaryMemory(
         mongo_uri=MONGODB_URI,
         mongo_db_name=MONGODB_DB_NAME,
         mongo_collection=MONGODB_CHAT_COLLECTION,
-        get_llm=rag._get_llm,
+        get_llm=rag.llm_service.get_llm,  # 重要：用抽出後的 LLMService
         summary_model="gpt_5_mini",
         summary_trigger_threshold=6,
         max_summary_messages=30,
-        refresh_min_interval_sec=60,  # 1 分鐘內不重算
-        refresh_every_n_new_msgs=4,  # 新增>=4則 human/ai 才重算
+        refresh_min_interval_sec=60,
+        refresh_every_n_new_msgs=4,
     )
 
     app.state.rag_service = rag
@@ -75,14 +103,23 @@ async def lifespan(app: FastAPI):
 app = FastAPI(root_path="/easybot-rag-api", lifespan=lifespan)
 
 
+# =========================
+# Dependencies (copy/paste)
+# =========================
 def get_rag_service(request: Request) -> RAGService:
-    return request.app.state.rag_service
+    rag = request.app.state.rag_service
+    if rag is None:
+        raise RuntimeError("RAG service not initialized.")
+    return rag
 
 
 def get_knowledge_service(session: SessionDep) -> KnowledgeService:
     return KnowledgeService(session)
 
 
+# =========================
+# Routers in MAIN
+# =========================
 @app.post("/ingest")
 def ingest(
     req: IngestRequest,
@@ -90,11 +127,13 @@ def ingest(
     rag: Annotated[RAGService, Depends(get_rag_service)],
 ):
     sync_results = knowledge_service.sync_knowledge_vectors(req.bot_uuid, rag)
+
+    # collection 現在在 vector_service 內
     return {
         "bot_uuid": str(req.bot_uuid),
         "upserted": sync_results["upserted"],
         "deleted": sync_results["deleted"],
-        "collection": rag.collection,
+        "collection": rag.vector_service.collection,
     }
 
 
@@ -106,20 +145,25 @@ async def query(
 ):
     start_total = time.perf_counter()
 
-    # 1) Search + Rewrite
-    start_search = time.perf_counter()
-    final_query, hits = rag.search_history_aware(
+    # 把整個 RAG 用例放到 thread，避免阻塞 event loop（search + generate 都會阻塞）
+    start_answer = time.perf_counter()
+    result = await asyncio.to_thread(
+        rag.answer,
         bot_uuid=req.bot_uuid,
         line_id=req.line_id,
         query_text=req.query,
+        model_name=req.model,
         top_k=req.top_k,
         score_threshold=req.score_threshold,
         history_rounds=5,
         rewrite_model="gpt_5_mini",
+        max_history_messages=rag.DEFAULT_MAX_HISTORY_MESSAGES,
     )
-    search_duration = time.perf_counter() - start_search
+    answer_duration = time.perf_counter() - start_answer
+    hits = result.get("hits", []) or []
+    answer = result.get("answer", "") or ""
     logger.info(
-        f"[Timer] 1. Search & Rewrite: {search_duration:.3f}s | Hits: {len(hits)}"
+        f"[Timer] 1. Answer(use-case): {answer_duration:.3f}s | Hits: {len(hits)}"
     )
 
     if not hits:
@@ -131,24 +175,10 @@ async def query(
             hits=[],
         )
 
-    # 2) Generate
-    start_gen = time.perf_counter()
-    answer = await asyncio.to_thread(
-        rag.generate,
-        req.bot_uuid,
-        req.line_id,
-        req.query,  # original_query
-        final_query,  # rewritten_query
-        hits,
-        req.model,
-    )
-    gen_duration = time.perf_counter() - start_gen
-    logger.info(f"[Timer] 2. Generation: {gen_duration:.3f}s")
-
-    # 3) Background summary update (NOT in critical path)
-    if req.line_id:
+    # Background summary update (NOT in critical path)
+    if req.line_id and hasattr(rag.memory, "maybe_update_summary"):
         session_key = f"{req.bot_uuid}:{req.line_id}"
-        mem = cast(MongoSummaryMemory, rag.memory)
+        mem = cast(SummaryMemory, rag.memory)
         background_tasks.add_task(mem.maybe_update_summary, session_key)
 
     total_duration = time.perf_counter() - start_total

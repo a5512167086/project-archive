@@ -9,7 +9,7 @@ from langchain_mongodb.chat_message_histories import MongoDBChatMessageHistory
 from app.services.memory.base import MemoryModule, MemorySnapshot
 
 
-class MongoBufferMemory(MemoryModule):
+class BufferMemory(MemoryModule):
     def __init__(
         self, mongo_uri: str, mongo_db_name: str, mongo_collection: str
     ) -> None:
