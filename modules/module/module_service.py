@@ -44,3 +44,15 @@ class ModuleService:
             self.command.insert_module_setting(
                 setting_class_id, module_name, is_enabled
             )
+
+    def check_module_is_enabled(self, bot_class_id: int, module_name: str):
+        setting_class_id = self.validate_setting_class(bot_class_id)
+        module = self.query.get_single_module_setting(setting_class_id, module_name)
+
+        if not module or not module.is_enabled:
+            raise GlobalErrorException(
+                error_code=ErrorCode.MODULE_NOT_ENABLED,
+                error_message="Module is not enabled for the given bot",
+            )
+
+        return True

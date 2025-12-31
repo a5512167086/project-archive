@@ -7,7 +7,7 @@ from modules.bot.bot_service import BotService
 from modules.module.module_schema import InsertModuleSettingRequest, Module
 from modules.module.module_service import ModuleService
 from shared.clients.database import SessionDep
-from shared.dependencies import get_current_user
+from shared.dependencies import BotAccessController, get_bot_access
 
 
 def get_bot_service(session: SessionDep) -> BotService:
@@ -27,21 +27,18 @@ module_router = APIRouter(prefix="/modules", tags=["modules"])
 def get_module_settings(
     bot_uuid: UUID,
     module_service: Annotated[ModuleService, Depends(get_module_service)],
-    bot_service: Annotated[BotService, Depends(get_bot_service)],
+    access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    bot = bot_service.validate_line_bot_exists(bot_uuid)
+    bot = access.verify(bot_uuid=bot_uuid)
     return module_service.get_all_module_settings(bot)
 
 
 @module_router.post("")
 def add_module_setting(
     body: InsertModuleSettingRequest,
-    current_user: Annotated[dict, Depends(get_current_user)],
     module_service: Annotated[ModuleService, Depends(get_module_service)],
-    bot_service: Annotated[BotService, Depends(get_bot_service)],
+    access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    user_id = current_user["user_id"]
-    bot = bot_service.validate_line_bot_exists(body.bot_uuid)
-    bot_service.validate_bot_ownership(user_id, body.bot_uuid)
+    bot = access.verify(bot_uuid=body.bot_uuid, owner_only=True)
     module_service.insert_new_module_setting(bot, body.module_name, body.is_enabled)
     module_service.session.commit()

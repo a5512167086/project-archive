@@ -1,7 +1,7 @@
 from typing import Annotated, List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, Request
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from linebot.v3.messaging import Configuration
 
 from modules.bot.bot_model import BotListView
@@ -20,9 +20,12 @@ from modules.ecomm.ecomm_schema import (
     UpdateShippingSettingRequest,
 )
 from modules.ecomm.ecomm_service import EcommService
+from modules.module.module_service import ModuleService
 from shared.clients.database import SessionDep
+from shared.constants.common import ModuleType
 from shared.constants.config import BACKEND_URL
-from shared.dependencies import get_current_user
+from shared.dependencies import BotAccessController, get_bot_access, get_current_user
+from shared.exception import GlobalErrorException
 
 
 def get_bot_service(session: SessionDep) -> BotService:
@@ -35,6 +38,11 @@ def get_ecomm_service(session: SessionDep) -> EcommService:
     return EcommService(session)
 
 
+def get_module_service(session: SessionDep) -> ModuleService:
+    """依賴注入 ModuleService"""
+    return ModuleService(session)
+
+
 bot_router = APIRouter(prefix="/bots", tags=["bots"])
 
 
@@ -43,14 +51,18 @@ def get_bots(
     current_user: Annotated[dict, Depends(get_current_user)],
     bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
+    # 查詢用戶列表：不需要 access controller (沒有 bot_uuid)
     user_id = current_user["user_id"]
     return bot_service.get_all_bots(user_id)
 
 
 @bot_router.get("/{bot_uuid}", response_model=BotWithPublicCredential)
 def get_bot_credential_by_uuid(
-    bot_uuid: UUID, bot_service: Annotated[BotService, Depends(get_bot_service)]
+    bot_uuid: UUID,
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
+    access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
+    access.verify(bot_uuid)
     return bot_service.get_bot_credential(bot_uuid)
 
 
@@ -62,9 +74,12 @@ async def create_bot(
     bot_service: Annotated[BotService, Depends(get_bot_service)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
 ):
+    # 建立機器人：不需要 access controller (機器人尚未存在)
     user_id = current_user["user_id"]
     bot_uuid = bot_service.create_new_bot(user_id, bot_body)
     base_url = BACKEND_URL or str(request.base_url).rstrip("/")
+
+    # 初始化運費設定
     init_shipping_option = UpdateShippingSettingRequest(
         bot_uuid=bot_uuid,
         shipping_options=[
@@ -80,33 +95,42 @@ async def create_bot(
             ),
         ],
     )
+
+    # 這裡因為剛建立，可能需要根據 EcommService 的實作確認傳入的是 uuid 還是 id
+    # 假設 ecomm_service 內部能處理 uuid
     await ecomm_service.update_shipping_setting(bot_uuid, init_shipping_option)
     bot_service.session.commit()
+
     return {"webhook_url": f"{base_url}/bots/webhook/{bot_uuid}"}
 
 
 @bot_router.delete("/{bot_uuid}", tags=["bots"])
 def delete_bot(
-    current_user: Annotated[dict, Depends(get_current_user)],
     bot_uuid: UUID,
     bot_service: Annotated[BotService, Depends(get_bot_service)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    user_id = current_user["user_id"]
-    bot_service.delete_current_bot(user_id, bot_uuid)
+    # 刪除機器人：僅限 Owner
+    bot = access.verify(bot_uuid, owner_only=True)
+
+    # access 已經確保是 Owner，這裡傳入 user_id 進行刪除
+    bot_service.delete_current_bot(access.user_id, bot, bot_uuid)
     ecomm_service.delete_all_shipping_settings(bot_uuid)
     bot_service.session.commit()
 
 
 @bot_router.patch("/{bot_uuid}", tags=["bots"])
 def update_bot(
-    current_user: Annotated[dict, Depends(get_current_user)],
     bot_uuid: UUID,
     bot_body: UpdateBotRequest,
     bot_service: Annotated[BotService, Depends(get_bot_service)],
+    access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    user_id = current_user["user_id"]
-    bot_service.update_current_bot(user_id, bot_uuid, bot_body)
+    # 更新機器人資訊：僅限 Owner
+    access.verify(bot_uuid, owner_only=True)
+
+    bot_service.update_current_bot(access.user_id, bot_uuid, bot_body)
     bot_service.session.commit()
 
 
@@ -116,11 +140,26 @@ def line_webhook(
     bot_body: BotBodies,
     bot_uuid: str,
     bot_service: Annotated[BotService, Depends(get_bot_service)],
+    module_service: Annotated[ModuleService, Depends(get_module_service)],
 ):
-    credentials = bot_service.get_bot_credential(bot_uuid)
+    try:
+        bot = bot_service.validate_line_bot_exists(UUID(bot_uuid))
+    except Exception:
+        raise HTTPException(status_code=404, detail="Bot not found")
+
+    try:
+        module_service.check_module_is_enabled(bot.class_id, ModuleType.Knowledge)
+    except GlobalErrorException:
+        print(f"Bot {bot_uuid}: Knowledge module disabled, ignoring webhook.")
+        return {"message": "Knowledge module is disabled, webhook ignored."}
+
+    credentials = bot_service.get_bot_credential(UUID(bot_uuid))
+
     x_line_signature = bot_header.x_line_signature
     bot_service.check_x_line_signature(x_line_signature)
+
     configuration = Configuration(access_token=credentials.channel_access_token)
+
     custom_webhook(
         credentials.channel_secret,
         bot_uuid,

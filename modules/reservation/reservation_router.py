@@ -3,7 +3,6 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
-from modules.bot.bot_service import BotService
 from modules.reservation.reservation_schema import (
     DailyAvailableSlots,
     ReservationCreate,
@@ -17,26 +16,13 @@ from modules.reservation.reservation_schema import (
 )
 from modules.reservation.reservation_service import ReservationService
 from shared.clients.database import SessionDep
-from shared.constants.error_code import ErrorCode
-from shared.dependencies import get_current_user
-from shared.exception import GlobalErrorException
-from shared.queries.group_query import is_user_in_group
-from shared.services.group_service import GroupService
+from shared.constants.common import ModuleType
+from shared.dependencies import BotAccessController, get_bot_access, get_current_user
 
 
 def get_reservation_service(session: SessionDep) -> ReservationService:
     """依賴注入 ReservationService"""
     return ReservationService(session)
-
-
-def get_bot_service(session: SessionDep) -> BotService:
-    """依賴注入 BotService"""
-    return BotService(session)
-
-
-def get_group_service(session: SessionDep) -> GroupService:
-    """依賴注入 GroupService"""
-    return GroupService(session)
 
 
 reservation_router = APIRouter(prefix="/reservations", tags=["reservations"])
@@ -49,23 +35,25 @@ def list_services(
     reservation_service: Annotated[
         ReservationService, Depends(get_reservation_service)
     ],
-    bot_service: Annotated[BotService, Depends(get_bot_service)],
+    access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    bot = bot_service.validate_line_bot_exists(bot_uuid)
+    # [公開/成員] 查看服務列表：User 可看
+    bot = access.verify(bot_uuid, module_name=ModuleType.Reservation, owner_only=False)
     return reservation_service.get_services_by_bot_class_id(bot.class_id)
 
 
 @service_router.post("")
 def create_service(
     service: ServiceCreate,
-    current_user: Annotated[dict, Depends(get_current_user)],
     reservation_service: Annotated[
         ReservationService, Depends(get_reservation_service)
     ],
-    bot_service: Annotated[BotService, Depends(get_bot_service)],
+    access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    user_id = current_user["user_id"]
-    bot = bot_service.validate_bot_ownership(user_id, service.bot_uuid)
+    # [管理] 建立服務：僅限 Owner
+    bot = access.verify(
+        service.bot_uuid, module_name=ModuleType.Reservation, owner_only=True
+    )
     reservation_service.insert_new_service(service, bot.class_id)
     reservation_service.session.commit()
 
@@ -73,14 +61,15 @@ def create_service(
 @service_router.delete("")
 def delete_service(
     delete_service: ServiceDelete,
-    current_user: Annotated[dict, Depends(get_current_user)],
     reservation_service: Annotated[
         ReservationService, Depends(get_reservation_service)
     ],
-    bot_service: Annotated[BotService, Depends(get_bot_service)],
+    access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    user_id = current_user["user_id"]
-    bot = bot_service.validate_bot_ownership(user_id, delete_service.bot_uuid)
+    # [管理] 刪除服務：僅限 Owner
+    bot = access.verify(
+        delete_service.bot_uuid, module_name=ModuleType.Reservation, owner_only=True
+    )
     reservation_service.delete_service_by_service_id(
         bot.class_id,
         delete_service.delete_service_list,
@@ -91,14 +80,15 @@ def delete_service(
 @service_router.patch("")
 def update_service(
     service_patch: ServicePatch,
-    current_user: Annotated[dict, Depends(get_current_user)],
     reservation_service: Annotated[
         ReservationService, Depends(get_reservation_service)
     ],
-    bot_service: Annotated[BotService, Depends(get_bot_service)],
+    access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    user_id = current_user["user_id"]
-    bot = bot_service.validate_bot_ownership(user_id, service_patch.bot_uuid)
+    # [管理] 更新服務：僅限 Owner
+    bot = access.verify(
+        service_patch.bot_uuid, module_name=ModuleType.Reservation, owner_only=True
+    )
     reservation_service.update_service_by_service_id(service_patch, bot.class_id)
     reservation_service.session.commit()
 
@@ -112,6 +102,7 @@ def get_available_times(
         ReservationService, Depends(get_reservation_service)
     ],
 ):
+    # 此接口僅依賴 service_id，通常為公開資訊，故維持原樣
     return reservation_service.get_available_times_for_service(service_id)
 
 
@@ -122,18 +113,13 @@ def create_reservation(
     reservation_service: Annotated[
         ReservationService, Depends(get_reservation_service)
     ],
-    bot_service: Annotated[BotService, Depends(get_bot_service)],
-    group_service: Annotated[GroupService, Depends(get_group_service)],
+    access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
+    # [成員] 建立預約：User 可用
+    bot = access.verify(
+        reservation.bot_uuid, module_name=ModuleType.Reservation, owner_only=False
+    )
     user_id = current_user["user_id"]
-    bot = bot_service.validate_line_bot_exists(reservation.bot_uuid)
-    bot_group = group_service.validate_group_exist_in_bot(bot.class_id, "Users")
-
-    if not is_user_in_group(reservation_service.session, bot_group.group_id, user_id):
-        raise GlobalErrorException(
-            error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
-            error_message="User is not a member of this bot's group.",
-        )
 
     reservation_detail = reservation_service.create_user_reservation(
         user_id, reservation, bot.class_id
@@ -159,15 +145,16 @@ def create_reservation(
 def delete_reservation(
     reservation_id: UUID,
     bot_uuid: UUID,
-    current_user: Annotated[dict, Depends(get_current_user)],
     reservation_service: Annotated[
         ReservationService, Depends(get_reservation_service)
     ],
-    bot_service: Annotated[BotService, Depends(get_bot_service)],
+    access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
     """Delete a reservation by reservation ID"""
-    user_id = current_user["user_id"]
-    bot_service.validate_bot_ownership(user_id, bot_uuid)
+    # [管理] 刪除預約：僅限 Owner
+    # 這裡的 bot_uuid 通常來自 query param
+    access.verify(bot_uuid, module_name=ModuleType.Reservation, owner_only=True)
+
     reservation_service.delete_user_reservation(reservation_id)
     reservation_service.session.commit()
 
@@ -181,18 +168,13 @@ def get_user_reservations_in_bot(
     reservation_service: Annotated[
         ReservationService, Depends(get_reservation_service)
     ],
-    bot_service: Annotated[BotService, Depends(get_bot_service)],
-    group_service: Annotated[GroupService, Depends(get_group_service)],
+    access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
     """Get user's reservations in a specific bot"""
+    # [成員] 查詢自己的預約：User 可用
+    bot = access.verify(bot_uuid, module_name=ModuleType.Reservation, owner_only=False)
     user_id = current_user["user_id"]
-    bot = bot_service.validate_line_bot_exists(bot_uuid)
-    bot_group = group_service.validate_group_exist_in_bot(bot.class_id, "Users")
-    if not is_user_in_group(reservation_service.session, bot_group.group_id, user_id):
-        raise GlobalErrorException(
-            error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
-            error_message="User is not a member of this bot's group.",
-        )
+
     reservations = reservation_service.get_user_reservations_in_bot_list(
         bot.class_id, user_id
     )
@@ -202,15 +184,14 @@ def get_user_reservations_in_bot(
 @reservation_router.get("/{bot_uuid}", response_model=List[ReservationListResponse])
 def get_bot_reservations(
     bot_uuid: UUID,
-    current_user: Annotated[dict, Depends(get_current_user)],
     reservation_service: Annotated[
         ReservationService, Depends(get_reservation_service)
     ],
-    bot_service: Annotated[BotService, Depends(get_bot_service)],
+    access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
     """Get all reservations for a bot (bot owner only)"""
-    user_id = current_user["user_id"]
-    bot = bot_service.validate_bot_ownership(user_id, bot_uuid)
+    # [管理] 查詢所有預約：僅限 Owner
+    bot = access.verify(bot_uuid, module_name=ModuleType.Reservation, owner_only=True)
     reservations = reservation_service.get_bot_reservations_list(bot.class_id)
     return reservations
 
@@ -218,15 +199,17 @@ def get_bot_reservations(
 @reservation_router.patch("", response_model=ReservationResponse)
 def update_reservation(
     reservation_patch: ReservationPatch,
-    current_user: Annotated[dict, Depends(get_current_user)],
     reservation_service: Annotated[
         ReservationService, Depends(get_reservation_service)
     ],
-    bot_service: Annotated[BotService, Depends(get_bot_service)],
+    access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
     """Update a reservation"""
-    user_id = current_user["user_id"]
-    bot_service.validate_bot_ownership(user_id, reservation_patch.bot_uuid)
+    # [管理] 更新預約狀態：僅限 Owner
+    access.verify(
+        reservation_patch.bot_uuid, module_name=ModuleType.Reservation, owner_only=True
+    )
+
     updated_reservation = reservation_service.update_reservation_by_owner(
         reservation_patch
     )

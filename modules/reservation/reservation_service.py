@@ -31,9 +31,7 @@ class ReservationService:
         self.query = ReservationQuery(session)
 
     def validate_service_class(self, bot_class_id: int) -> int:
-        service_class_id = self.query.get_service_class_id_by_bot_class_id(
-            bot_class_id
-        )
+        service_class_id = self.query.get_service_class_id_by_bot_class_id(bot_class_id)
         if not service_class_id:
             raise GlobalErrorException(
                 error_code=ErrorCode.SERVICE_CLASS_NOT_FOUND,
@@ -108,9 +106,7 @@ class ReservationService:
         self, user_id: UUID, reservation: ReservationCreate, bot_class_id: int
     ):
         service_class_id = self.validate_service_class(bot_class_id)
-        service = self.query.get_service_by_id(
-            service_class_id, reservation.service_id
-        )
+        service = self.query.get_service_by_id(service_class_id, reservation.service_id)
 
         if not service:
             raise GlobalErrorException(
@@ -421,9 +417,7 @@ class ReservationService:
     def update_reservation_by_owner(self, reservation_patch: ReservationPatch):
         """Update reservation (reservation owner or bot owner can update)"""
         # 檢查 reservation 是否存在
-        reservation = self.query.get_reservation_by_id(
-            reservation_patch.reservation_id
-        )
+        reservation = self.query.get_reservation_by_id(reservation_patch.reservation_id)
         if not reservation:
             raise GlobalErrorException(
                 error_code=ErrorCode.RESERVATION_NOT_FOUND,

@@ -2,7 +2,10 @@ from sqlmodel import Session
 
 from shared.constants.error_code import ErrorCode
 from shared.exception import GlobalErrorException
-from shared.queries.group_query import get_group_by_bot_class_id_and_group_name
+from shared.queries.group_query import (
+    get_group_by_bot_class_id_and_group_name,
+    is_user_in_group,
+)
 
 
 class GroupService:
@@ -20,3 +23,12 @@ class GroupService:
             )
 
         return group
+
+    def validate_user_in_group(self, group_id: int, user_id: str) -> bool:
+        if not is_user_in_group(self.session, group_id, user_id):
+            raise GlobalErrorException(
+                error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
+                error_message="User is not a member of this bot's group.",
+            )
+
+        return True

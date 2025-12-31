@@ -52,3 +52,9 @@ class SyncStatus(str, Enum):
     RUNNING = "RUNNING"
     PENDING = "PENDING"
     FAILED = "FAILED"
+
+
+class ModuleType(str, Enum):
+    FAQ = "FAQ"
+    Reservation = "Reservation"
+    Ecomm = "Ecomm"

@@ -1,5 +1,6 @@
-from sqlmodel import Session, select
 from uuid import UUID
+
+from sqlmodel import Session, select
 
 from shared.models.group_member_model import GroupMember
 from shared.models.group_model import Group, GroupPermissionView

@@ -39,8 +39,6 @@ from modules.ecomm.ecomm_schema import (
 from shared.constants.config import BACKEND_URL
 from shared.constants.error_code import ErrorCode
 from shared.exception import GlobalErrorException
-from shared.models.group_model import Group
-from shared.queries.group_query import is_user_in_group
 from shared.services.minio_service import (
     delete_product_image,
     upload_product_images,
@@ -482,13 +480,8 @@ class EcommService:
         return orders
 
     def get_all_user_orders(
-        self, bot: BotListWithCredentialView, bot_group: Group, user_id: UUID
+        self, bot: BotListWithCredentialView, user_id: UUID
     ) -> List[OrderResponse]:
-        if not is_user_in_group(self.session, bot_group.group_id, user_id):
-            raise GlobalErrorException(
-                error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
-                error_message="User is not a member of this bot's group.",
-            )
         order_class_id = self.validate_order_class(bot.class_id)
         orders_data = self.query.get_all_user_orders_view(user_id, order_class_id)
         orders = []
@@ -514,16 +507,9 @@ class EcommService:
     async def insert_order(
         self,
         bot: BotListWithCredentialView,
-        bot_group: Group,
         body: InsertOrderRequest,
         user_id: str,
     ):
-        if not is_user_in_group(self.session, bot_group.group_id, user_id):
-            raise GlobalErrorException(
-                error_code=ErrorCode.USER_NOT_IN_BOT_GROUP,
-                error_message="User is not a member of this bot's group.",
-            )
-
         order_class_id = self.validate_order_class(bot.class_id)
         shipping_setting = await self.query.get_shipping_setting_by_bot_uuid(
             str(body.bot_uuid)
