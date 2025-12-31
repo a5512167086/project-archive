@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CustomLoader } from '@/components/CustomLoader'
 import { useTranslation } from 'react-i18next'
@@ -12,8 +12,15 @@ import {
   useOauthBindUserMutation,
   useOauthLoginUserMutation
 } from '@/store/apis/userApi'
-import { useAppSelector } from '@/utils/hook'
+import { useAppDispatch, useAppSelector } from '@/utils/hook'
 import { ERROR_CODE_MESSAGE_MAPPING } from '@/configs/common'
+import { setAuthenticated } from '@/store/modules/userSlice'
+import { clearUserToken } from '@/utils/helper'
+
+type CustomState = {
+  provider: OAuthProvider
+  action: 'login' | 'bind'
+}
 
 const oauthCallbackContent = {
   loading: 'common.loading',
@@ -23,16 +30,14 @@ const oauthCallbackContent = {
   oauthExistHint: 'error.oauth_exist_hint'
 }
 
-type CustomState = {
-  provider: OAuthProvider
-  action: 'login' | 'bind'
-}
-
 const OAuthCallbackPage = () => {
-  let isRequest = false
+  const requestOnceRef = useRef(false)
+
+  const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { errorCode, isAuthenticated } = useAppSelector((state) => state.user)
   const { t } = useTranslation()
+
   const [oauthLogin] = useOauthLoginUserMutation()
   const [oauthBind] = useOauthBindUserMutation()
   const [getUser] = useLazyGetUserMeQuery()
@@ -43,54 +48,60 @@ const OAuthCallbackPage = () => {
 
   const handleOAuthCallback = async () => {
     const urlParams = new URLSearchParams(window.location.search)
-    const state = urlParams.get('state')
-    if (!state) {
-      navigate(PAGE_PATHS.SIGN_IN)
+    const stateStr = urlParams.get('state')
+    const code = urlParams.get('code')
+    const error = urlParams.get('error')
+
+    if (error || !code || !stateStr) {
+      setTimeout(() => navigate(PAGE_PATHS.SIGN_IN), 2000)
       return
     }
 
-    const { provider, action } = JSON.parse(state) as unknown as CustomState
-    const code = urlParams.get('code')
-    const error = urlParams.get('error')
-    if (error || !code) {
-      setTimeout(() => {
-        navigate(PAGE_PATHS.SIGN_IN)
-      }, 5000)
+    let parsed: CustomState
+    try {
+      parsed = JSON.parse(stateStr) as CustomState
+    } catch {
+      // 如果你的 state 有做 encodeURIComponent，請改成 JSON.parse(decodeURIComponent(stateStr))
+      // parsed = JSON.parse(decodeURIComponent(stateStr)) as CustomState
+      setTimeout(() => navigate(PAGE_PATHS.SIGN_IN), 2000)
       return
     }
-    if (action === 'login') {
-      await oauthLogin({ code, provider: provider as OAuthProvider })
-        .unwrap()
-        .then((payload) => {
-          localStorage.setItem('access_token', payload.access_token)
-          localStorage.setItem('refresh_token', payload.refresh_token)
-          getUser().then(() => {
-            navigate(PAGE_PATHS.BOT_LIST)
-          })
-        })
-        .catch(() => {
-          setTimeout(() => {
-            navigate(PAGE_PATHS.SIGN_IN)
-          }, 5000)
-        })
-    } else if (action === 'bind') {
-      await oauthBind({
-        code,
-        provider: provider as OAuthProvider,
-        action: 'bind'
-      })
-        .unwrap()
-        .finally(() => {
-          navigate(PAGE_PATHS.USER_SETTING)
-        })
+
+    const { provider, action } = parsed
+
+    try {
+      if (action === 'login') {
+        const payload = await oauthLogin({ code, provider }).unwrap()
+
+        // OAuth 登入通常視為 remember：直接存 localStorage
+        localStorage.setItem('access_token', payload.access_token)
+        localStorage.setItem('refresh_token', payload.refresh_token)
+
+        // 確認 token 已寫入後再打 me
+        await getUser().unwrap()
+
+        dispatch(setAuthenticated(true))
+        navigate(PAGE_PATHS.BOT_LIST)
+        return
+      }
+
+      if (action === 'bind') {
+        await oauthBind({ code, provider, action: 'bind' }).unwrap()
+        navigate(PAGE_PATHS.USER_SETTING)
+        return
+      }
+    } catch {
+      // 任何一步失敗：清 token，回登入
+      dispatch(setAuthenticated(false))
+      clearUserToken()
+      setTimeout(() => navigate(PAGE_PATHS.SIGN_IN), 2000)
     }
   }
 
   useEffect(() => {
-    if (!isRequest) {
-      handleOAuthCallback()
-    }
-    isRequest = true
+    if (requestOnceRef.current) return
+    requestOnceRef.current = true
+    handleOAuthCallback()
   }, [])
 
   return (
@@ -98,6 +109,7 @@ const OAuthCallbackPage = () => {
       {!errorCode && (
         <CustomLoader size="6rem" text={t(oauthCallbackContent.loading)} />
       )}
+
       {errorCode && !isAuthenticated && (
         <Paper
           elevation={3}
@@ -109,15 +121,11 @@ const OAuthCallbackPage = () => {
             backgroundColor: 'background.paper'
           }}
         >
-          <ErrorIcon
-            sx={{
-              fontSize: '3.5rem',
-              marginBottom: '15px'
-            }}
-          />
+          <ErrorIcon sx={{ fontSize: '3.5rem', marginBottom: '15px' }} />
           <Typography variant="h4" component="h1" sx={{ marginBottom: '15px' }}>
             {t(oauthCallbackContent.failedTitle)}
           </Typography>
+
           <Typography
             variant="body1"
             align="center"
@@ -136,6 +144,7 @@ const OAuthCallbackPage = () => {
             <br />
             {t(oauthCallbackContent.backToLoginHint)}
           </Typography>
+
           <Button
             fullWidth
             variant="contained"
