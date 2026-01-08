@@ -60,9 +60,7 @@ def get_bots(
 def get_bot_credential_by_uuid(
     bot_uuid: UUID,
     bot_service: Annotated[BotService, Depends(get_bot_service)],
-    access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    access.verify(bot_uuid)
     return bot_service.get_bot_credential(bot_uuid)
 
 
@@ -148,7 +146,7 @@ def line_webhook(
         raise HTTPException(status_code=404, detail="Bot not found")
 
     try:
-        module_service.check_module_is_enabled(bot.class_id, ModuleType.Knowledge)
+        module_service.check_module_is_enabled(bot.class_id, ModuleType.FAQ)
     except GlobalErrorException:
         print(f"Bot {bot_uuid}: Knowledge module disabled, ignoring webhook.")
         return {"message": "Knowledge module is disabled, webhook ignored."}
