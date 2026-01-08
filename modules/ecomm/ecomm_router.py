@@ -65,7 +65,7 @@ async def get_shipping_settings(
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
     # 查看設定：User/Owner 皆可
-    bot = access.verify(bot_uuid, module_name=ModuleType.Ecomm, owner_only=False)
+    bot = access.verify(bot_uuid, owner_only=False)
     return await ecomm_service.get_shipping_setting(bot)
 
 
@@ -100,7 +100,7 @@ def list_brands(
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
     # 列表：User/Owner 皆可
-    bot = access.verify(bot_uuid, module_name=ModuleType.Ecomm, owner_only=False)
+    bot = access.verify(bot_uuid, owner_only=False)
     return ecomm_service.get_all_brands(bot)
 
 
@@ -151,7 +151,7 @@ def list_categories(
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
     # 列表：User/Owner 皆可
-    bot = access.verify(bot_uuid, module_name=ModuleType.Ecomm, owner_only=False)
+    bot = access.verify(bot_uuid, owner_only=False)
     category_list, category_class_id = ecomm_service.get_all_categories(bot)
     return ecomm_service.get_nested_categories(category_class_id, category_list)
 
@@ -207,7 +207,7 @@ def list_products(
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
     # 列表：User/Owner 皆可
-    bot = access.verify(bot_uuid, module_name=ModuleType.Ecomm, owner_only=False)
+    bot = access.verify(bot_uuid, owner_only=False)
     return ecomm_service.get_all_products(bot)
 
 
@@ -450,7 +450,7 @@ def list_user_orders(
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
     # 查詢個人訂單：User 可用
-    bot = access.verify(bot_uuid, module_name=ModuleType.Ecomm, owner_only=False)
+    bot = access.verify(bot_uuid, owner_only=False)
     user_id = current_user["user_id"]
 
     return ecomm_service.get_all_user_orders(bot, user_id)

@@ -70,9 +70,8 @@ class JWTValidator:
                 )
 
             user_id = payload.get("sub")
-            email = payload.get("email")
 
-            if not user_id or not email:
+            if not user_id:
                 raise GlobalErrorException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     error_code=ErrorCode.TOKEN_PAYLOAD_INVALID,

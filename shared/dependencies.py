@@ -75,7 +75,7 @@ class BotAccessController:
         if module_name is not None:
             self.module_service.check_module_is_enabled(bot.class_id, module_name)
 
-        return bot, bot_group
+        return bot
 
 
 def get_bot_access(

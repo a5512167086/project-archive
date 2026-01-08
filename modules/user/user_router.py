@@ -19,7 +19,7 @@ from modules.user.user_schema import (
 )
 from modules.user.user_service import UserService
 from shared.clients.database import SessionDep
-from shared.dependencies import BotAccessController, get_bot_access, get_current_user
+from shared.dependencies import get_current_user
 from shared.services.group_service import GroupService
 
 
@@ -139,9 +139,11 @@ async def change_user_password(
 async def user_customer_login(
     body: CustomerLoginRequest,
     user_service: Annotated[UserService, Depends(get_user_service)],
-    access: Annotated[BotAccessController, Depends(get_bot_access)],
+    bot_service: Annotated[BotService, Depends(get_bot_service)],
+    group_service: Annotated[GroupService, Depends(get_group_service)],
 ):
-    bot, bot_group = access.verify(bot_uuid=body.bot_id)
+    bot = bot_service.validate_line_bot_exists(body.bot_id)
+    bot_group = group_service.validate_group_exist_in_bot(bot.class_id, "Users")
     token_response = user_service.customer_login(bot_group.group_id, body, bot)
     user_service.session.commit()
     return token_response

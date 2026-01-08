@@ -26,6 +26,12 @@ class UserCommand:
         self.session.flush()
         return new_user
 
+    def create_customer_user(self, username: str) -> User:
+        new_user = User(username=username, email=None, password=None, is_valid=True)
+        self.session.add(new_user)
+        self.session.flush()
+        return new_user
+
     def update_user_password(self, update_user_id: str, new_password: str):
         user = self.session.get(User, update_user_id)
         user.password = new_password

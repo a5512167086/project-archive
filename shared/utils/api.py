@@ -46,7 +46,7 @@ def create_liff_app(channel_access_token: str):
             "url": "https://liff-web.onrender.com",
         },
         "description": "Easybot LIFF App",
-        "scope": ["openid", "email", "profile", "chat_message.write"],
+        "scope": ["openid", "profile", "chat_message.write"],
     }
     response = requests.post(url, headers=headers, json=data)
 

@@ -238,7 +238,7 @@ class UserService:
         bot: BotListWithCredentialView,
     ):
         user_info = get_line_oauth_info(customer.line_id_token, bot.login_channel_id)
-
+        print(user_info)
         user = self.query.get_user_by_email(user_info["email"])
         if not user:
             # For new users, we need to create them and add to the bot's Users group

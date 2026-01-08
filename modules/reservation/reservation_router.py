@@ -38,7 +38,7 @@ def list_services(
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
     # [公開/成員] 查看服務列表：User 可看
-    bot = access.verify(bot_uuid, module_name=ModuleType.Reservation, owner_only=False)
+    bot = access.verify(bot_uuid, owner_only=False)
     return reservation_service.get_services_by_bot_class_id(bot.class_id)
 
 
@@ -172,7 +172,7 @@ def get_user_reservations_in_bot(
 ):
     """Get user's reservations in a specific bot"""
     # [成員] 查詢自己的預約：User 可用
-    bot = access.verify(bot_uuid, module_name=ModuleType.Reservation, owner_only=False)
+    bot = access.verify(bot_uuid, owner_only=False)
     user_id = current_user["user_id"]
 
     reservations = reservation_service.get_user_reservations_in_bot_list(
