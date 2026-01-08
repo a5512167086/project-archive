@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS users(
     username VARCHAR(100),
     password VARCHAR(300),
     is_valid BOOLEAN DEFAULT FALSE,
-    email VARCHAR(100) NOT NULL,
+    email VARCHAR(100),
     status SMALLINT,
     login_count INT DEFAULT 0 NOT NULL,
     last_login_datetime TIMESTAMP,
@@ -17,4 +17,3 @@ CREATE TABLE IF NOT EXISTS users(
 );
 
 CREATE INDEX IF NOT EXISTS ix_users_email ON users(email);
-
