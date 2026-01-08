@@ -37,6 +37,7 @@ export const baseApi = createApi({
     "Category",
     "Product",
     "Bot",
+    "Module",
   ],
   endpoints: () => ({}),
 });
