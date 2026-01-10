@@ -15,13 +15,14 @@ class QueryRequest(BaseModel):
     line_id: Optional[str] = None
     query: str
     top_k: int = 3
-    score_threshold: float = 0.3
+    score_threshold: float = 0.5
     model: ModelName = Field(default="gpt_5_mini")
 
 
 class QueryHit(BaseModel):
     id: str
     score: float
+    rerank_score: Optional[float] = None
     object_id: int | None = None
     question: Optional[str] = None
     answer: Optional[str] = None

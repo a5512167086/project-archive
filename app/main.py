@@ -1,8 +1,8 @@
-# main.py
 import asyncio
 import time
 from contextlib import asynccontextmanager
-from typing import Annotated, cast
+from typing import Annotated, Optional, cast
+from uuid import UUID
 
 import torch
 from fastapi import BackgroundTasks, Depends, FastAPI, Request
@@ -11,6 +11,7 @@ from langchain_huggingface import (
     HuggingFaceEmbeddings,
     HuggingFacePipeline,
 )
+from pydantic import BaseModel, Field
 
 from app.configs.config import (
     CHAT_MODEL,
@@ -23,13 +24,29 @@ from app.configs.config import (
 )
 from app.database import SessionDep
 from app.logger import logger
-from app.schemas import IngestRequest, QueryHit, QueryRequest, QueryResponse
+from app.schemas import IngestRequest, QueryHit, QueryResponse
 from app.services.knowledge_service import KnowledgeService
 from app.services.llm_service import LLMService
 from app.services.memory.summary import SummaryMemory
 from app.services.prompt_service import PromptService
 from app.services.rag_service import RAGService
+from app.services.reranker_service import RerankerService
 from app.services.vector_service import VectorService
+
+
+# =========================
+# Schemas (Main 專用)
+# =========================
+# 簡單定義在這裡，或是從 app.schemas import
+class QueryRequest(BaseModel):
+    bot_uuid: UUID
+    line_id: Optional[str] = None
+    query: str
+    top_k: int = 3
+    fetch_k: Optional[int] = Field(default=15)
+    score_threshold: float = 0.3
+    rerank_threshold: float = Field(default=0.5)
+    model: str = Field(default="gpt_5_mini")
 
 
 # =========================
@@ -46,7 +63,7 @@ async def lifespan(app: FastAPI):
         cache_folder="../cache",
     )
 
-    # 2) Local HF chat model (optional; for qwen3_local)
+    # 2) Local HF chat model (optional)
     chat_pipeline = HuggingFacePipeline.from_model_id(
         task="text-generation",
         model_id=CHAT_MODEL,
@@ -69,6 +86,9 @@ async def lifespan(app: FastAPI):
         ensure_collection_and_indexes=True,
     )
 
+    # 初始化 Reranker Service
+    reranker_service = RerankerService()
+
     # 4) RAG service (singleton)
     rag = RAGService(
         embeddings=embedding_model,
@@ -76,7 +96,8 @@ async def lifespan(app: FastAPI):
         llm_service=llm_service,
         prompt_service=prompt_service,
         vector_service=vector_service,
-        ensure_collection_and_indexes=False,  # vector_service 已處理過了，避免重複 ensure
+        reranker_service=reranker_service,  # 注入 Reranker
+        ensure_collection_and_indexes=False,
     )
 
     # 5) Memory: cache-only load + background summary update
@@ -84,7 +105,7 @@ async def lifespan(app: FastAPI):
         mongo_uri=MONGODB_URI,
         mongo_db_name=MONGODB_DB_NAME,
         mongo_collection=MONGODB_CHAT_COLLECTION,
-        get_llm=rag.llm_service.get_llm,  # 重要：用抽出後的 LLMService
+        get_llm=rag.llm_service.get_llm,
         summary_model="gpt_5_mini",
         summary_trigger_threshold=6,
         max_summary_messages=30,
@@ -104,7 +125,7 @@ app = FastAPI(root_path="/easybot-rag-api", lifespan=lifespan)
 
 
 # =========================
-# Dependencies (copy/paste)
+# Dependencies
 # =========================
 def get_rag_service(request: Request) -> RAGService:
     rag = request.app.state.rag_service
@@ -128,7 +149,6 @@ def ingest(
 ):
     sync_results = knowledge_service.sync_knowledge_vectors(req.bot_uuid, rag)
 
-    # collection 現在在 vector_service 內
     return {
         "bot_uuid": str(req.bot_uuid),
         "upserted": sync_results["upserted"],
@@ -145,8 +165,9 @@ async def query(
 ):
     start_total = time.perf_counter()
 
-    # 把整個 RAG 用例放到 thread，避免阻塞 event loop（search + generate 都會阻塞）
+    # 把整個 RAG 用例放到 thread，避免阻塞 event loop
     start_answer = time.perf_counter()
+
     result = await asyncio.to_thread(
         rag.answer,
         bot_uuid=req.bot_uuid,
@@ -154,11 +175,14 @@ async def query(
         query_text=req.query,
         model_name=req.model,
         top_k=req.top_k,
+        fetch_k=req.fetch_k,
         score_threshold=req.score_threshold,
+        rerank_threshold=req.rerank_threshold,
         history_rounds=5,
         rewrite_model="gpt_5_mini",
         max_history_messages=rag.DEFAULT_MAX_HISTORY_MESSAGES,
     )
+
     answer_duration = time.perf_counter() - start_answer
     hits = result.get("hits", []) or []
     answer = result.get("answer", "") or ""
@@ -175,7 +199,7 @@ async def query(
             hits=[],
         )
 
-    # Background summary update (NOT in critical path)
+    # Background summary update
     if req.line_id and hasattr(rag.memory, "maybe_update_summary"):
         session_key = f"{req.bot_uuid}:{req.line_id}"
         mem = cast(SummaryMemory, rag.memory)
