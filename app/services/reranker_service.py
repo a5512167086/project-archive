@@ -37,7 +37,7 @@ class RerankerService:
         for d in docs:
             q_text = d.get("question", "") or ""
             a_text = d.get("answer", "") or ""
-            doc_content = f"Q: {q_text}\nA: {a_text}".strip()
+            doc_content = f"Q: {q_text}，A: {a_text}".strip()
 
             pairs.append([query, doc_content])
 

@@ -123,7 +123,7 @@ def main():
 
                 # 給 RAGAS 的 contexts：用 Q/A 組合（不要只放 answer）
                 contexts_for_ragas = [
-                    f"Q: {str(h.get('question', '')).strip()}\nA: {str(h.get('answer', '')).strip()}"
+                    f"Q: {str(h.get('question', '')).strip()}，A: {str(h.get('answer', '')).strip()}"
                     for h in hits
                     if (
                         str(h.get("question", "")).strip()

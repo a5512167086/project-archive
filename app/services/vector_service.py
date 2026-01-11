@@ -191,7 +191,7 @@ class VectorService:
     def _format_knowledge_text(self, item: KnowledgeItem) -> str:
         q = (item.question or "").strip()
         a = (item.answer or "").strip()
-        return f"Q: {q}\nA: {a}" if a else f"Q: {q}"
+        return f"Q: {q}，A: {a}" if a else f"Q: {q}"
 
     # =====================
     # Search
