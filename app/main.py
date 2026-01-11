@@ -1,8 +1,10 @@
+# app/main.py
+from __future__ import annotations
+
 import asyncio
 import time
 from contextlib import asynccontextmanager
-from typing import Annotated, Optional, cast
-from uuid import UUID
+from typing import Annotated
 
 import torch
 from fastapi import BackgroundTasks, Depends, FastAPI, Request
@@ -11,7 +13,6 @@ from langchain_huggingface import (
     HuggingFaceEmbeddings,
     HuggingFacePipeline,
 )
-from pydantic import BaseModel, Field
 
 from app.configs.config import (
     CHAT_MODEL,
@@ -24,29 +25,20 @@ from app.configs.config import (
 )
 from app.database import SessionDep
 from app.logger import logger
-from app.schemas import IngestRequest, QueryHit, QueryResponse
+from app.schemas import IngestRequest, QueryHit, QueryRequest, QueryResponse
 from app.services.knowledge_service import KnowledgeService
 from app.services.llm_service import LLMService
-from app.services.memory.summary import SummaryMemory
+
+# ---- RAG services ----
 from app.services.prompt_service import PromptService
 from app.services.rag_service import RAGService
 from app.services.reranker_service import RerankerService
+from app.services.rewrite_service import RewriteService
+from app.services.summary_service import SummaryService
 from app.services.vector_service import VectorService
 
-
-# =========================
-# Schemas (Main 專用)
-# =========================
-# 簡單定義在這裡，或是從 app.schemas import
-class QueryRequest(BaseModel):
-    bot_uuid: UUID
-    line_id: Optional[str] = None
-    query: str
-    top_k: int = 3
-    fetch_k: Optional[int] = Field(default=15)
-    score_threshold: float = 0.3
-    rerank_threshold: float = Field(default=0.5)
-    model: str = Field(default="gpt_5_mini")
+# ---- Memory / Services ----
+from app.summary_memory import SummaryMemory
 
 
 # =========================
@@ -75,9 +67,11 @@ async def lifespan(app: FastAPI):
 
     # 3) Extracted services (singleton)
     llm_service = LLMService(preloaded_hf_chat_model=chat_model)
+
     prompt_service = PromptService(
         max_contexts_for_prompt=RAGService.DEFAULT_MAX_CONTEXTS_FOR_PROMPT
     )
+
     vector_service = VectorService(
         embeddings=embedding_model,
         qdrant_url=QDRANT_URL,
@@ -86,31 +80,48 @@ async def lifespan(app: FastAPI):
         ensure_collection_and_indexes=True,
     )
 
-    # 初始化 Reranker Service
     reranker_service = RerankerService()
 
-    # 4) RAG service (singleton)
+    # 4) Memory backend (SummaryMemory: cache-only load + background update)
+    #    這個物件同時具備：
+    #    - load()/load_recent_only(): 快速讀 recent + cached summary
+    #    - append_turn(): 寫入對話
+    #    - maybe_update_summary(): 背景更新 summary cache
+    summary_memory = SummaryMemory(
+        mongo_uri=MONGODB_URI,
+        mongo_db_name=MONGODB_DB_NAME,
+        mongo_collection=MONGODB_CHAT_COLLECTION,
+        get_llm=llm_service.get_llm,
+        summary_model="gpt_5_mini",
+        summary_trigger_threshold=6,
+        max_summary_messages=30,
+        refresh_min_interval_sec=60,
+        refresh_every_n_new_msgs=4,
+    )
+
+    # 5) SummaryService facade
+    summary_service = SummaryService(summary_memory)
+
+    # 6) RewriteService
+    rewrite_service = RewriteService(
+        get_llm=llm_service.get_llm,
+        snapshot_loader=summary_service,  # RewriteService 只需要 load()
+        use_summary=True,
+    )
+
+    # 7) RAG service (singleton)
+    #    注意：不要再 rag.memory = xxx 外掛，改成建構時注入
     rag = RAGService(
         embeddings=embedding_model,
         preloaded_hf_chat_model=chat_model,
         llm_service=llm_service,
         prompt_service=prompt_service,
         vector_service=vector_service,
-        reranker_service=reranker_service,  # 注入 Reranker
+        reranker_service=reranker_service,
         ensure_collection_and_indexes=False,
-    )
-
-    # 5) Memory: cache-only load + background summary update
-    rag.memory = SummaryMemory(
-        mongo_uri=MONGODB_URI,
-        mongo_db_name=MONGODB_DB_NAME,
-        mongo_collection=MONGODB_CHAT_COLLECTION,
-        get_llm=rag.llm_service.get_llm,
-        summary_model="gpt_5_mini",
-        summary_trigger_threshold=6,
-        max_summary_messages=30,
-        refresh_min_interval_sec=60,
-        refresh_every_n_new_msgs=4,
+        summary_service=summary_service,
+        rewrite_service=rewrite_service,
+        memory=summary_memory,
     )
 
     app.state.rag_service = rag
@@ -148,7 +159,6 @@ def ingest(
     rag: Annotated[RAGService, Depends(get_rag_service)],
 ):
     sync_results = knowledge_service.sync_knowledge_vectors(req.bot_uuid, rag)
-
     return {
         "bot_uuid": str(req.bot_uuid),
         "upserted": sync_results["upserted"],
@@ -167,7 +177,6 @@ async def query(
 
     # 把整個 RAG 用例放到 thread，避免阻塞 event loop
     start_answer = time.perf_counter()
-
     result = await asyncio.to_thread(
         rag.answer,
         bot_uuid=req.bot_uuid,
@@ -182,8 +191,8 @@ async def query(
         rewrite_model="gpt_5_mini",
         max_history_messages=rag.DEFAULT_MAX_HISTORY_MESSAGES,
     )
-
     answer_duration = time.perf_counter() - start_answer
+
     hits = result.get("hits", []) or []
     answer = result.get("answer", "") or ""
     logger.info(
@@ -199,11 +208,10 @@ async def query(
             hits=[],
         )
 
-    # Background summary update
-    if req.line_id and hasattr(rag.memory, "maybe_update_summary"):
+    # Background summary update (改成走 summary_service)
+    if req.line_id:
         session_key = f"{req.bot_uuid}:{req.line_id}"
-        mem = cast(SummaryMemory, rag.memory)
-        background_tasks.add_task(mem.maybe_update_summary, session_key)
+        background_tasks.add_task(rag.summary_service.maybe_update_summary, session_key)
 
     total_duration = time.perf_counter() - start_total
     logger.info(f"[Timer] === Total Request: {total_duration:.3f}s ===")

@@ -18,7 +18,6 @@ class VectorService:
 
     def __init__(
         self,
-        *,
         embeddings: HuggingFaceEmbeddings,
         qdrant_url: str,
         collection_name: str,
@@ -199,7 +198,6 @@ class VectorService:
     # =====================
     def search(
         self,
-        *,
         bot_uuid: UUID,
         query_text: str,
         top_k: int,

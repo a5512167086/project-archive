@@ -1,15 +1,16 @@
+# app/services/summary_memory.py
 from __future__ import annotations
 
 import time
 from datetime import datetime, timezone
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_mongodb.chat_message_histories import MongoDBChatMessageHistory
 
 from app.logger import logger
-from app.services.memory.base import MemorySnapshot
-from app.services.memory.buffer import BufferMemory
+from app.schemas import MemorySnapshot
 
 try:
     from pymongo import MongoClient
@@ -17,17 +18,21 @@ except Exception:  # pragma: no cover
     MongoClient = None  # type: ignore
 
 
-class SummaryMemory(BufferMemory):
+class SummaryMemory:
     """
-    Summary is moved out of critical path:
-    - load(): returns recent buffer + cached summary (no LLM)
-    - maybe_update_summary(): compute summary via LLM and upsert cache (call in background)
+    Mongo-backed chat memory with summary cache.
+
+    - load(): returns recent messages + cached summary (NO LLM)
+    - load_recent_only(): returns recent messages only (NO cache lookup)
+    - append_turn(): writes chat turns to Mongo history
+    - maybe_update_summary(): background job to update cached summary using LLM
     """
 
     DEFAULT_CACHE_SUFFIX = "_summary_cache"
 
     def __init__(
         self,
+        *,
         mongo_uri: str,
         mongo_db_name: str,
         mongo_collection: str,
@@ -35,35 +40,34 @@ class SummaryMemory(BufferMemory):
         summary_model: str = "gpt_5_mini",
         summary_trigger_threshold: int = 6,
         max_summary_messages: int = 30,
-        # refresh policy
         refresh_min_interval_sec: int = 60,
         refresh_every_n_new_msgs: int = 4,
         cache_collection: Optional[str] = None,
     ) -> None:
-        super().__init__(
-            mongo_uri=mongo_uri,
-            mongo_db_name=mongo_db_name,
-            mongo_collection=mongo_collection,
-        )
+        self.mongo_uri = mongo_uri
+        self.mongo_db_name = mongo_db_name
+        self.mongo_collection = mongo_collection
+
         self._get_llm = get_llm
         self.summary_model = summary_model
-        self.summary_trigger_threshold = summary_trigger_threshold
-        self.max_summary_messages = max_summary_messages
-
+        self.summary_trigger_threshold = int(summary_trigger_threshold)
+        self.max_summary_messages = int(max_summary_messages)
         self.refresh_min_interval_sec = int(refresh_min_interval_sec)
         self.refresh_every_n_new_msgs = int(refresh_every_n_new_msgs)
 
+        self._history_cache: Dict[str, MongoDBChatMessageHistory] = {}
+
+        # summary cache
         self._cache_enabled = MongoClient is not None
         self._cache_col = None
 
         if self._cache_enabled:
             try:
-                client = MongoClient(mongo_uri)
+                client = MongoClient(self.mongo_uri)
                 col_name = cache_collection or (
-                    mongo_collection + self.DEFAULT_CACHE_SUFFIX
+                    self.mongo_collection + self.DEFAULT_CACHE_SUFFIX
                 )
-                self._cache_col = client[mongo_db_name][col_name]
-                # recommended indexes (safe to call multiple times)
+                self._cache_col = client[self.mongo_db_name][col_name]
                 self._cache_col.create_index("session_key", unique=True)
                 self._cache_col.create_index("updated_at")
             except Exception as e:
@@ -76,7 +80,32 @@ class SummaryMemory(BufferMemory):
             )
 
     # ---------------------
-    # Helpers
+    # Mongo history
+    # ---------------------
+    def _get_history(self, session_key: str) -> MongoDBChatMessageHistory:
+        if session_key in self._history_cache:
+            return self._history_cache[session_key]
+
+        h = MongoDBChatMessageHistory(
+            connection_string=self.mongo_uri,
+            session_id=session_key,
+            database_name=self.mongo_db_name,
+            collection_name=self.mongo_collection,
+        )
+        self._history_cache[session_key] = h
+        return h
+
+    def append_turn(self, session_key: str, *, human: str, ai: str) -> None:
+        h = self._get_history(session_key)
+        h.add_user_message(human)
+        h.add_ai_message(ai)
+
+    def clear(self, session_key: str) -> None:
+        h = self._get_history(session_key)
+        h.clear()
+
+    # ---------------------
+    # Summary cache helpers
     # ---------------------
     def _clean(self, messages: List[BaseMessage]) -> List[BaseMessage]:
         return [m for m in messages if isinstance(m, (HumanMessage, AIMessage))]
@@ -93,8 +122,7 @@ class SummaryMemory(BufferMemory):
             {"session_key": session_key},
             {"summary": 1, "msg_count": 1, "updated_at": 1},
         )
-        dur = time.perf_counter() - t0
-        logger.info(f"[Timer] Summary Cache Read: {dur:.3f}s")
+        logger.info(f"[Timer] Summary Cache Read: {(time.perf_counter() - t0):.3f}s")
 
         if not doc:
             return "", 0, 0.0
@@ -126,20 +154,60 @@ class SummaryMemory(BufferMemory):
             },
             upsert=True,
         )
-        dur = time.perf_counter() - t0
-        logger.info(f"[Timer] Summary Cache Upsert: {dur:.3f}s")
+        logger.info(f"[Timer] Summary Cache Upsert: {(time.perf_counter() - t0):.3f}s")
+
+    # ---------------------
+    # Public APIs
+    # ---------------------
+    def load(self, session_key: str, *, max_messages: int) -> MemorySnapshot:
+        """
+        Critical path: load history + recent; summary is READ FROM CACHE ONLY.
+        """
+        t0 = time.perf_counter()
+
+        t_hist = time.perf_counter()
+        h = self._get_history(session_key)
+        all_msgs = h.messages or []
+        logger.info(
+            f"[Timer] Memory History Load (Mongo): {(time.perf_counter() - t_hist):.3f}s | Msgs: {len(all_msgs)}"
+        )
+
+        recent = all_msgs[-max_messages:] if max_messages > 0 else []
+
+        clean_cnt = len(self._clean(all_msgs))
+        cached_summary, cached_cnt, _ = self._get_cached(session_key)
+        logger.info(
+            f"[Timer] Summary Cache Used: yes | cached_cnt={cached_cnt} | clean_cnt={clean_cnt} | has_summary={bool(cached_summary)}"
+        )
+
+        logger.info(
+            f"[Timer] Memory Load Total (CacheOnly): {(time.perf_counter() - t0):.3f}s"
+        )
+        return MemorySnapshot(recent_messages=recent, summary=cached_summary)
+
+    def load_recent_only(
+        self, session_key: str, *, max_messages: int
+    ) -> MemorySnapshot:
+        """
+        Faster: no summary/cache.
+        """
+        t0 = time.perf_counter()
+
+        h = self._get_history(session_key)
+        all_msgs = h.messages or []
+        recent = all_msgs[-max_messages:] if max_messages > 0 else []
+
+        logger.info(
+            f"[Timer] Memory Load Total (RecentOnly): {(time.perf_counter() - t0):.3f}s"
+        )
+        return MemorySnapshot(recent_messages=recent, summary="")
 
     def _summarize(self, messages: List[BaseMessage]) -> str:
         """
         Heavy path (LLM). Do NOT call this in load().
         """
-        t0 = time.perf_counter()
-
         clean = self._clean(messages)
         if len(clean) < self.summary_trigger_threshold:
-            logger.info(
-                f"[Timer] Summary Skipped (<threshold): {(time.perf_counter() - t0):.3f}s"
-            )
             return ""
 
         clean = clean[-self.max_summary_messages :]
@@ -157,90 +225,13 @@ class SummaryMemory(BufferMemory):
             MessagesPlaceholder("chat_history"),
         ])
 
-        t_fmt = time.perf_counter()
         final_messages = prompt.format_messages(chat_history=clean)
-        fmt_dur = time.perf_counter() - t_fmt
-        logger.info(
-            f"[Timer] Summary Prompt Format: {fmt_dur:.3f}s | Msgs: {len(clean)}"
-        )
-
-        t_invoke = time.perf_counter()
         response = llm.invoke(final_messages)
-        invoke_dur = time.perf_counter() - t_invoke
-        logger.info(f"[Timer] Summary LLM Invoke: {invoke_dur:.3f}s")
 
         content = getattr(response, "content", "")
         if not isinstance(content, str):
             content = str(content)
-
-        total = time.perf_counter() - t0
-        logger.info(f"[Timer] Summary Total: {total:.3f}s")
         return content.strip()
-
-    # ---------------------
-    # Public APIs
-    # ---------------------
-    def load(self, session_key: str, max_messages: int) -> MemorySnapshot:
-        """
-        Critical path: load history + recent; summary is READ FROM CACHE ONLY.
-        """
-        t0 = time.perf_counter()
-
-        # 1) Mongo 讀取歷史
-        t_hist = time.perf_counter()
-        h = self._get_history(session_key)
-        all_msgs = h.messages or []
-        hist_dur = time.perf_counter() - t_hist
-        logger.info(
-            f"[Timer] Memory History Load (Mongo): {hist_dur:.3f}s | Msgs: {len(all_msgs)}"
-        )
-
-        # 2) recent slice
-        t_recent = time.perf_counter()
-        recent = all_msgs[-max_messages:] if max_messages > 0 else []
-        recent_dur = time.perf_counter() - t_recent
-        logger.info(
-            f"[Timer] Memory Recent Slice: {recent_dur:.3f}s | Recent: {len(recent)}"
-        )
-
-        # 3) summary from cache (fast)
-        clean_cnt = len(self._clean(all_msgs))
-        cached_summary, cached_cnt, _ = self._get_cached(session_key)
-
-        logger.info(
-            f"[Timer] Summary Cache Used: yes | cached_cnt={cached_cnt} | clean_cnt={clean_cnt} | has_summary={bool(cached_summary)}"
-        )
-
-        total = time.perf_counter() - t0
-        logger.info(f"[Timer] Memory Load Total (CacheOnly): {total:.3f}s")
-
-        return MemorySnapshot(recent_messages=recent, summary=cached_summary)
-
-    def load_recent_only(self, session_key: str, max_messages: int) -> MemorySnapshot:
-        """
-        Optimization A: load recent messages only (no summary, no cache access needed).
-        """
-        t0 = time.perf_counter()
-
-        t_hist = time.perf_counter()
-        h = self._get_history(session_key)
-        all_msgs = h.messages or []
-        hist_dur = time.perf_counter() - t_hist
-        logger.info(
-            f"[Timer] Memory History Load (Mongo, RecentOnly): {hist_dur:.3f}s | Msgs: {len(all_msgs)}"
-        )
-
-        t_recent = time.perf_counter()
-        recent = all_msgs[-max_messages:] if max_messages > 0 else []
-        recent_dur = time.perf_counter() - t_recent
-        logger.info(
-            f"[Timer] Memory Recent Slice (RecentOnly): {recent_dur:.3f}s | Recent: {len(recent)}"
-        )
-
-        total = time.perf_counter() - t0
-        logger.info(f"[Timer] Memory Load Total (RecentOnly): {total:.3f}s")
-
-        return MemorySnapshot(recent_messages=recent, summary="")
 
     def maybe_update_summary(self, session_key: str, *, force: bool = False) -> bool:
         """
@@ -254,16 +245,10 @@ class SummaryMemory(BufferMemory):
 
         t0 = time.perf_counter()
 
-        # Read current history (cheap)
-        t_hist = time.perf_counter()
         h = self._get_history(session_key)
         all_msgs = h.messages or []
         clean_msgs = self._clean(all_msgs)
         clean_cnt = len(clean_msgs)
-        hist_dur = time.perf_counter() - t_hist
-        logger.info(
-            f"[Timer] Summary BG History Load: {hist_dur:.3f}s | CleanMsgs: {clean_cnt}"
-        )
 
         if clean_cnt < self.summary_trigger_threshold:
             logger.info("[Summary BG] skipped: below threshold")
@@ -279,8 +264,8 @@ class SummaryMemory(BufferMemory):
         )
         delta = clean_cnt - int(cached_cnt or 0)
 
-        need_update = force or (
-            (not cached_summary) or (delta >= self.refresh_every_n_new_msgs)
+        need_update = (
+            force or (not cached_summary) or (delta >= self.refresh_every_n_new_msgs)
         )
         if too_soon and not force:
             need_update = False
@@ -295,8 +280,6 @@ class SummaryMemory(BufferMemory):
             )
             return False
 
-        # Heavy path: LLM summarize
-        summary = ""
         try:
             summary = self._summarize(all_msgs)
         except Exception as e:
@@ -305,6 +288,7 @@ class SummaryMemory(BufferMemory):
 
         self._set_cached(session_key, summary, msg_count=clean_cnt)
 
-        total = time.perf_counter() - t0
-        logger.info(f"[Timer] Summary BG Total (Updated): {total:.3f}s")
+        logger.info(
+            f"[Timer] Summary BG Total (Updated): {(time.perf_counter() - t0):.3f}s"
+        )
         return True

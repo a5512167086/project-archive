@@ -8,12 +8,11 @@ from app.logger import logger
 
 
 class PromptService:
-    def __init__(self, *, max_contexts_for_prompt: int = 3) -> None:
+    def __init__(self, max_contexts_for_prompt: int = 3) -> None:
         self.max_contexts_for_prompt = int(max_contexts_for_prompt)
 
     def build_messages(
         self,
-        *,
         original_query: str,
         rewritten_query: str,
         contexts: List[Dict[str, Any]],
