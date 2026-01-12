@@ -26,7 +26,6 @@ class RewriteService:
 
     def __init__(
         self,
-        *,
         get_llm: Callable[[str], Any],
         snapshot_loader: SnapshotLoader,
         use_summary: bool = True,
@@ -44,7 +43,6 @@ class RewriteService:
 
     def rewrite(
         self,
-        *,
         session_key: str,
         user_query: str,
         history_rounds: int,
@@ -69,7 +67,6 @@ class RewriteService:
 
     def rewrite_with_snapshot(
         self,
-        *,
         user_query: str,
         snapshot: MemorySnapshot,
         rewrite_model: str,

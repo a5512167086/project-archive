@@ -32,7 +32,6 @@ class SummaryMemory:
 
     def __init__(
         self,
-        *,
         mongo_uri: str,
         mongo_db_name: str,
         mongo_collection: str,

@@ -999,6 +999,12 @@ wheels = [
 ]
 
 [[package]]
+name = "jieba"
+version = "0.42.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/c6/cb/18eeb235f833b726522d7ebed54f2278ce28ba9438e3135ab0278d9792a2/jieba-0.42.1.tar.gz", hash = "sha256:055ca12f62674fafed09427f176506079bc135638a14e23e25be909131928db2", size = 19214172, upload-time = "2020-01-20T14:27:23.5Z" }
+
+[[package]]
 name = "jinja2"
 version = "3.1.6"
 source = { registry = "https://pypi.org/simple" }
@@ -2462,6 +2468,7 @@ dependencies = [
     { name = "datasets" },
     { name = "fastapi", extra = ["standard"] },
     { name = "flagembedding" },
+    { name = "jieba" },
     { name = "langchain" },
     { name = "langchain-google-genai" },
     { name = "langchain-huggingface" },
@@ -2477,6 +2484,7 @@ dependencies = [
     { name = "pymongo" },
     { name = "python-dotenv" },
     { name = "ragas" },
+    { name = "rank-bm25" },
     { name = "sentence-transformers" },
     { name = "sqlmodel" },
     { name = "torch" },
@@ -2489,6 +2497,7 @@ requires-dist = [
     { name = "datasets", specifier = ">=4.0.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.116.1" },
     { name = "flagembedding", specifier = ">=1.3.5" },
+    { name = "jieba", specifier = ">=0.42.1" },
     { name = "langchain", specifier = ">=1.0" },
     { name = "langchain-google-genai", specifier = ">=3.0.3" },
     { name = "langchain-huggingface", specifier = ">=1.0.1" },
@@ -2504,6 +2513,7 @@ requires-dist = [
     { name = "pymongo", specifier = ">=4.15.5" },
     { name = "python-dotenv", specifier = ">=1.1.1" },
     { name = "ragas", specifier = ">=0.3.9" },
+    { name = "rank-bm25", specifier = ">=0.2.2" },
     { name = "sentence-transformers", specifier = ">=5.1.0" },
     { name = "sqlmodel", specifier = ">=0.0.24" },
     { name = "torch", specifier = ">=2.8.0" },
@@ -2539,6 +2549,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/25/cd/456c0a0de093636683cfe61c0db7865005f00f1a1d38d3c964c0b6e70c73/ragas-0.3.9.tar.gz", hash = "sha256:7807cfc3f01c0297ef99ab3e6a5f53e7cac0a73267d273273b17871437c55786", size = 43865644, upload-time = "2025-11-11T17:25:19.18Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/60/e7/4b76c1d5826481fe6bd0aaa4527e7a98a17164559c41b5fe0663a236a1dd/ragas-0.3.9-py3-none-any.whl", hash = "sha256:1be77af14c7101f26125cc025ff1026f49e2d564162471ae590c3d832527f9c5", size = 366710, upload-time = "2025-11-11T17:25:16.374Z" },
+]
+
+[[package]]
+name = "rank-bm25"
+version = "0.2.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/fc/0a/f9579384aa017d8b4c15613f86954b92a95a93d641cc849182467cf0bb3b/rank_bm25-0.2.2.tar.gz", hash = "sha256:096ccef76f8188563419aaf384a02f0ea459503fdf77901378d4fd9d87e5e51d", size = 8347, upload-time = "2022-02-16T12:10:52.196Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2a/21/f691fb2613100a62b3fa91e9988c991e9ca5b89ea31c0d3152a3210344f9/rank_bm25-0.2.2-py3-none-any.whl", hash = "sha256:7bd4a95571adadfc271746fa146a4bcfd89c0cf731e49c3d1ad863290adbe8ae", size = 8584, upload-time = "2022-02-16T12:10:50.626Z" },
 ]
 
 [[package]]

@@ -14,6 +14,7 @@ from app.schemas import KnowledgeItem
 from app.services.llm_service import LLMService
 from app.services.prompt_service import PromptService
 from app.services.reranker_service import RerankerService
+from app.services.retrieval_service import RetrievalService  # NEW
 from app.services.rewrite_service import RewriteService
 from app.services.summary_service import SummaryService
 from app.services.vector_service import VectorService
@@ -41,6 +42,7 @@ class RAGService:
         prompt_service: Optional[PromptService] = None,
         vector_service: Optional[VectorService] = None,
         reranker_service: Optional[RerankerService] = None,
+        retrieval_service: Optional[RetrievalService] = None,
         summary_service: Optional[SummaryService] = None,
         rewrite_service: Optional[RewriteService] = None,
         memory: Optional[Any] = None,
@@ -65,6 +67,9 @@ class RAGService:
         )
 
         self.reranker = reranker_service
+
+        # ---- retrieval (hybrid) ----
+        self.retrieval_service = retrieval_service
 
         # ---- required facade services ----
         if summary_service is None:
@@ -112,63 +117,85 @@ class RAGService:
         )
 
     # =====================
-    # Search
+    # Search (Hybrid-aware)
     # =====================
     def search(
         self,
         bot_uuid: UUID,
         query_text: str,
-        top_k: int = 3,
-        fetch_k: Optional[int] = None,
-        score_threshold: Optional[float] = DEFAULT_SCORE_THRESHOLD,
-        rerank_threshold: Optional[float] = None,
+        top_k: int = 3,  # 最後只留 top_k
+        fetch_k: Optional[int] = None,  # 第一階段抓取候選數
+        score_threshold: Optional[float] = DEFAULT_SCORE_THRESHOLD,  # vector threshold
+        rerank_threshold: Optional[float] = None,  # rerank threshold
     ) -> List[Dict[str, Any]]:
 
+        # 1) 決定第一階段抓取數量 (initial_k)
         if fetch_k is not None:
-            initial_k = fetch_k
+            initial_k = int(fetch_k)
         elif self.reranker:
-            initial_k = top_k * self.DEFAULT_RERANK_FACTOR
+            initial_k = int(top_k) * self.DEFAULT_RERANK_FACTOR
         else:
-            initial_k = top_k
+            initial_k = int(top_k)
 
+        # 稍微放寬向量檢索的閾值，確保 Recall
         initial_threshold = (score_threshold - 0.1) if score_threshold else None
 
-        logger.info(
-            f"[RAGService] Step 1: Vector searching top {initial_k} candidates..."
-        )
-
-        hits = self.vector_service.search(
-            bot_uuid=bot_uuid,
-            query_text=query_text,
-            top_k=initial_k,
-            score_threshold=initial_threshold,
-        )
-
-        if hits:
+        # 2) Step 1: Retrieval (Hybrid if available)
+        if self.retrieval_service is not None:
             logger.info(
-                f"--- [Step 1 Result] Vector Search found {len(hits)} items ---"
+                f"[RAGService] Step 1: Hybrid searching top {initial_k} candidates..."
             )
+            hits = self.retrieval_service.search(
+                bot_uuid=bot_uuid,
+                query_text=query_text,
+                top_k=initial_k,  # 先抓較多候選，給 reranker 用
+                fetch_k=initial_k,
+                score_threshold=initial_threshold,
+                mode="hybrid",
+            )
+        else:
+            logger.info(
+                f"[RAGService] Step 1: Vector searching top {initial_k} candidates..."
+            )
+            hits = self.vector_service.search(
+                bot_uuid=bot_uuid,
+                query_text=query_text,
+                top_k=initial_k,
+                score_threshold=initial_threshold,
+            )
+
+        # --- LOGGING: 初始檢索結果 ---
+        if hits:
+            logger.info(f"--- [Step 1 Result] Retrieved {len(hits)} items ---")
             for i, h in enumerate(hits):
                 q_snippet = (h.get("question", "") or "")[:30]
+                s = h.get("score", None)
+                try:
+                    s_fmt = f"{float(s):.4f}" if s is not None else "NA"
+                except Exception:
+                    s_fmt = "NA"
                 logger.info(
-                    f"  #{i + 1} Score: {h.get('score', 0.0):.4f} | ID: {h.get('object_id')} | Q: {q_snippet}..."
+                    f"  #{i + 1} Score: {s_fmt} | ID: {h.get('object_id')} | Q: {q_snippet}..."
                 )
         else:
-            logger.info("--- [Step 1 Result] Vector Search found NO items ---")
+            logger.info("--- [Step 1 Result] Retrieved NO items ---")
 
+        # 如果沒有抓到資料，或沒有設定 reranker，直接回傳 top_k
         if not hits or not self.reranker:
-            return hits[:top_k]
+            return hits[: int(top_k)]
 
         logger.info(
             f"[RAGService] Step 2: Reranking {len(hits)} hits -> Top {top_k}..."
         )
 
+        # 3) Step 2: Rerank（reranker 依然吃 docs list）
         reranked_hits = self.reranker.rerank(
             query=query_text,
             docs=hits,
-            top_k=top_k,
+            top_k=int(top_k),
         )
 
+        # 4) Rerank 門檻過濾 (詳細 Log 版)
         if rerank_threshold is not None:
             kept_hits = []
             dropped_hits = []
@@ -196,6 +223,7 @@ class RAGService:
                     f"[Rerank Filter] No items dropped (all >= {rerank_threshold})."
                 )
 
+        # --- LOGGING: 最終保留結果 ---
         if reranked_hits:
             logger.info(
                 f"--- [Step 2 Result] After Reranking & Filtering (Top {len(reranked_hits)}) ---"
@@ -281,7 +309,7 @@ class RAGService:
             rerank_threshold=rerank_threshold,
         )
         logger.info(
-            f"[Timer] Vector Search (Wrapper): {(time.perf_counter() - t_search):.3f}s | Hits: {len(hits)}"
+            f"[Timer] Retrieval Search (Wrapper): {(time.perf_counter() - t_search):.3f}s | Hits: {len(hits)}"
         )
 
         logger.info(

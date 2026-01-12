@@ -6,6 +6,7 @@ import time
 from contextlib import asynccontextmanager
 from typing import Annotated
 
+import jieba
 import torch
 from fastapi import BackgroundTasks, Depends, FastAPI, Request
 from langchain_huggingface import (
@@ -28,34 +29,27 @@ from app.logger import logger
 from app.schemas import IngestRequest, QueryHit, QueryRequest, QueryResponse
 from app.services.knowledge_service import KnowledgeService
 from app.services.llm_service import LLMService
-
-# ---- RAG services ----
 from app.services.prompt_service import PromptService
 from app.services.rag_service import RAGService
 from app.services.reranker_service import RerankerService
+from app.services.retrieval_service import RetrievalService
 from app.services.rewrite_service import RewriteService
 from app.services.summary_service import SummaryService
 from app.services.vector_service import VectorService
-
-# ---- Memory / Services ----
 from app.summary_memory import SummaryMemory
 
 
-# =========================
-# Lifespan: init singletons
-# =========================
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    jieba.initialize()
     device = 0 if torch.cuda.is_available() else -1
 
-    # 1) Embeddings (singleton)
     embedding_model = HuggingFaceEmbeddings(
         model_name=EMBEDDING_MODEL,
         model_kwargs={"device": device},
         cache_folder="../cache",
     )
 
-    # 2) Local HF chat model (optional)
     chat_pipeline = HuggingFacePipeline.from_model_id(
         task="text-generation",
         model_id=CHAT_MODEL,
@@ -65,7 +59,6 @@ async def lifespan(app: FastAPI):
     )
     chat_model = ChatHuggingFace(llm=chat_pipeline)
 
-    # 3) Extracted services (singleton)
     llm_service = LLMService(preloaded_hf_chat_model=chat_model)
 
     prompt_service = PromptService(
@@ -82,11 +75,6 @@ async def lifespan(app: FastAPI):
 
     reranker_service = RerankerService()
 
-    # 4) Memory backend (SummaryMemory: cache-only load + background update)
-    #    這個物件同時具備：
-    #    - load()/load_recent_only(): 快速讀 recent + cached summary
-    #    - append_turn(): 寫入對話
-    #    - maybe_update_summary(): 背景更新 summary cache
     summary_memory = SummaryMemory(
         mongo_uri=MONGODB_URI,
         mongo_db_name=MONGODB_DB_NAME,
@@ -99,18 +87,22 @@ async def lifespan(app: FastAPI):
         refresh_every_n_new_msgs=4,
     )
 
-    # 5) SummaryService facade
     summary_service = SummaryService(summary_memory)
 
-    # 6) RewriteService
     rewrite_service = RewriteService(
         get_llm=llm_service.get_llm,
-        snapshot_loader=summary_service,  # RewriteService 只需要 load()
+        snapshot_loader=summary_service,
         use_summary=True,
     )
 
-    # 7) RAG service (singleton)
-    #    注意：不要再 rag.memory = xxx 外掛，改成建構時注入
+    # 注意：lifespan 沒 DB session，所以先不綁 load_docs
+    retrieval_service = RetrievalService(
+        vector_service=vector_service,
+        load_docs=None,  # 之後在 ingest/query 用 KnowledgeService 綁上
+        bm25_enabled=True,
+        bm25_refresh_ttl_sec=300,
+    )
+
     rag = RAGService(
         embeddings=embedding_model,
         preloaded_hf_chat_model=chat_model,
@@ -121,13 +113,18 @@ async def lifespan(app: FastAPI):
         ensure_collection_and_indexes=False,
         summary_service=summary_service,
         rewrite_service=rewrite_service,
+        retrieval_service=retrieval_service,
         memory=summary_memory,
     )
 
+    # 掛到 app.state 讓 endpoint 取用
     app.state.rag_service = rag
+    app.state.retrieval_service = retrieval_service
+
     yield
 
     app.state.rag_service = None
+    app.state.retrieval_service = None
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
 
@@ -135,9 +132,6 @@ async def lifespan(app: FastAPI):
 app = FastAPI(root_path="/easybot-rag-api", lifespan=lifespan)
 
 
-# =========================
-# Dependencies
-# =========================
 def get_rag_service(request: Request) -> RAGService:
     rag = request.app.state.rag_service
     if rag is None:
@@ -145,20 +139,30 @@ def get_rag_service(request: Request) -> RAGService:
     return rag
 
 
+def get_retrieval_service(request: Request) -> RetrievalService:
+    rs = request.app.state.retrieval_service
+    if rs is None:
+        raise RuntimeError("Retrieval service not initialized.")
+    return rs
+
+
 def get_knowledge_service(session: SessionDep) -> KnowledgeService:
     return KnowledgeService(session)
 
 
-# =========================
-# Routers in MAIN
-# =========================
 @app.post("/ingest")
 def ingest(
     req: IngestRequest,
     knowledge_service: Annotated[KnowledgeService, Depends(get_knowledge_service)],
     rag: Annotated[RAGService, Depends(get_rag_service)],
+    rs: Annotated[RetrievalService, Depends(get_retrieval_service)],
 ):
     sync_results = knowledge_service.sync_knowledge_vectors(req.bot_uuid, rag)
+
+    # A 方式：ingest 後重建 BM25 index
+    rs.bind_docs_loader(knowledge_service.export_knowledge_docs)
+    rs.refresh_index(req.bot_uuid)
+
     return {
         "bot_uuid": str(req.bot_uuid),
         "upserted": sync_results["upserted"],
@@ -171,12 +175,16 @@ def ingest(
 async def query(
     req: QueryRequest,
     rag: Annotated[RAGService, Depends(get_rag_service)],
+    rs: Annotated[RetrievalService, Depends(get_retrieval_service)],
+    knowledge_service: Annotated[KnowledgeService, Depends(get_knowledge_service)],
     background_tasks: BackgroundTasks,
 ):
     start_total = time.perf_counter()
 
-    # 把整個 RAG 用例放到 thread，避免阻塞 event loop
-    start_answer = time.perf_counter()
+    # 確保 loader 已綁（避免第一個 query 就 hybrid 直接炸）
+    if not rs.has_loader():
+        rs.bind_docs_loader(knowledge_service.export_knowledge_docs)
+
     result = await asyncio.to_thread(
         rag.answer,
         bot_uuid=req.bot_uuid,
@@ -191,30 +199,23 @@ async def query(
         rewrite_model="gpt_5_mini",
         max_history_messages=rag.DEFAULT_MAX_HISTORY_MESSAGES,
     )
-    answer_duration = time.perf_counter() - start_answer
 
     hits = result.get("hits", []) or []
     answer = result.get("answer", "") or ""
+
     logger.info(
-        f"[Timer] 1. Answer(use-case): {answer_duration:.3f}s | Hits: {len(hits)}"
+        f"[Timer] Total Request: {(time.perf_counter() - start_total):.3f}s | Hits={len(hits)}"
     )
 
     if not hits:
-        logger.info(
-            f"[Timer] Total (No Hits): {time.perf_counter() - start_total:.3f}s"
-        )
         return QueryResponse(
             answers={"default": "抱歉，知識庫目前沒有足夠資訊可以回答這個問題。"},
             hits=[],
         )
 
-    # Background summary update (改成走 summary_service)
     if req.line_id:
         session_key = f"{req.bot_uuid}:{req.line_id}"
         background_tasks.add_task(rag.summary_service.maybe_update_summary, session_key)
-
-    total_duration = time.perf_counter() - start_total
-    logger.info(f"[Timer] === Total Request: {total_duration:.3f}s ===")
 
     return QueryResponse(
         answers={req.model: answer},

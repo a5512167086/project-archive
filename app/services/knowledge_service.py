@@ -84,3 +84,15 @@ class KnowledgeService:
         upserted_count = rag_service.upsert_knowledge_items(bot_uuid, sql_items)
 
         return {"upserted": upserted_count, "deleted": deleted_count}
+
+    def export_knowledge_docs(self, bot_uuid: UUID) -> list[dict]:
+        items = self.get_all_knowledge_list(bot_uuid)
+        return [
+            {
+                "object_id": it.object_id,
+                "question": it.question or "",
+                "answer": it.answer or "",
+                "text": f"Q: {it.question}\nA: {it.answer or ''}".strip(),
+            }
+            for it in items
+        ]

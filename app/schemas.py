@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Dict, List, Literal, Optional
+from dataclasses import dataclass
+from typing import Any, Dict, List, Literal, Optional
 from uuid import UUID
 
 from langchain_core.messages import BaseMessage
@@ -56,3 +57,16 @@ class RewriteResult(BaseModel):
     used_history: bool = False
     used_summary: bool = False
     model_name: Optional[str] = None
+
+
+@dataclass
+class BM25Index:
+    """
+    Internal cache structure (NOT for API response).
+    Holds BM25Okapi object which is not JSON serializable.
+    """
+
+    bm25: Any
+    docs: List[Dict[str, Any]]  # each doc: object_id/question/answer/text...
+    built_at: float
+    size: int
