@@ -9,57 +9,26 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set
 from uuid import UUID
 
-import jieba
+from rank_bm25 import BM25Okapi
 
 from app.logger import logger
 from app.services.vector_service import VectorService
 
-try:
-    from rank_bm25 import BM25Okapi
-except Exception as e:  # pragma: no cover
-    BM25Okapi = None  # type: ignore
-    _BM25_IMPORT_ERR = e
-else:
-    _BM25_IMPORT_ERR = None
-
-
 _ASCII_TOKEN_RE = re.compile(r"[A-Za-z0-9_]+")
 
-DEFAULT_STOPWORDS: Set[str] = {
-    "的",
-    "了",
-    "是",
-    "在",
-    "有",
-    "和",
-    "與",
-    "及",
-    "或",
-    "嗎",
-    "呢",
-    "啊",
-    "喔",
-    "我",
-    "你",
-    "他",
-    "她",
-    "它",
-    "我們",
-    "你們",
-    "他們",
-}
 
-
-def load_stopwords(
-    path: Optional[str], fallback: Set[str] = DEFAULT_STOPWORDS
-) -> Set[str]:
+def load_stopwords(path: Optional[str]) -> Set[str]:
+    """
+    Load stopwords from a txt file (one token per line).
+    Lines starting with # are treated as comments.
+    """
     if not path:
-        return set(fallback)
+        return set()
 
     p = Path(path)
     if not p.exists():
         logger.warning(f"[RetrievalService] stopwords file not found: {p}")
-        return set(fallback)
+        return set()
 
     out: Set[str] = set()
     for line in p.read_text(encoding="utf-8", errors="ignore").splitlines():
@@ -67,16 +36,25 @@ def load_stopwords(
         if not w or w.startswith("#"):
             continue
         out.add(w)
-
-    out |= set(fallback)
     return out
 
 
-def _has_zh(s: str) -> bool:
-    return any("\u4e00" <= ch <= "\u9fff" for ch in s)
+def _is_zh_char(ch: str) -> bool:
+    # CJK Unified Ideographs
+    return "\u4e00" <= ch <= "\u9fff"
 
 
-def jieba_tokenize(text: str, *, stopwords: Set[str]) -> List[str]:
+def ngram_tokenize_unigram_bigram(
+    text: str,
+    *,
+    stopwords: Set[str],
+) -> List[str]:
+    """
+    Tokenization strategy:
+    - ASCII tokens: [A-Za-z0-9_]+, lowercased
+    - Chinese: unigram + bigram on continuous CJK runs
+    - Apply stopwords to BOTH unigram and bigram
+    """
     if not text:
         return []
 
@@ -86,21 +64,40 @@ def jieba_tokenize(text: str, *, stopwords: Set[str]) -> List[str]:
 
     tokens: List[str] = []
 
+    # 1) ASCII tokens
     for m in _ASCII_TOKEN_RE.finditer(s):
         w = m.group(0).lower()
         if w and w not in stopwords:
             tokens.append(w)
 
-    for w in jieba.cut_for_search(s):
-        w = w.strip()
-        if not w:
-            continue
-        if w in stopwords:
-            continue
-        if not _has_zh(w):  # avoid double-counting alnum
-            continue
-        tokens.append(w)
+    # 2) Chinese runs -> unigram + bigram
+    buf: List[str] = []
 
+    def flush_buf() -> None:
+        nonlocal buf
+        if not buf:
+            return
+
+        # unigram
+        for ch in buf:
+            if ch and ch not in stopwords:
+                tokens.append(ch)
+
+        # bigram
+        for i in range(len(buf) - 1):
+            bg = buf[i] + buf[i + 1]
+            if bg and bg not in stopwords:
+                tokens.append(bg)
+
+        buf = []
+
+    for ch in s:
+        if _is_zh_char(ch):
+            buf.append(ch)
+        else:
+            flush_buf()
+
+    flush_buf()
     return tokens
 
 
@@ -116,7 +113,7 @@ class RetrievalService:
     """
     RetrievalService
     - vector: VectorService (Qdrant)
-    - lexical: BM25 (jieba tokenization)
+    - lexical: BM25 (char n-gram: unigram+bigram)
     - hybrid: RRF fusion (rank-based)
     """
 
@@ -129,36 +126,23 @@ class RetrievalService:
         load_docs: Optional[Callable[[UUID], List[Dict[str, Any]]]] = None,
         stopwords: Optional[Set[str]] = None,
         stopwords_path: Optional[str] = None,
-        jieba_user_dict: Optional[str] = None,
         bm25_enabled: bool = True,
         bm25_refresh_ttl_sec: int = 300,
+        debug_log_hits: bool = False,  # ✅ add switch
+        debug_log_top_n: int = 5,  # ✅ how many hits to log
     ) -> None:
         self.vs = vector_service
         self._load_docs_fn: Optional[Callable[[UUID], List[Dict[str, Any]]]] = load_docs
 
         self.stopwords: Set[str] = (
-            load_stopwords(stopwords_path, DEFAULT_STOPWORDS)
-            if stopwords is None
-            else set(stopwords)
+            load_stopwords(stopwords_path) if stopwords is None else set(stopwords)
         )
-
-        if jieba_user_dict:
-            try:
-                jieba.load_userdict(jieba_user_dict)
-                logger.info(
-                    f"[RetrievalService] jieba user_dict loaded: {jieba_user_dict}"
-                )
-            except Exception as e:
-                logger.warning(f"[RetrievalService] jieba.load_userdict failed: {e}")
 
         self.bm25_enabled = bool(bm25_enabled)
         self.bm25_refresh_ttl_sec = int(bm25_refresh_ttl_sec)
 
-        if self.bm25_enabled and BM25Okapi is None:
-            raise RuntimeError(
-                "rank_bm25 is not available. Install it: pip install rank-bm25\n"
-                f"Import error: {_BM25_IMPORT_ERR}"
-            )
+        self.debug_log_hits = bool(debug_log_hits)
+        self.debug_log_top_n = max(int(debug_log_top_n), 0)
 
         self._idx_cache: Dict[str, _BM25Index] = {}
         self._locks: Dict[str, threading.Lock] = {}
@@ -174,12 +158,60 @@ class RetrievalService:
         return self._load_docs_fn is not None
 
     def refresh_index(self, bot_uuid: UUID) -> None:
+        """Refresh BM25 index for a bot (in-memory)."""
         key = str(bot_uuid)
         with self._get_lock(key):
             if key in self._idx_cache:
                 del self._idx_cache[key]
         self._ensure_bm25_index(bot_uuid, force=True)
 
+    # -------- debug logging helpers --------
+    def _log_hits(
+        self,
+        *,
+        title: str,
+        query_text: str,
+        hits: List[Dict[str, Any]],
+        top_n: int,
+        score_key: str,
+    ) -> None:
+        q = (query_text or "").replace("\n", " ")[:120]
+        logger.info(f"[RetrievalService] {title} | q='{q}' | hits={len(hits)}")
+
+        for i, h in enumerate(hits[: max(0, int(top_n))], 1):
+            obj_id = h.get("object_id") or h.get("id")
+            score = h.get(score_key, h.get("score"))
+            q_snip = (h.get("question") or "").replace("\n", " ")[:60]
+            a_snip = (h.get("answer") or "").replace("\n", " ")[:60]
+            logger.info(
+                f"[RetrievalService] {title} top{i}: "
+                f"id={obj_id} {score_key}={score} q='{q_snip}' a='{a_snip}'"
+            )
+
+    def _log_hybrid_debug(
+        self,
+        *,
+        query_text: str,
+        vec_hits: List[Dict[str, Any]],
+        lex_hits: List[Dict[str, Any]],
+    ) -> None:
+        top_n = self.debug_log_top_n
+        self._log_hits(
+            title="VectorSearch",
+            query_text=query_text,
+            hits=vec_hits,
+            top_n=top_n,
+            score_key="vec_score",
+        )
+        self._log_hits(
+            title="BM25Search",
+            query_text=query_text,
+            hits=lex_hits,
+            top_n=top_n,
+            score_key="lex_score",
+        )
+
+    # -------- public search --------
     def search(
         self,
         *,
@@ -231,6 +263,14 @@ class RetrievalService:
             fetch_k=lex_fetch,
         )
 
+        # ✅ log vector & bm25 separately (hybrid mode only)
+        if self.debug_log_hits:
+            self._log_hybrid_debug(
+                query_text=query_text,
+                vec_hits=vec_hits,
+                lex_hits=lex_hits,
+            )
+
         return self._hybrid_fuse_rrf(
             query_text=query_text,
             vector_hits=vec_hits,
@@ -279,7 +319,7 @@ class RetrievalService:
         if idx.size <= 0:
             return []
 
-        q_tokens = jieba_tokenize(query_text, stopwords=self.stopwords)
+        q_tokens = ngram_tokenize_unigram_bigram(query_text, stopwords=self.stopwords)
         if not q_tokens:
             return []
 
@@ -335,7 +375,9 @@ class RetrievalService:
             docs = self._safe_load_docs(load_docs, bot_uuid)
 
             tokenized_corpus: List[List[str]] = [
-                jieba_tokenize(self._format_doc_text(d), stopwords=self.stopwords)
+                ngram_tokenize_unigram_bigram(
+                    self._format_doc_text(d), stopwords=self.stopwords
+                )
                 for d in docs
             ]
 

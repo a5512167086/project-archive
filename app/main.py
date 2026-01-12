@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import time
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Annotated
 
 import jieba
@@ -37,6 +38,9 @@ from app.services.rewrite_service import RewriteService
 from app.services.summary_service import SummaryService
 from app.services.vector_service import VectorService
 from app.summary_memory import SummaryMemory
+
+BASE_DIR = Path(__file__).resolve().parent.parent  # 專案根目錄
+STOPWORDS_PATH = f"{BASE_DIR}/data/stopwords.txt"
 
 
 @asynccontextmanager
@@ -101,6 +105,9 @@ async def lifespan(app: FastAPI):
         load_docs=None,  # 之後在 ingest/query 用 KnowledgeService 綁上
         bm25_enabled=True,
         bm25_refresh_ttl_sec=300,
+        stopwords_path=STOPWORDS_PATH,
+        debug_log_hits=True,
+        debug_log_top_n=30,
     )
 
     rag = RAGService(
