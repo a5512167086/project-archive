@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import placeholder from "@/assets/placeholder.svg";
 
 interface FeaturedItemProps {
   id: string;
@@ -19,7 +18,6 @@ export function FeaturedItem({
   description,
   price,
   priceLabel,
-  image,
   buttonText,
   disabled = false,
   onButtonClick,
@@ -30,13 +28,6 @@ export function FeaturedItem({
         disabled ? "opacity-60" : ""
       }`}
     >
-      <img
-        src={image || placeholder}
-        alt={name}
-        width={60}
-        height={60}
-        className="rounded-lg object-cover"
-      />
       <div className="flex-1">
         <h4 className="font-medium">{name}</h4>
         <p className="text-sm text-muted-foreground">{description}</p>
