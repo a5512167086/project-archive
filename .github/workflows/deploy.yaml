@@ -6,8 +6,64 @@ on:
       - main
 
 jobs:
+  # 測試階段
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    # Fake env variable for fix import error
+    env:
+      DB_HOST: "localhost"
+      DB_PORT: "5432"
+      DB_NAME: "test"
+      DB_USER: "user"
+      DB_PASSWORD: "pw"
+      MINIO_ENDPOINT: "localhost:9000"
+      MINIO_ACCESS_KEY: "fake_key"
+      MINIO_SECRET_KEY: "fake_secret"
+      JWT_SECRET: "secret"
+      JWT_REFRESH_SECRET: "secret"
+      JWT_RESET_SECRET: "secret"
+      EMAIL: "test@test.com"
+      EMAIL_APP_PASSWORD: "pw"
+      FRONTEND_URL: "http://localhost"
+      BACKEND_URL: "http://localhost"
+      RAG_BACKEND_URL: "http://localhost"
+      LINE_CLIENT_ID: "id"
+      LINE_CLIENT_SECRET: "secret"
+      GOOGLE_CLIENT_ID: "id"
+      GOOGLE_CLIENT_SECRET: "secret"
+      OAUTH_REDIRECT_URI: "uri"
+      REDIS_HOST: "localhost"
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: "pw"
+      MONGODB_HOST: "localhost"
+      MONGODB_PORT: "27017"
+      MONGODB_USER: "user"
+      MONGODB_PASSWORD: "pw"
+      MONGODB_DB_NAME: "db"
+      ENV: "test"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run Pytest
+        run: uv run pytest
+
+  # 部署到 Master
   deploy-master:
     name: Deploy to Easybot Master
+    needs: test
     runs-on: [self-hosted, master]
     environment: prod
 
@@ -15,17 +71,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Stop old container
-        run: |
-          docker stop fastapi-app || true
-          docker rm fastapi-app || true
-
-      - name: Build Docker image
-        run: docker build -t fastapi-app .
-
       - name: Write .env file
         run: |
-          echo "DB_HOST=${{ vars.DB_HOST }}" >> .env
+          echo "DB_HOST=${{ vars.DB_HOST }}" > .env
           echo "DB_PORT=${{ vars.DB_PORT }}" >> .env
           echo "DB_NAME=${{ vars.DB_NAME }}" >> .env
           echo "DB_USER=${{ vars.DB_USER }}" >> .env
@@ -56,17 +104,64 @@ jobs:
           echo "MINIO_SECRET_KEY=${{ secrets.MINIO_SECRET_KEY }}" >> .env
           echo "ENV=production" >> .env
 
-      - name: Run new container
+      - name: Build and Deploy
         run: |
-          docker run -d \
+          docker build -t fastapi-app:latest .
+
+          if [ "$(docker ps -q -f name=fastapi-app)" ]; then
+            echo "Creating backup of current container..."
+            docker commit fastapi-app fastapi-app:backup
+            docker stop fastapi-app
+            docker rm fastapi-app
+          fi
+
+          echo "Starting new container..."
+          if docker run -d \
             --restart=unless-stopped \
             --name fastapi-app \
             --env-file .env \
             -p 8000:80 \
-            fastapi-app
+            fastapi-app:latest; then
+            
+            echo "New container started. Waiting for health check..."
+            sleep 5
+            
+            if [ "$(docker ps -q -f name=fastapi-app)" ]; then
+              echo "Deployment Successful! ✅"
+            else
+              echo "Container crashed immediately! ❌"
+              exit 1
+            fi
+            
+          else
+            echo "Docker run failed! ❌"
+            exit 1
+          fi
 
+      - name: Rollback if Deploy Failed
+        if: failure()
+        run: |
+          echo "⚠️ Deployment failed. Rolling back to backup..."
+          docker stop fastapi-app || true
+          docker rm fastapi-app || true
+
+          if docker image inspect fastapi-app:backup > /dev/null 2>&1; then
+             echo "Restoring backup image..."
+             docker run -d \
+              --restart=unless-stopped \
+              --name fastapi-app \
+              --env-file .env \
+              -p 8000:80 \
+              fastapi-app:backup
+             echo "Rollback successful. Old version is running. 🔄"
+          else
+             echo "No backup found. System might be down. 💀"
+          fi
+
+  # 部署到 Slave
   deploy-slave:
     name: Deploy to Easybot Slave
+    needs: test
     runs-on: [self-hosted, slave]
     environment: prod
 
@@ -74,17 +169,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Stop old container
-        run: |
-          docker stop fastapi-app || true
-          docker rm fastapi-app || true
-
-      - name: Build Docker image
-        run: docker build -t fastapi-app .
-
       - name: Write .env file
         run: |
-          echo "DB_HOST=${{ vars.DB_HOST }}" >> .env
+          echo "DB_HOST=${{ vars.DB_HOST }}" > .env
           echo "DB_PORT=${{ vars.DB_PORT }}" >> .env
           echo "DB_NAME=${{ vars.DB_NAME }}" >> .env
           echo "DB_USER=${{ vars.DB_USER }}" >> .env
@@ -115,11 +202,59 @@ jobs:
           echo "MINIO_SECRET_KEY=${{ secrets.MINIO_SECRET_KEY }}" >> .env
           echo "ENV=production" >> .env
 
-      - name: Run new container
+      - name: Build and Deploy
         run: |
-          docker run -d \
+          # 1. 建置新版 Image
+          docker build -t fastapi-app:latest .
+
+          # 2. 備份
+          if [ "$(docker ps -q -f name=fastapi-app)" ]; then
+            echo "Creating backup of current container..."
+            docker commit fastapi-app fastapi-app:backup
+            docker stop fastapi-app
+            docker rm fastapi-app
+          fi
+
+          # 3. 嘗試啟動
+          echo "Starting new container..."
+          if docker run -d \
             --restart=unless-stopped \
             --name fastapi-app \
             --env-file .env \
             -p 8000:80 \
-            fastapi-app
+            fastapi-app:latest; then
+            
+            echo "New container started. Waiting for health check..."
+            sleep 5 
+            
+            if [ "$(docker ps -q -f name=fastapi-app)" ]; then
+              echo "Deployment Successful! ✅"
+            else
+              echo "Container crashed immediately! ❌"
+              exit 1 
+            fi
+            
+          else
+            echo "Docker run failed! ❌"
+            exit 1
+          fi
+
+      - name: Rollback if Deploy Failed
+        if: failure()
+        run: |
+          echo "⚠️ Deployment failed. Rolling back to backup..."
+          docker stop fastapi-app || true
+          docker rm fastapi-app || true
+
+          if docker image inspect fastapi-app:backup > /dev/null 2>&1; then
+             echo "Restoring backup image..."
+             docker run -d \
+              --restart=unless-stopped \
+              --name fastapi-app \
+              --env-file .env \
+              -p 8000:80 \
+              fastapi-app:backup
+             echo "Rollback successful. Old version is running. 🔄"
+          else
+             echo "No backup found. System might be down. 💀"
+          fi
