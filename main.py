@@ -4,6 +4,7 @@ from fastapi import FastAPI, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from modules.bot.bot_router import bot_router
 from modules.ecomm.ecomm_router import (
@@ -34,7 +35,7 @@ app = FastAPI(
     responses={status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse}},
     root_path="/easybot-api",
 )
-
+Instrumentator().instrument(app).expose(app)
 # Global exception handler
 add_global_exception_handler(app)
 
