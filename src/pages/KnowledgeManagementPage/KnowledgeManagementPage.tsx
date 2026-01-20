@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from '@mui/material'
+import { Box, Button, Typography, Chip, CircularProgress } from '@mui/material'
 import { StyledKnowledgeManagementPage } from './KnowledgeManagementPage.style'
 import { useTranslation } from 'react-i18next'
 import { CustomTable } from '@/components/CustomTable'
@@ -8,7 +8,9 @@ import {
   useInsertKnowledgeItemMutation,
   useInsertKnowledgeItemsByCSVMutation,
   useLazyGetKnowledgeItemsQuery,
-  useUpdateKnowledgeItemMutation
+  useUpdateKnowledgeItemMutation,
+  useGetSyncStatusQuery,
+  useTriggerSyncMutation
 } from '@/store/apis/knowledgeApi'
 import { useEffect, useState } from 'react'
 import { useAppSelector } from '@/utils/hook'
@@ -19,6 +21,10 @@ import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
 import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
 import { showErrorToast, showSuccessToast } from '@/utils/toast'
 import { useParams } from 'react-router-dom'
+import SyncIcon from '@mui/icons-material/Sync'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import ErrorIcon from '@mui/icons-material/Error'
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty'
 
 const knowledgeManagementPageContent = {
   title: 'knowledgeSettingPage.title',
@@ -69,11 +75,28 @@ const insertKnowledgesFields: FieldProps[] = [
 
 const KnowledgeManagementPage = () => {
   const { uuid } = useParams()
+  const { t } = useTranslation()
+  const { knowledgeItems } = useAppSelector((state) => state.knowledge)
+  const { botList } = useAppSelector((state) => state.bot)
+  const currentBot = botList.find((bot) => bot.bot_detail_id === uuid)
+  const [pollingInterval, setPollingInterval] = useState(0)
   const [getKnowledges] = useLazyGetKnowledgeItemsQuery()
   const [insertKnowledge] = useInsertKnowledgeItemMutation()
   const [updateKnowledge] = useUpdateKnowledgeItemMutation()
   const [insertKnowledges] = useInsertKnowledgeItemsByCSVMutation()
   const [deleteKnowledges] = useDeleteKnowledgeItemsMutation()
+
+  const { data: syncStatus } = useGetSyncStatusQuery(
+    { bot_uuid: uuid! },
+    {
+      skip: !uuid,
+      pollingInterval: pollingInterval
+    }
+  )
+
+  const [triggerSync, { isLoading: isSyncTriggering }] =
+    useTriggerSyncMutation()
+
   const [selected, setSelected] = useState<number[]>([])
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isMutiDeleteDialogOpen, setIsMutiDeleteDialogOpen] = useState(false)
@@ -85,10 +108,7 @@ const KnowledgeManagementPage = () => {
     useState<KnowledgeItem | null>(null)
   const [editingKnowledgeItem, setEditingKnowledgeItem] =
     useState<KnowledgeItem | null>(null)
-  const { t } = useTranslation()
-  const { knowledgeItems } = useAppSelector((state) => state.knowledge)
-  const { botList } = useAppSelector((state) => state.bot)
-  const currentBot = botList.find((bot) => bot.bot_detail_id === uuid)
+
   const breadcrumbItems = [
     {
       link: PAGE_PATHS.BOT_LIST,
@@ -96,13 +116,32 @@ const KnowledgeManagementPage = () => {
     },
     {
       link: PAGE_PATHS.BOT_LIST + `/${currentBot?.bot_detail_id}`,
-      linkText: currentBot!.chinese_name
+      linkText: currentBot?.chinese_name || ''
     },
     {
       link: `${PAGE_PATHS.BOT_LIST}/${currentBot?.bot_detail_id}/${PAGE_PATHS.KNOWLEDGE_MOUDLE}`,
       linkText: knowledgeManagementPageContent.title
     }
   ]
+
+  useEffect(() => {
+    if (syncStatus?.status === 'RUNNING') {
+      setPollingInterval(3000)
+    } else {
+      setPollingInterval(0)
+    }
+  }, [syncStatus?.status])
+
+  // --- Handlers ---
+  const handleTriggerSync = async () => {
+    if (!currentBot?.bot_detail_id) return
+    try {
+      await triggerSync({ bot_uuid: currentBot.bot_detail_id }).unwrap()
+      showSuccessToast('success.sync_success', t)
+    } catch (error) {
+      showErrorToast(error, t)
+    }
+  }
 
   const handleDeleteItem = (item: KnowledgeItem) => {
     setCurrentDeleteKnowledgeItem(item)
@@ -225,8 +264,68 @@ const KnowledgeManagementPage = () => {
   }
 
   useEffect(() => {
-    getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
-  }, [])
+    if (currentBot?.bot_detail_id) {
+      getKnowledges({ bot_uuid: currentBot.bot_detail_id })
+    }
+  }, [currentBot?.bot_detail_id])
+
+  const renderSyncStatusChip = () => {
+    if (!syncStatus) return null
+
+    let label = ''
+    let color:
+      | 'default'
+      | 'primary'
+      | 'secondary'
+      | 'error'
+      | 'info'
+      | 'success'
+      | 'warning' = 'default'
+    let icon = undefined
+
+    switch (syncStatus.status) {
+      case 'PENDING':
+        label = '等待同步'
+        color = 'warning'
+        icon = <HourglassEmptyIcon />
+        break
+      case 'RUNNING':
+        label = '同步中...'
+        color = 'info'
+        icon = <CircularProgress size={16} color="inherit" />
+        break
+      case 'COMPLETED':
+        label = syncStatus.has_pending_changes ? '資料已變更' : '已同步'
+        color = syncStatus.has_pending_changes ? 'warning' : 'success'
+        icon = syncStatus.has_pending_changes ? (
+          <ErrorIcon />
+        ) : (
+          <CheckCircleIcon />
+        )
+        break
+      case 'FAILED':
+        label = '同步失敗'
+        color = 'error'
+        icon = <ErrorIcon />
+        break
+    }
+
+    return (
+      <Chip
+        label={label}
+        color={color}
+        icon={icon}
+        variant="outlined"
+        size="small"
+        sx={{ marginRight: '10px' }}
+      />
+    )
+  }
+
+  const isSyncDisabled =
+    isSyncTriggering ||
+    syncStatus?.status === 'RUNNING' ||
+    (!syncStatus?.has_pending_changes && syncStatus?.status === 'COMPLETED')
 
   return (
     <StyledKnowledgeManagementPage disableGutters maxWidth={false}>
@@ -249,7 +348,11 @@ const KnowledgeManagementPage = () => {
         >
           {t(knowledgeManagementPageContent.title)}
         </Typography>
-        <Box>
+
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {/* Status Chip */}
+          {renderSyncStatusChip()}
+
           {!isEmpty(selected) && (
             <Button
               variant="outlined"
@@ -260,9 +363,22 @@ const KnowledgeManagementPage = () => {
               {t(knowledgeManagementPageContent.deleteButtonText)}
             </Button>
           )}
-          <Button variant="outlined" sx={{ marginRight: '10px' }}>
-            {t(knowledgeManagementPageContent.syncButtonText)}
+
+          {/* Sync Button */}
+          <Button
+            variant="outlined"
+            sx={{ marginRight: '10px' }}
+            onClick={handleTriggerSync}
+            disabled={isSyncDisabled}
+            startIcon={
+              isSyncTriggering ? <CircularProgress size={20} /> : <SyncIcon />
+            }
+          >
+            {isSyncTriggering
+              ? 'Starting...'
+              : t(knowledgeManagementPageContent.syncButtonText)}
           </Button>
+
           <Button
             variant="outlined"
             onClick={handleAddSingleKnowledge}
@@ -275,6 +391,7 @@ const KnowledgeManagementPage = () => {
           </Button>
         </Box>
       </Box>
+
       <Box className="knowledge__tableContainer">
         <CustomTable
           data={knowledgeItems}
@@ -285,6 +402,8 @@ const KnowledgeManagementPage = () => {
           onDelete={handleDeleteItem}
         />
       </Box>
+
+      {/* Dialogs ... */}
       <CustomDialog<{
         question: string
         answer: string

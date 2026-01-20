@@ -1,10 +1,16 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { CustomError } from '@/configs/type'
-import { knowledgeApi, KnowledgeItem } from '../apis/knowledgeApi'
+import {
+  knowledgeApi,
+  KnowledgeItem,
+  KnowledgeSyncStatusResponse
+} from '../apis/knowledgeApi'
 
 interface KnowledgeState {
   knowledgeItems: KnowledgeItem[]
   currentknowledgeItemObjectId: number | null
+  syncInfo: KnowledgeSyncStatusResponse | null
+  isSyncing: boolean
   errorCode: string
   errorMessage: string
   status: 'idle' | 'loading' | 'succeeded' | 'failed'
@@ -13,6 +19,8 @@ interface KnowledgeState {
 const initialState: KnowledgeState = {
   knowledgeItems: [],
   currentknowledgeItemObjectId: null,
+  syncInfo: null,
+  isSyncing: false,
   errorCode: '',
   errorMessage: '',
   status: 'idle'
@@ -52,10 +60,38 @@ export const knowledgeSlice = createSlice({
       .addMatcher(
         knowledgeApi.endpoints.getKnowledgeItems.matchRejected,
         (state, action) => {
-          const error = action.payload!.data as CustomError
+          const error = action.payload?.data as CustomError
           state.status = 'failed'
-          state.errorCode = error['error_code']
-          state.errorMessage = error['error_message']
+          if (error) {
+            state.errorCode = error['error_code']
+            state.errorMessage = error['error_message']
+          }
+        }
+      )
+      .addMatcher(
+        knowledgeApi.endpoints.getSyncStatus.matchFulfilled,
+        (state, action) => {
+          state.syncInfo = action.payload
+        }
+      )
+      .addMatcher(knowledgeApi.endpoints.triggerSync.matchPending, (state) => {
+        state.isSyncing = true
+      })
+      .addMatcher(
+        knowledgeApi.endpoints.triggerSync.matchFulfilled,
+        (state) => {
+          state.isSyncing = false
+        }
+      )
+      .addMatcher(
+        knowledgeApi.endpoints.triggerSync.matchRejected,
+        (state, action) => {
+          state.isSyncing = false
+          const error = action.payload?.data as CustomError
+          if (error) {
+            state.errorCode = error['error_code']
+            state.errorMessage = error['error_message']
+          }
         }
       )
   }

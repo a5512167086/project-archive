@@ -379,7 +379,8 @@
     "image_added": "圖片新增成功",
     "image_updated": "圖片更新成功",
     "image_deleted": "圖片刪除成功",
-    "image_order_updated": "圖片順序更新成功"
+    "image_order_updated": "圖片順序更新成功",
+    "sync_success": "知識項目已成功同步到向量資料庫"
   },
   "productManagementPage": {
     "title": "商品管理",

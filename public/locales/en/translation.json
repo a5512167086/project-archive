@@ -377,7 +377,8 @@
     "image_added": "Image added successfully",
     "image_updated": "Image updated successfully",
     "image_deleted": "Image deleted successfully",
-    "image_order_updated": "Image order updated successfully"
+    "image_order_updated": "Image order updated successfully",
+    "sync_success": "Knowledge items synced to Vector DB successfully"
   },
   "productManagementPage": {
     "title": "Product Management",
