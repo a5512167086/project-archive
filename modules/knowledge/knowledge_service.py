@@ -1,17 +1,22 @@
+from datetime import datetime, timezone
+from uuid import UUID
+
 import pandas as pd
 from fastapi import UploadFile
 from sqlmodel import Session
 
 from modules.bot.bot_model import BotListWithCredentialView
 from modules.knowledge.knowledge_command import KnowledgeCommand
+from modules.knowledge.knowledge_model import KnowledgeVectorDBStatus
 from modules.knowledge.knowledge_query import KnowledgeQuery
 from modules.knowledge.knowledge_schema import (
-    CreateOrUpdateKnowledgeVectorDBStatus,
     InsertKnowledgeRequest,
     UpdateKnowledgeRequest,
 )
+from shared.constants.common import SyncStatus
 from shared.constants.error_code import ErrorCode
 from shared.exception import GlobalErrorException
+from shared.utils.api import rag_vector_ingest
 
 
 class KnowledgeService:
@@ -91,15 +96,60 @@ class KnowledgeService:
             knowledge.object_id, body.question, body.answer
         )
 
-    async def update_knowledge_sync_status(
-        self,
-        bot: BotListWithCredentialView,
-        body: CreateOrUpdateKnowledgeVectorDBStatus,
-    ):
-        bot_uuid_str = str(bot.bot_detail_id)
-
-        update_payload = body.model_dump(exclude_unset=True, exclude={"bot_uuid"})
-
+    async def mark_as_pending(self, bot_uuid: UUID):
+        bot_uuid_str = str(bot_uuid)
         await self.command.update_knowledge_vector_db_status(
-            bot_uuid=bot_uuid_str, **update_payload
+            bot_uuid=bot_uuid_str, status=SyncStatus.PENDING, has_pending_changes=True
         )
+
+    async def get_sync_status(self, bot_uuid: UUID) -> KnowledgeVectorDBStatus:
+        bot_uuid_str = str(bot_uuid)
+        status = await KnowledgeVectorDBStatus.find_one(
+            KnowledgeVectorDBStatus.bot_uuid == bot_uuid_str
+        )
+        if not status:
+            return KnowledgeVectorDBStatus(bot_uuid=bot_uuid_str)
+        return status
+
+    async def trigger_sync(self, bot: BotListWithCredentialView):
+        bot_uuid_str = str(bot.bot_detail_id)
+        status_doc = await self.get_sync_status(bot.bot_detail_id)
+
+        if status_doc.status == SyncStatus.RUNNING:
+            raise GlobalErrorException(
+                error_code=ErrorCode.SYNC_ALREADY_IN_PROGRESS,
+                error_message="Sync is already in progress.",
+            )
+
+        if not status_doc.has_pending_changes:
+            raise GlobalErrorException(
+                error_code=ErrorCode.NO_PENDING_CHANGES,
+                error_message="No pending changes to sync.",
+            )
+
+        now = datetime.now(timezone.utc)
+        await self.command.update_knowledge_vector_db_status(
+            bot_uuid=bot_uuid_str, status=SyncStatus.RUNNING, last_sync_start_time=now
+        )
+
+        try:
+            rag_vector_ingest(bot_uuid_str)
+
+            await self.command.update_knowledge_vector_db_status(
+                bot_uuid=bot_uuid_str,
+                status=SyncStatus.COMPLETED,
+                has_pending_changes=False,
+                last_sync_end_time=datetime.now(timezone.utc),
+                last_successful_sync_time=now,
+            )
+
+        except Exception as e:
+            await self.command.update_knowledge_vector_db_status(
+                bot_uuid=bot_uuid_str,
+                status=SyncStatus.FAILED,
+                last_sync_end_time=datetime.now(timezone.utc),
+            )
+            raise GlobalErrorException(
+                error_code=ErrorCode.RAG_SERVICE_ERROR,
+                error_message=f"Failed to sync with RAG service: {str(e)}",
+            )

@@ -32,3 +32,16 @@ class CreateOrUpdateKnowledgeVectorDBStatus(BaseModel):
     last_sync_start_time: Optional[datetime] = None
     last_sync_end_time: Optional[datetime] = None
     last_successful_sync_time: Optional[datetime] = None
+
+
+class KnowledgeSyncStatusResponse(BaseModel):
+    bot_uuid: str
+    status: SyncStatus
+    has_pending_changes: bool
+    last_sync_start_time: Optional[datetime] = None
+    last_sync_end_time: Optional[datetime] = None
+    last_successful_sync_time: Optional[datetime] = None
+
+
+class TriggerSyncRequest(BaseModel):
+    bot_uuid: UUID
