@@ -56,20 +56,14 @@ class KnowledgeService:
         return self.query.get_all_knowledge_items_by_class_id(knowledge_class_id)
 
     def sync_knowledge_vectors(self, bot_uuid: UUID, rag_service: RAGService) -> dict:
-        """
-        同步 SQL 資料庫和向量資料庫的知識內容。
-        """
-        # 1. 從 SQL 獲取最新的完整知識列表
         sql_items = self.get_all_knowledge_list(bot_uuid)
         sql_object_ids = {item.object_id for item in sql_items}
         logger.info(
             f"Found {len(sql_object_ids)} knowledge items in SQL for bot {bot_uuid}."
         )
 
-        # 2. 從 Vector DB 獲取當前儲存的 object_id 列表
         qdrant_object_ids = rag_service.get_object_ids_by_bot_uuid(bot_uuid)
 
-        # 3. 計算需要從 Vector DB 刪除的 ID
         ids_to_delete = list(qdrant_object_ids - sql_object_ids)
         deleted_count = 0
         if ids_to_delete:
@@ -79,8 +73,6 @@ class KnowledgeService:
         else:
             logger.info("No items need to be deleted from Qdrant.")
 
-        # 4. 將 SQL 中的所有資料 Upsert 到 Vector DB
-        # upsert 會自動覆蓋已存在的點，並新增不存在的點
         upserted_count = rag_service.upsert_knowledge_items(bot_uuid, sql_items)
 
         return {"upserted": upserted_count, "deleted": deleted_count}

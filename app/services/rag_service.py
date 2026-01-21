@@ -1,4 +1,3 @@
-# app/services/rag_service.py
 from __future__ import annotations
 
 import time
@@ -14,7 +13,7 @@ from app.schemas import KnowledgeItem
 from app.services.llm_service import LLMService
 from app.services.prompt_service import PromptService
 from app.services.reranker_service import RerankerService
-from app.services.retrieval_service import RetrievalService  # NEW
+from app.services.retrieval_service import RetrievalService
 from app.services.rewrite_service import RewriteService
 from app.services.summary_service import SummaryService
 from app.services.vector_service import VectorService
@@ -48,16 +47,12 @@ class RAGService:
         memory: Optional[Any] = None,
     ) -> None:
         self.embeddings = embeddings
-
-        # ---- extracted services ----
         self.llm_service: LLMService = llm_service or LLMService(
             preloaded_hf_chat_model=preloaded_hf_chat_model
         )
-
         self.prompt_service: PromptService = prompt_service or PromptService(
             max_contexts_for_prompt=self.DEFAULT_MAX_CONTEXTS_FOR_PROMPT
         )
-
         self.vector_service: VectorService = vector_service or VectorService(
             embeddings=embeddings,
             qdrant_url=qdrant_url,
@@ -65,36 +60,19 @@ class RAGService:
             timeout=timeout,
             ensure_collection_and_indexes=ensure_collection_and_indexes,
         )
-
         self.reranker = reranker_service
-
-        # ---- retrieval (hybrid) ----
         self.retrieval_service = retrieval_service
-
-        # ---- required facade services ----
-        if summary_service is None:
-            raise ValueError("summary_service is required (no default memory module).")
         self.summary_service: SummaryService = summary_service
-
-        # ---- persistence memory (append_turn) ----
         self.memory = memory
-
-        # ---- rewrite service ----
         self.rewrite_service: RewriteService = rewrite_service or RewriteService(
             get_llm=self.llm_service.get_llm,
             snapshot_loader=self.summary_service,
             use_summary=True,
         )
 
-    # =====================
-    # Session Key
-    # =====================
     def _build_session_key(self, bot_uuid: UUID, line_id: str) -> str:
         return f"{str(bot_uuid)}:{line_id}"
 
-    # =====================
-    # Vector wrappers
-    # =====================
     def get_object_ids_by_bot_uuid(
         self, bot_uuid: UUID, batch_size: int = DEFAULT_BATCH_SIZE
     ) -> Set[int]:
@@ -116,44 +94,50 @@ class RAGService:
             bot_uuid=bot_uuid, object_ids=object_ids
         )
 
-    # =====================
-    # Search (Hybrid-aware)
-    # =====================
     def search(
         self,
         bot_uuid: UUID,
         query_text: str,
-        top_k: int = 3,  # 最後只留 top_k
-        fetch_k: Optional[int] = None,  # 第一階段抓取候選數
-        score_threshold: Optional[float] = DEFAULT_SCORE_THRESHOLD,  # vector threshold
-        rerank_threshold: Optional[float] = None,  # rerank threshold
+        top_k: int = 3,
+        fetch_k: Optional[int] = None,
+        score_threshold: Optional[float] = DEFAULT_SCORE_THRESHOLD,
+        rerank_threshold: Optional[float] = None,
+        retrieval_mode: str = "hybrid",
+        use_rerank: bool = True,
     ) -> List[Dict[str, Any]]:
+        mode = (retrieval_mode or "hybrid").lower().strip()
+        if mode not in {"vector", "lexical", "hybrid"}:
+            mode = "hybrid"
 
-        # 1) 決定第一階段抓取數量 (initial_k)
         if fetch_k is not None:
             initial_k = int(fetch_k)
-        elif self.reranker:
+        elif self.reranker and use_rerank:
             initial_k = int(top_k) * self.DEFAULT_RERANK_FACTOR
         else:
             initial_k = int(top_k)
 
-        # 稍微放寬向量檢索的閾值，確保 Recall
-        initial_threshold = (score_threshold - 0.1) if score_threshold else None
+        if score_threshold is None:
+            initial_threshold = None
+        else:
+            initial_threshold = max(float(score_threshold) - 0.1, 0.0)
 
-        # 2) Step 1: Retrieval (Hybrid if available)
         if self.retrieval_service is not None:
             logger.info(
-                f"[RAGService] Step 1: Hybrid searching top {initial_k} candidates..."
+                f"[RAGService] Step 1: Retrieval(mode={mode}) searching top {initial_k} candidates..."
             )
             hits = self.retrieval_service.search(
                 bot_uuid=bot_uuid,
                 query_text=query_text,
-                top_k=initial_k,  # 先抓較多候選，給 reranker 用
+                top_k=initial_k,
                 fetch_k=initial_k,
                 score_threshold=initial_threshold,
-                mode="hybrid",
+                mode=mode,
             )
         else:
+            if mode != "vector":
+                logger.warning(
+                    f"[RAGService] retrieval_service is None, fallback to vector search (requested mode={mode})."
+                )
             logger.info(
                 f"[RAGService] Step 1: Vector searching top {initial_k} candidates..."
             )
@@ -164,7 +148,6 @@ class RAGService:
                 score_threshold=initial_threshold,
             )
 
-        # --- LOGGING: 初始檢索結果 ---
         if hits:
             logger.info(f"--- [Step 1 Result] Retrieved {len(hits)} items ---")
             for i, h in enumerate(hits):
@@ -180,29 +163,27 @@ class RAGService:
         else:
             logger.info("--- [Step 1 Result] Retrieved NO items ---")
 
-        # 如果沒有抓到資料，或沒有設定 reranker，直接回傳 top_k
-        if not hits or not self.reranker:
+        if not hits or not self.reranker or (not use_rerank):
             return hits[: int(top_k)]
 
         logger.info(
             f"[RAGService] Step 2: Reranking {len(hits)} hits -> Top {top_k}..."
         )
 
-        # 3) Step 2: Rerank（reranker 依然吃 docs list）
         reranked_hits = self.reranker.rerank(
             query=query_text,
             docs=hits,
             top_k=int(top_k),
         )
 
-        # 4) Rerank 門檻過濾 (詳細 Log 版)
         if rerank_threshold is not None:
-            kept_hits = []
-            dropped_hits = []
+            kept_hits: List[Dict[str, Any]] = []
+            dropped_hits: List[Dict[str, Any]] = []
 
+            thr = float(rerank_threshold)
             for h in reranked_hits:
-                score = h.get("rerank_score", 0.0)
-                if score >= rerank_threshold:
+                score = float(h.get("rerank_score", 0.0) or 0.0)
+                if score >= thr:
                     kept_hits.append(h)
                 else:
                     dropped_hits.append(h)
@@ -211,19 +192,17 @@ class RAGService:
 
             if dropped_hits:
                 logger.info(
-                    f"--- [Rerank Filter] Dropped {len(dropped_hits)} items (Score < {rerank_threshold}) ---"
+                    f"--- [Rerank Filter] Dropped {len(dropped_hits)} items (Score < {thr}) ---"
                 )
                 for h in dropped_hits:
                     q_snippet = (h.get("question", "") or "")[:30]
                     logger.info(
-                        f"  [DROPPED] Score: {h.get('rerank_score', 0.0):.4f} | ID: {h.get('object_id')} | Q: {q_snippet}..."
+                        f"  [DROPPED] Score: {float(h.get('rerank_score', 0.0) or 0.0):.4f} "
+                        f"| ID: {h.get('object_id')} | Q: {q_snippet}..."
                     )
             else:
-                logger.info(
-                    f"[Rerank Filter] No items dropped (all >= {rerank_threshold})."
-                )
+                logger.info(f"[Rerank Filter] No items dropped (all >= {thr}).")
 
-        # --- LOGGING: 最終保留結果 ---
         if reranked_hits:
             logger.info(
                 f"--- [Step 2 Result] After Reranking & Filtering (Top {len(reranked_hits)}) ---"
@@ -231,7 +210,8 @@ class RAGService:
             for i, h in enumerate(reranked_hits):
                 q_snippet = (h.get("question", "") or "")[:30]
                 logger.info(
-                    f"  #{i + 1} RerankScore: {h.get('rerank_score', 0.0):.4f} | ID: {h.get('object_id')} | Q: {q_snippet}..."
+                    f"  #{i + 1} RerankScore: {float(h.get('rerank_score', 0.0) or 0.0):.4f} "
+                    f"| ID: {h.get('object_id')} | Q: {q_snippet}..."
                 )
         else:
             logger.info(
@@ -240,9 +220,6 @@ class RAGService:
 
         return reranked_hits
 
-    # =====================
-    # History-aware search
-    # =====================
     def search_history_aware(
         self,
         bot_uuid: UUID,
@@ -254,6 +231,10 @@ class RAGService:
         rerank_threshold: Optional[float] = None,
         history_rounds: int = DEFAULT_MAX_HISTORY_ROUNDS,
         rewrite_model: str = "gpt_5_mini",
+        use_rewrite: bool = True,
+        use_summary_in_rewrite: bool = True,
+        retrieval_mode: str = "hybrid",
+        use_rerank: bool = True,
     ) -> Tuple[str, List[Dict[str, Any]]]:
         t0 = time.perf_counter()
 
@@ -265,6 +246,8 @@ class RAGService:
                 fetch_k=fetch_k,
                 score_threshold=score_threshold,
                 rerank_threshold=rerank_threshold,
+                retrieval_mode=retrieval_mode,
+                use_rerank=use_rerank,
             )
             logger.info(
                 f"[Timer] SearchHistoryAware Total (SingleTurn): {(time.perf_counter() - t0):.3f}s"
@@ -273,31 +256,39 @@ class RAGService:
 
         session_key = self._build_session_key(bot_uuid, line_id)
 
-        t_mem = time.perf_counter()
-        snapshot = self.summary_service.load(
-            session_key, max_messages=max(0, history_rounds * 2)
-        )
-        logger.info(
-            f"[Timer] Memory Load (Summary Included): {(time.perf_counter() - t_mem):.3f}s"
-        )
+        final_query = query_text
 
-        if snapshot.summary:
+        if use_rewrite:
+            t_mem = time.perf_counter()
+            snapshot = self.summary_service.load(
+                session_key, max_messages=max(0, history_rounds * 2)
+            )
             logger.info(
-                f"[RAGService] conversation_summary(session={session_key}): {snapshot.summary}"
+                f"[Timer] Memory Load (Summary Included): {(time.perf_counter() - t_mem):.3f}s"
             )
 
-        t_rewrite = time.perf_counter()
-        rr = self.rewrite_service.rewrite_with_snapshot(
-            user_query=query_text,
-            snapshot=snapshot,
-            rewrite_model=rewrite_model,
-        )
-        logger.info(
-            f"[Timer] Query Rewrite (Wrapper): {(time.perf_counter() - t_rewrite):.3f}s"
-        )
+            if snapshot.summary:
+                logger.info(
+                    f"[RAGService] conversation_summary(session={session_key}): {snapshot.summary}"
+                )
 
-        final_query = (rr.rewritten or "").strip() or query_text
-        logger.info(f"[RAGService] rewritten_query='{final_query}' from '{query_text}'")
+            t_rewrite = time.perf_counter()
+            rr = self.rewrite_service.rewrite_with_snapshot(
+                user_query=query_text,
+                snapshot=snapshot,
+                rewrite_model=rewrite_model,
+                use_summary=bool(use_summary_in_rewrite),
+            )
+            logger.info(
+                f"[Timer] Query Rewrite (Wrapper): {(time.perf_counter() - t_rewrite):.3f}s"
+            )
+
+            final_query = (rr.rewritten or "").strip() or query_text
+            logger.info(
+                f"[RAGService] rewritten_query='{final_query}' from '{query_text}'"
+            )
+        else:
+            logger.info("[RAGService] rewrite disabled for this request.")
 
         t_search = time.perf_counter()
         hits = self.search(
@@ -307,6 +298,8 @@ class RAGService:
             fetch_k=fetch_k,
             score_threshold=score_threshold,
             rerank_threshold=rerank_threshold,
+            retrieval_mode=retrieval_mode,
+            use_rerank=use_rerank,
         )
         logger.info(
             f"[Timer] Retrieval Search (Wrapper): {(time.perf_counter() - t_search):.3f}s | Hits: {len(hits)}"
@@ -317,9 +310,6 @@ class RAGService:
         )
         return final_query, hits
 
-    # =====================
-    # Generate
-    # =====================
     def generate(
         self,
         bot_uuid: UUID,
@@ -383,7 +373,6 @@ class RAGService:
 
         answer = (text or "").strip()
 
-        # ---- persistence append_turn ----
         if use_memory and session_key:
             if self.memory is not None and hasattr(self.memory, "append_turn"):
                 try:
@@ -400,9 +389,6 @@ class RAGService:
         logger.info(f"[Timer] Generate Total: {(time.perf_counter() - t0):.3f}s")
         return answer
 
-    # =====================
-    # One-shot Use Case
-    # =====================
     def answer(
         self,
         bot_uuid: UUID,
@@ -416,8 +402,11 @@ class RAGService:
         history_rounds: int = DEFAULT_MAX_HISTORY_ROUNDS,
         rewrite_model: str = "gpt_5_mini",
         max_history_messages: int = DEFAULT_MAX_HISTORY_MESSAGES,
+        use_rewrite: bool = True,
+        use_summary_in_rewrite: bool = True,
+        retrieval_mode: str = "hybrid",  # e.g., "vector", "lexical", "hybrid"
+        use_rerank: bool = True,
     ) -> Dict[str, Any]:
-
         rewritten, hits = self.search_history_aware(
             bot_uuid=bot_uuid,
             line_id=line_id,
@@ -428,6 +417,10 @@ class RAGService:
             rerank_threshold=rerank_threshold,
             history_rounds=history_rounds,
             rewrite_model=rewrite_model,
+            use_rewrite=use_rewrite,
+            use_summary_in_rewrite=use_summary_in_rewrite,
+            retrieval_mode=retrieval_mode,
+            use_rerank=use_rerank,
         )
 
         ans = self.generate(

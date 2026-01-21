@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import time
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, TypeAlias
 from uuid import UUID, uuid5
 
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -11,6 +11,8 @@ from qdrant_client import models as qmodels
 
 from app.logger import logger
 from app.schemas import KnowledgeItem
+
+Hit: TypeAlias = Dict[str, Any]
 
 
 class VectorService:
@@ -40,13 +42,25 @@ class VectorService:
             embedding=self.embeddings,
         )
 
-    # =====================
-    # Ensure / Indexes
-    # =====================
+    def _embedding_dim(self) -> int:
+        client = getattr(self.embeddings, "client", None)
+        if client is not None:
+            get_dim = getattr(client, "get_sentence_embedding_dimension", None)
+            if callable(get_dim):
+                try:
+                    dim = int(get_dim())
+                    if dim > 0:
+                        return dim
+                except Exception:
+                    pass
+
+        return len(self.embeddings.embed_query("test"))
+
     def ensure_collection(self) -> None:
         if self.client.collection_exists(self.collection):
             return
-        dim = len(self.embeddings.embed_query("test"))
+
+        dim = self._embedding_dim()
         self.client.create_collection(
             collection_name=self.collection,
             vectors_config=qmodels.VectorParams(
@@ -60,9 +74,12 @@ class VectorService:
             ("metadata.object_id", qmodels.PayloadSchemaType.INTEGER),
             ("metadata.source", qmodels.PayloadSchemaType.KEYWORD),
         ]
+
         try:
             info = self.client.get_collection(collection_name=self.collection)
-            existing = set(info.payload_schema.keys())
+            payload_schema = getattr(info, "payload_schema", None) or {}
+            existing = set(payload_schema.keys())
+
             for field_name, field_type in wanted:
                 if field_name in existing:
                     continue
@@ -75,35 +92,49 @@ class VectorService:
         except Exception as e:
             logger.warning(f"[VectorService] Index creation skipped/failed: {e}")
 
-    # =====================
-    # Filters / scroll
-    # =====================
+    def _build_knowledge_filter(
+        self,
+        bot_uuid: UUID,
+        object_ids: Optional[List[int]] = None,
+    ) -> qmodels.Filter:
+        must: List[qmodels.FieldCondition] = [
+            qmodels.FieldCondition(
+                key="metadata.bot_uuid",
+                match=qmodels.MatchValue(value=str(bot_uuid)),
+            ),
+            qmodels.FieldCondition(
+                key="metadata.source",
+                match=qmodels.MatchValue(value="knowledge"),
+            ),
+        ]
+
+        if object_ids:
+            must.append(
+                qmodels.FieldCondition(
+                    key="metadata.object_id",
+                    match=qmodels.MatchAny(any=object_ids),
+                )
+            )
+
+        return qmodels.Filter(must=must)
+
     def filter_knowledge(self, bot_uuid: UUID) -> qmodels.Filter:
-        return qmodels.Filter(
-            must=[
-                qmodels.FieldCondition(
-                    key="metadata.bot_uuid",
-                    match=qmodels.MatchValue(value=str(bot_uuid)),
-                ),
-                qmodels.FieldCondition(
-                    key="metadata.source",
-                    match=qmodels.MatchValue(value="knowledge"),
-                ),
-            ]
-        )
+        return self._build_knowledge_filter(bot_uuid)
 
     def get_object_ids_by_bot_uuid(
-        self, bot_uuid: UUID, batch_size: int = DEFAULT_BATCH_SIZE
+        self,
+        bot_uuid: UUID,
+        batch_size: int = DEFAULT_BATCH_SIZE,
     ) -> Set[int]:
         object_ids: Set[int] = set()
         next_offset = None
-        filt = self.filter_knowledge(bot_uuid)
+        filt = self._build_knowledge_filter(bot_uuid)
 
         while True:
             points, next_offset = self.client.scroll(
                 collection_name=self.collection,
                 scroll_filter=filt,
-                limit=batch_size,
+                limit=int(batch_size),
                 with_payload=["metadata.object_id"],
                 with_vectors=False,
                 offset=next_offset,
@@ -124,48 +155,46 @@ class VectorService:
 
         return object_ids
 
-    # =====================
-    # Upsert / Delete
-    # =====================
     def upsert_knowledge_items(
-        self, bot_uuid: UUID, items: Iterable[KnowledgeItem]
+        self,
+        bot_uuid: UUID,
+        items: Iterable[KnowledgeItem],
+        batch_size: int = DEFAULT_BATCH_SIZE,
     ) -> int:
         docs, metas, ids = self._prepare_docs(bot_uuid, items)
         if not docs:
             return 0
-        self.vs.add_texts(texts=docs, metadatas=metas, ids=ids)
-        return len(docs)
+
+        total = 0
+        bs = max(int(batch_size), 1)
+
+        for i in range(0, len(docs), bs):
+            chunk_docs = docs[i : i + bs]
+            chunk_metas = metas[i : i + bs]
+            chunk_ids = ids[i : i + bs]
+            self.vs.add_texts(texts=chunk_docs, metadatas=chunk_metas, ids=chunk_ids)
+            total += len(chunk_docs)
+
+        return total
 
     def delete_knowledge_items(
-        self, bot_uuid: UUID, object_ids: Optional[List[int]] = None
+        self,
+        bot_uuid: UUID,
+        object_ids: Optional[List[int]] = None,
     ) -> bool:
-        must = [
-            qmodels.FieldCondition(
-                key="metadata.bot_uuid",
-                match=qmodels.MatchValue(value=str(bot_uuid)),
-            ),
-            qmodels.FieldCondition(
-                key="metadata.source",
-                match=qmodels.MatchValue(value="knowledge"),
-            ),
-        ]
-        if object_ids:
-            must.append(
-                qmodels.FieldCondition(
-                    key="metadata.object_id",
-                    match=qmodels.MatchAny(any=object_ids),
-                )
-            )
+        filt = self._build_knowledge_filter(bot_uuid, object_ids=object_ids)
 
         self.client.delete(
             collection_name=self.collection,
-            points_selector=qmodels.FilterSelector(filter=qmodels.Filter(must=must)),
+            points_selector=qmodels.FilterSelector(filter=filt),
             wait=True,
         )
         return True
 
     def _prepare_docs(
-        self, bot_uuid: UUID, items: Iterable[KnowledgeItem]
+        self,
+        bot_uuid: UUID,
+        items: Iterable[KnowledgeItem],
     ) -> Tuple[List[str], List[Dict[str, Any]], List[str]]:
         bot_str = str(bot_uuid)
         docs: List[str] = []
@@ -175,8 +204,10 @@ class VectorService:
         for it in items:
             text = self._format_knowledge_text(it)
             pid = uuid5(bot_uuid, str(it.object_id))
+
             docs.append(text)
             ids.append(str(pid))
+
             metas.append({
                 "bot_uuid": bot_str,
                 "object_id": it.object_id,
@@ -193,32 +224,29 @@ class VectorService:
         a = (item.answer or "").strip()
         return f"Q: {q}，A: {a}" if a else f"Q: {q}"
 
-    # =====================
-    # Search
-    # =====================
     def search(
         self,
         bot_uuid: UUID,
         query_text: str,
         top_k: int,
         score_threshold: Optional[float],
-    ) -> List[Dict[str, Any]]:
+    ) -> List[Hit]:
         t0 = time.perf_counter()
 
         t_vs = time.perf_counter()
         pairs = self.vs.similarity_search_with_relevance_scores(
             query=query_text,
-            k=top_k,
-            filter=self.filter_knowledge(bot_uuid),
+            k=int(top_k),
+            filter=self._build_knowledge_filter(bot_uuid),
             score_threshold=score_threshold,
         )
-        vs_dur = time.perf_counter() - t_vs
         logger.info(
-            f"[Timer] Vector Search Call (Qdrant): {vs_dur:.3f}s | Pairs: {len(pairs)}"
+            f"[Timer] Vector Search Call (Qdrant): {(time.perf_counter() - t_vs):.3f}s | "
+            f"Pairs: {len(pairs)}"
         )
 
         t_map = time.perf_counter()
-        results: List[Dict[str, Any]] = []
+        results: List[Hit] = []
         for doc, score in pairs:
             md = doc.metadata or {}
             results.append({
@@ -228,24 +256,29 @@ class VectorService:
                 "question": md.get("question", ""),
                 "answer": md.get("answer", ""),
             })
-        map_dur = time.perf_counter() - t_map
-        logger.info(f"[Timer] Vector Search Transform: {map_dur:.3f}s")
-
-        t_post = time.perf_counter()
-        results.sort(key=lambda x: x["score"], reverse=True)
-        seen = set()
-        deduped = []
-        for r in results:
-            key = r.get("object_id") or r.get("id")
-            if key in seen:
-                continue
-            seen.add(key)
-            deduped.append(r)
-        post_dur = time.perf_counter() - t_post
         logger.info(
-            f"[Timer] Vector Search PostProcess: {post_dur:.3f}s | Deduped: {len(deduped)}"
+            f"[Timer] Vector Search Transform: {(time.perf_counter() - t_map):.3f}s"
         )
 
-        total = time.perf_counter() - t0
-        logger.info(f"[Timer] Search Total: {total:.3f}s")
+        t_post = time.perf_counter()
+        results = self._dedupe_and_sort(results)
+        logger.info(
+            f"[Timer] Vector Search PostProcess: {(time.perf_counter() - t_post):.3f}s | "
+            f"Deduped: {len(results)}"
+        )
+
+        logger.info(f"[Timer] Search Total: {(time.perf_counter() - t0):.3f}s")
+        return results
+
+    def _dedupe_and_sort(self, results: List[Hit]) -> List[Hit]:
+        results.sort(key=lambda x: float(x.get("score", 0.0) or 0.0), reverse=True)
+
+        seen: Set[Any] = set()
+        deduped: List[Hit] = []
+        for r in results:
+            k = r.get("object_id") or r.get("id")
+            if k in seen:
+                continue
+            seen.add(k)
+            deduped.append(r)
         return deduped

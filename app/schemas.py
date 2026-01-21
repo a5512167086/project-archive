@@ -61,12 +61,7 @@ class RewriteResult(BaseModel):
 
 @dataclass
 class BM25Index:
-    """
-    Internal cache structure (NOT for API response).
-    Holds BM25Okapi object which is not JSON serializable.
-    """
-
     bm25: Any
-    docs: List[Dict[str, Any]]  # each doc: object_id/question/answer/text...
+    docs: List[Dict[str, Any]]
     built_at: float
     size: int

@@ -1,4 +1,3 @@
-# app/services/summary_service.py
 from __future__ import annotations
 
 from typing import Any
@@ -14,15 +13,18 @@ class SummaryService:
         return self.mem.load(session_key, max_messages=max_messages)
 
     def load_recent_only(self, session_key: str, max_messages: int) -> MemorySnapshot:
-        if hasattr(self.mem, "load_recent_only"):
-            return self.mem.load_recent_only(session_key, max_messages=max_messages)
+        load_recent_only = getattr(self.mem, "load_recent_only", None)
+        if callable(load_recent_only):
+            return load_recent_only(session_key, max_messages=max_messages)
         return self.mem.load(session_key, max_messages=max_messages)
 
     def maybe_update_summary(self, session_key: str, *, force: bool = False) -> bool:
-        if hasattr(self.mem, "maybe_update_summary"):
-            return self.mem.maybe_update_summary(session_key, force=force)
+        fn = getattr(self.mem, "maybe_update_summary", None)
+        if callable(fn):
+            return bool(fn(session_key, force=force))
         return False
 
     def append_turn(self, session_key: str, human: str, ai: str) -> None:
-        if hasattr(self.mem, "append_turn"):
-            self.mem.append_turn(session_key, human=human, ai=ai)
+        fn = getattr(self.mem, "append_turn", None)
+        if callable(fn):
+            fn(session_key, human=human, ai=ai)

@@ -1,154 +1,48 @@
-# app/services/retrieval_service.py
 from __future__ import annotations
 
-import re
 import threading
 import time
-from dataclasses import dataclass
-from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set
 from uuid import UUID
 
 from rank_bm25 import BM25Okapi
 
 from app.logger import logger
+from app.schemas import BM25Index
 from app.services.vector_service import VectorService
-
-_ASCII_TOKEN_RE = re.compile(r"[A-Za-z0-9_]+")
-
-
-def load_stopwords(path: Optional[str]) -> Set[str]:
-    """
-    Load stopwords from a txt file (one token per line).
-    Lines starting with # are treated as comments.
-    """
-    if not path:
-        return set()
-
-    p = Path(path)
-    if not p.exists():
-        logger.warning(f"[RetrievalService] stopwords file not found: {p}")
-        return set()
-
-    out: Set[str] = set()
-    for line in p.read_text(encoding="utf-8", errors="ignore").splitlines():
-        w = line.strip()
-        if not w or w.startswith("#"):
-            continue
-        out.add(w)
-    return out
-
-
-def _is_zh_char(ch: str) -> bool:
-    # CJK Unified Ideographs
-    return "\u4e00" <= ch <= "\u9fff"
-
-
-def ngram_tokenize_unigram_bigram(
-    text: str,
-    *,
-    stopwords: Set[str],
-) -> List[str]:
-    """
-    Tokenization strategy:
-    - ASCII tokens: [A-Za-z0-9_]+, lowercased
-    - Chinese: unigram + bigram on continuous CJK runs
-    - Apply stopwords to BOTH unigram and bigram
-    """
-    if not text:
-        return []
-
-    s = text.strip()
-    if not s:
-        return []
-
-    tokens: List[str] = []
-
-    # 1) ASCII tokens
-    for m in _ASCII_TOKEN_RE.finditer(s):
-        w = m.group(0).lower()
-        if w and w not in stopwords:
-            tokens.append(w)
-
-    # 2) Chinese runs -> unigram + bigram
-    buf: List[str] = []
-
-    def flush_buf() -> None:
-        nonlocal buf
-        if not buf:
-            return
-
-        # unigram
-        for ch in buf:
-            if ch and ch not in stopwords:
-                tokens.append(ch)
-
-        # bigram
-        for i in range(len(buf) - 1):
-            bg = buf[i] + buf[i + 1]
-            if bg and bg not in stopwords:
-                tokens.append(bg)
-
-        buf = []
-
-    for ch in s:
-        if _is_zh_char(ch):
-            buf.append(ch)
-        else:
-            flush_buf()
-
-    flush_buf()
-    return tokens
-
-
-@dataclass
-class _BM25Index:
-    bm25: Any
-    docs: List[Dict[str, Any]]  # {id, object_id, question, answer, text}
-    built_at: float
-    size: int
+from app.utils.helper import load_stopwords, ngram_tokenize_unigram_bigram
 
 
 class RetrievalService:
-    """
-    RetrievalService
-    - vector: VectorService (Qdrant)
-    - lexical: BM25 (char n-gram: unigram+bigram)
-    - hybrid: RRF fusion (rank-based)
-    """
-
     DEFAULT_RRF_K = 60
 
     def __init__(
         self,
-        *,
         vector_service: VectorService,
         load_docs: Optional[Callable[[UUID], List[Dict[str, Any]]]] = None,
         stopwords: Optional[Set[str]] = None,
         stopwords_path: Optional[str] = None,
         bm25_enabled: bool = True,
         bm25_refresh_ttl_sec: int = 300,
-        debug_log_hits: bool = False,  # ✅ add switch
-        debug_log_top_n: int = 5,  # ✅ how many hits to log
+        debug_log_hits: bool = False,
+        debug_log_top_n: int = 5,
     ) -> None:
         self.vs = vector_service
-        self._load_docs_fn: Optional[Callable[[UUID], List[Dict[str, Any]]]] = load_docs
+        self._load_docs_fn = load_docs
 
         self.stopwords: Set[str] = (
             load_stopwords(stopwords_path) if stopwords is None else set(stopwords)
         )
-
         self.bm25_enabled = bool(bm25_enabled)
         self.bm25_refresh_ttl_sec = int(bm25_refresh_ttl_sec)
 
         self.debug_log_hits = bool(debug_log_hits)
         self.debug_log_top_n = max(int(debug_log_top_n), 0)
 
-        self._idx_cache: Dict[str, _BM25Index] = {}
+        self._idx_cache: Dict[str, BM25Index] = {}
         self._locks: Dict[str, threading.Lock] = {}
         self._global_lock = threading.Lock()
 
-    # -------- bind loader --------
     def bind_docs_loader(
         self, load_docs: Callable[[UUID], List[Dict[str, Any]]]
     ) -> None:
@@ -158,17 +52,13 @@ class RetrievalService:
         return self._load_docs_fn is not None
 
     def refresh_index(self, bot_uuid: UUID) -> None:
-        """Refresh BM25 index for a bot (in-memory)."""
         key = str(bot_uuid)
         with self._get_lock(key):
-            if key in self._idx_cache:
-                del self._idx_cache[key]
+            self._idx_cache.pop(key, None)
         self._ensure_bm25_index(bot_uuid, force=True)
 
-    # -------- debug logging helpers --------
     def _log_hits(
         self,
-        *,
         title: str,
         query_text: str,
         hits: List[Dict[str, Any]],
@@ -190,7 +80,6 @@ class RetrievalService:
 
     def _log_hybrid_debug(
         self,
-        *,
         query_text: str,
         vec_hits: List[Dict[str, Any]],
         lex_hits: List[Dict[str, Any]],
@@ -211,16 +100,14 @@ class RetrievalService:
             score_key="lex_score",
         )
 
-    # -------- public search --------
     def search(
         self,
-        *,
         bot_uuid: UUID,
         query_text: str,
         top_k: int = 5,
         fetch_k: Optional[int] = None,
         score_threshold: Optional[float] = None,
-        mode: str = "hybrid",  # vector | lexical | hybrid
+        mode: str = "hybrid",
         rrf_k: int = DEFAULT_RRF_K,
         weight_vector: float = 1.0,
         weight_lexical: float = 1.0,
@@ -263,12 +150,9 @@ class RetrievalService:
             fetch_k=lex_fetch,
         )
 
-        # ✅ log vector & bm25 separately (hybrid mode only)
         if self.debug_log_hits:
             self._log_hybrid_debug(
-                query_text=query_text,
-                vec_hits=vec_hits,
-                lex_hits=lex_hits,
+                query_text=query_text, vec_hits=vec_hits, lex_hits=lex_hits
             )
 
         return self._hybrid_fuse_rrf(
@@ -281,20 +165,19 @@ class RetrievalService:
             weight_lexical=float(weight_lexical),
         )
 
-    # -------- vector --------
     def _vector_search(
         self,
-        *,
         bot_uuid: UUID,
         query_text: str,
         top_k: int,
         fetch_k: Optional[int],
         score_threshold: Optional[float],
     ) -> List[Dict[str, Any]]:
+        k_fetch = int(fetch_k or top_k)
         hits = self.vs.search(
             bot_uuid=bot_uuid,
             query_text=query_text,
-            top_k=int(fetch_k or top_k),
+            top_k=k_fetch,
             score_threshold=score_threshold,
         )[: int(top_k)]
 
@@ -303,10 +186,8 @@ class RetrievalService:
             h.setdefault("vec_rank", i)
         return hits
 
-    # -------- lexical (bm25) --------
     def _lexical_search(
         self,
-        *,
         bot_uuid: UUID,
         query_text: str,
         top_k: int,
@@ -326,7 +207,7 @@ class RetrievalService:
         fetch_k = max(int(fetch_k), int(top_k), 1)
 
         t0 = time.perf_counter()
-        scores = idx.bm25.get_scores(q_tokens)  # type: ignore[attr-defined]
+        scores = idx.bm25.get_scores(q_tokens)
         ranked = sorted(enumerate(scores), key=lambda x: x[1], reverse=True)[:fetch_k]
 
         out: List[Dict[str, Any]] = []
@@ -340,7 +221,7 @@ class RetrievalService:
                 "answer": d.get("answer", ""),
                 "lex_score": lex_score,
                 "lex_rank": rank,
-                "score": lex_score,  # lexical-only compatibility
+                "score": lex_score,
             })
 
         logger.info(
@@ -357,7 +238,7 @@ class RetrievalService:
             )
         return self._load_docs_fn
 
-    def _ensure_bm25_index(self, bot_uuid: UUID, force: bool = False) -> _BM25Index:
+    def _ensure_bm25_index(self, bot_uuid: UUID, force: bool = False) -> BM25Index:
         key = str(bot_uuid)
         lock = self._get_lock(key)
 
@@ -371,8 +252,7 @@ class RetrievalService:
                     return cached
 
             t0 = time.perf_counter()
-            load_docs = self._require_loader()
-            docs = self._safe_load_docs(load_docs, bot_uuid)
+            docs = self._safe_load_docs(self._require_loader(), bot_uuid)
 
             tokenized_corpus: List[List[str]] = [
                 ngram_tokenize_unigram_bigram(
@@ -381,14 +261,9 @@ class RetrievalService:
                 for d in docs
             ]
 
-            bm25 = BM25Okapi(tokenized_corpus)  # type: ignore[misc]
+            bm25 = BM25Okapi(tokenized_corpus)
 
-            idx = _BM25Index(
-                bm25=bm25,
-                docs=docs,
-                built_at=time.time(),
-                size=len(docs),
-            )
+            idx = BM25Index(bm25=bm25, docs=docs, built_at=time.time(), size=len(docs))
             self._idx_cache[key] = idx
 
             logger.info(
@@ -438,10 +313,8 @@ class RetrievalService:
         a = (d.get("answer") or "").strip()
         return f"Q: {q}\nA: {a}" if a else f"Q: {q}"
 
-    # -------- hybrid fusion (RRF) --------
     def _hybrid_fuse_rrf(
         self,
-        *,
         query_text: str,
         vector_hits: List[Dict[str, Any]],
         lexical_hits: List[Dict[str, Any]],

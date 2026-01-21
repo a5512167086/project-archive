@@ -19,43 +19,35 @@ class RerankerService:
         logger.info(
             f"[RerankerService] Loading model: {model_id} on {self.device} (fp16={use_fp16})..."
         )
-
         self.model = FlagReranker(model_id, use_fp16=use_fp16)
-
         logger.info("[RerankerService] Model loaded.")
 
     def rerank(
         self, query: str, docs: List[Dict[str, Any]], top_k: int = 5
     ) -> List[Dict[str, Any]]:
-
         if not docs:
             return []
 
         t0 = time.perf_counter()
 
-        pairs = []
+        pairs: List[List[str]] = []
         for d in docs:
-            q_text = d.get("question", "") or ""
-            a_text = d.get("answer", "") or ""
+            q_text = (d.get("question") or "").strip()
+            a_text = (d.get("answer") or "").strip()
             doc_content = f"Q: {q_text}，A: {a_text}".strip()
-
             pairs.append([query, doc_content])
 
         scores = self.model.compute_score(pairs, normalize=True)
-
         if isinstance(scores, float):
             scores = [scores]
 
         for i, doc in enumerate(docs):
             doc["rerank_score"] = float(scores[i])
 
-        docs.sort(key=lambda x: x["rerank_score"], reverse=True)
+        docs.sort(key=lambda x: float(x.get("rerank_score", 0.0) or 0.0), reverse=True)
 
-        results = docs[:top_k]
-
-        duration = time.perf_counter() - t0
+        results = docs[: int(top_k)]
         logger.info(
-            f"[Timer] Reranker processed {len(docs)} docs -> top {len(results)} in {duration:.3f}s"
+            f"[Timer] Reranker processed {len(docs)} docs -> top {len(results)} in {(time.perf_counter() - t0):.3f}s"
         )
-
         return results

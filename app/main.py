@@ -1,4 +1,3 @@
-# app/main.py
 from __future__ import annotations
 
 import asyncio
@@ -39,7 +38,7 @@ from app.services.summary_service import SummaryService
 from app.services.vector_service import VectorService
 from app.summary_memory import SummaryMemory
 
-BASE_DIR = Path(__file__).resolve().parent.parent  # 專案根目錄
+BASE_DIR = Path(__file__).resolve().parent.parent
 STOPWORDS_PATH = f"{BASE_DIR}/data/stopwords.txt"
 
 
@@ -99,10 +98,9 @@ async def lifespan(app: FastAPI):
         use_summary=True,
     )
 
-    # 注意：lifespan 沒 DB session，所以先不綁 load_docs
     retrieval_service = RetrievalService(
         vector_service=vector_service,
-        load_docs=None,  # 之後在 ingest/query 用 KnowledgeService 綁上
+        load_docs=None,
         bm25_enabled=True,
         bm25_refresh_ttl_sec=300,
         stopwords_path=STOPWORDS_PATH,
@@ -124,7 +122,6 @@ async def lifespan(app: FastAPI):
         memory=summary_memory,
     )
 
-    # 掛到 app.state 讓 endpoint 取用
     app.state.rag_service = rag
     app.state.retrieval_service = retrieval_service
 
@@ -166,7 +163,6 @@ def ingest(
 ):
     sync_results = knowledge_service.sync_knowledge_vectors(req.bot_uuid, rag)
 
-    # A 方式：ingest 後重建 BM25 index
     rs.bind_docs_loader(knowledge_service.export_knowledge_docs)
     rs.refresh_index(req.bot_uuid)
 
@@ -188,7 +184,6 @@ async def query(
 ):
     start_total = time.perf_counter()
 
-    # 確保 loader 已綁（避免第一個 query 就 hybrid 直接炸）
     if not rs.has_loader():
         rs.bind_docs_loader(knowledge_service.export_knowledge_docs)
 
@@ -205,6 +200,10 @@ async def query(
         history_rounds=5,
         rewrite_model="gpt_5_mini",
         max_history_messages=rag.DEFAULT_MAX_HISTORY_MESSAGES,
+        use_rewrite=True,
+        use_summary_in_rewrite=True,
+        retrieval_mode="hybrid",
+        use_rerank=True,
     )
 
     hits = result.get("hits", []) or []
