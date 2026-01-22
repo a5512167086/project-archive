@@ -100,3 +100,20 @@ def rag_vector_ingest(bot_uuid: str):
     except requests.exceptions.RequestException as e:
         print(f"Error connecting to RAG backend: {e}")
         raise
+
+
+def rag_vector_purge(bot_uuid: str):
+    url = f"{RAG_BACKEND_URL}/purge"
+
+    try:
+        response = requests.post(url, json={"bot_uuid": bot_uuid}, timeout=300)
+
+        if response.status_code != 200:
+            print(f"RAG Ingest failed: {response.text}")
+            response.raise_for_status()
+
+        return response.json()
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error connecting to RAG backend: {e}")
+        raise

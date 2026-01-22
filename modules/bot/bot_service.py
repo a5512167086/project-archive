@@ -27,6 +27,7 @@ from shared.utils.api import (
     delete_liff_app,
     get_all_liff_apps,
     get_channel_access_token,
+    rag_vector_purge,
 )
 
 logging.basicConfig(
@@ -241,6 +242,7 @@ class BotService:
         )
         self.delete_default_rich_menu(bot.channel_access_token)
         self.safe_delete_liff_app(login_channel_access_token, bot.liff_id)
+        rag_vector_purge(str(delete_bot_uuid))
         logger.info(f"Bot deleted successfully for bot_uuid: {delete_bot_uuid}")
 
     def get_all_bots(self, user_id: str):
