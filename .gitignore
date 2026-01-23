@@ -14,6 +14,7 @@ wheels/
 data/*.json
 data/ragas_result/*
 data/eval_dataset
+data/eval_dataset_tmp
 data/chart/*
 cache
 

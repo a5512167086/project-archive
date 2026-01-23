@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import threading
 import time
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 from uuid import UUID
 
 from rank_bm25 import BM25Okapi
@@ -52,6 +52,10 @@ class RetrievalService:
         return self._load_docs_fn is not None
 
     def refresh_index(self, bot_uuid: UUID) -> None:
+        """
+        Force rebuild BM25 index.
+        Must never raise due to empty corpus; empty corpus should just produce size=0 cache.
+        """
         key = str(bot_uuid)
         with self._get_lock(key):
             self._idx_cache.pop(key, None)
@@ -197,7 +201,8 @@ class RetrievalService:
             return []
 
         idx = self._ensure_bm25_index(bot_uuid)
-        if idx.size <= 0:
+        # size=0 代表 corpus 空，直接退化回傳空
+        if idx.size <= 0 or idx.bm25 is None:
             return []
 
         q_tokens = ngram_tokenize_unigram_bigram(query_text, stopwords=self.stopwords)
@@ -239,6 +244,11 @@ class RetrievalService:
         return self._load_docs_fn
 
     def _ensure_bm25_index(self, bot_uuid: UUID, force: bool = False) -> BM25Index:
+        """
+        Build or return cached BM25 index.
+        - Must never call BM25Okapi on empty corpus
+        - Must keep docs aligned with tokenized_corpus indices
+        """
         key = str(bot_uuid)
         lock = self._get_lock(key)
 
@@ -254,20 +264,56 @@ class RetrievalService:
             t0 = time.perf_counter()
             docs = self._safe_load_docs(self._require_loader(), bot_uuid)
 
-            tokenized_corpus: List[List[str]] = [
-                ngram_tokenize_unigram_bigram(
-                    self._format_doc_text(d), stopwords=self.stopwords
-                )
-                for d in docs
-            ]
+            # Debug counters to identify where corpus becomes empty
+            raw_docs_cnt = len(docs)
 
+            # Build (doc, tokens) pairs and filter empty tokens
+            pairs: List[Tuple[Dict[str, Any], List[str]]] = []
+            dropped_empty_tokens = 0
+
+            for d in docs:
+                text = (d.get("text") or "").strip() or self._format_doc_text(d)
+                toks = ngram_tokenize_unigram_bigram(text, stopwords=self.stopwords)
+                if toks:
+                    pairs.append((d, toks))
+                else:
+                    dropped_empty_tokens += 1
+
+            if not pairs:
+                # Empty corpus: cache a size=0 index (so lexical_search returns [])
+                logger.warning(
+                    f"[RetrievalService] BM25 index skipped (empty corpus): "
+                    f"bot={key} | raw_docs={raw_docs_cnt} | "
+                    f"dropped_empty_tokens={dropped_empty_tokens} | "
+                    f"stopwords={len(self.stopwords)}"
+                )
+                idx = BM25Index(
+                    bm25=None,
+                    docs=[],
+                    built_at=time.time(),
+                    size=0,
+                )
+                self._idx_cache[key] = idx
+                return idx
+
+            filtered_docs = [d for d, _ in pairs]
+            tokenized_corpus = [t for _, t in pairs]
+
+            # Safe: tokenized_corpus is non-empty here
             bm25 = BM25Okapi(tokenized_corpus)
 
-            idx = BM25Index(bm25=bm25, docs=docs, built_at=time.time(), size=len(docs))
+            idx = BM25Index(
+                bm25=bm25,
+                docs=filtered_docs,
+                built_at=time.time(),
+                size=len(filtered_docs),
+            )
             self._idx_cache[key] = idx
 
             logger.info(
-                f"[RetrievalService] BM25 index built: bot={key} | docs={len(docs)} | "
+                f"[RetrievalService] BM25 index built: bot={key} | "
+                f"raw_docs={raw_docs_cnt} | kept_docs={idx.size} | "
+                f"dropped_empty_tokens={dropped_empty_tokens} | "
                 f"t={(time.perf_counter() - t0):.3f}s"
             )
             return idx
@@ -290,6 +336,8 @@ class RetrievalService:
 
             q = (d.get("question") or "").strip()
             a = (d.get("answer") or "").strip()
+
+            # keep a "text" field for bm25 tokenization (prefer explicit 'text' else format)
             text = (d.get("text") or "").strip() or self._format_doc_text({
                 "question": q,
                 "answer": a,

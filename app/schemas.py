@@ -6,6 +6,7 @@ from uuid import UUID
 
 from langchain_core.messages import BaseMessage
 from pydantic import BaseModel, ConfigDict, Field
+from rank_bm25 import BM25Okapi
 
 ModelName = Literal["gpt_5_mini", "qwen3_local", "gemini_2.5_flash"]
 
@@ -59,9 +60,19 @@ class RewriteResult(BaseModel):
     model_name: Optional[str] = None
 
 
+class PurgeRequest(BaseModel):
+    bot_uuid: UUID
+
+
+class PurgeResponse(BaseModel):
+    bot_uuid: UUID
+    collection: str
+    deleted: bool
+
+
 @dataclass
 class BM25Index:
-    bm25: Any
+    bm25: Optional[BM25Okapi]
     docs: List[Dict[str, Any]]
     built_at: float
     size: int

@@ -1,45 +1,47 @@
 from __future__ import annotations
 
 import time
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from uuid import UUID
 
 from langchain_core.messages import BaseMessage
 from langchain_huggingface import ChatHuggingFace, HuggingFaceEmbeddings
 
-from app.configs.config import QDRANT_COLLECTION, QDRANT_URL
+from app.configs.constans import (
+    DEFAULT_BATCH_SIZE,
+    DEFAULT_MAX_CONTEXTS_FOR_PROMPT,
+    DEFAULT_MAX_HISTORY_MESSAGES,
+    DEFAULT_MAX_HISTORY_ROUNDS,
+    DEFAULT_RERANK_FACTOR,
+    DEFAULT_SCORE_THRESHOLD,
+    DEFAULT_TIMEOUT,
+    DEFAULT_TOP_K,
+)
 from app.logger import logger
-from app.schemas import KnowledgeItem
 from app.services.llm_service import LLMService
 from app.services.prompt_service import PromptService
 from app.services.reranker_service import RerankerService
 from app.services.retrieval_service import RetrievalService
 from app.services.rewrite_service import RewriteService
 from app.services.summary_service import SummaryService
-from app.services.vector_service import VectorService
 
 
 class RAGService:
-    DEFAULT_TOP_K = 5
-    DEFAULT_SCORE_THRESHOLD = 0.7
-    DEFAULT_TIMEOUT = 30.0
-    DEFAULT_BATCH_SIZE = 250
-    DEFAULT_MAX_HISTORY_ROUNDS = 5
-    DEFAULT_MAX_HISTORY_MESSAGES = 10
-    DEFAULT_MAX_CONTEXTS_FOR_PROMPT = 3
-    DEFAULT_RERANK_FACTOR = 4
+    DEFAULT_TOP_K = DEFAULT_TOP_K
+    DEFAULT_SCORE_THRESHOLD = DEFAULT_SCORE_THRESHOLD
+    DEFAULT_TIMEOUT = DEFAULT_TIMEOUT
+    DEFAULT_BATCH_SIZE = DEFAULT_BATCH_SIZE
+    DEFAULT_MAX_HISTORY_ROUNDS = DEFAULT_MAX_HISTORY_ROUNDS
+    DEFAULT_MAX_HISTORY_MESSAGES = DEFAULT_MAX_HISTORY_MESSAGES
+    DEFAULT_MAX_CONTEXTS_FOR_PROMPT = DEFAULT_MAX_CONTEXTS_FOR_PROMPT
+    DEFAULT_RERANK_FACTOR = DEFAULT_RERANK_FACTOR
 
     def __init__(
         self,
         embeddings: HuggingFaceEmbeddings,
         preloaded_hf_chat_model: Optional[ChatHuggingFace] = None,
-        qdrant_url: str = QDRANT_URL,
-        collection_name: str = QDRANT_COLLECTION,
-        timeout: float = DEFAULT_TIMEOUT,
-        ensure_collection_and_indexes: bool = True,
         llm_service: Optional[LLMService] = None,
         prompt_service: Optional[PromptService] = None,
-        vector_service: Optional[VectorService] = None,
         reranker_service: Optional[RerankerService] = None,
         retrieval_service: Optional[RetrievalService] = None,
         summary_service: Optional[SummaryService] = None,
@@ -53,13 +55,6 @@ class RAGService:
         self.prompt_service: PromptService = prompt_service or PromptService(
             max_contexts_for_prompt=self.DEFAULT_MAX_CONTEXTS_FOR_PROMPT
         )
-        self.vector_service: VectorService = vector_service or VectorService(
-            embeddings=embeddings,
-            qdrant_url=qdrant_url,
-            collection_name=collection_name,
-            timeout=timeout,
-            ensure_collection_and_indexes=ensure_collection_and_indexes,
-        )
         self.reranker = reranker_service
         self.retrieval_service = retrieval_service
         self.summary_service: SummaryService = summary_service
@@ -72,27 +67,6 @@ class RAGService:
 
     def _build_session_key(self, bot_uuid: UUID, line_id: str) -> str:
         return f"{str(bot_uuid)}:{line_id}"
-
-    def get_object_ids_by_bot_uuid(
-        self, bot_uuid: UUID, batch_size: int = DEFAULT_BATCH_SIZE
-    ) -> Set[int]:
-        return self.vector_service.get_object_ids_by_bot_uuid(
-            bot_uuid=bot_uuid, batch_size=batch_size
-        )
-
-    def upsert_knowledge_items(
-        self, bot_uuid: UUID, items: Iterable[KnowledgeItem]
-    ) -> int:
-        return self.vector_service.upsert_knowledge_items(
-            bot_uuid=bot_uuid, items=items
-        )
-
-    def delete_knowledge_items(
-        self, bot_uuid: UUID, object_ids: Optional[List[int]] = None
-    ) -> bool:
-        return self.vector_service.delete_knowledge_items(
-            bot_uuid=bot_uuid, object_ids=object_ids
-        )
 
     def search(
         self,
@@ -109,6 +83,9 @@ class RAGService:
         if mode not in {"vector", "lexical", "hybrid"}:
             mode = "hybrid"
 
+        if self.retrieval_service is None:
+            raise RuntimeError("retrieval_service is required for RAGService.search().")
+
         if fetch_k is not None:
             initial_k = int(fetch_k)
         elif self.reranker and use_rerank:
@@ -121,32 +98,17 @@ class RAGService:
         else:
             initial_threshold = max(float(score_threshold) - 0.1, 0.0)
 
-        if self.retrieval_service is not None:
-            logger.info(
-                f"[RAGService] Step 1: Retrieval(mode={mode}) searching top {initial_k} candidates..."
-            )
-            hits = self.retrieval_service.search(
-                bot_uuid=bot_uuid,
-                query_text=query_text,
-                top_k=initial_k,
-                fetch_k=initial_k,
-                score_threshold=initial_threshold,
-                mode=mode,
-            )
-        else:
-            if mode != "vector":
-                logger.warning(
-                    f"[RAGService] retrieval_service is None, fallback to vector search (requested mode={mode})."
-                )
-            logger.info(
-                f"[RAGService] Step 1: Vector searching top {initial_k} candidates..."
-            )
-            hits = self.vector_service.search(
-                bot_uuid=bot_uuid,
-                query_text=query_text,
-                top_k=initial_k,
-                score_threshold=initial_threshold,
-            )
+        logger.info(
+            f"[RAGService] Step 1: Retrieval(mode={mode}) searching top {initial_k} candidates..."
+        )
+        hits = self.retrieval_service.search(
+            bot_uuid=bot_uuid,
+            query_text=query_text,
+            top_k=initial_k,
+            fetch_k=initial_k,
+            score_threshold=initial_threshold,
+            mode=mode,
+        )
 
         if hits:
             logger.info(f"--- [Step 1 Result] Retrieved {len(hits)} items ---")
@@ -255,10 +217,14 @@ class RAGService:
             return query_text, hits
 
         session_key = self._build_session_key(bot_uuid, line_id)
-
         final_query = query_text
 
         if use_rewrite:
+            if self.summary_service is None:
+                logger.warning(
+                    "[RAGService] summary_service is None; rewrite_with_snapshot will run without snapshot."
+                )
+
             t_mem = time.perf_counter()
             snapshot = self.summary_service.load(
                 session_key, max_messages=max(0, history_rounds * 2)
@@ -329,16 +295,21 @@ class RAGService:
         session_key: Optional[str] = None
 
         if use_memory and line_id:
-            session_key = self._build_session_key(bot_uuid, line_id)
+            if self.summary_service is None:
+                logger.warning(
+                    "[RAGService] summary_service is None; cannot load recent messages."
+                )
+            else:
+                session_key = self._build_session_key(bot_uuid, line_id)
 
-            t_mem = time.perf_counter()
-            snapshot = self.summary_service.load_recent_only(
-                session_key, max_messages=max_history_messages
-            )
-            logger.info(
-                f"[Timer] Generate Memory Load: {(time.perf_counter() - t_mem):.3f}s"
-            )
-            history = snapshot.recent_messages
+                t_mem = time.perf_counter()
+                snapshot = self.summary_service.load_recent_only(
+                    session_key, max_messages=max_history_messages
+                )
+                logger.info(
+                    f"[Timer] Generate Memory Load: {(time.perf_counter() - t_mem):.3f}s"
+                )
+                history = snapshot.recent_messages
 
         t_prompt = time.perf_counter()
         messages = self.prompt_service.build_messages(
@@ -404,7 +375,7 @@ class RAGService:
         max_history_messages: int = DEFAULT_MAX_HISTORY_MESSAGES,
         use_rewrite: bool = True,
         use_summary_in_rewrite: bool = True,
-        retrieval_mode: str = "hybrid",  # e.g., "vector", "lexical", "hybrid"
+        retrieval_mode: str = "hybrid",
         use_rerank: bool = True,
     ) -> Dict[str, Any]:
         rewritten, hits = self.search_history_aware(

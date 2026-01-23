@@ -282,3 +282,20 @@ class VectorService:
             seen.add(k)
             deduped.append(r)
         return deduped
+
+    def delete_all_by_bot_uuid(self, bot_uuid: UUID) -> bool:
+        filt = qmodels.Filter(
+            must=[
+                qmodels.FieldCondition(
+                    key="metadata.bot_uuid",
+                    match=qmodels.MatchValue(value=str(bot_uuid)),
+                )
+            ]
+        )
+
+        self.client.delete(
+            collection_name=self.collection,
+            points_selector=qmodels.FilterSelector(filter=filt),
+            wait=True,
+        )
+        return True

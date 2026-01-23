@@ -9,7 +9,7 @@ from app.models.bot_model import BotListView
 from app.queries.bot_query import BotQuery
 from app.queries.entity_query import EntityQuery
 from app.queries.knowledge_query import KnowledgeQuery
-from app.services.rag_service import RAGService
+from app.services.vector_service import VectorService
 
 logging.basicConfig(
     level=logging.INFO,
@@ -32,7 +32,6 @@ class KnowledgeService:
                 error_code=ErrorCode.BOT_NOT_EXIST,
                 error_message="The specified bot does not exist",
             )
-
         return bot
 
     def validate_knowledge_class(self, bot_class_id: int) -> int:
@@ -47,7 +46,6 @@ class KnowledgeService:
                 error_code=ErrorCode.KNOWLEDGE_CLASS_NOT_FOUND,
                 error_message="Knowledge class not found for the given bot class",
             )
-
         return knowledge_class_id
 
     def get_all_knowledge_list(self, bot_uuid: UUID):
@@ -55,30 +53,36 @@ class KnowledgeService:
         knowledge_class_id = self.validate_knowledge_class(bot.class_id)
         return self.query.get_all_knowledge_items_by_class_id(knowledge_class_id)
 
-    def sync_knowledge_vectors(self, bot_uuid: UUID, rag_service: RAGService) -> dict:
+    def sync_knowledge_vectors(
+        self, bot_uuid: UUID, vector_service: VectorService
+    ) -> dict:
         sql_items = self.get_all_knowledge_list(bot_uuid)
         sql_object_ids = {item.object_id for item in sql_items}
         logger.info(
             f"Found {len(sql_object_ids)} knowledge items in SQL for bot {bot_uuid}."
         )
 
-        qdrant_object_ids = rag_service.get_object_ids_by_bot_uuid(bot_uuid)
+        qdrant_object_ids = vector_service.get_object_ids_by_bot_uuid(bot_uuid)
 
         ids_to_delete = list(qdrant_object_ids - sql_object_ids)
         deleted_count = 0
         if ids_to_delete:
             logger.info(f"Found {len(ids_to_delete)} items to delete from Qdrant.")
-            rag_service.delete_knowledge_items(bot_uuid, object_ids=ids_to_delete)
+            vector_service.delete_knowledge_items(bot_uuid, object_ids=ids_to_delete)
             deleted_count = len(ids_to_delete)
         else:
             logger.info("No items need to be deleted from Qdrant.")
 
-        upserted_count = rag_service.upsert_knowledge_items(bot_uuid, sql_items)
+        upserted_count = vector_service.upsert_knowledge_items(bot_uuid, sql_items)
 
         return {"upserted": upserted_count, "deleted": deleted_count}
 
     def export_knowledge_docs(self, bot_uuid: UUID) -> list[dict]:
         items = self.get_all_knowledge_list(bot_uuid)
+
+        if not items:
+            return []
+
         return [
             {
                 "object_id": it.object_id,

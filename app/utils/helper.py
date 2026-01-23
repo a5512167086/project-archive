@@ -1,10 +1,14 @@
+from __future__ import annotations
+
 import re
 from pathlib import Path
 from typing import List, Optional, Set
 
 from app.logger import logger
 
-_ASCII_TOKEN_RE = re.compile(r"[A-Za-z0-9_]+")
+ASCII_TOKEN_RE = re.compile(r"[A-Za-z0-9_]+")
+BASE_DIR = Path(__file__).resolve().parent.parent
+STOPWORDS_PATH = f"{BASE_DIR}/data/stopwords.txt"
 
 
 def load_stopwords(path: Optional[str]) -> Set[str]:
@@ -39,7 +43,7 @@ def ngram_tokenize_unigram_bigram(text: str, *, stopwords: Set[str]) -> List[str
 
     tokens: List[str] = []
 
-    for m in _ASCII_TOKEN_RE.finditer(s):
+    for m in ASCII_TOKEN_RE.finditer(s):
         w = m.group(0).lower()
         if w and w not in stopwords:
             tokens.append(w)

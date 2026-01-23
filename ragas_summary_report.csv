@@ -1,7 +1,0 @@
-Dataset / Model,faithfulness,context_precision,context_recall,answer_relevancy,answer_correctness
-result_ragas_eval_gemini_2.5_flash_wke_opt.csv,0.8668,0.953,0.9687,0.7767,0.7246
-result_ragas_eval_gemini_2.5_flash_wke.csv,0.8787,0.9162,0.9364,0.7664,0.7205
-result_ragas_eval_gpt_5_mini_wke_opt.csv,0.9262,0.9634,0.9883,0.6732,0.6896
-result_ragas_eval_gpt_5_mini_wke.csv,0.9261,0.9197,0.9727,0.6608,0.6793
-result_ragas_eval_qwen3_local_wke_opt.csv,0.8701,0.9384,0.9747,0.7682,0.6641
-result_ragas_eval_qwen3_local_wke.csv,0.8882,0.9035,0.9816,0.7717,0.6549
