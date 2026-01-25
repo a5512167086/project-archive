@@ -33,7 +33,7 @@ class LLMService:
                 base_url=f"{AZURE_OPENAI_ENDPOINT.rstrip('/')}/openai/v1",
                 api_key=AZURE_OPENAI_API_KEY,
                 model=AZURE_OPENAI_DEPLOYMENT,
-                max_completion_tokens=512,
+                max_completion_tokens=2048,
                 reasoning_effort="low",
             )
         elif model_name == "gemini_2.5_flash":
@@ -42,7 +42,7 @@ class LLMService:
             llm = ChatGoogleGenerativeAI(
                 model="gemini-2.5-flash",
                 temperature=float(LLM_TEMPERATURE),
-                max_output_tokens=512,
+                max_output_tokens=2048,
             )
         elif model_name == "qwen3_local":
             if not self._preloaded_hf:

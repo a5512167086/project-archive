@@ -14,8 +14,11 @@ wheels/
 data/*.json
 data/ragas_result/*
 data/eval_dataset
-data/eval_dataset_tmp
+data/eval_dataset_done
+data/eval_result
 data/chart/*
 cache
 
 experiments/*
+
+evaluation.log

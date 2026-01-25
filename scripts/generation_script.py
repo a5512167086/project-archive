@@ -282,7 +282,7 @@ def build_chat_model(device: int) -> ChatHuggingFace:
         device=device,
         model_kwargs={"torch_dtype": torch.bfloat16} if device == 0 else {},
         pipeline_kwargs=dict(
-            max_new_tokens=512,
+            max_new_tokens=1024,
             do_sample=False,
             repetition_penalty=1.03,
             return_full_text=False,
