@@ -1,12 +1,11 @@
 import asyncio
 import json
-from datetime import datetime
 from urllib.parse import urljoin
 
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 from playwright.async_api import async_playwright
 
-URL = "https://www.1010hope.com/"
+URL = "https://1010online.com.tw/"
 MAX_CONCURRENCY = 5  # 同時抓取商品細節的最大並發數
 
 
@@ -38,7 +37,7 @@ def _abs_url(u: str | None) -> str | None:
 
 # ---------- 進入「子分類頁」抓前 N 筆商品連結 ----------
 async def fetch_subcategory_products(
-    page, subcategory_url: str, limit: int = 5
+    page, subcategory_url: str, limit: int = 3
 ) -> list[str]:
     try:
         await page.goto(subcategory_url, timeout=30000)
@@ -215,7 +214,7 @@ async def get_categories_and_sample_products_with_details():
         # 分層資料結構：categories -> main -> sub -> products
         categories: list[dict] = []
 
-        for i in range(2, 5):
+        for i in range(5, 8):
             li = top_items.nth(i)
             main_name = _norm(await li.locator("span.text").first.inner_text())
             print(f"\n=== 主分類: {main_name} ===")
@@ -242,7 +241,7 @@ async def get_categories_and_sample_products_with_details():
                     if href:
                         # 取樣商品連結
                         sample_links = await fetch_subcategory_products(
-                            page, href, limit=5
+                            page, href, limit=3
                         )
                         # 併發抓商品細節
                         tasks = [
@@ -281,12 +280,10 @@ async def get_categories_and_sample_products_with_details():
             })
 
         # ---- 寫檔：products_YYYYMMDD_HHMMSS.json ----
-        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        outfile = f"products_{ts}.json"
+        outfile = "products.json"
         payload = {
             "crawl_meta": {
                 "source": URL,
-                "generated_at": ts,
             },
             "brands": sorted(brand_set),
             "categories": categories,
