@@ -1,4 +1,4 @@
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from typing import List
 from uuid import UUID
 
@@ -330,7 +330,6 @@ class ReservationCommand:
         status: str = None,
         note: str = None,
     ):
-        """Update reservation details"""
         reservation = self.session.exec(
             select(ReservationDetail).where(
                 ReservationDetail.reservation_id == reservation_id
@@ -340,14 +339,11 @@ class ReservationCommand:
         if not reservation:
             return None
 
-        # 更新有提供的欄位
         if reservation_date is not None:
             reservation.reservation_date = reservation_date
 
         if start_time is not None:
             reservation.start_time = start_time
-            # 如果更新了開始時間，需要重新計算結束時間
-            # 首先取得 service 的 duration
             service_detail = self.session.exec(
                 select(ServiceDetail).where(
                     ServiceDetail.service_id == reservation.service_id
@@ -355,9 +351,6 @@ class ReservationCommand:
             ).first()
 
             if service_detail:
-                from datetime import datetime, timedelta
-
-                # 使用更新後的日期（如果有的話）來計算結束時間
                 target_date = reservation.reservation_date
                 end_time = (
                     datetime.combine(target_date, start_time)

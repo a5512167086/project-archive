@@ -182,7 +182,6 @@ class ReservationQuery:
         return service_response
 
     def get_object_id_by_service_id(self, service_id: UUID) -> int | None:
-        """Get object_id by service_id from ServiceListView"""
         result = self.session.exec(
             select(ServiceListView.object_id).where(
                 ServiceListView.service_id == service_id
@@ -191,7 +190,6 @@ class ReservationQuery:
         return result
 
     def get_object_ids_by_service_ids(self, service_ids: List[UUID]) -> List[int]:
-        """Get object_ids by service_ids from ServiceListView"""
         if not service_ids:
             return []
 
@@ -203,7 +201,6 @@ class ReservationQuery:
         return list(results)
 
     def get_service_details_by_uuid(self, service_id: UUID):
-        """Get service details by service UUID"""
 
         result = self.session.exec(
             select(ServiceDetail).where(ServiceDetail.service_id == service_id)
@@ -211,7 +208,6 @@ class ReservationQuery:
         return result
 
     def get_service_options_by_ids(self, option_ids: List[UUID]) -> List:
-        """Get service options by option IDs"""
         if not option_ids:
             return []
 
@@ -223,7 +219,6 @@ class ReservationQuery:
     def get_service_schedule_by_date(
         self, object_id: int, reservation_date: date
     ) -> ServiceSchedule | None:
-        """Get service schedule by object_id and date"""
         specific_schedule = self.session.exec(
             select(ServiceSchedule).where(
                 ServiceSchedule.object_id == object_id,
@@ -247,7 +242,6 @@ class ReservationQuery:
         return weekly_schedule
 
     def get_available_schedules_for_service(self, service_id: UUID) -> List:
-        """Get all available schedules for a service"""
         object_id = self.get_object_id_by_service_id(service_id)
         if not object_id:
             return []
@@ -262,7 +256,6 @@ class ReservationQuery:
     def get_concurrent_reservations_count(
         self, service_id: UUID, reservation_date, start_time, end_time
     ) -> int:
-        """Get count of concurrent reservations for a service at given time"""
 
         object_id = self.get_object_id_by_service_id(service_id)
         if not object_id:
@@ -281,7 +274,6 @@ class ReservationQuery:
     def get_concurrent_reservations_count_by_schedule(
         self, schedule_id: UUID, reservation_date: date, start_time: time
     ) -> int:
-        """Get count of concurrent reservations for a specific schedule at given time"""
         return self.session.exec(
             select(func.count(ReservationDetail.reservation_id)).where(
                 ReservationDetail.service_schedule_id == schedule_id,
@@ -291,7 +283,6 @@ class ReservationQuery:
         ).one()
 
     def get_reservation_by_id(self, reservation_id: UUID):
-        """Get reservation by ID"""
         result = self.session.exec(
             select(ReservationDetail).where(
                 ReservationDetail.reservation_id == reservation_id
@@ -300,8 +291,6 @@ class ReservationQuery:
         return result
 
     def get_bot_reservations(self, bot_class_id: int) -> List[ReservationListView]:
-        """Get all reservations for a bot (for bot owner)"""
-        # 直接使用 view 中的 class_id 來查詢
         reservations = self.session.exec(
             select(ReservationListView)
             .where(ReservationListView.class_id == bot_class_id)
@@ -313,8 +302,6 @@ class ReservationQuery:
     def get_user_reservations_in_bot(
         self, user_id: UUID, bot_class_id: int
     ) -> List[ReservationListView]:
-        """Get user's reservations in a specific bot"""
-        # 獲取該用戶的 reservation object_ids
         user_reservation_object_ids = self.session.exec(
             select(Object.object_id).where(Object.owner_id == str(user_id))
         ).all()
@@ -322,7 +309,6 @@ class ReservationQuery:
         if not user_reservation_object_ids:
             return []
 
-        # 直接使用 view 中的 class_id 和 object_id 來查詢
         reservations = self.session.exec(
             select(ReservationListView)
             .where(
@@ -359,7 +345,6 @@ class ReservationQuery:
             .where(ReservationOption.object_id.in_(reservation_object_ids))
         ).all()
 
-        # 按 object_id 分組
         options_by_object_id = {}
         for option in selected_options:
             object_id = option[0]
@@ -378,18 +363,14 @@ class ReservationQuery:
     def get_service_schedules_by_object_id(
         self, object_id: int, reservation_date: date
     ) -> List:
-        """Get service schedules by object_id and date"""
-        # Get all schedules for this object
         schedules = self.session.exec(
             select(ServiceSchedule).where(
                 ServiceSchedule.object_id == object_id, ServiceSchedule.is_active
             )
         ).all()
 
-        # Filter schedules based on date and schedule type
         valid_schedules = []
-        weekday = reservation_date.weekday()  # Monday is 0, Sunday is 6
-        # Convert to the format used in the database (Sunday is 0, Monday is 1, etc.)
+        weekday = reservation_date.weekday()
         weekday_db = (weekday + 1) % 7
 
         for schedule in schedules:
@@ -406,9 +387,6 @@ class ReservationQuery:
     def get_reservations_count_map_for_service(
         self, service_id: UUID, start_date: date, end_date: date
     ) -> dict:
-        """Get reservation counts for all time slots within date range for a service"""
-
-        # Get all reservations for the service within the date range
         reservations = self.session.exec(
             select(ReservationDetail).where(
                 ReservationDetail.service_id == service_id,
@@ -417,7 +395,6 @@ class ReservationQuery:
             )
         ).all()
 
-        # Count reservations by (date, start_time)
         count_map = {}
         for reservation in reservations:
             key = (
@@ -431,11 +408,9 @@ class ReservationQuery:
     def get_service_option_groups_with_selected_options(
         self, reservation_object_ids: List[int]
     ) -> dict[int, List[dict]]:
-        """Get all option groups for services with selected options marked"""
         if not reservation_object_ids:
             return {}
 
-        # 首先獲取這些預約對應的服務信息
         service_info = self.session.exec(
             select(ReservationListView.object_id, ReservationListView.service_id).where(
                 ReservationListView.object_id.in_(reservation_object_ids)
@@ -446,7 +421,6 @@ class ReservationQuery:
         reservation_to_service_map = {}
         for info in service_info:
             reservation_to_service_map[info.object_id] = info.service_id
-            # 需要獲取服務的 object_id
             service_object_id = self.get_object_id_by_service_id(info.service_id)
             if service_object_id:
                 service_object_ids.append(service_object_id)
@@ -454,14 +428,12 @@ class ReservationQuery:
         if not service_object_ids:
             return {}
 
-        # 獲取這些服務的所有 option groups
         all_option_groups = self.session.exec(
             select(ServiceOptionGroup).where(
                 ServiceOptionGroup.object_id.in_(service_object_ids)
             )
         ).all()
 
-        # 獲取用戶實際選中的 options
         selected_options = self.session.exec(
             select(
                 ReservationOption.object_id,
@@ -476,7 +448,6 @@ class ReservationQuery:
             .where(ReservationOption.object_id.in_(reservation_object_ids))
         ).all()
 
-        # 建立選中的 options 映射
         selected_options_map = {}
         for option in selected_options:
             reservation_object_id = option[0]
@@ -491,7 +462,6 @@ class ReservationQuery:
                 "option_name": option[3],
             })
 
-        # 為每個預約建立完整的 option groups 列表
         result = {}
         for reservation_object_id in reservation_object_ids:
             service_id = reservation_to_service_map.get(reservation_object_id)
@@ -504,7 +474,6 @@ class ReservationQuery:
 
             result[reservation_object_id] = []
 
-            # 找到該服務的所有 option groups
             service_groups = [
                 g for g in all_option_groups if g.object_id == service_object_id
             ]

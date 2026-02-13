@@ -70,7 +70,6 @@ class ReservationService:
         self, bot_class_id: int, service_id_list: List[UUID]
     ):
         service_class_id = self.validate_service_class(bot_class_id)
-        # Get object_ids from service_ids first
         object_id_list = []
         for service_id in service_id_list:
             object_id = self.query.get_object_id_by_service_id(service_id)
@@ -114,7 +113,6 @@ class ReservationService:
                 error_message="Service not found",
             )
 
-        # Get schedule using query method - this needs to be implemented
         schedules = self.query.get_service_schedules_by_object_id(
             service.object_id, reservation.reservation_date
         )
@@ -131,13 +129,11 @@ class ReservationService:
                 error_message="Reservation schedule not found or not active for the given date",
             )
 
-        # Calculate end time
         end_time = (
             datetime.combine(reservation.reservation_date, reservation.start_time)
             + timedelta(minutes=service.duration_minutes)
         ).time()
 
-        # Check capacity - this needs to be implemented properly
         concurrent_reservations = self.query.get_concurrent_reservations_count(
             reservation.service_id,
             reservation.reservation_date,
@@ -165,7 +161,6 @@ class ReservationService:
 
         reservation_class_id = self.validate_reservation_class(bot_class_id)
 
-        # Determine payment status based on payment method
         payment_status = PaymentStatus.unpaid.value
         if reservation.payment_method == PaymentMethod.cash.value:
             payment_status = PaymentStatus.unpaid.value
@@ -209,7 +204,6 @@ class ReservationService:
         if not all_schedules:
             return []
 
-        # Get actual reservation counts for the date range
         reservations_count_map = self.query.get_reservations_count_map_for_service(
             service_id, today, end_date
         )
@@ -232,16 +226,13 @@ class ReservationService:
                     specific_schedules[schedule.schedule_date] = []
                 specific_schedules[schedule.schedule_date].append(schedule)
 
-        # Process each day
         current_date = today
         while current_date <= end_date:
             daily_slots = []
 
-            # Check for specific schedules first
             if current_date in specific_schedules:
                 schedules_for_day = specific_schedules[current_date]
             else:
-                # Use weekly schedules
                 weekday = (current_date.weekday() + 1) % 7
                 schedules_for_day = weekly_schedules.get(weekday, [])
 
@@ -249,7 +240,6 @@ class ReservationService:
                 start_time = datetime.combine(current_date, schedule.start_time)
                 end_time = datetime.combine(current_date, schedule.end_time)
 
-                # Generate time slots
                 current_slot_time = start_time
                 while (
                     current_slot_time + timedelta(minutes=time_slot_duration_minutes)
@@ -285,26 +275,22 @@ class ReservationService:
         return list(daily_slots_map.values())
 
     def delete_user_reservation(self, reservation_id: UUID):
-        """Delete a user's reservation"""
         self.command.delete_reservation_by_id(reservation_id)
 
     def get_bot_reservations_list(
         self, bot_class_id: int
     ) -> List[ReservationListResponse]:
-        """Get all reservations for a bot (bot owner only)"""
         reservation_class_id = self.validate_reservation_class(bot_class_id)
         reservations = self.query.get_bot_reservations(reservation_class_id)
 
         if not reservations:
             return []
 
-        # 獲取所有預約的選項
         reservation_object_ids = [r.object_id for r in reservations]
         options_map = self.query.get_service_option_groups_with_selected_options(
             reservation_object_ids
         )
 
-        # 構建回應
         result = []
         for reservation in reservations:
             selected_option_groups = []
@@ -352,10 +338,8 @@ class ReservationService:
     def get_user_reservations_in_bot_list(
         self, bot_class_id: int, current_user_id: UUID
     ) -> List[ReservationListResponse]:
-        """Get user's reservations in a specific bot"""
         reservation_class_id = self.validate_reservation_class(bot_class_id)
 
-        # 獲取用戶在該 bot 下的預約
         reservations = self.query.get_user_reservations_in_bot(
             current_user_id, reservation_class_id
         )
@@ -363,13 +347,11 @@ class ReservationService:
         if not reservations:
             return []
 
-        # 獲取所有預約的選項
         reservation_object_ids = [r.object_id for r in reservations]
         options_map = self.query.get_service_option_groups_with_selected_options(
             reservation_object_ids
         )
 
-        # 構建回應
         result = []
         for reservation in reservations:
             selected_option_groups = []
@@ -415,8 +397,6 @@ class ReservationService:
         return result
 
     def update_reservation_by_owner(self, reservation_patch: ReservationPatch):
-        """Update reservation (reservation owner or bot owner can update)"""
-        # 檢查 reservation 是否存在
         reservation = self.query.get_reservation_by_id(reservation_patch.reservation_id)
         if not reservation:
             raise GlobalErrorException(
@@ -424,14 +404,12 @@ class ReservationService:
                 error_message="Reservation not found",
             )
 
-        # 如果要更新時間相關欄位，需要重新檢查排程和容量
         if reservation_patch.reservation_date or reservation_patch.start_time:
             new_date = (
                 reservation_patch.reservation_date or reservation.reservation_date
             )
             new_start_time = reservation_patch.start_time or reservation.start_time
 
-            # 檢查排程是否存在且有效
             service_item = self.query.get_service_details_by_uuid(
                 reservation.service_id
             )
@@ -447,7 +425,6 @@ class ReservationService:
                         error_message="Reservation schedule not found or not active for the given date",
                     )
 
-                # 檢查時間是否在排程範圍內（處理跨日情況）
                 if schedule.end_time < schedule.start_time:
                     valid_time = (
                         new_start_time >= schedule.start_time
@@ -462,7 +439,7 @@ class ReservationService:
                     raise GlobalErrorException(
                         error_code=ErrorCode.RESERVATION_TIME_INVALID,
                         error_message="Reservation time is outside of schedule",
-                    )  # 檢查容量（排除目前這筆預約）
+                    )
                 concurrent_reservations = (
                     self.query.get_concurrent_reservations_count_by_schedule(
                         schedule.service_schedule_id,
@@ -470,7 +447,6 @@ class ReservationService:
                         new_start_time,
                     )
                 )
-                # 如果是修改同一個時間，不需要檢查容量
                 if (
                     new_date != reservation.reservation_date
                     or new_start_time != reservation.start_time
@@ -481,7 +457,6 @@ class ReservationService:
                             error_message="Reservation capacity exceeded",
                         )
 
-        # 如果修改付款方式，自動調整付款狀態
         payment_status = reservation_patch.payment_status
         if reservation_patch.payment_method:
             if reservation_patch.payment_method == PaymentMethod.cash.value:
@@ -489,7 +464,6 @@ class ReservationService:
             elif payment_status is None:
                 payment_status = PaymentStatus.unpaid.value
 
-        # 更新 reservation
         updated_reservation = self.command.update_reservation(
             reservation_patch.reservation_id,
             reservation_date=reservation_patch.reservation_date,

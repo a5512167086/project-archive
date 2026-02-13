@@ -11,12 +11,10 @@ from shared.dependencies import BotAccessController, get_bot_access
 
 
 def get_bot_service(session: SessionDep) -> BotService:
-    """依賴注入 BotService"""
     return BotService(session)
 
 
 def get_module_service(session: SessionDep) -> ModuleService:
-    """依賴注入 ModuleService"""
     return ModuleService(session)
 
 

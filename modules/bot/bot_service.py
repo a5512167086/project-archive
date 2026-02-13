@@ -197,7 +197,6 @@ class BotService:
         with ApiClient(configuration) as api_client:
             line_bot_api = MessagingApi(api_client)
 
-            # 1) 取得預設 ID
             try:
                 resp = line_bot_api.get_default_rich_menu_id()
                 default_id = resp.rich_menu_id
@@ -209,7 +208,6 @@ class BotService:
                 logger.error(f"Get default rich menu failed: {e}")
                 raise
 
-            # 2) 取消預設（若已被取消，404 略過）
             try:
                 line_bot_api.cancel_default_rich_menu()
                 logger.info(f"Canceled default rich menu: {default_id}")
@@ -219,7 +217,6 @@ class BotService:
                 logger.error(f"Cancel default rich menu failed: {e}")
                 raise
 
-            # 3) 刪除該 menu（若已被刪除，404 略過）
             try:
                 line_bot_api.delete_rich_menu(rich_menu_id=default_id)
                 logger.info(f"Deleted rich menu: {default_id}")

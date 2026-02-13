@@ -24,17 +24,14 @@ from shared.services.group_service import GroupService
 
 
 def get_user_service(session: SessionDep) -> UserService:
-    """依賴注入 UserService"""
     return UserService(session)
 
 
 def get_bot_service(session: SessionDep) -> BotService:
-    """依賴注入 BotService"""
     return BotService(session)
 
 
 def get_group_service(session: SessionDep) -> GroupService:
-    """依賴注入 GroupService"""
     return GroupService(session)
 
 

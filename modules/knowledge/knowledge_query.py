@@ -1,9 +1,9 @@
 import logging
-from typing import List
+from typing import List, Optional
 
 from sqlmodel import Session, select
 
-from modules.knowledge.knowledge_model import KnowledgeListView
+from modules.knowledge.knowledge_model import KnowledgeFileListView, KnowledgeListView
 from shared.models.class_model import SubClassView
 from shared.queries.entity_query import get_entity_id_by_name
 
@@ -28,10 +28,10 @@ class KnowledgeQuery:
         return result
 
     def get_all_knowledge_items_by_class_id(
-        self, class_id: int
+        self, knowledge_class_id: int
     ) -> List[KnowledgeListView]:
         statement = select(KnowledgeListView).where(
-            KnowledgeListView.class_id == class_id
+            KnowledgeListView.class_id == knowledge_class_id
         )
         result = self.session.exec(statement)
         return result.all()
@@ -45,3 +45,29 @@ class KnowledgeQuery:
         )
         result = self.session.exec(statement)
         return result.one_or_none()
+
+    def get_all_knowledge_files_by_class_id(
+        self, class_id: int
+    ) -> List[KnowledgeFileListView]:
+        stmt = select(KnowledgeFileListView).where(
+            KnowledgeFileListView.class_id == class_id
+        )
+        return self.session.exec(stmt).all()
+
+    def get_knowledge_file_view_by_id(
+        self, class_id: int, file_id: int
+    ) -> Optional[KnowledgeFileListView]:
+        stmt = select(KnowledgeFileListView).where(
+            KnowledgeFileListView.class_id == class_id,
+            KnowledgeFileListView.file_id == file_id,
+        )
+        return self.session.exec(stmt).one_or_none()
+
+    def get_knowledge_file_views_by_ids(
+        self, class_id: int, file_ids: List[int]
+    ) -> List[KnowledgeFileListView]:
+        stmt = select(KnowledgeFileListView).where(
+            KnowledgeFileListView.class_id == class_id,
+            KnowledgeFileListView.file_id.in_(file_ids),
+        )
+        return self.session.exec(stmt).all()

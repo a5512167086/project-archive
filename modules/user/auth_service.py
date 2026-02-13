@@ -103,9 +103,6 @@ class JWTValidator:
         return self.decode_token(credentials.credentials)
 
 
-# 1. 一般 API 驗證用
 verify_auth = JWTValidator(secret=JWT_SECRET, token_type="access")
-# 2. 刷新 Token API 用 (通常在 Dependency)
 verify_refresh = JWTValidator(secret=JWT_REFRESH_SECRET, token_type="refresh")
-# 3. 重設密碼 Token 用
 verify_reset = JWTValidator(secret=JWT_RESET_SECRET, token_type="reset")

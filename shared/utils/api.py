@@ -27,7 +27,7 @@ def get_all_liff_apps(channel_access_token: str):
     }
     response = requests.get(url, headers=headers)
     if response.status_code == 404:
-        return None  # No LIFF apps found
+        return None
     if response.status_code != 200:
         response.raise_for_status()
 

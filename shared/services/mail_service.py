@@ -41,9 +41,3 @@ class MailService:
                 error_code=ErrorCode.EMAIL_SERVICE_FAILED,
                 error_message="Can't send email.",
             )
-
-
-# 向後兼容的函數包裝器，供現有代碼調用
-def send_reset_email(email: str, token: str):
-    service = MailService()
-    return service.send_reset_email(email, token)

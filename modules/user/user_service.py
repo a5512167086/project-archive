@@ -26,7 +26,7 @@ from shared.constants.config import (
 )
 from shared.constants.error_code import ErrorCode
 from shared.exception import GlobalErrorException
-from shared.services.mail_service import send_reset_email
+from shared.services.mail_service import MailService
 from shared.utils.common import (
     authenticate_with_google,
     authenticate_with_line,
@@ -45,6 +45,7 @@ logger = logging.getLogger(__name__)
 class UserService:
     def __init__(self, session: Session):
         self.session = session
+        self.mail_service = MailService()
         self.command = UserCommand(session)
         self.query = UserQuery(session)
 
@@ -193,7 +194,7 @@ class UserService:
             JWT_RESET_SECRET,
             timedelta(minutes=15),
         )
-        send_reset_email(user.email, reset_token)
+        self.mail_service.send_reset_email(user.email, reset_token)
 
     def reset_password(self, user_id: str, new_password: str):
         user = self.query.get_user_by_id(user_id)
@@ -207,7 +208,6 @@ class UserService:
         self.command.update_user_password(user_id, hashed_password)
 
     def reset_password_with_token(self, reset_token: str, new_password: str):
-        """Reset password using reset token from email"""
         if self.query.is_token_in_blacklist(reset_token):
             raise GlobalErrorException(
                 error_code=ErrorCode.TOKEN_INVALID,
@@ -227,7 +227,7 @@ class UserService:
         self.command.update_user_password(user_id, hashed_password)
 
         try:
-            self.command.add_token_to_blacklist(reset_token, 900)  # 15 分鐘
+            self.command.add_token_to_blacklist(reset_token, 900)
         except Exception as e:
             logger.error(f"Failed to add token to blacklist: {e}")
 
@@ -241,7 +241,6 @@ class UserService:
         print(user_info)
         user = self.query.get_user_by_email(user_info["email"])
         if not user:
-            # For new users, we need to create them and add to the bot's Users group
             random_password = generate_random_password()
             hashed_password = hash_password(random_password)
 
@@ -251,10 +250,8 @@ class UserService:
 
             self.command.create_oauth(new_user.user_id, "line", user_info["id"])
 
-            # Add to the bot's Users group
             insert_group_member(self.session, group_id, new_user.user_id, 2, None, True)
 
-            # Generate and return token
             token = generate_token_pair(new_user.user_id, new_user.email, True)
             return token
 
@@ -269,7 +266,6 @@ class UserService:
         return oauth_user_info
 
     def change_password(self, email: str, old_password: str, new_password: str):
-        """Change user password by verifying old password"""
         user = self.query.get_user_by_email(email)
         if not user:
             raise GlobalErrorException(
@@ -277,13 +273,11 @@ class UserService:
                 error_message="User not found",
             )
 
-        # Verify old password
         if not verify_password(old_password, user.password):
             raise GlobalErrorException(
                 error_code=ErrorCode.PASSWORD_NOT_MATCH,
                 error_message="Current password is incorrect",
             )
 
-        # Hash and update new password
         hashed_password = hash_password(new_password)
         self.command.update_user_password(user.user_id, hashed_password)

@@ -1,4 +1,4 @@
-from typing import Annotated, Any, Dict, Optional  # 補上 Optional
+from typing import Annotated, Any, Dict, Optional
 from uuid import UUID
 
 from fastapi import Depends

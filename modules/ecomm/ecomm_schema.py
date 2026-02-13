@@ -38,7 +38,6 @@ class UpdateBrandRequest(BaseModel):
     brand_description: Optional[str] = None
 
 
-# Category schemas
 class InsertCategoryRequest(BaseModel):
     bot_uuid: UUID
     category_name: str
@@ -182,12 +181,6 @@ class DeleteProductImageRequest(BaseModel):
     image_id: int
 
 
-class UploadProductImageRequest(BaseModel):
-    bot_uuid: UUID
-    product_id: UUID
-
-
-# Shipping schemas
 class ShippingOptionSchema(BaseModel):
     method: Literal["home_delivery", "store_pickup"]
     fee: int = Field(ge=0, description="運費")
@@ -209,7 +202,6 @@ class DeleteShippingMethodRequest(BaseModel):
     method: Literal["home_delivery", "store_pickup"]
 
 
-# Order schemas
 class OrderItemSchema(BaseModel):
     product_id: UUID
     variant_id: Optional[UUID] = None

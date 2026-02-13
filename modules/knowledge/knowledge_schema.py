@@ -43,5 +43,30 @@ class KnowledgeSyncStatusResponse(BaseModel):
     last_successful_sync_time: Optional[datetime] = None
 
 
+class UploadKnowledgeFileRequest(BaseModel):
+    bot_uuid: UUID
+
+
+class UpdateKnowledgeFileRequest(BaseModel):
+    bot_uuid: UUID
+    file_id: int
+    display_name: Optional[str] = None
+
+
+class DeleteKnowledgeFileRequest(BaseModel):
+    bot_uuid: UUID
+    file_id_list: List[int]
+
+
+class KnowledgeFileResponse(BaseModel):
+    class_id: int
+    object_id: int
+    file_id: int
+    filename: str
+    display_name: str
+    file_type: str
+    created_at: Optional[datetime] = None
+
+
 class TriggerSyncRequest(BaseModel):
     bot_uuid: UUID

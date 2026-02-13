@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import List, Optional
 from uuid import UUID
 
 import pandas as pd
@@ -16,12 +17,14 @@ from modules.knowledge.knowledge_schema import (
 from shared.constants.common import SyncStatus
 from shared.constants.error_code import ErrorCode
 from shared.exception import GlobalErrorException
+from shared.services.minio_service import MinioService
 from shared.utils.api import rag_vector_ingest
 
 
 class KnowledgeService:
     def __init__(self, session: Session):
         self.session = session
+        self.minio = MinioService()
         self.command = KnowledgeCommand(session)
         self.query = KnowledgeQuery(session)
 
@@ -110,6 +113,122 @@ class KnowledgeService:
         if not status:
             return KnowledgeVectorDBStatus(bot_uuid=bot_uuid_str)
         return status
+
+    def get_all_knowledge_files(self, bot: BotListWithCredentialView):
+        knowledge_class_id = self.validate_knowledge_class(bot.class_id)
+        rows = self.query.get_all_knowledge_files_by_class_id(knowledge_class_id)
+
+        result = []
+        for r in rows:
+            result.append({
+                "class_id": r.class_id,
+                "object_id": r.object_id,
+                "file_id": r.file_id,
+                "filename": r.filename,
+                "display_name": r.display_name,
+                "file_type": r.file_type,
+                "created_at": r.created_at,
+            })
+
+        return result
+
+    def upload_knowledge_files(
+        self,
+        bot: BotListWithCredentialView,
+        files: List[UploadFile],
+    ):
+        knowledge_class_id = self.validate_knowledge_class(bot.class_id)
+
+        uploaded = self.minio.upload_knowledge_files(
+            files, bucket_name="knowledge-files"
+        )
+        if not uploaded:
+            return []
+
+        created = []
+        try:
+            for item in uploaded:
+                filename = item["filename"]
+                display_name = item.get("original_filename") or filename
+
+                kf = self.command.insert_knowledge_file(
+                    knowledge_class_id=knowledge_class_id,
+                    display_name=display_name,
+                    filename=filename,
+                    file_type="pdf",
+                )
+
+                created.append(kf)
+
+        except Exception:
+            for item in uploaded:
+                try:
+                    self.minio.delete_knowledge_file(
+                        item["filename"], bucket_name="knowledge-files"
+                    )
+                except Exception:
+                    pass
+            raise
+
+        return created
+
+    def update_knowledge_file(
+        self,
+        bot: BotListWithCredentialView,
+        file_id: int,
+        display_name: Optional[str] = None,
+    ):
+        knowledge_class_id = self.validate_knowledge_class(bot.class_id)
+        view_row = self.query.get_knowledge_file_view_by_id(knowledge_class_id, file_id)
+        if not view_row:
+            raise GlobalErrorException(
+                error_code=ErrorCode.KNOWLEDGE_NOT_FOUND,
+                error_message="Knowledge file not found",
+            )
+
+        if display_name is not None:
+            self.command.update_knowledge_file_display_name(
+                object_id=view_row.object_id,
+                file_id=view_row.file_id,
+                display_name=display_name,
+            )
+
+    def delete_knowledge_files(
+        self, bot: BotListWithCredentialView, file_id_list: List[int]
+    ) -> None:
+        knowledge_class_id = self.validate_knowledge_class(bot.class_id)
+
+        if not file_id_list:
+            return
+
+        rows = self.query.get_knowledge_file_views_by_ids(
+            knowledge_class_id, file_id_list
+        )
+        found = {r.file_id for r in rows}
+        missing = [fid for fid in file_id_list if fid not in found]
+        if missing:
+            raise GlobalErrorException(
+                error_code=ErrorCode.KNOWLEDGE_NOT_FOUND,
+                error_message=f"Knowledge file not found: {missing}",
+            )
+
+        for r in rows:
+            self.minio.delete_knowledge_file(r.filename, bucket_name="knowledge-files")
+
+        object_ids = [r.object_id for r in rows]
+        self.command.delete_knowledge_files_by_objects(knowledge_class_id, object_ids)
+
+    def open_knowledge_file_stream(self, bot: BotListWithCredentialView, file_id: int):
+        knowledge_class_id = self.validate_knowledge_class(bot.class_id)
+        row = self.query.get_knowledge_file_view_by_id(knowledge_class_id, file_id)
+        if not row:
+            raise GlobalErrorException(
+                error_code=ErrorCode.KNOWLEDGE_NOT_FOUND,
+                error_message="Knowledge file not found",
+            )
+
+        obj = self.minio.get_object(row.filename, bucket_name="knowledge-files")
+        return row, obj
 
     async def trigger_sync(self, bot: BotListWithCredentialView):
         bot_uuid_str = str(bot.bot_detail_id)

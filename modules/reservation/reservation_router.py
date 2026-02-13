@@ -21,7 +21,6 @@ from shared.dependencies import BotAccessController, get_bot_access, get_current
 
 
 def get_reservation_service(session: SessionDep) -> ReservationService:
-    """依賴注入 ReservationService"""
     return ReservationService(session)
 
 
@@ -37,7 +36,6 @@ def list_services(
     ],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # [公開/成員] 查看服務列表：User 可看
     bot = access.verify(bot_uuid, owner_only=False)
     return reservation_service.get_services_by_bot_class_id(bot.class_id)
 
@@ -50,7 +48,6 @@ def create_service(
     ],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # [管理] 建立服務：僅限 Owner
     bot = access.verify(
         service.bot_uuid, module_name=ModuleType.Reservation, owner_only=True
     )
@@ -66,7 +63,6 @@ def delete_service(
     ],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # [管理] 刪除服務：僅限 Owner
     bot = access.verify(
         delete_service.bot_uuid, module_name=ModuleType.Reservation, owner_only=True
     )
@@ -85,7 +81,6 @@ def update_service(
     ],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # [管理] 更新服務：僅限 Owner
     bot = access.verify(
         service_patch.bot_uuid, module_name=ModuleType.Reservation, owner_only=True
     )
@@ -102,7 +97,6 @@ def get_available_times(
         ReservationService, Depends(get_reservation_service)
     ],
 ):
-    # 此接口僅依賴 service_id，通常為公開資訊，故維持原樣
     return reservation_service.get_available_times_for_service(service_id)
 
 
@@ -115,7 +109,6 @@ def create_reservation(
     ],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # [成員] 建立預約：User 可用
     bot = access.verify(
         reservation.bot_uuid, module_name=ModuleType.Reservation, owner_only=False
     )
@@ -150,9 +143,6 @@ def delete_reservation(
     ],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    """Delete a reservation by reservation ID"""
-    # [管理] 刪除預約：僅限 Owner
-    # 這裡的 bot_uuid 通常來自 query param
     access.verify(bot_uuid, module_name=ModuleType.Reservation, owner_only=True)
 
     reservation_service.delete_user_reservation(reservation_id)
@@ -170,8 +160,6 @@ def get_user_reservations_in_bot(
     ],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    """Get user's reservations in a specific bot"""
-    # [成員] 查詢自己的預約：User 可用
     bot = access.verify(bot_uuid, owner_only=False)
     user_id = current_user["user_id"]
 
@@ -189,8 +177,6 @@ def get_bot_reservations(
     ],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    """Get all reservations for a bot (bot owner only)"""
-    # [管理] 查詢所有預約：僅限 Owner
     bot = access.verify(bot_uuid, module_name=ModuleType.Reservation, owner_only=True)
     reservations = reservation_service.get_bot_reservations_list(bot.class_id)
     return reservations
@@ -204,8 +190,6 @@ def update_reservation(
     ],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    """Update a reservation"""
-    # [管理] 更新預約狀態：僅限 Owner
     access.verify(
         reservation_patch.bot_uuid, module_name=ModuleType.Reservation, owner_only=True
     )

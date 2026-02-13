@@ -42,12 +42,10 @@ from shared.services.minio_service import MinioService
 
 
 def get_ecomm_service(session: SessionDep) -> EcommService:
-    """依賴注入 EcommService"""
     return EcommService(session)
 
 
 def get_minio_service() -> MinioService:
-    """依賴注入 MinioService"""
     return MinioService()
 
 
@@ -64,7 +62,6 @@ async def get_shipping_settings(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 查看設定：User/Owner 皆可
     bot = access.verify(bot_uuid, owner_only=False)
     return await ecomm_service.get_shipping_setting(bot)
 
@@ -75,7 +72,6 @@ async def update_shipping_settings(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 更新設定：僅限 Owner
     bot = access.verify(
         update_request.bot_uuid, module_name=ModuleType.Ecomm, owner_only=True
     )
@@ -88,7 +84,6 @@ async def delete_shipping_settings(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 刪除設定：僅限 Owner
     bot = access.verify(body.bot_uuid, module_name=ModuleType.Ecomm, owner_only=True)
     await ecomm_service.delete_shipping_setting(bot, body)
 
@@ -99,7 +94,6 @@ def list_brands(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 列表：User/Owner 皆可
     bot = access.verify(bot_uuid, owner_only=False)
     return ecomm_service.get_all_brands(bot)
 
@@ -110,7 +104,6 @@ def create_brand(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 建立：僅限 Owner
     bot = access.verify(brand.bot_uuid, module_name=ModuleType.Ecomm, owner_only=True)
     ecomm_service.insert_single_brand(bot, brand)
     ecomm_service.session.commit()
@@ -122,7 +115,6 @@ def delete_brands(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 刪除：僅限 Owner
     bot = access.verify(
         delete_request.bot_uuid, module_name=ModuleType.Ecomm, owner_only=True
     )
@@ -136,7 +128,6 @@ def update_brand(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 更新：僅限 Owner
     bot = access.verify(
         update_request.bot_uuid, module_name=ModuleType.Ecomm, owner_only=True
     )
@@ -150,7 +141,6 @@ def list_categories(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 列表：User/Owner 皆可
     bot = access.verify(bot_uuid, owner_only=False)
     category_list, category_class_id = ecomm_service.get_all_categories(bot)
     return ecomm_service.get_nested_categories(category_class_id, category_list)
@@ -163,7 +153,6 @@ def create_category(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 建立：僅限 Owner
     bot = access.verify(
         category.bot_uuid, module_name=ModuleType.Ecomm, owner_only=True
     )
@@ -178,7 +167,6 @@ def delete_categories(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 刪除：僅限 Owner
     bot = access.verify(
         delete_request.bot_uuid, module_name=ModuleType.Ecomm, owner_only=True
     )
@@ -192,7 +180,6 @@ def update_category(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 更新：僅限 Owner
     bot = access.verify(
         update_request.bot_uuid, module_name=ModuleType.Ecomm, owner_only=True
     )
@@ -206,7 +193,6 @@ def list_products(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 列表：User/Owner 皆可
     bot = access.verify(bot_uuid, owner_only=False)
     return ecomm_service.get_all_products(bot)
 
@@ -227,7 +213,6 @@ def create_product(
     brand_id: str = Form("", description="品牌ID，可選"),
     images: List[UploadFile] = File([], description="產品圖片檔案"),
 ):
-    # 建立：僅限 Owner
     bot = access.verify(bot_uuid, module_name=ModuleType.Ecomm, owner_only=True)
     user_id = current_user["user_id"]
 
@@ -282,7 +267,6 @@ def delete_products(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 刪除：僅限 Owner
     bot = access.verify(
         delete_request.bot_uuid, module_name=ModuleType.Ecomm, owner_only=True
     )
@@ -296,7 +280,6 @@ def update_product(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 更新：僅限 Owner
     bot = access.verify(
         update_request.bot_uuid, module_name=ModuleType.Ecomm, owner_only=True
     )
@@ -310,7 +293,6 @@ def create_product_variant(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 建立變體：僅限 Owner
     bot = access.verify(variant.bot_uuid, module_name=ModuleType.Ecomm, owner_only=True)
     new_variant = ecomm_service.insert_product_variant(bot, variant)
     ecomm_service.session.commit()
@@ -323,7 +305,6 @@ def update_product_variant(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 更新變體：僅限 Owner
     bot = access.verify(
         update_request.bot_uuid, module_name=ModuleType.Ecomm, owner_only=True
     )
@@ -337,7 +318,6 @@ def delete_product_variants(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 刪除變體：僅限 Owner
     bot = access.verify(
         delete_request.bot_uuid, module_name=ModuleType.Ecomm, owner_only=True
     )
@@ -350,7 +330,6 @@ async def get_product_image(
     file_name: str,
     minio_service: Annotated[MinioService, Depends(get_minio_service)],
 ):
-    # 公開資源，無需驗證
     try:
         response = minio_service.client.get_object("product-images", file_name)
         image_data = response.read()
@@ -397,7 +376,6 @@ def upload_product_image(
     product_id: UUID = Form(...),
     images: List[UploadFile] = File(...),
 ):
-    # 上傳圖片：僅限 Owner
     bot = access.verify(bot_uuid, module_name=ModuleType.Ecomm, owner_only=True)
     ecomm_service.upload_product_image(bot, product_id, images)
     ecomm_service.session.commit()
@@ -409,7 +387,6 @@ def update_product_image(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 更新圖片：僅限 Owner
     bot = access.verify(
         update_request.bot_uuid, module_name=ModuleType.Ecomm, owner_only=True
     )
@@ -423,7 +400,6 @@ def delete_product_image(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 刪除圖片：僅限 Owner
     bot = access.verify(
         delete_request.bot_uuid, module_name=ModuleType.Ecomm, owner_only=True
     )
@@ -437,7 +413,6 @@ def list_bot_orders(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 查詢所有訂單 (後台)：僅限 Owner
     bot = access.verify(bot_uuid, module_name=ModuleType.Ecomm, owner_only=True)
     return ecomm_service.get_all_orders(bot)
 
@@ -449,7 +424,6 @@ def list_user_orders(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 查詢個人訂單：User 可用
     bot = access.verify(bot_uuid, owner_only=False)
     user_id = current_user["user_id"]
 
@@ -463,7 +437,6 @@ async def create_order(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 建立訂單：User 可用
     bot = access.verify(order.bot_uuid, module_name=ModuleType.Ecomm, owner_only=False)
     user_id = current_user["user_id"]
 
@@ -477,7 +450,6 @@ def update_order(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 修改訂單狀態：僅限 Owner
     bot = access.verify(
         update_request.bot_uuid, module_name=ModuleType.Ecomm, owner_only=True
     )
@@ -491,7 +463,6 @@ def delete_orders(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 刪除訂單：僅限 Owner
     bot = access.verify(
         delete_request.bot_uuid, module_name=ModuleType.Ecomm, owner_only=True
     )

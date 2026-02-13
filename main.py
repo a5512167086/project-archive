@@ -68,18 +68,13 @@ app.add_middleware(
 )
 
 
-# User module routers
+# routers
 app.include_router(user_router)
-# Knowledge module routers
 app.include_router(knowledge_router)
-# Module setting routers
 app.include_router(module_router)
-# Bot module routers
 app.include_router(bot_router)
-# Reservation module routers
 app.include_router(reservation_router)
 app.include_router(service_router)
-# E-commerce module routers
 app.include_router(ecomm_router)
 app.include_router(brand_router)
 app.include_router(category_router)

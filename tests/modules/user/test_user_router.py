@@ -27,7 +27,6 @@ def test_register_user(client, session):
 
 
 def test_login_user(client):
-    """測試使用者登入 (Login)"""
     client.post(
         "/users/register",
         json={
@@ -76,7 +75,6 @@ def test_get_me_protected(client):
 
 
 def test_change_password(client):
-    """測試修改密碼 (Update)"""
     client.post(
         "/users/register",
         json={

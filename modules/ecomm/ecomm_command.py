@@ -32,19 +32,13 @@ class EcommCommand:
         self.session = session
 
     def get_category_tree(self):
-        """
-        取得所有類別並組成巢狀結構
-        """
-        # 取得所有類別
         categories = self.session.exec(select(Class)).all()
-        # 取得所有繼承關係
         inheritances = self.session.exec(select(Inheritance)).all()
 
-        # 建立 id -> category 映射
         category_map = {str(cat.class_id): cat for cat in categories}
-        # 建立 parent -> children 對應
         children_map = {}
         parent_map = {}
+
         for inh in inheritances:
             parent_id = str(inh.parent_class_id)
             child_id = str(inh.child_class_id)
@@ -55,7 +49,6 @@ class EcommCommand:
             children_map[parent_id].append(child_id)
             parent_map[child_id] = parent_id
 
-        # 找出所有 root (沒有被當作 child 的 parent)
         all_child_ids = set(str(inh.child_class_id) for inh in inheritances)
         root_ids = [
             str(cat.class_id)
@@ -71,7 +64,6 @@ class EcommCommand:
                 "description": cat.chinese_description,
                 "parentId": parent_map.get(cat_id),
             }
-            # children
             if cat_id in children_map:
                 node["children"] = [
                     build_node(child_id) for child_id in children_map[cat_id]
@@ -122,7 +114,6 @@ class EcommCommand:
         brand_name: Optional[str] = None,
         brand_description: Optional[str] = None,
     ):
-        # 檢查該 object_id 是否存在於指定的 brand_class_id 中
         relation = self.session.exec(
             select(ClassObjectRelation).where(
                 ClassObjectRelation.class_id == brand_class_id,
@@ -133,10 +124,8 @@ class EcommCommand:
         if not relation:
             return False
 
-        # 更新 Object 資料
         brand_object = self.session.get(Object, object_id)
         if brand_object:
-            # 只更新有提供的欄位
             if brand_name is not None:
                 brand_object.chinese_name = brand_name
             if brand_description is not None:
@@ -146,7 +135,6 @@ class EcommCommand:
 
         return False
 
-    # Category command functions
     def insert_category(
         self,
         category_class_id: int,
@@ -157,13 +145,10 @@ class EcommCommand:
     ):
         category_entity_id = get_entity_id_by_name(self.session, "類別")
 
-        # 決定父類別 ID
         parent_id = parent_category_id if parent_category_id else category_class_id
 
-        # 處理 owner_id 參數
         owner_param = "NULL" if owner_id is None else f"'{owner_id}'"
 
-        # 使用 SQL function 建立新的 class
         sql_query = f"SELECT fs_insert_class({parent_id}, {category_entity_id}, '{category_name}', '{category_description}', {owner_param})"
 
         result = self.session.exec(text(sql_query)).first()
@@ -171,12 +156,10 @@ class EcommCommand:
         if result is None:
             raise Exception("CATEGORY_CREATE_FAILED: Failed to create category class")
 
-        return result  # 回傳新建立的 class_id
-        # name_path 檢查移至 service 層，這裡不再檢查
+        return result
 
     def delete_categories(self, delete_categories_class_id: List[int]):
         for class_id in delete_categories_class_id:
-            # 1. 找到要刪除的類別的父類別
             parent_inheritance = self.session.exec(
                 select(Inheritance.parent_class_id).where(
                     Inheritance.child_class_id == class_id
@@ -184,33 +167,27 @@ class EcommCommand:
             ).first()
 
             if parent_inheritance:
-                # 2. 找到所有子類別
                 child_classes = self.session.exec(
                     select(Inheritance.child_class_id).where(
                         Inheritance.parent_class_id == class_id
                     )
                 ).all()
 
-                # 3. 使用 SQL function 將所有子類別移動到祖父類別
                 for child_class_id in child_classes:
-                    # 呼叫 SQL function 移動子類別
                     self.session.exec(
                         text(
                             f"SELECT * FROM fs_move_class({child_class_id}, {parent_inheritance})"
                         )
                     )
 
-            # 4. 刪除該類別的所有繼承關係（作為子類別）
             self.session.exec(
                 delete(Inheritance).where(Inheritance.child_class_id == class_id)
             )
 
-            # 5. 刪除該類別的所有繼承關係（作為父類別）
             self.session.exec(
                 delete(Inheritance).where(Inheritance.parent_class_id == class_id)
             )
             self.session.exec(delete(Permission).where(Permission.class_id == class_id))
-            # 6. 刪除該類別本身
             self.session.exec(delete(Class).where(Class.class_id == class_id))
 
     def update_category(
@@ -221,12 +198,10 @@ class EcommCommand:
         category_description: Optional[str] = None,
         parent_category_id: Optional[int] = None,
     ):
-        # 檢查該 class_id 是否存在
         category_class = self.session.get(Class, class_id)
         if not category_class:
             return False
 
-        # 更新 Class 資料
         if category_name is not None:
             category_class.chinese_name = category_name
             category_class.english_name = category_name
@@ -236,7 +211,6 @@ class EcommCommand:
 
         self.session.add(category_class)
 
-        # 更新父類別關係
         if parent_category_id is not None:
             parent_category_id = (
                 parent_category_id if parent_category_id != 0 else category_class_id
@@ -252,7 +226,6 @@ class EcommCommand:
 
         return True
 
-    # Product command functions
     def insert_product(
         self,
         product_class_id: int,
@@ -266,10 +239,8 @@ class EcommCommand:
         images: List[dict],
         owner_id: Optional[str] = None,
     ) -> int:
-        """建立產品"""
         product_entity_id = get_entity_id_by_name(self.session, "產品")
 
-        # 建立 Object
         new_product_object = Object(
             chinese_name=product_name,
             chinese_description=product_description,
@@ -279,13 +250,11 @@ class EcommCommand:
         self.session.add(new_product_object)
         self.session.flush()
 
-        # 建立 ClassObjectRelation
         relation = ClassObjectRelation(
             class_id=product_class_id, object_id=new_product_object.object_id
         )
         self.session.add(relation)
 
-        # 建立 ProductDetail
         product_detail = ProductDetail(
             brand_id=brand_id,
             object_id=new_product_object.object_id,
@@ -297,7 +266,6 @@ class EcommCommand:
         self.session.add(product_detail)
         self.session.flush()
 
-        # 建立產品圖片
         for img in images:
             product_image = ProductImage(
                 filename=img["filename"],
@@ -309,8 +277,6 @@ class EcommCommand:
         return new_product_object.object_id
 
     def delete_products(self, product_ids: List[UUID]):
-        """刪除產品"""
-        # 先取得相關的 object_ids
         product_details = self.session.exec(
             select(ProductDetail).where(ProductDetail.product_id.in_(product_ids))
         ).all()
@@ -318,29 +284,24 @@ class EcommCommand:
         object_ids = [pd.object_id for pd in product_details]
 
         if object_ids:
-            # 刪除產品圖片
             self.session.exec(
                 delete(ProductImage).where(ProductImage.object_id.in_(object_ids))
             )
 
-            # 刪除產品變體
             self.session.exec(
                 delete(ProductVariant).where(ProductVariant.object_id.in_(object_ids))
             )
 
-            # 刪除 ClassObjectRelation
             self.session.exec(
                 delete(ClassObjectRelation).where(
                     ClassObjectRelation.object_id.in_(object_ids)
                 )
             )
 
-            # 刪除產品詳細資訊
             self.session.exec(
                 delete(ProductDetail).where(ProductDetail.product_id.in_(product_ids))
             )
 
-            # 刪除 Object
             self.session.exec(delete(Object).where(Object.object_id.in_(object_ids)))
 
     def update_product(
@@ -355,13 +316,10 @@ class EcommCommand:
         is_active: Optional[bool] = None,
         category_id: Optional[int] = None,
     ) -> bool:
-        """更新產品"""
-        # 取得產品詳細資訊
         product_detail = self.session.get(ProductDetail, product_id)
         if not product_detail:
             return False
 
-        # 更新 Object
         product_object = self.session.get(Object, product_detail.object_id)
         if product_object:
             if product_name is not None:
@@ -384,7 +342,6 @@ class EcommCommand:
         product_detail.updated_at = datetime.now(timezone.utc)
         self.session.add(product_detail)
 
-        # 更新類別關係
         if category_id is not None:
             self.session.exec(
                 update(ClassObjectRelation)
@@ -402,7 +359,6 @@ class EcommCommand:
         price: Optional[int],
         stock: Optional[int],
     ) -> ProductVariant:
-        """建立產品變體"""
         product_variant = ProductVariant(
             object_id=object_id,
             variant_name=variant_name,
@@ -413,6 +369,7 @@ class EcommCommand:
         self.session.add(product_variant)
         self.session.flush()
         self.session.refresh(product_variant)
+
         return product_variant
 
     def update_product_variant(
@@ -423,7 +380,6 @@ class EcommCommand:
         price: Optional[int] = None,
         stock: Optional[int] = None,
     ) -> bool:
-        """更新產品變體"""
         variant = self.session.get(ProductVariant, variant_id)
         if not variant:
             return False
@@ -442,7 +398,6 @@ class EcommCommand:
         return True
 
     def delete_product_variants(self, variant_ids: List[UUID]):
-        """刪除產品變體"""
         self.session.exec(
             delete(ProductVariant).where(ProductVariant.variant_id.in_(variant_ids))
         )
@@ -476,7 +431,6 @@ class EcommCommand:
         if settings:
             await settings.delete()
 
-    # Order command functions
     def insert_order(
         self,
         order_class_id: int,
@@ -492,10 +446,8 @@ class EcommCommand:
         owner_id: Optional[str] = None,
         notes: Optional[str] = None,
     ) -> UUID:
-        """建立訂單"""
         order_entity_id = get_entity_id_by_name(self.session, "訂單")
 
-        # 建立 Object
         new_order_object = Object(
             chinese_name=f"Order by {recipient_name}",
             entity_id=order_entity_id,
@@ -504,13 +456,11 @@ class EcommCommand:
         self.session.add(new_order_object)
         self.session.flush()
 
-        # 建立 ClassObjectRelation
         relation = ClassObjectRelation(
             class_id=order_class_id, object_id=new_order_object.object_id
         )
         self.session.add(relation)
 
-        # 建立 OrderDetail
         order_detail = OrderDetail(
             object_id=new_order_object.object_id,
             total_amount=total_amount,
@@ -526,7 +476,6 @@ class EcommCommand:
         self.session.add(order_detail)
         self.session.flush()
 
-        # 建立訂單項目
         for item in items:
             order_item = OrderItem(
                 object_id=new_order_object.object_id,
@@ -541,7 +490,6 @@ class EcommCommand:
         return order_detail.order_id
 
     def delete_orders(self, order_ids: List[UUID]):
-        """刪除訂單"""
         orders = self.session.exec(
             select(OrderDetail).where(OrderDetail.order_id.in_(order_ids))
         ).all()
@@ -569,7 +517,6 @@ class EcommCommand:
         payment_status: Optional[str] = None,
         tracking_number: Optional[str] = None,
     ) -> bool:
-        """更新訂單狀態"""
         order_detail = self.session.get(OrderDetail, order_id)
         if not order_detail:
             return False
@@ -589,7 +536,6 @@ class EcommCommand:
     def insert_product_image(
         self, object_id: int, filename: str, is_primary: bool = False
     ) -> ProductImage:
-        """Inserts a new product image."""
         product_image = ProductImage(
             filename=filename,
             object_id=object_id,
@@ -601,20 +547,17 @@ class EcommCommand:
         return product_image
 
     def delete_product_image(self, image_id: int):
-        """刪除產品圖片"""
         self.session.exec(delete(ProductImage).where(ProductImage.image_id == image_id))
 
     def update_product_image(
         self, image_id: int, is_primary: Optional[bool] = None
     ) -> bool:
-        """更新產品圖片"""
         image = self.session.get(ProductImage, image_id)
         if not image:
             return False
 
         if is_primary is not None:
             if is_primary:
-                # 將同一個 object_id 的其他圖片的 is_primary 設為 False
                 self.session.exec(
                     update(ProductImage)
                     .where(ProductImage.object_id == image.object_id)

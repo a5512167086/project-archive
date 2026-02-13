@@ -36,7 +36,6 @@ class CategoryListView(SQLModel, table=True):
     updated_at: datetime
 
 
-# Product models
 class ProductDetail(SQLModel, table=True):
     __tablename__ = "product_details"
 

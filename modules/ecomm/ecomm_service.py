@@ -39,10 +39,7 @@ from modules.ecomm.ecomm_schema import (
 from shared.constants.config import BACKEND_URL
 from shared.constants.error_code import ErrorCode
 from shared.exception import GlobalErrorException
-from shared.services.minio_service import (
-    delete_product_image,
-    upload_product_images,
-)
+from shared.services.minio_service import MinioService
 
 
 class EcommService:
@@ -50,6 +47,7 @@ class EcommService:
         self.session = session
         self.command = EcommCommand(session)
         self.query = EcommQuery(session)
+        self.minio = MinioService()
 
     def get_nested_categories(
         self, category_class_id: int, category_list: List[CategoryListView]
@@ -336,7 +334,7 @@ class EcommService:
         if images and any(img.filename and img.size > 0 for img in images):
             valid_images = [img for img in images if img.filename and img.size > 0]
             if valid_images:
-                uploaded_images = upload_product_images(valid_images)
+                uploaded_images = self.minio.upload_product_images(valid_images)
                 if uploaded_images:
                     for i, img_data in enumerate(uploaded_images):
                         img_data["is_primary"] = i == 0
@@ -674,7 +672,7 @@ class EcommService:
                 error_message="Image list cannot be empty",
             )
 
-        uploaded_images = upload_product_images(images)
+        uploaded_images = self.minio.upload_product_images(images)
         for img_data in uploaded_images:
             self.command.insert_product_image(
                 product.object_id, img_data["filename"], is_primary=False
@@ -707,5 +705,5 @@ class EcommService:
                 error_message="Product image not found",
             )
 
-        delete_product_image(image.filename)
+        self.minio.delete_product_image(image.filename)
         self.command.delete_product_image(body.image_id)

@@ -14,7 +14,6 @@ from modules.ecomm.ecomm_query import EcommQuery
 from shared.clients.database import engine
 from shared.services.minio_service import MinioService
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
@@ -24,12 +23,10 @@ PRODUCTS_JSON_PATH = "products.json"
 
 
 def get_db() -> Session:
-    """Get a database session."""
     return Session(engine)
 
 
 def generate_filename(original_filename: str) -> str:
-    """Generates a unique filename."""
     file_extension = (
         original_filename.split(".")[-1] if "." in original_filename else "jpg"
     )
@@ -37,10 +34,8 @@ def generate_filename(original_filename: str) -> str:
 
 
 def download_image(url: str) -> bytes | None:
-    """Downloads an image from a URL."""
     try:
         with httpx.Client(verify=False) as client:
-            # Some URLs might not have a valid SSL certificate
             response = client.get(url, follow_redirects=True, timeout=20)
             response.raise_for_status()
             return response.content
@@ -55,9 +50,7 @@ def download_image(url: str) -> bytes | None:
 def upload_image_to_minio(
     minio_service: MinioService, image_data: bytes, original_filename: str
 ) -> str | None:
-    """Uploads image data to MinIO and returns the filename."""
     try:
-        # Basic content type detection
         content_type = "image/jpeg"
         if original_filename.lower().endswith(".png"):
             content_type = "image/png"
@@ -82,7 +75,6 @@ def upload_image_to_minio(
 
 
 def seed_data(bot_uuid_str: str):
-    """Reads product data from JSON and inserts it into the database."""
     db = get_db()
     ecomm_command = EcommCommand(db)
     ecomm_query = EcommQuery(db)
@@ -95,7 +87,6 @@ def seed_data(bot_uuid_str: str):
         logger.error("Invalid BOT_UUID format.")
         return
 
-    # 1. Get Bot
     logger.info(f"--- Fetching Bot with UUID: {bot_uuid} ---")
     bot = bot_query.get_bot_by_uuid(bot_uuid)
     if not bot:
@@ -105,7 +96,6 @@ def seed_data(bot_uuid_str: str):
         f"Using bot with UUID: {bot.bot_detail_id} and class_id: {bot.class_id}"
     )
 
-    # 2. Load data from JSON
     try:
         with open(PRODUCTS_JSON_PATH, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -116,7 +106,6 @@ def seed_data(bot_uuid_str: str):
         logger.error(f"Error decoding JSON from {PRODUCTS_JSON_PATH}.")
         return
 
-    # 3. Get class IDs
     brand_class_id = ecomm_query.get_brand_class_id_by_bot_class_id(bot.class_id)
     if not brand_class_id:
         logger.error("Brand class not found for the bot.")
@@ -129,7 +118,6 @@ def seed_data(bot_uuid_str: str):
         logger.error("Category class not found for the bot.")
         return
 
-    # 4. Insert Brands
     logger.info("--- Inserting Brands ---")
     for brand_name in data.get("brands", []):
         if not ecomm_query.check_brand_name_exists(brand_class_id, brand_name):
@@ -147,7 +135,6 @@ def seed_data(bot_uuid_str: str):
     brands_map = {b.brand_name: b.object_id for b in all_brands}
     logger.info(f"Found {len(brands_map)} brands in total.")
 
-    # 5. Insert Categories and Products
     logger.info("--- Inserting Categories and Products ---")
     for main_cat_data in data.get("categories", []):
         main_category_name = main_cat_data["main_category"]

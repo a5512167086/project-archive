@@ -29,17 +29,14 @@ from shared.exception import GlobalErrorException
 
 
 def get_bot_service(session: SessionDep) -> BotService:
-    """依賴注入 BotService"""
     return BotService(session)
 
 
 def get_ecomm_service(session: SessionDep) -> EcommService:
-    """依賴注入 EcommService"""
     return EcommService(session)
 
 
 def get_module_service(session: SessionDep) -> ModuleService:
-    """依賴注入 ModuleService"""
     return ModuleService(session)
 
 
@@ -51,7 +48,6 @@ def get_bots(
     current_user: Annotated[dict, Depends(get_current_user)],
     bot_service: Annotated[BotService, Depends(get_bot_service)],
 ):
-    # 查詢用戶列表：不需要 access controller (沒有 bot_uuid)
     user_id = current_user["user_id"]
     return bot_service.get_all_bots(user_id)
 
@@ -72,12 +68,10 @@ async def create_bot(
     bot_service: Annotated[BotService, Depends(get_bot_service)],
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
 ):
-    # 建立機器人：不需要 access controller (機器人尚未存在)
     user_id = current_user["user_id"]
     bot_uuid = bot_service.create_new_bot(user_id, bot_body)
     base_url = BACKEND_URL or str(request.base_url).rstrip("/")
 
-    # 初始化運費設定
     init_shipping_option = UpdateShippingSettingRequest(
         bot_uuid=bot_uuid,
         shipping_options=[
@@ -94,8 +88,6 @@ async def create_bot(
         ],
     )
 
-    # 這裡因為剛建立，可能需要根據 EcommService 的實作確認傳入的是 uuid 還是 id
-    # 假設 ecomm_service 內部能處理 uuid
     await ecomm_service.update_shipping_setting(bot_uuid, init_shipping_option)
     bot_service.session.commit()
 
@@ -109,10 +101,8 @@ def delete_bot(
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 刪除機器人：僅限 Owner
     bot = access.verify(bot_uuid, owner_only=True)
 
-    # access 已經確保是 Owner，這裡傳入 user_id 進行刪除
     bot_service.delete_current_bot(access.user_id, bot, bot_uuid)
     ecomm_service.delete_all_shipping_settings(bot_uuid)
     bot_service.session.commit()
@@ -125,7 +115,6 @@ def update_bot(
     bot_service: Annotated[BotService, Depends(get_bot_service)],
     access: Annotated[BotAccessController, Depends(get_bot_access)],
 ):
-    # 更新機器人資訊：僅限 Owner
     access.verify(bot_uuid, owner_only=True)
 
     bot_service.update_current_bot(access.user_id, bot_uuid, bot_body)

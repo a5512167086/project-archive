@@ -22,7 +22,7 @@ def handle_text_message(
     response = rag_customer_service(bot_uuid, event.message.text, "5", "0.3")
     hits_json_string = json.dumps(
         response["hits"],
-        ensure_ascii=False,  # 確保中文字元能正常顯示，而不是被轉成 \uXXXX 編碼
+        ensure_ascii=False,
     )
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)

@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from sqlmodel import Session, delete, select
 
-from modules.knowledge.knowledge_model import KnowledgeVectorDBStatus
+from modules.knowledge.knowledge_model import KnowledgeFile, KnowledgeVectorDBStatus
 from shared.constants.common import SyncStatus
 from shared.models.class_object_relation_model import ClassObjectRelation
 from shared.models.object_model import Object
@@ -96,6 +96,68 @@ class KnowledgeCommand:
                 knowledge.chinese_name = question
             if answer is not None:
                 knowledge.english_name = answer
+
+    def insert_knowledge_file(
+        self,
+        knowledge_class_id: int,
+        display_name: str,
+        filename: str,
+        file_type: str = "pdf",
+    ) -> KnowledgeFile:
+        knowledge_entity_id = get_entity_id_by_name(self.session, "知識")
+
+        new_obj = Object(
+            chinese_name=display_name,
+            english_name="",
+            entity_id=knowledge_entity_id,
+        )
+        self.session.add(new_obj)
+        self.session.flush()
+
+        rel = ClassObjectRelation(
+            class_id=knowledge_class_id,
+            object_id=new_obj.object_id,
+        )
+        self.session.add(rel)
+
+        kf = KnowledgeFile(
+            object_id=new_obj.object_id,
+            filename=filename,
+            display_name=display_name,
+            file_type=file_type,
+            created_at=None,
+        )
+        self.session.add(kf)
+        self.session.flush()
+        return kf
+
+    def update_knowledge_file_display_name(
+        self,
+        object_id: int,
+        file_id: int,
+        display_name: str,
+    ) -> None:
+        kf = self.session.get(KnowledgeFile, file_id)
+        if kf:
+            kf.display_name = display_name
+
+        obj = self.session.get(Object, object_id)
+        if obj:
+            obj.chinese_name = display_name
+
+    def delete_knowledge_files_by_objects(
+        self, knowledge_class_id: int, object_ids: List[int]
+    ) -> None:
+        if not object_ids:
+            return
+
+        self.session.exec(
+            delete(ClassObjectRelation).where(
+                ClassObjectRelation.class_id == knowledge_class_id,
+                ClassObjectRelation.object_id.in_(object_ids),
+            )
+        )
+        self.session.exec(delete(Object).where(Object.object_id.in_(object_ids)))
 
     async def update_knowledge_vector_db_status(
         self,
