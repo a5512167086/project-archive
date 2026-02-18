@@ -113,7 +113,20 @@
     "deleteSelectedKnowledgeItems": "Delete Selected Knowledge",
     "question": "Question",
     "answer": "Answer",
-    "uploadCSV": "Upload CSV File"
+    "uploadCSV": "Upload CSV File",
+    "qaTab": "Q&A Management",
+    "fileTab": "Files Management",
+    "fileName": "File Name",
+    "fileType": "File Type",
+    "createdAt": "Created At",
+    "uploadFile": "Upload File",
+    "editFileName": "Edit File Name",
+    "editQA": "Edit QA",
+    "addSingle": "Add Single",
+    "importCSV": "Import CSV",
+    "sync": "Sync",
+    "syncing": "Syncing...",
+    "syncCompleted": "Sync Completed"
   },
   "reservationManagementPage": {
     "title": "Reservation Management",
@@ -267,6 +280,11 @@
     "price": "Price",
     "description": "Description",
     "noData": "No Data",
+    "delete": "Delete",
+    "syncing": "Syncing...",
+    "edit": "Edit",
+    "submit": "Submit",
+    "confirm": "Confirm",
     "backToLoginHint": "You will be redirected to the login page in five seconds, or you can click the button below to continue.",
     "feature": {
       "faqTitle": "FAQ Module",
@@ -378,7 +396,11 @@
     "image_updated": "Image updated successfully",
     "image_deleted": "Image deleted successfully",
     "image_order_updated": "Image order updated successfully",
-    "sync_success": "Knowledge items synced to Vector DB successfully"
+    "sync_success": "Knowledge items synced to Vector DB successfully",
+    "add": "Added successfully",
+    "upload": "Uploaded successfully",
+    "update": "Updated successfully",
+    "delete": "Deleted successfully"
   },
   "productManagementPage": {
     "title": "Product Management",

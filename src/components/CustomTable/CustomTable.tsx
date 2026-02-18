@@ -11,6 +11,7 @@ import IconButton from '@mui/material/IconButton'
 import TablePagination from '@mui/material/TablePagination'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload'
 import { useTranslation } from 'react-i18next'
 
 interface TableColumn {
@@ -24,6 +25,7 @@ interface CustomTableProps<T> {
   columns: TableColumn[]
   onEdit?: (item: T) => void
   onDelete?: (item: T) => void
+  onDownload?: (item: T) => void
   rowsPerPage?: number
   selected: number[]
   setSelected: Dispatch<SetStateAction<number[]>>
@@ -34,6 +36,7 @@ export const CustomTable = <T,>({
   columns,
   onEdit,
   onDelete,
+  onDownload,
   rowsPerPage = 11,
   selected,
   setSelected
@@ -142,6 +145,11 @@ export const CustomTable = <T,>({
                       </TableCell>
                     ))}
                     <TableCell>
+                      {onDownload && (
+                        <IconButton onClick={() => onDownload(row)}>
+                          <CloudDownloadIcon />
+                        </IconButton>
+                      )}
                       {onEdit && (
                         <IconButton onClick={() => onEdit(row)}>
                           <EditIcon />

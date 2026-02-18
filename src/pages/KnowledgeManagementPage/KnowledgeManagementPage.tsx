@@ -1,91 +1,65 @@
-import { Box, Button, Typography, Chip, CircularProgress } from '@mui/material'
-import { StyledKnowledgeManagementPage } from './KnowledgeManagementPage.style'
+import { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { CustomTable } from '@/components/CustomTable'
 import {
-  KnowledgeItem,
-  useDeleteKnowledgeItemsMutation,
-  useInsertKnowledgeItemMutation,
-  useInsertKnowledgeItemsByCSVMutation,
-  useLazyGetKnowledgeItemsQuery,
-  useUpdateKnowledgeItemMutation,
-  useGetSyncStatusQuery,
-  useTriggerSyncMutation
-} from '@/store/apis/knowledgeApi'
-import { useEffect, useState } from 'react'
+  Box,
+  Button,
+  Typography,
+  CircularProgress,
+  Tabs,
+  Tab
+} from '@mui/material'
+import SyncIcon from '@mui/icons-material/Sync'
+import DeleteIcon from '@mui/icons-material/Delete'
+import AddIcon from '@mui/icons-material/Add'
+import FileUploadIcon from '@mui/icons-material/FileUpload'
 import { useAppSelector } from '@/utils/hook'
-import { isEmpty } from '@/utils/helper'
-import { PAGE_PATHS } from '@/routes'
+import { CustomTable } from '@/components/CustomTable'
 import { CustomDialog } from '@/components/CustomDialog'
 import { CustomBreadcrumb } from '@/components/CustomBreadcrumb'
-import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
 import { showErrorToast, showSuccessToast } from '@/utils/toast'
-import { useParams } from 'react-router-dom'
-import SyncIcon from '@mui/icons-material/Sync'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import ErrorIcon from '@mui/icons-material/Error'
-import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty'
-
-const knowledgeManagementPageContent = {
-  title: 'knowledgeSettingPage.title',
-  addButtonText: 'knowledgeSettingPage.addKnowledgeItemButton',
-  syncButtonText: 'knowledgeSettingPage.syncKnowledgeItemsButton',
-  editButtonText: 'knowledgeSettingPage.editKnowledgeItemButton',
-  addButtonTextByCSV: 'knowledgeSettingPage.addKnowledgeItemFromCSVButton',
-  deleteButtonText: 'knowledgeSettingPage.deleteSelectedKnowledgeItems',
-  deleteDialogTitle: 'knowledgeSettingPage.deleteKnowledgeItemTitle',
-  deleteMutiDialogTitle: 'knowledgeSettingPage.deleteKnowledgeItemsTitle',
-  botPageTitle: 'botPage.myBot'
-}
-
-const columns = [
-  { id: 'question', label: 'knowledgeSettingPage.question' },
-  { id: 'answer', label: 'knowledgeSettingPage.answer' }
-]
-
-const knowledgeFormFields: FieldProps[] = [
-  {
-    id: 'question',
-    name: 'question',
-    label: 'knowledgeSettingPage.question',
-    type: 'text',
-    required: true
-  },
-  {
-    id: 'answer',
-    name: 'answer',
-    label: 'knowledgeSettingPage.answer',
-    type: 'text',
-    required: true
-  }
-]
-
-const insertKnowledgesFields: FieldProps[] = [
-  {
-    id: 'csv_file',
-    name: 'csv_file',
-    label: 'knowledgeSettingPage.uploadCSV',
-    type: 'file',
-    required: true,
-    errorText: {
-      invalidFormat: 'Please upload a valid CSV file'
-    }
-  }
-]
+import {
+  useLazyGetKnowledgeItemsQuery,
+  useInsertKnowledgeItemMutation,
+  useInsertKnowledgeItemsByCSVMutation,
+  useUpdateKnowledgeItemMutation,
+  useDeleteKnowledgeItemsMutation,
+  useLazyGetKnowledgeFilesQuery,
+  useInsertKnowledgeFilesMutation,
+  useDeleteKnowledgeFilesMutation,
+  useUpdateKnowledgeFileMutation,
+  useLazyDownloadKnowledgeFileQuery,
+  useGetSyncStatusQuery,
+  useTriggerSyncMutation,
+  KnowledgeFileItem,
+  KnowledgeItem
+} from '@/store/apis/knowledgeApi'
+import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
 
 const KnowledgeManagementPage = () => {
   const { uuid } = useParams()
   const { t } = useTranslation()
-  const { knowledgeItems } = useAppSelector((state) => state.knowledge)
+  const [tabValue, setTabValue] = useState(0)
+
+  const { knowledgeItems, knowledgeFiles } = useAppSelector(
+    (state) => state.knowledge
+  )
   const { botList } = useAppSelector((state) => state.bot)
   const currentBot = botList.find((bot) => bot.bot_detail_id === uuid)
-  const [pollingInterval, setPollingInterval] = useState(0)
-  const [getKnowledges] = useLazyGetKnowledgeItemsQuery()
-  const [insertKnowledge] = useInsertKnowledgeItemMutation()
-  const [updateKnowledge] = useUpdateKnowledgeItemMutation()
-  const [insertKnowledges] = useInsertKnowledgeItemsByCSVMutation()
-  const [deleteKnowledges] = useDeleteKnowledgeItemsMutation()
 
+  const [pollingInterval, setPollingInterval] = useState(0)
+
+  const [getKnowledges] = useLazyGetKnowledgeItemsQuery()
+  const [insertQA] = useInsertKnowledgeItemMutation()
+  const [insertQAByCSV] = useInsertKnowledgeItemsByCSVMutation()
+  const [updateQA] = useUpdateKnowledgeItemMutation()
+  const [deleteQA] = useDeleteKnowledgeItemsMutation()
+  const [getFiles] = useLazyGetKnowledgeFilesQuery()
+  const [insertFiles] = useInsertKnowledgeFilesMutation()
+  const [updateFile] = useUpdateKnowledgeFileMutation()
+  const [deleteFiles] = useDeleteKnowledgeFilesMutation()
+  const [triggerDownload] = useLazyDownloadKnowledgeFileQuery()
+  const [triggerSync, { isLoading: isSyncing }] = useTriggerSyncMutation()
   const { data: syncStatus } = useGetSyncStatusQuery(
     { bot_uuid: uuid! },
     {
@@ -94,367 +68,404 @@ const KnowledgeManagementPage = () => {
     }
   )
 
-  const [triggerSync, { isLoading: isSyncTriggering }] =
-    useTriggerSyncMutation()
-
-  const [selected, setSelected] = useState<number[]>([])
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [isMutiDeleteDialogOpen, setIsMutiDeleteDialogOpen] = useState(false)
-  const [isInsertSingleDialogOpen, setIsInsertSingleDialogOpen] =
-    useState(false)
-  const [isInsertByCSVDialogOpen, setIsInsertByCSVDialogOpen] = useState(false)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [currentDeleteKnowledgeItem, setCurrentDeleteKnowledgeItem] =
-    useState<KnowledgeItem | null>(null)
-  const [editingKnowledgeItem, setEditingKnowledgeItem] =
-    useState<KnowledgeItem | null>(null)
-
-  const breadcrumbItems = [
-    {
-      link: PAGE_PATHS.BOT_LIST,
-      linkText: knowledgeManagementPageContent.botPageTitle
-    },
-    {
-      link: PAGE_PATHS.BOT_LIST + `/${currentBot?.bot_detail_id}`,
-      linkText: currentBot?.chinese_name || ''
-    },
-    {
-      link: `${PAGE_PATHS.BOT_LIST}/${currentBot?.bot_detail_id}/${PAGE_PATHS.KNOWLEDGE_MOUDLE}`,
-      linkText: knowledgeManagementPageContent.title
-    }
-  ]
-
   useEffect(() => {
     if (syncStatus?.status === 'RUNNING') {
-      setPollingInterval(3000)
+      setPollingInterval(5000)
     } else {
       setPollingInterval(0)
     }
   }, [syncStatus?.status])
 
-  // --- Handlers ---
-  const handleTriggerSync = async () => {
-    if (!currentBot?.bot_detail_id) return
-    try {
-      await triggerSync({ bot_uuid: currentBot.bot_detail_id }).unwrap()
-      showSuccessToast('success.sync_success', t)
-    } catch (error) {
-      showErrorToast(error, t)
-    }
-  }
+  const [selectedQA, setSelectedQA] = useState<number[]>([])
+  const [selectedFiles, setSelectedFiles] = useState<number[]>([])
+  const [isAddQAOpen, setIsAddQAOpen] = useState(false)
+  const [isAddCSVOpen, setIsAddCSVOpen] = useState(false)
+  const [editingQA, setEditingQA] = useState<KnowledgeItem | null>(null)
+  const [isUploadOpen, setIsUploadOpen] = useState(false)
+  const [editingFile, setEditingFile] = useState<KnowledgeFileItem | null>(null)
+  const [isDeleteQAOpen, setIsDeleteQAOpen] = useState(false)
+  const [isDeleteFilesOpen, setIsDeleteFilesOpen] = useState(false)
 
-  const handleDeleteItem = (item: KnowledgeItem) => {
-    setCurrentDeleteKnowledgeItem(item)
-    setIsDeleteDialogOpen(true)
-  }
+  const isSyncRunning = isSyncing || syncStatus?.status === 'RUNNING'
 
-  const handleDialogClose = () => {
-    setIsDeleteDialogOpen(false)
-    setTimeout(() => {
-      setCurrentDeleteKnowledgeItem(null)
-    }, 200)
-  }
+  const canSync =
+    syncStatus?.status === 'PENDING' ||
+    syncStatus?.status === 'FAILED' ||
+    syncStatus?.has_pending_changes
 
-  const handleDialogConfirm = async () => {
-    await deleteKnowledges({
-      bot_uuid: currentBot!.bot_detail_id,
-      deleted_id_list: [currentDeleteKnowledgeItem!.object_id!]
-    }).unwrap()
-
-    showSuccessToast('success.knowledge_deleted', t)
-    getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
-  }
-
-  const handleDelteItems = () => {
-    setIsMutiDeleteDialogOpen(true)
-  }
-
-  const handleMutiDialogClose = () => {
-    setIsMutiDeleteDialogOpen(false)
-  }
-
-  const handleMutiDialogConfirm = async () => {
-    const deletedIdList = selected.map(
-      (index) => knowledgeItems[index]?.object_id
-    )
-
-    await deleteKnowledges({
-      bot_uuid: currentBot!.bot_detail_id,
-      deleted_id_list: deletedIdList
-    }).unwrap()
-
-    showSuccessToast('success.knowledges_deleted', t)
-    setSelected([])
-    getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
-  }
-
-  const handleAddSingleKnowledge = () => {
-    setIsInsertSingleDialogOpen(true)
-  }
-
-  const handleInsertSingleDialogClose = () => {
-    setIsInsertSingleDialogOpen(false)
-  }
-
-  const handleInsertSingleDialogConfirm = async (data: {
-    question: string
-    answer: string
-  }) => {
-    await insertKnowledge({
-      bot_uuid: currentBot!.bot_detail_id,
-      ...data
-    }).unwrap()
-
-    showSuccessToast('success.knowledge_added', t)
-    getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
-    handleInsertSingleDialogClose()
-  }
-
-  const handleAddKnowledgesByCSV = () => {
-    setIsInsertByCSVDialogOpen(true)
-  }
-
-  const handleInsertByCSVDialogClose = () => {
-    setIsInsertByCSVDialogOpen(false)
-  }
-
-  const handleInsertByCSVDialogConfirm = async (data: { csv_file: File }) => {
-    if (
-      !data.csv_file.type.includes('csv') &&
-      !data.csv_file.name.toLowerCase().endsWith('.csv')
-    ) {
-      showErrorToast(null, t, 'error.invalid_file_type')
-      return
-    }
-
-    await insertKnowledges({
-      bot_uuid: currentBot!.bot_detail_id,
-      csv_file: data.csv_file
-    }).unwrap()
-
-    showSuccessToast('success.csv_imported', t)
-    getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
-  }
-
-  const handleEditItem = (item: KnowledgeItem) => {
-    setEditingKnowledgeItem(item)
-    setIsEditDialogOpen(true)
-  }
-
-  const handleEditDialogClose = () => {
-    setIsEditDialogOpen(false)
-    setEditingKnowledgeItem(null)
-  }
-
-  const handleEditDialogConfirm = async (data: {
-    question: string
-    answer: string
-  }) => {
-    if (!editingKnowledgeItem) return
-
-    await updateKnowledge({
-      bot_uuid: currentBot!.bot_detail_id,
-      object_id: editingKnowledgeItem.object_id,
-      ...data
-    }).unwrap()
-
-    showSuccessToast('success.knowledge_updated', t)
-    getKnowledges({ bot_uuid: currentBot!.bot_detail_id })
-    handleEditDialogClose()
+  const getSyncText = () => {
+    if (isSyncRunning) return t('knowledgeSettingPage.syncing')
+    if (!canSync && syncStatus?.status === 'COMPLETED')
+      return t('knowledgeSettingPage.syncCompleted')
+    return t('knowledgeSettingPage.sync')
   }
 
   useEffect(() => {
-    if (currentBot?.bot_detail_id) {
-      getKnowledges({ bot_uuid: currentBot.bot_detail_id })
+    if (uuid) {
+      if (tabValue === 0) {
+        getKnowledges({ bot_uuid: uuid })
+      } else {
+        getFiles({ bot_uuid: uuid })
+      }
     }
-  }, [currentBot?.bot_detail_id])
+  }, [tabValue, uuid, getKnowledges, getFiles])
 
-  const renderSyncStatusChip = () => {
-    if (!syncStatus) return null
-
-    let label = ''
-    let color:
-      | 'default'
-      | 'primary'
-      | 'secondary'
-      | 'error'
-      | 'info'
-      | 'success'
-      | 'warning' = 'default'
-    let icon = undefined
-
-    switch (syncStatus.status) {
-      case 'PENDING':
-        label = '等待同步'
-        color = 'warning'
-        icon = <HourglassEmptyIcon />
-        break
-      case 'RUNNING':
-        label = '同步中...'
-        color = 'info'
-        icon = <CircularProgress size={16} color="inherit" />
-        break
-      case 'COMPLETED':
-        label = syncStatus.has_pending_changes ? '資料已變更' : '已同步'
-        color = syncStatus.has_pending_changes ? 'warning' : 'success'
-        icon = syncStatus.has_pending_changes ? (
-          <ErrorIcon />
-        ) : (
-          <CheckCircleIcon />
-        )
-        break
-      case 'FAILED':
-        label = '同步失敗'
-        color = 'error'
-        icon = <ErrorIcon />
-        break
+  const handleAddQAConfirm = async (data: {
+    question: string
+    answer: string
+  }) => {
+    try {
+      await insertQA({ bot_uuid: uuid!, ...data }).unwrap()
+      showSuccessToast('success.add', t)
+      setIsAddQAOpen(false)
+      getKnowledges({ bot_uuid: uuid! })
+    } catch (e) {
+      showErrorToast(e, t)
     }
-
-    return (
-      <Chip
-        label={label}
-        color={color}
-        icon={icon}
-        variant="outlined"
-        size="small"
-        sx={{ marginRight: '10px' }}
-      />
-    )
   }
 
-  const isSyncDisabled =
-    isSyncTriggering ||
-    syncStatus?.status === 'RUNNING' ||
-    (!syncStatus?.has_pending_changes && syncStatus?.status === 'COMPLETED')
+  const handleAddCSVConfirm = async (data: { csv_file: File }) => {
+    try {
+      if (!data.csv_file || !data.csv_file.name.endsWith('.csv')) {
+        showErrorToast('error.invalid_file_type', t)
+        return
+      }
+      await insertQAByCSV({ bot_uuid: uuid!, csv_file: data.csv_file }).unwrap()
+      showSuccessToast('success.upload', t)
+      getKnowledges({ bot_uuid: uuid! })
+    } catch (e) {
+      showErrorToast(e, t)
+    }
+  }
+
+  const handleEditQAConfirm = async (data: {
+    question: string
+    answer: string
+  }) => {
+    if (!editingQA) return
+    try {
+      await updateQA({
+        bot_uuid: uuid!,
+        object_id: editingQA.object_id,
+        ...data
+      }).unwrap()
+      showSuccessToast('success.update', t)
+      setEditingQA(null)
+      getKnowledges({ bot_uuid: uuid! })
+    } catch (e) {
+      showErrorToast(e, t)
+    }
+  }
+
+  const handleConfirmDeleteQA = async () => {
+    const ids = selectedQA.map((idx) => knowledgeItems[idx].object_id)
+    try {
+      await deleteQA({ bot_uuid: uuid!, deleted_id_list: ids }).unwrap()
+      setSelectedQA([])
+      showSuccessToast('success.delete', t)
+      setIsDeleteQAOpen(false)
+      getKnowledges({ bot_uuid: uuid! })
+    } catch (e) {
+      showErrorToast(e, t)
+    }
+  }
+
+  const handleDownload = async (file: KnowledgeFileItem) => {
+    try {
+      const blob = await triggerDownload({
+        bot_uuid: uuid!,
+        file_id: file.file_id
+      }).unwrap()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = file.filename
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+    } catch (e) {
+      showErrorToast(e, t)
+    }
+  }
+
+  const handleUploadConfirm = async (data: { files: File[] }) => {
+    try {
+      const fileArray = Array.isArray(data.files) ? data.files : [data.files]
+      if (fileArray.length === 0) return
+
+      await insertFiles({ bot_uuid: uuid!, files: fileArray }).unwrap()
+      showSuccessToast('success.upload', t)
+      setIsUploadOpen(false)
+    } catch (e) {
+      showErrorToast(e, t)
+    }
+  }
+
+  const handleEditFileConfirm = async (data: { display_name: string }) => {
+    if (!editingFile) return
+    try {
+      await updateFile({
+        bot_uuid: uuid!,
+        file_id: editingFile.file_id,
+        display_name: data.display_name
+      }).unwrap()
+      showSuccessToast('success.update', t)
+      setEditingFile(null)
+    } catch (e) {
+      showErrorToast(e, t)
+    }
+  }
+
+  const handleConfirmDeleteFiles = async () => {
+    const ids = selectedFiles.map((idx) => knowledgeFiles[idx].file_id)
+    try {
+      await deleteFiles({ bot_uuid: uuid!, file_id_list: ids }).unwrap()
+      setSelectedFiles([])
+      showSuccessToast('success.delete', t)
+      setIsDeleteFilesOpen(false)
+    } catch (e) {
+      showErrorToast(e, t)
+    }
+  }
+
+  const addQAFields: FieldProps[] = [
+    {
+      id: 'question',
+      name: 'question',
+      type: 'text',
+      label: 'knowledgeSettingPage.question',
+      required: true
+    },
+    {
+      id: 'answer',
+      name: 'answer',
+      type: 'text',
+      label: 'knowledgeSettingPage.answer',
+      required: true
+    }
+  ]
+
+  const csvFields: FieldProps[] = [
+    {
+      id: 'csv_file',
+      name: 'csv_file',
+      type: 'file',
+      label: 'knowledgeSettingPage.uploadCSV',
+      required: true,
+      accept: '.csv'
+    }
+  ]
+
+  const uploadFields: FieldProps[] = [
+    {
+      id: 'files',
+      name: 'files',
+      type: 'file',
+      label: 'knowledgeSettingPage.uploadFile',
+      required: true,
+      multiple: true
+    }
+  ]
+
+  const editFileFields: FieldProps[] = [
+    {
+      id: 'display_name',
+      name: 'display_name',
+      type: 'text',
+      label: 'knowledgeSettingPage.fileName',
+      required: true,
+      defaultValue: editingFile?.display_name
+    }
+  ]
+
+  const getEditQAFields = (): FieldProps[] => [
+    {
+      id: 'question',
+      name: 'question',
+      type: 'text',
+      label: 'knowledgeSettingPage.question',
+      required: true,
+      defaultValue: editingQA?.question
+    },
+    {
+      id: 'answer',
+      name: 'answer',
+      type: 'text',
+      label: 'knowledgeSettingPage.answer',
+      required: true,
+      defaultValue: editingQA?.answer
+    }
+  ]
 
   return (
-    <StyledKnowledgeManagementPage disableGutters maxWidth={false}>
-      <CustomBreadcrumb items={breadcrumbItems} />
+    <Box sx={{ p: 3 }}>
+      <CustomBreadcrumb
+        items={[
+          { linkText: t('botPage.myBot'), link: '/bots' },
+          { linkText: currentBot?.chinese_name || '', link: `/bots/${uuid}` }
+        ]}
+      />
       <Box
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          flexShrink: 0,
-          marginBottom: '16px'
+          mb: 3
         }}
       >
-        <Typography
-          variant="h5"
-          sx={{
-            fontSize: '2rem',
-            fontWeight: '500'
-          }}
-        >
-          {t(knowledgeManagementPageContent.title)}
-        </Typography>
-
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {/* Status Chip */}
-          {renderSyncStatusChip()}
-
-          {!isEmpty(selected) && (
-            <Button
-              variant="outlined"
-              color="error"
-              onClick={handleDelteItems}
-              sx={{ marginRight: '10px' }}
-            >
-              {t(knowledgeManagementPageContent.deleteButtonText)}
-            </Button>
-          )}
-
-          {/* Sync Button */}
+        <Typography variant="h4">{t('knowledgeSettingPage.title')}</Typography>
+        <Box sx={{ display: 'flex', gap: 1 }}>
           <Button
             variant="outlined"
-            sx={{ marginRight: '10px' }}
-            onClick={handleTriggerSync}
-            disabled={isSyncDisabled}
             startIcon={
-              isSyncTriggering ? <CircularProgress size={20} /> : <SyncIcon />
+              isSyncRunning ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                <SyncIcon />
+              )
             }
+            onClick={() => triggerSync({ bot_uuid: uuid! })}
+            // 只有當 canSync 為 true 且沒有在執行中時，才能點擊
+            disabled={!canSync || isSyncRunning}
           >
-            {isSyncTriggering
-              ? 'Starting...'
-              : t(knowledgeManagementPageContent.syncButtonText)}
+            {getSyncText()}
           </Button>
-
-          <Button
-            variant="outlined"
-            onClick={handleAddSingleKnowledge}
-            sx={{ marginRight: '10px' }}
-          >
-            {t(knowledgeManagementPageContent.addButtonText)}
-          </Button>
-          <Button variant="outlined" onClick={handleAddKnowledgesByCSV}>
-            {t(knowledgeManagementPageContent.addButtonTextByCSV)}
-          </Button>
+          {tabValue === 0 && (
+            <>
+              {selectedQA.length > 0 && (
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                  onClick={() => setIsDeleteQAOpen(true)}
+                >
+                  {t('common.delete')} ({selectedQA.length})
+                </Button>
+              )}
+              <Button
+                variant="outlined"
+                startIcon={<FileUploadIcon />}
+                onClick={() => setIsAddCSVOpen(true)}
+              >
+                {t('knowledgeSettingPage.importCSV')}
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => setIsAddQAOpen(true)}
+              >
+                {t('knowledgeSettingPage.addSingle')}
+              </Button>
+            </>
+          )}
+          {tabValue === 1 && (
+            <>
+              {selectedFiles.length > 0 && (
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                  onClick={() => setIsDeleteFilesOpen(true)}
+                >
+                  {t('common.delete')} ({selectedFiles.length})
+                </Button>
+              )}
+              <Button variant="contained" onClick={() => setIsUploadOpen(true)}>
+                {t('knowledgeSettingPage.uploadFile')}
+              </Button>
+            </>
+          )}
         </Box>
       </Box>
-
-      <Box className="knowledge__tableContainer">
+      <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)} sx={{ mb: 2 }}>
+        <Tab label={t('knowledgeSettingPage.qaTab')} />
+        <Tab label={t('knowledgeSettingPage.fileTab')} />
+      </Tabs>
+      {tabValue === 0 && (
         <CustomTable
           data={knowledgeItems}
-          columns={columns}
-          selected={selected}
-          setSelected={setSelected}
-          onEdit={handleEditItem}
-          onDelete={handleDeleteItem}
-        />
-      </Box>
-
-      {/* Dialogs ... */}
-      <CustomDialog<{
-        question: string
-        answer: string
-      }>
-        open={isInsertSingleDialogOpen}
-        handleClose={handleInsertSingleDialogClose}
-        fields={knowledgeFormFields}
-        title={t(knowledgeManagementPageContent.addButtonText)}
-        onSubmit={handleInsertSingleDialogConfirm}
-      />
-      {editingKnowledgeItem && (
-        <CustomDialog<{
-          question: string
-          answer: string
-        }>
-          open={isEditDialogOpen}
-          handleClose={handleEditDialogClose}
-          fields={knowledgeFormFields.map((field) => ({
-            ...field,
-            defaultValue:
-              editingKnowledgeItem[field.name as keyof KnowledgeItem]
-          }))}
-          title={t(knowledgeManagementPageContent.editButtonText)}
-          onSubmit={handleEditDialogConfirm}
+          columns={[
+            { id: 'question', label: 'knowledgeSettingPage.question' },
+            { id: 'answer', label: 'knowledgeSettingPage.answer' }
+          ]}
+          selected={selectedQA}
+          setSelected={setSelectedQA}
+          onEdit={(item: KnowledgeItem) => setEditingQA(item)}
         />
       )}
-      <CustomDialog<{
-        csv_file: File
-      }>
-        open={isInsertByCSVDialogOpen}
-        handleClose={handleInsertByCSVDialogClose}
-        fields={insertKnowledgesFields}
-        title={knowledgeManagementPageContent.addButtonTextByCSV}
-        onSubmit={handleInsertByCSVDialogConfirm}
+      {tabValue === 1 && (
+        <CustomTable
+          data={knowledgeFiles}
+          columns={[
+            { id: 'display_name', label: 'knowledgeSettingPage.fileName' },
+            { id: 'file_type', label: 'knowledgeSettingPage.fileType' },
+            { id: 'created_at', label: 'knowledgeSettingPage.createdAt' }
+          ]}
+          selected={selectedFiles}
+          setSelected={setSelectedFiles}
+          onEdit={(item: KnowledgeFileItem) => setEditingFile(item)}
+          onDownload={(item: KnowledgeFileItem) => handleDownload(item)}
+        />
+      )}
+      <CustomDialog
+        open={isAddQAOpen}
+        title="knowledgeSettingPage.addSingle"
+        fields={addQAFields}
+        handleClose={() => setIsAddQAOpen(false)}
+        onSubmit={handleAddQAConfirm}
       />
       <CustomDialog
-        open={isDeleteDialogOpen}
-        title={t(knowledgeManagementPageContent.deleteDialogTitle, {
-          knowledge_name:
-            currentDeleteKnowledgeItem && currentDeleteKnowledgeItem.question
-        })}
-        handleClose={handleDialogClose}
-        onSubmit={handleDialogConfirm}
+        open={isAddCSVOpen}
+        title="knowledgeSettingPage.importCSV"
+        fields={csvFields}
+        handleClose={() => setIsAddCSVOpen(false)}
+        onSubmit={handleAddCSVConfirm}
+      />
+      {editingQA && (
+        <CustomDialog
+          open={!!editingQA}
+          title="knowledgeSettingPage.editQA"
+          fields={getEditQAFields()}
+          handleClose={() => setEditingQA(null)}
+          onSubmit={handleEditQAConfirm}
+        />
+      )}
+      <CustomDialog
+        open={isUploadOpen}
+        title="knowledgeSettingPage.uploadFile"
+        fields={uploadFields}
+        handleClose={() => setIsUploadOpen(false)}
+        onSubmit={handleUploadConfirm}
+      />
+      {editingFile && (
+        <CustomDialog
+          open={!!editingFile}
+          title="knowledgeSettingPage.editFileName"
+          fields={editFileFields}
+          handleClose={() => setEditingFile(null)}
+          onSubmit={handleEditFileConfirm}
+        />
+      )}
+      <CustomDialog
+        open={isDeleteQAOpen}
+        title="knowledgeSettingPage.deleteKnowledgeItemsTitle"
+        description="knowledgeSettingPage.deleteKnowledgeItemsTitle"
+        fields={[]}
+        dangerButton={true}
+        handleClose={() => setIsDeleteQAOpen(false)}
+        onSubmit={handleConfirmDeleteQA}
       />
       <CustomDialog
-        open={isMutiDeleteDialogOpen}
-        handleClose={handleMutiDialogClose}
-        title={t(knowledgeManagementPageContent.deleteMutiDialogTitle)}
-        onSubmit={handleMutiDialogConfirm}
+        open={isDeleteFilesOpen}
+        title="knowledgeSettingPage.deleteKnowledgeItemsTitle"
+        description="knowledgeSettingPage.deleteKnowledgeItemsTitle"
+        fields={[]}
+        dangerButton={true}
+        handleClose={() => setIsDeleteFilesOpen(false)}
+        onSubmit={handleConfirmDeleteFiles}
       />
-    </StyledKnowledgeManagementPage>
+    </Box>
   )
 }
 

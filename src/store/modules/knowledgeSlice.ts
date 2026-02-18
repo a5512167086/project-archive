@@ -1,14 +1,17 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { CustomError } from '@/configs/type'
 import {
   knowledgeApi,
   KnowledgeItem,
+  KnowledgeFileItem,
   KnowledgeSyncStatusResponse
 } from '../apis/knowledgeApi'
 
 interface KnowledgeState {
   knowledgeItems: KnowledgeItem[]
   currentknowledgeItemObjectId: number | null
+  knowledgeFiles: KnowledgeFileItem[]
+  currentFileId: number | null
   syncInfo: KnowledgeSyncStatusResponse | null
   isSyncing: boolean
   errorCode: string
@@ -19,6 +22,8 @@ interface KnowledgeState {
 const initialState: KnowledgeState = {
   knowledgeItems: [],
   currentknowledgeItemObjectId: null,
+  knowledgeFiles: [],
+  currentFileId: null,
   syncInfo: null,
   isSyncing: false,
   errorCode: '',
@@ -30,11 +35,17 @@ export const knowledgeSlice = createSlice({
   name: 'knowledge',
   initialState,
   reducers: {
-    setCurrentKnowledgeItem: (state, action) => {
+    setCurrentKnowledgeItem: (state, action: PayloadAction<number | null>) => {
       state.currentknowledgeItemObjectId = action.payload
     },
     clearCurrentKnowledgeItem: (state) => {
       state.currentknowledgeItemObjectId = null
+    },
+    setCurrentFile: (state, action: PayloadAction<number | null>) => {
+      state.currentFileId = action.payload
+    },
+    clearCurrentFile: (state) => {
+      state.currentFileId = null
     },
     clearKnowledgeError: (state) => {
       state.errorCode = ''
@@ -60,8 +71,32 @@ export const knowledgeSlice = createSlice({
       .addMatcher(
         knowledgeApi.endpoints.getKnowledgeItems.matchRejected,
         (state, action) => {
-          const error = action.payload?.data as CustomError
           state.status = 'failed'
+          const error = action.payload?.data as CustomError
+          if (error) {
+            state.errorCode = error['error_code']
+            state.errorMessage = error['error_message']
+          }
+        }
+      )
+      .addMatcher(
+        knowledgeApi.endpoints.getKnowledgeFiles.matchPending,
+        (state) => {
+          state.status = 'loading'
+        }
+      )
+      .addMatcher(
+        knowledgeApi.endpoints.getKnowledgeFiles.matchFulfilled,
+        (state, action) => {
+          state.status = 'succeeded'
+          state.knowledgeFiles = action.payload
+        }
+      )
+      .addMatcher(
+        knowledgeApi.endpoints.getKnowledgeFiles.matchRejected,
+        (state, action) => {
+          state.status = 'failed'
+          const error = action.payload?.data as CustomError
           if (error) {
             state.errorCode = error['error_code']
             state.errorMessage = error['error_message']
@@ -100,6 +135,8 @@ export const knowledgeSlice = createSlice({
 export const {
   setCurrentKnowledgeItem,
   clearCurrentKnowledgeItem,
+  setCurrentFile,
+  clearCurrentFile,
   clearKnowledgeError
 } = knowledgeSlice.actions
 

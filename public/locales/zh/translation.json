@@ -113,7 +113,20 @@
     "deleteSelectedKnowledgeItems": "刪除所選的知識",
     "question": "問題",
     "answer": "答案",
-    "uploadCSV": "上傳CSV檔案"
+    "uploadCSV": "上傳CSV檔案",
+    "qaTab": "問答管理",
+    "fileTab": "檔案管理",
+    "fileName": "檔案名稱",
+    "fileType": "檔案類型",
+    "createdAt": "建立日期",
+    "uploadFile": "上傳檔案",
+    "editFileName": "編輯檔案名稱",
+    "editQA": "編輯問答",
+    "addSingle": "新增單筆",
+    "importCSV": "匯入CSV",
+    "sync": "同步",
+    "syncing": "同步中...",
+    "syncCompleted": "同步完成"
   },
   "reservationManagementPage": {
     "title": "預約管理",
@@ -268,6 +281,11 @@
     "description": "描述",
     "noData": "無資料",
     "backToLoginHint": "將在五秒後前往登入頁面，如未前往可以手動點擊下方按鈕繼續",
+    "delete": "刪除",
+    "syncing": "同步中...",
+    "edit": "編輯",
+    "submit": "送出",
+    "confirm": "確認",
     "feature": {
       "faqTitle": "問答模組",
       "faqDescription": "問答模組結合了AI的RAG (檢索增強生成) 系統，能夠即時從資料庫中檢索出相關答案，並通過生成技術提供精確和自然的回應。無論是常見問題還是專業知識，這個模組都能輕鬆處理，確保用戶得到滿意的解答。",
@@ -380,7 +398,11 @@
     "image_updated": "圖片更新成功",
     "image_deleted": "圖片刪除成功",
     "image_order_updated": "圖片順序更新成功",
-    "sync_success": "知識項目已成功同步到向量資料庫"
+    "sync_success": "知識項目已成功同步到向量資料庫",
+    "add": "新增成功",
+    "upload": "上傳成功",
+    "update": "更新成功",
+    "delete": "刪除成功"
   },
   "productManagementPage": {
     "title": "商品管理",
