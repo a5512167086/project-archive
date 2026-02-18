@@ -125,7 +125,6 @@ class KnowledgeCommand:
             filename=filename,
             display_name=display_name,
             file_type=file_type,
-            created_at=None,
         )
         self.session.add(kf)
         self.session.flush()

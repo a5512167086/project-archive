@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Annotated, Optional
 
 from beanie import Document, Indexed
@@ -24,7 +24,9 @@ class KnowledgeFile(SQLModel, table=True):
     filename: str = Field(index=True, unique=True)
     display_name: str
     file_type: str = Field(default="pdf")
-    created_at: Optional[datetime] = None
+    created_at: Optional[datetime] = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
 
 
 class KnowledgeFileListView(SQLModel, table=True):
