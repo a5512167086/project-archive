@@ -54,7 +54,6 @@ class RetrievalService:
     def refresh_index(self, bot_uuid: UUID) -> None:
         """
         Force rebuild BM25 index.
-        Must never raise due to empty corpus; empty corpus should just produce size=0 cache.
         """
         key = str(bot_uuid)
         with self._get_lock(key):
@@ -73,10 +72,15 @@ class RetrievalService:
         logger.info(f"[RetrievalService] {title} | q='{q}' | hits={len(hits)}")
 
         for i, h in enumerate(hits[: max(0, int(top_n))], 1):
-            obj_id = h.get("object_id") or h.get("id")
+            # 優先顯示 chunk id，方便除錯
+            obj_id = h.get("id") or h.get("object_id")
             score = h.get(score_key, h.get("score"))
+
+            # 顯示 Question 或 File Name
             q_snip = (h.get("question") or "").replace("\n", " ")[:60]
+            # 顯示 Answer 或 File Content
             a_snip = (h.get("answer") or "").replace("\n", " ")[:60]
+
             logger.info(
                 f"[RetrievalService] {title} top{i}: "
                 f"id={obj_id} {score_key}={score} q='{q_snip}' a='{a_snip}'"
@@ -201,7 +205,6 @@ class RetrievalService:
             return []
 
         idx = self._ensure_bm25_index(bot_uuid)
-        # size=0 代表 corpus 空，直接退化回傳空
         if idx.size <= 0 or idx.bm25 is None:
             return []
 
@@ -244,11 +247,6 @@ class RetrievalService:
         return self._load_docs_fn
 
     def _ensure_bm25_index(self, bot_uuid: UUID, force: bool = False) -> BM25Index:
-        """
-        Build or return cached BM25 index.
-        - Must never call BM25Okapi on empty corpus
-        - Must keep docs aligned with tokenized_corpus indices
-        """
         key = str(bot_uuid)
         lock = self._get_lock(key)
 
@@ -263,15 +261,13 @@ class RetrievalService:
 
             t0 = time.perf_counter()
             docs = self._safe_load_docs(self._require_loader(), bot_uuid)
-
-            # Debug counters to identify where corpus becomes empty
             raw_docs_cnt = len(docs)
-
-            # Build (doc, tokens) pairs and filter empty tokens
             pairs: List[Tuple[Dict[str, Any], List[str]]] = []
             dropped_empty_tokens = 0
 
             for d in docs:
+                # 這裡處理相容性：File 類型的 content 通常沒有被 load_docs 載入 (太慢)
+                # BM25 目前主要針對 QA。若要包含 File，需在 loader 階段處理。
                 text = (d.get("text") or "").strip() or self._format_doc_text(d)
                 toks = ngram_tokenize_unigram_bigram(text, stopwords=self.stopwords)
                 if toks:
@@ -280,13 +276,6 @@ class RetrievalService:
                     dropped_empty_tokens += 1
 
             if not pairs:
-                # Empty corpus: cache a size=0 index (so lexical_search returns [])
-                logger.warning(
-                    f"[RetrievalService] BM25 index skipped (empty corpus): "
-                    f"bot={key} | raw_docs={raw_docs_cnt} | "
-                    f"dropped_empty_tokens={dropped_empty_tokens} | "
-                    f"stopwords={len(self.stopwords)}"
-                )
                 idx = BM25Index(
                     bm25=None,
                     docs=[],
@@ -299,7 +288,6 @@ class RetrievalService:
             filtered_docs = [d for d, _ in pairs]
             tokenized_corpus = [t for _, t in pairs]
 
-            # Safe: tokenized_corpus is non-empty here
             bm25 = BM25Okapi(tokenized_corpus)
 
             idx = BM25Index(
@@ -313,7 +301,6 @@ class RetrievalService:
             logger.info(
                 f"[RetrievalService] BM25 index built: bot={key} | "
                 f"raw_docs={raw_docs_cnt} | kept_docs={idx.size} | "
-                f"dropped_empty_tokens={dropped_empty_tokens} | "
                 f"t={(time.perf_counter() - t0):.3f}s"
             )
             return idx
@@ -334,16 +321,22 @@ class RetrievalService:
             if not isinstance(d, dict):
                 continue
 
+            # QA 欄位
             q = (d.get("question") or "").strip()
             a = (d.get("answer") or "").strip()
 
-            # keep a "text" field for bm25 tokenization (prefer explicit 'text' else format)
-            text = (d.get("text") or "").strip() or self._format_doc_text({
-                "question": q,
-                "answer": a,
-            })
+            # File 欄位相容 (如果 loader 有傳入)
+            filename = d.get("filename", "")
 
-            if not q and not a:
+            # BM25 Tokenization 用
+            text = (d.get("text") or "").strip()
+            if not text:
+                if filename:
+                    text = f"{d.get('display_name', '')} {filename}"  # File 僅搜標題
+                else:
+                    text = self._format_doc_text({"question": q, "answer": a})
+
+            if not q and not a and not filename:
                 continue
 
             out.append({
@@ -371,11 +364,19 @@ class RetrievalService:
         weight_vector: float,
         weight_lexical: float,
     ) -> List[Dict[str, Any]]:
+        """
+        RRF Fusion Logic:
+        1. 優先使用 'id' (Chunk UUID) 作為去重 Key，解決 File Chunks 被誤合併的問題。
+        2. 若無 'id' 則退回使用 'object_id'。
+        """
         t0 = time.perf_counter()
         rrf_k = max(int(rrf_k), 1)
 
         def _key(h: Dict[str, Any]) -> Any:
-            return h.get("object_id") or h.get("id")
+            # === [Critical Fix] ===
+            # 使用 id (Chunk UUID) 作為唯一鍵值。
+            # 這樣同一檔案的不同 Chunks 會有不同的 Key，不會被合併。
+            return h.get("id") or h.get("object_id")
 
         vec_rank: Dict[Any, int] = {}
         for i, h in enumerate(vector_hits, 1):
@@ -394,11 +395,18 @@ class RetrievalService:
         def _ensure_base(k: Any, h: Dict[str, Any]) -> Dict[str, Any]:
             if k in merged:
                 return merged[k]
+
+            # 確保所有下游需要的欄位都被複製
             base = {
                 "id": h.get("id") or str(h.get("object_id") or ""),
                 "object_id": h.get("object_id"),
                 "question": h.get("question", ""),
                 "answer": h.get("answer", ""),
+                # 若為 File，VectorService 有回傳 content/filename 等額外欄位，也需要保留
+                "content": h.get("content"),
+                "filename": h.get("filename"),
+                "display_name": h.get("display_name"),
+                "type": h.get("type"),
                 "vec_score": None,
                 "lex_score": None,
                 "vec_rank": None,

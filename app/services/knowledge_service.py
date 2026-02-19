@@ -1,4 +1,5 @@
 import logging
+from typing import List
 from uuid import UUID
 
 from sqlmodel import Session
@@ -6,15 +7,13 @@ from sqlmodel import Session
 from app.configs.constans import EntityName, ErrorCode
 from app.exception import GlobalErrorException
 from app.models.bot_model import BotListView
+from app.models.knowledge_model import KnowledgeFileListView, KnowledgeListView
 from app.queries.bot_query import BotQuery
 from app.queries.entity_query import EntityQuery
 from app.queries.knowledge_query import KnowledgeQuery
+from app.services.storage_service import StorageService
 from app.services.vector_service import VectorService
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-)
 logger = logging.getLogger(__name__)
 
 
@@ -24,8 +23,9 @@ class KnowledgeService:
         self.query = KnowledgeQuery(session)
         self.entity_query = EntityQuery(session)
         self.bot_query = BotQuery(session)
+        self.storage_service = StorageService()
 
-    def validate_line_bot_exists(self, bot_uuid: UUID) -> BotListView | None:
+    def validate_line_bot_exists(self, bot_uuid: UUID) -> BotListView:
         bot = self.bot_query.get_bot_by_uuid(bot_uuid)
         if not bot:
             raise GlobalErrorException(
@@ -34,61 +34,82 @@ class KnowledgeService:
             )
         return bot
 
-    def validate_knowledge_class(self, bot_class_id: int) -> int:
-        knowledge_entity_id = self.entity_query.get_entity_id_by_name(
-            EntityName.KNOWLEDGE
+    def _get_class_id(self, bot_class_id: int, entity_name: str) -> int | None:
+        entity_id = self.entity_query.get_entity_id_by_name(entity_name)
+        if not entity_id:
+            return None
+        return self.query.get_knowledge_class_id_by_bot_class_id(
+            bot_class_id, entity_id
         )
-        knowledge_class_id = self.query.get_knowledge_class_id_by_bot_class_id(
-            bot_class_id, knowledge_entity_id
-        )
-        if not knowledge_class_id:
-            raise GlobalErrorException(
-                error_code=ErrorCode.KNOWLEDGE_CLASS_NOT_FOUND,
-                error_message="Knowledge class not found for the given bot class",
-            )
-        return knowledge_class_id
 
-    def get_all_knowledge_list(self, bot_uuid: UUID):
+    def get_all_qa_list(self, bot_uuid: UUID) -> List[KnowledgeListView]:
         bot = self.validate_line_bot_exists(bot_uuid)
-        knowledge_class_id = self.validate_knowledge_class(bot.class_id)
-        return self.query.get_all_knowledge_items_by_class_id(knowledge_class_id)
+        class_id = self._get_class_id(bot.class_id, EntityName.KNOWLEDGE)
+        if not class_id:
+            return []
+        return self.query.get_all_knowledge_items_by_class_id(class_id)
+
+    def get_all_file_list(self, bot_uuid: UUID) -> List[KnowledgeFileListView]:
+        bot = self.validate_line_bot_exists(bot_uuid)
+        class_id = self._get_class_id(bot.class_id, EntityName.KNOWLEDGE)
+        if not class_id:
+            return []
+        return self.query.get_all_knowledge_files_by_class_id(class_id)
 
     def sync_knowledge_vectors(
         self, bot_uuid: UUID, vector_service: VectorService
     ) -> dict:
-        sql_items = self.get_all_knowledge_list(bot_uuid)
-        sql_object_ids = {item.object_id for item in sql_items}
+        qa_items = self.get_all_qa_list(bot_uuid)
+        file_items = self.get_all_file_list(bot_uuid)
+
+        sql_qa_ids = {item.object_id for item in qa_items}
+        sql_file_ids = {item.object_id for item in file_items}
+        all_sql_ids = sql_qa_ids.union(sql_file_ids)
+
         logger.info(
-            f"Found {len(sql_object_ids)} knowledge items in SQL for bot {bot_uuid}."
+            f"Syncing Bot {bot_uuid}: {len(sql_qa_ids)} QAs, {len(sql_file_ids)} Files."
         )
 
-        qdrant_object_ids = vector_service.get_object_ids_by_bot_uuid(bot_uuid)
+        qdrant_ids = vector_service.get_object_ids_by_bot_uuid(bot_uuid)
+        ids_to_delete = list(qdrant_ids - all_sql_ids)
 
-        ids_to_delete = list(qdrant_object_ids - sql_object_ids)
         deleted_count = 0
         if ids_to_delete:
-            logger.info(f"Found {len(ids_to_delete)} items to delete from Qdrant.")
-            vector_service.delete_knowledge_items(bot_uuid, object_ids=ids_to_delete)
+            logger.info(f"Deleting {len(ids_to_delete)} obsolete items from Qdrant.")
+            vector_service.delete_knowledge_items(bot_uuid, ids_to_delete)
             deleted_count = len(ids_to_delete)
-        else:
-            logger.info("No items need to be deleted from Qdrant.")
 
-        upserted_count = vector_service.upsert_knowledge_items(bot_uuid, sql_items)
+        upserted_count = 0
+
+        if qa_items:
+            upserted_count += vector_service.upsert_qa_items(bot_uuid, qa_items)
+
+        if file_items:
+            upserted_count += vector_service.upsert_file_items(
+                bot_uuid, file_items, self.storage_service
+            )
 
         return {"upserted": upserted_count, "deleted": deleted_count}
 
     def export_knowledge_docs(self, bot_uuid: UUID) -> list[dict]:
-        items = self.get_all_knowledge_list(bot_uuid)
+        qa_items = self.get_all_qa_list(bot_uuid)
+        file_items = self.get_all_file_list(bot_uuid)
 
-        if not items:
-            return []
+        docs = []
 
-        return [
-            {
+        for it in qa_items:
+            text = f"Q: {it.question}\nA: {it.answer or ''}".strip()
+            docs.append({
                 "object_id": it.object_id,
-                "question": it.question or "",
-                "answer": it.answer or "",
-                "text": f"Q: {it.question}\nA: {it.answer or ''}".strip(),
-            }
-            for it in items
-        ]
+                "text": text,
+                "metadata": {"type": "qa"},
+            })
+
+        for f in file_items:
+            docs.append({
+                "object_id": f.object_id,
+                "text": f"{f.display_name} {f.filename}",
+                "metadata": {"type": "file"},
+            })
+
+        return docs

@@ -1,29 +1,50 @@
 from __future__ import annotations
 
+import gc
+import re
 import time
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, TypeAlias
+import uuid
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    TypeAlias,
+)
 from uuid import UUID, uuid5
 
+import torch
+from langchain_core.documents import Document
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_qdrant import QdrantVectorStore
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from pypdf import PdfReader
 from qdrant_client import QdrantClient
 from qdrant_client import models as qmodels
 
 from app.logger import logger
 from app.schemas import KnowledgeItem
 
+if TYPE_CHECKING:
+    from app.models.knowledge_model import KnowledgeFileListView
+    from app.services.storage_service import StorageService
+
 Hit: TypeAlias = Dict[str, Any]
 
 
 class VectorService:
-    DEFAULT_BATCH_SIZE = 250
+    DEFAULT_BATCH_SIZE = 12
 
     def __init__(
         self,
         embeddings: HuggingFaceEmbeddings,
         qdrant_url: str,
         collection_name: str,
-        timeout: float = 30.0,
+        timeout: float = 60.0,
         ensure_collection_and_indexes: bool = True,
     ) -> None:
         self.embeddings = embeddings
@@ -31,6 +52,13 @@ class VectorService:
         self.collection = collection_name
 
         self.client = QdrantClient(url=self.qdrant_url, timeout=timeout)
+
+        self.text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=500,
+            chunk_overlap=50,
+            separators=["\n\n", "\n", "。", "！", "？", " ", ""],
+            keep_separator=True,
+        )
 
         if ensure_collection_and_indexes:
             self.ensure_collection()
@@ -53,7 +81,6 @@ class VectorService:
                         return dim
                 except Exception:
                     pass
-
         return len(self.embeddings.embed_query("test"))
 
     def ensure_collection(self) -> None:
@@ -73,6 +100,8 @@ class VectorService:
             ("metadata.bot_uuid", qmodels.PayloadSchemaType.KEYWORD),
             ("metadata.object_id", qmodels.PayloadSchemaType.INTEGER),
             ("metadata.source", qmodels.PayloadSchemaType.KEYWORD),
+            ("metadata.type", qmodels.PayloadSchemaType.KEYWORD),
+            ("metadata.filename", qmodels.PayloadSchemaType.KEYWORD),
         ]
 
         try:
@@ -145,8 +174,10 @@ class VectorService:
 
             for p in points:
                 try:
-                    oid = p.payload["metadata"]["object_id"]
-                    object_ids.add(int(oid))
+                    md = p.payload.get("metadata", {}) if p.payload else {}
+                    oid = md.get("object_id")
+                    if oid is not None:
+                        object_ids.add(int(oid))
                 except Exception:
                     continue
 
@@ -155,43 +186,77 @@ class VectorService:
 
         return object_ids
 
-    def upsert_knowledge_items(
+    def _safe_batch_upsert(
+        self,
+        texts: List[str],
+        metadatas: List[Dict[str, Any]],
+        ids: List[str],
+        batch_size: int,
+    ) -> int:
+        if not texts:
+            return 0
+
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
+        total = 0
+
+        i = 0
+        n = len(texts)
+
+        while i < n:
+            current_batch_size = max(1, int(batch_size))
+
+            end_idx = min(i + current_batch_size, n)
+            chunk_texts = texts[i:end_idx]
+            chunk_metas = metadatas[i:end_idx]
+            chunk_ids = ids[i:end_idx]
+
+            try:
+                self.vs.add_texts(
+                    texts=chunk_texts, metadatas=chunk_metas, ids=chunk_ids
+                )
+                total += len(chunk_texts)
+                i += len(chunk_texts)
+
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+
+            except RuntimeError as e:
+                if "out of memory" in str(e).lower():
+                    if current_batch_size <= 1:
+                        logger.error(
+                            "CUDA OOM even with batch_size=1. Critical memory shortage."
+                        )
+                        if torch.cuda.is_available():
+                            torch.cuda.empty_cache()
+                        gc.collect()
+                        raise e
+
+                    logger.warning(
+                        f"CUDA OOM with batch_size={current_batch_size}. "
+                        f"Cleaning cache and retrying with batch_size={current_batch_size // 2}..."
+                    )
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+                    gc.collect()
+
+                    batch_size = current_batch_size // 2
+                else:
+                    raise e
+
+        return total
+
+    def upsert_qa_items(
         self,
         bot_uuid: UUID,
         items: Iterable[KnowledgeItem],
         batch_size: int = DEFAULT_BATCH_SIZE,
     ) -> int:
-        docs, metas, ids = self._prepare_docs(bot_uuid, items)
-        if not docs:
-            return 0
+        docs, metas, ids = self._prepare_qa_docs(bot_uuid, items)
+        return self._safe_batch_upsert(docs, metas, ids, batch_size)
 
-        total = 0
-        bs = max(int(batch_size), 1)
-
-        for i in range(0, len(docs), bs):
-            chunk_docs = docs[i : i + bs]
-            chunk_metas = metas[i : i + bs]
-            chunk_ids = ids[i : i + bs]
-            self.vs.add_texts(texts=chunk_docs, metadatas=chunk_metas, ids=chunk_ids)
-            total += len(chunk_docs)
-
-        return total
-
-    def delete_knowledge_items(
-        self,
-        bot_uuid: UUID,
-        object_ids: Optional[List[int]] = None,
-    ) -> bool:
-        filt = self._build_knowledge_filter(bot_uuid, object_ids=object_ids)
-
-        self.client.delete(
-            collection_name=self.collection,
-            points_selector=qmodels.FilterSelector(filter=filt),
-            wait=True,
-        )
-        return True
-
-    def _prepare_docs(
+    def _prepare_qa_docs(
         self,
         bot_uuid: UUID,
         items: Iterable[KnowledgeItem],
@@ -214,6 +279,7 @@ class VectorService:
                 "question": it.question,
                 "answer": it.answer or "",
                 "source": "knowledge",
+                "type": "qa",
                 "id": str(pid),
             })
 
@@ -224,64 +290,100 @@ class VectorService:
         a = (item.answer or "").strip()
         return f"Q: {q}，A: {a}" if a else f"Q: {q}"
 
-    def search(
+    def _clean_text(self, text: str) -> str:
+        if not text:
+            return ""
+        text = re.sub(r"(?<!\n)\n(?!\n)", " ", text)
+        text = re.sub(r"[ \t]+", " ", text)
+        return text.strip()
+
+    def upsert_file_items(
         self,
         bot_uuid: UUID,
-        query_text: str,
-        top_k: int,
-        score_threshold: Optional[float],
-    ) -> List[Hit]:
-        t0 = time.perf_counter()
+        files: List["KnowledgeFileListView"],
+        storage_service: "StorageService",
+    ) -> int:
+        docs_to_add: List[str] = []
+        metas_to_add: List[Dict[str, Any]] = []
+        ids_to_add: List[str] = []
 
-        t_vs = time.perf_counter()
-        pairs = self.vs.similarity_search_with_relevance_scores(
-            query=query_text,
-            k=int(top_k),
-            filter=self._build_knowledge_filter(bot_uuid),
-            score_threshold=score_threshold,
-        )
-        logger.info(
-            f"[Timer] Vector Search Call (Qdrant): {(time.perf_counter() - t_vs):.3f}s | "
-            f"Pairs: {len(pairs)}"
-        )
+        bot_str = str(bot_uuid)
 
-        t_map = time.perf_counter()
-        results: List[Hit] = []
-        for doc, score in pairs:
-            md = doc.metadata or {}
-            results.append({
-                "id": md.get("id"),
-                "score": float(score),
-                "object_id": md.get("object_id"),
-                "question": md.get("question", ""),
-                "answer": md.get("answer", ""),
-            })
-        logger.info(
-            f"[Timer] Vector Search Transform: {(time.perf_counter() - t_map):.3f}s"
-        )
+        file_object_ids = list({f.object_id for f in files})
+        if file_object_ids:
+            self.delete_knowledge_items(bot_uuid, file_object_ids)
 
-        t_post = time.perf_counter()
-        results = self._dedupe_and_sort(results)
-        logger.info(
-            f"[Timer] Vector Search PostProcess: {(time.perf_counter() - t_post):.3f}s | "
-            f"Deduped: {len(results)}"
-        )
-
-        logger.info(f"[Timer] Search Total: {(time.perf_counter() - t0):.3f}s")
-        return results
-
-    def _dedupe_and_sort(self, results: List[Hit]) -> List[Hit]:
-        results.sort(key=lambda x: float(x.get("score", 0.0) or 0.0), reverse=True)
-
-        seen: Set[Any] = set()
-        deduped: List[Hit] = []
-        for r in results:
-            k = r.get("object_id") or r.get("id")
-            if k in seen:
+        for file_item in files:
+            file_stream = storage_service.get_file_bytes(file_item.filename)
+            if not file_stream:
+                logger.warning(
+                    f"[VectorService] File not found in storage: {file_item.filename}"
+                )
                 continue
-            seen.add(k)
-            deduped.append(r)
-        return deduped
+
+            file_stream.seek(0)
+
+            raw_text = ""
+            try:
+                if file_item.file_type.lower() == "pdf":
+                    pdf = PdfReader(file_stream)
+                    for page in pdf.pages:
+                        extracted = page.extract_text()
+                        if extracted:
+                            raw_text += extracted + "\n\n"
+                else:
+                    raw_text = file_stream.getvalue().decode("utf-8", errors="ignore")
+            except Exception as e:
+                logger.error(
+                    f"[VectorService] Failed to parse file {file_item.filename}: {e}"
+                )
+                continue
+
+            cleaned_text = self._clean_text(raw_text)
+
+            if not cleaned_text.strip():
+                continue
+
+            raw_doc = Document(page_content=cleaned_text)
+            chunks = self.text_splitter.split_documents([raw_doc])
+
+            for chunk in chunks:
+                chunk_id = str(uuid.uuid4())
+
+                docs_to_add.append(chunk.page_content)
+                ids_to_add.append(chunk_id)
+                metas_to_add.append({
+                    "bot_uuid": bot_str,
+                    "object_id": file_item.object_id,
+                    "filename": file_item.filename,
+                    "display_name": file_item.display_name,
+                    "source": "knowledge",
+                    "type": "file",
+                    "content": chunk.page_content,
+                    "id": chunk_id,
+                    "question": "",
+                    "answer": chunk.page_content,
+                })
+
+        total = self._safe_batch_upsert(
+            docs_to_add, metas_to_add, ids_to_add, self.DEFAULT_BATCH_SIZE
+        )
+
+        logger.info(f"[VectorService] Upserted {total} chunks from {len(files)} files.")
+        return total
+
+    def delete_knowledge_items(
+        self,
+        bot_uuid: UUID,
+        object_ids: Optional[List[int]] = None,
+    ) -> bool:
+        filt = self._build_knowledge_filter(bot_uuid, object_ids=object_ids)
+        self.client.delete(
+            collection_name=self.collection,
+            points_selector=qmodels.FilterSelector(filter=filt),
+            wait=True,
+        )
+        return True
 
     def delete_all_by_bot_uuid(self, bot_uuid: UUID) -> bool:
         filt = qmodels.Filter(
@@ -292,10 +394,75 @@ class VectorService:
                 )
             ]
         )
-
         self.client.delete(
             collection_name=self.collection,
             points_selector=qmodels.FilterSelector(filter=filt),
             wait=True,
         )
         return True
+
+    def search(
+        self,
+        bot_uuid: UUID,
+        query_text: str,
+        top_k: int,
+        score_threshold: Optional[float],
+    ) -> List[Hit]:
+        t0 = time.perf_counter()
+
+        pairs = self.vs.similarity_search_with_relevance_scores(
+            query=query_text,
+            k=int(top_k),
+            filter=self._build_knowledge_filter(bot_uuid),
+            score_threshold=score_threshold,
+        )
+
+        results: List[Hit] = []
+        for doc, score in pairs:
+            md = doc.metadata or {}
+            item_type = md.get("type", "qa")
+
+            hit = {
+                "id": md.get("id"),
+                "score": float(score),
+                "object_id": md.get("object_id"),
+                "type": item_type,
+            }
+
+            if item_type == "file":
+                hit["content"] = md.get("content", "")
+                hit["filename"] = md.get("filename", "")
+                hit["display_name"] = md.get("display_name", "")
+                hit["answer"] = md.get("content", "")
+                hit["question"] = f"File: {md.get('display_name')}"
+            else:
+                hit["question"] = md.get("question", "")
+                hit["answer"] = md.get("answer", "")
+
+            results.append(hit)
+
+        results = self._dedupe_and_sort(results)
+
+        logger.info(
+            f"[Timer] Search Total: {(time.perf_counter() - t0):.3f}s | Hits: {len(results)}"
+        )
+        return results
+
+    def _dedupe_and_sort(self, results: List[Hit]) -> List[Hit]:
+        results.sort(key=lambda x: float(x.get("score", 0.0) or 0.0), reverse=True)
+
+        seen: Set[Any] = set()
+        deduped: List[Hit] = []
+        for r in results:
+            obj_id = r.get("object_id")
+            chunk_id = r.get("id")
+            item_type = r.get("type")
+
+            key = chunk_id if item_type == "file" else (obj_id or chunk_id)
+
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append(r)
+
+        return deduped
