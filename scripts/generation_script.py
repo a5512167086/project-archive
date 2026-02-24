@@ -11,21 +11,16 @@ from uuid import UUID
 
 import httpx
 import pandas as pd
-import torch
 from dotenv import load_dotenv
-from langchain_huggingface import (
-    ChatHuggingFace,
-    HuggingFaceEmbeddings,
-    HuggingFacePipeline,
-)
+from langchain_ollama import OllamaEmbeddings
 from qdrant_client.http.exceptions import ResponseHandlingException
 
 from app.configs.config import (
-    CHAT_MODEL,
-    EMBEDDING_MODEL,
     MONGODB_CHAT_COLLECTION,
     MONGODB_DB_NAME,
     MONGODB_URI,
+    OLLAMA_BASE_URL,
+    OLLAMA_EMBED_NAME,
     QDRANT_COLLECTION,
     QDRANT_URL,
 )
@@ -68,8 +63,8 @@ EXPERIMENTS: List[ExpConfig] = [
 # retrieval modes to test (align with RetrievalService.search(mode=...))
 RETRIEVAL_MODES: List[str] = [
     "hybrid",
-    "vector",
-    "lexical",
+    # "vector",
+    # "lexical",
 ]
 
 
@@ -79,14 +74,14 @@ RETRIEVAL_MODES: List[str] = [
 DATASET_CONFIG: Dict[str, Dict[str, str]] = {
     "wke_opt": {
         "path": "./data/testset/wke_faq_testset.csv",
-        "bot_uuid": "b2608f4e-037f-4d33-a222-d7af9d9032d1",
+        "bot_uuid": "3a4d2c72-7ba4-47e8-8ebd-1aab455ee91e",
     },
 }
 
 MODELS_TO_RUN: List[str] = [
-    "gpt_5_mini",
-    "gemini_2.5_flash",
-    "qwen3_local",
+    # "gpt_5_mini",
+    # "gemini_2.5_flash",
+    "qwen2.5_local",
 ]
 
 
@@ -139,10 +134,6 @@ def _contexts_for_ragas(hits: List[Dict[str, Any]]) -> List[str]:
 
 
 def _score_threshold_for_mode(mode: str) -> float:
-    """
-    Vector similarity scores often in [0,1], BM25/lexical scores are unbounded and not comparable.
-    If you keep 0.7 for lexical, you'll likely filter out everything.
-    """
     mode = (mode or "").lower().strip()
     if mode in ("vector", "hybrid"):
         return 0.7
@@ -155,10 +146,8 @@ def _score_threshold_for_mode(mode: str) -> float:
 # Qdrant robustness helpers
 # -----------------------------
 def _is_transient_qdrant_error(e: Exception) -> bool:
-    # qdrant_client wraps httpx errors into ResponseHandlingException
     if isinstance(e, ResponseHandlingException):
         return True
-    # raw httpx errors (in case they bubble up)
     if isinstance(
         e,
         (
@@ -206,14 +195,10 @@ def _rag_answer_with_retry(
     retrieval_mode: str,
     use_rerank: bool,
     use_rewrite: bool,
-    rewrite_model: str = "gpt_5_mini",
+    rewrite_model: str = "qwen2.5_local",
     max_attempts: int = 5,
     base_sleep: float = 1.5,
 ) -> Dict[str, Any]:
-    """
-    Retry rag.answer() on transient Qdrant disconnects.
-    This prevents the whole script from crashing mid-run.
-    """
     last_exc: Exception | None = None
 
     for attempt in range(1, max_attempts + 1):
@@ -255,7 +240,6 @@ def _rag_answer_with_retry(
             )
             time.sleep(sleep_s)
 
-    # defensive
     assert last_exc is not None
     raise last_exc
 
@@ -263,35 +247,14 @@ def _rag_answer_with_retry(
 # -----------------------------
 # Service builders (match FastAPI)
 # -----------------------------
-def get_device() -> int:
-    return 0 if torch.cuda.is_available() else -1
-
-
-def build_embeddings(device: int) -> HuggingFaceEmbeddings:
-    return HuggingFaceEmbeddings(
-        model_name=EMBEDDING_MODEL,
-        model_kwargs={"device": device},
-        cache_folder="./cache",
+def build_embeddings() -> OllamaEmbeddings:
+    return OllamaEmbeddings(
+        model=OLLAMA_EMBED_NAME,
+        base_url=OLLAMA_BASE_URL,
     )
 
 
-def build_chat_model(device: int) -> ChatHuggingFace:
-    chat_pipeline = HuggingFacePipeline.from_model_id(
-        task="text-generation",
-        model_id=CHAT_MODEL,
-        device=device,
-        model_kwargs={"torch_dtype": torch.bfloat16} if device == 0 else {},
-        pipeline_kwargs=dict(
-            max_new_tokens=1024,
-            do_sample=False,
-            repetition_penalty=1.03,
-            return_full_text=False,
-        ),
-    )
-    return ChatHuggingFace(llm=chat_pipeline)
-
-
-def build_vector_service(embeddings: HuggingFaceEmbeddings) -> VectorService:
+def build_vector_service(embeddings: OllamaEmbeddings) -> VectorService:
     return VectorService(
         embeddings=embeddings,
         qdrant_url=QDRANT_URL,
@@ -308,19 +271,18 @@ def build_summary_memory(llm_service: LLMService) -> SummaryMemory:
         mongo_db_name=MONGODB_DB_NAME,
         mongo_collection=MONGODB_CHAT_COLLECTION,
         get_llm=llm_service.get_llm,
-        summary_model="gpt_5_mini",
-        summary_trigger_threshold=999999,  # disable
+        summary_model="qwen2.5_local",
+        summary_trigger_threshold=999999,
         max_summary_messages=30,
         refresh_min_interval_sec=60,
-        refresh_every_n_new_msgs=999999,  # disable
+        refresh_every_n_new_msgs=999999,
     )
 
 
 def build_services(
-    embeddings: HuggingFaceEmbeddings,
-    chat_model: ChatHuggingFace,
+    embeddings: OllamaEmbeddings,
 ) -> Tuple[RAGService, RetrievalService]:
-    llm_service = LLMService(preloaded_hf_chat_model=chat_model)
+    llm_service = LLMService()
 
     prompt_service = PromptService(
         max_contexts_for_prompt=RAGService.DEFAULT_MAX_CONTEXTS_FOR_PROMPT
@@ -350,7 +312,6 @@ def build_services(
 
     rag_service = RAGService(
         embeddings=embeddings,
-        preloaded_hf_chat_model=chat_model,
         llm_service=llm_service,
         prompt_service=prompt_service,
         reranker_service=reranker_service,
@@ -374,7 +335,6 @@ def bind_bm25_loader_once(rs: RetrievalService) -> None:
         ks = KnowledgeService(session)
         rs.bind_docs_loader(ks.export_knowledge_docs)
     finally:
-        # close generator to exit the dependency generator cleanly
         try:
             next(gen)
         except StopIteration:
@@ -387,20 +347,14 @@ def bind_bm25_loader_once(rs: RetrievalService) -> None:
 def main() -> None:
     load_dotenv()
 
-    device = get_device()
-    print(f"Device: {'cuda' if device == 0 else 'cpu'}")
+    embeddings = build_embeddings()
+    rag, rs = build_services(embeddings=embeddings)
 
-    embeddings = build_embeddings(device)
-    chat_model = build_chat_model(device)
-    rag, rs = build_services(embeddings=embeddings, chat_model=chat_model)
-
-    # Bind BM25 loader once (so lexical/hybrid can build BM25 index)
     bind_bm25_loader_once(rs)
 
     out_dir = Path("./data/eval_dataset")
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # Optional pre-run qdrant healthcheck (won't block; just prints)
     is_alive = _qdrant_healthcheck(QDRANT_URL)
     print(f"[Qdrant] health={is_alive} url={QDRANT_URL}")
 
@@ -408,7 +362,6 @@ def main() -> None:
         bot_uuid = UUID(cfg["bot_uuid"])
         test_data = load_test_data(cfg["path"])
 
-        # Optional: Force rebuild BM25 once per bot (ensures index exists before lexical/hybrid)
         rs.refresh_index(bot_uuid)
 
         for model_name in MODELS_TO_RUN:
@@ -432,7 +385,6 @@ def main() -> None:
                             question = item["question"]
                             ground_truth = item["ground_truth"]
 
-                            # For rerank experiments, give more candidates to reranker
                             top_k = 3
                             fetch_k = 15 if exp.use_rerank else top_k
 
@@ -440,7 +392,6 @@ def main() -> None:
 
                             t0 = time.perf_counter()
 
-                            # Robust call (retry on qdrant disconnect)
                             result = _rag_answer_with_retry(
                                 rag,
                                 bot_uuid=bot_uuid,
@@ -452,7 +403,7 @@ def main() -> None:
                                 retrieval_mode=retrieval_mode,
                                 use_rerank=exp.use_rerank,
                                 use_rewrite=exp.use_rewrite,
-                                rewrite_model="gpt_5_mini",
+                                rewrite_model="qwen2.5_local",
                                 max_attempts=5,
                                 base_sleep=1.5,
                             )
@@ -485,7 +436,6 @@ def main() -> None:
                             log_f.write(msg)
                             log_f.flush()
 
-                            # Keep JSON strictly compatible with your RAGAS input
                             results.append({
                                 "question": question,
                                 "contexts": contexts_for_ragas,
@@ -508,8 +458,6 @@ def main() -> None:
                     save_json(results, str(out_json))
 
     print("Done.")
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
 
 
 if __name__ == "__main__":

@@ -11,6 +11,6 @@ sudo docker run --rm -d \
   --network="host" \
   --gpus device=3 \
   --env-file .env \
-  -e OLLAMA_HOST="http://127.0.0.1:11434" \
+  -e OLLAMA_BASE_URL="http://127.0.0.1:11434" \
   --name easybot_rag_api \
   easybot_rag_api:latest

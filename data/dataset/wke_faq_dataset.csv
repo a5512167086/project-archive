@@ -1,27 +1,26 @@
 question,answer
 WKE實驗室的主要研究領域是什麼?,WKE實驗室專注於Web Intelligent Information Systems and Applications，涵蓋：search engine、text mining、data mining and machine learning、knowledge extraction and AI deep learning應用，重視訓練學生開發大型軟體系統，不做只能表面demo的膚淺玩具。
-WKE有哪些需要注意的學習態度或事項?,思考有興趣的題目、設定階段目標「做中學」；盡量往沒有人做的題目發展，不然就要整合創意應用；練習獨立思考想清楚脈絡再執行；Web設計可以先用Figma來做示意流程；AI相關題目或應用案例，要先弄清楚資料輪廓 (big data from open data or kagle)，先定義問題、資料再去找方法
+WKE實驗室有哪些需要注意的學習態度或事項?,思考有興趣的題目、設定階段目標「做中學」；盡量往沒有人做的題目發展，不然就要整合創意應用；練習獨立思考想清楚脈絡再執行；Web設計可以先用Figma來做示意流程；AI相關題目或應用案例，要先弄清楚資料輪廓 (big data from open data or kagle)，先定義問題、資料再去找方法
 誰是WKE實驗室的負責人?,WKE實驗室由林宣華教授領導，專長於Web Data and Text Mining、Search Engine和軟體架構。
 WKE學生如何獲得報酬(薪水)?,WKE學生根據他們在項目中的表現和貢獻獲得報酬。實驗室計畫多，只要認真學習態度好，都可以獲得不錯的薪資，最重要的是學到開發大型系統的技術和經驗。
 WKE實驗室強調哪些寫程式技能?,"主要技能包括Python、SQL、HTML/CSS/JS (React) 以及針對實際應用的Web系統與App開發。例如：先自學react.js和mssql server； Python: selenium, fastapi; 然後想想你要做的論文題目相關模組，然後做中學。"
-WKE開設那些課程？,上學期Web前後端基礎 (Web Programming、Database System)、Python Programming (教育學院)；下學期Web前後端進階 (Frontend Programming、SQL Programming)、C++ Programming (程式設計，資工系大一必修)
+WKE實驗室開設那些課程？,上學期Web前後端基礎 (Web Programming、Database System)、Python Programming (教育學院)；下學期Web前後端進階 (Frontend Programming、SQL Programming)、C++ Programming (程式設計，資工系大一必修)
 加入WKE實驗室的要求是什麼?,學生必須享受寫程式和解決問題，並且對於開發大型軟體系統持有積極的態度。專題生和研究生報到的寒、暑假就必須到LAB (請事先申請學校住宿或自行外宿)，除非有特殊狀況 (例如：你很強，可以跟我視訊meeting，讓我覺得你可以強到work from home沒問題)。不符合以上條件，請不要來面談，以免浪費雙方時間。
-WKE Lab有多少成員？,截至目前 (2024年底) 共有專任28 (16 programmers + 12 project managers/PM)，研究生每屆不固定，收學生講求學習態度 (寧缺勿濫)，頻率對才來談。
-WKE Lab 的學習環境有什麼特點？,WKE Lab 是一個學習與練功的環境，提倡自學習慣，先自我解決問題，不能解決再尋求同事幫助。
-WKE Lab 推薦的解決問題方法是什麼？,問AI (ChatGPT、Copilot等) 或搜尋 (Google) 網路相關資訊，了解問題並嘗試解決，不能解決再詢問可能會的同事。
-WKE Lab 建議如何進行每周的meeting？,每周的meeting應注意聆聽並思考他人報告，練習並想像如何解決所提出的問題。之後，可以思考與老師提出解決方法的差異，反覆練習精進。老師也歡迎補充或修正老 師提出的solutions。
-WKE Lab 的科三館有哪些空間及其分機號碼？,"科三館空間包括：老師 (R428/4869)、LAB (R405/4708)、Meeting Room (Nokia Show Room, R421/4933)、計畫辦公室 (R413/有問題直接到場問工程師或PM)。"
-WKE Lab 建議碩士班新生如何選修課程？,碩士班新生應修8門3學分課程，碩一以修指導老師課程為主 (碩一上下共4門)，碩二依論文需求選修AI相關課程。
-固定什麼時間開會？,固定每週三下午 2:30 點開會，如有緊急事件需延後或暫停開會，會在 FB 群組進行通知。有事情無法出席可與老師請假。
-暑假需要做哪些事？,1. 想自己的題目，畫成心智圖或做 PPT 跟老師討論。2. 有興趣接學長姐的專案也可以提出。
-開學要注意哪些事（碩士班）？,1. 環安衛演講記得參加（需要填表單），學校會發 EMail 通知。2. 記得參加 TA 課程並提醒老師 TA 分配。
-如何設定405門禁？,設定405門禁需要準備一張卡片（如學生證、悠遊卡、一卡通），並提供卡號給門禁管理人。
+WKE實驗室有多少成員？,截至目前 (2024年底) 共有專任28 (16 programmers + 12 project managers/PM)，研究生每屆不固定，收學生講求學習態度 (寧缺勿濫)，頻率對才來談。
+WKE實驗室的學習環境有什麼特點？,WKE Lab 是一個學習與練功的環境，提倡自學習慣，先自我解決問題，不能解決再尋求同事幫助。
+WKE實驗室推薦的解決問題方法是什麼？,問AI (ChatGPT、Copilot等) 或搜尋 (Google) 網路相關資訊，了解問題並嘗試解決，不能解決再詢問可能會的同事。
+WKE實驗室建議如何進行每周的meeting？,每周的meeting應注意聆聽並思考他人報告，練習並想像如何解決所提出的問題。之後，可以思考與老師提出解決方法的差異，反覆練習精進。老師也歡迎補充或修正老 師提出的solutions。
+WKE實驗室在科三館有哪些空間及其分機號碼？,WKE實驗室在科三館的空間與分機如下：老師辦公室（R428／4869）、LAB 實驗室（R405／4708）、會議室（R421／4933）、計畫辦公室（R413／分機未提供）
+WKE實驗室建議碩士班新生如何選修課程？,碩士班新生應修8門3學分課程，碩一以修指導老師課程為主 (碩一上下共4門)，碩二依論文需求選修AI相關課程。
+WKE實驗室固定什麼時間開會？,固定每週三下午 2:30 點開會，如有緊急事件需延後或暫停開會，會在 FB 群組進行通知。有事情無法出席可與老師請假。
+WKE新生暑假需要做哪些事？,1. 想自己的題目，畫成心智圖或做 PPT 跟老師討論。2. 有興趣接學長姐的專案也可以提出。
+WKE碩士班新生開學要注意哪些事？,1. 環安衛演講記得參加（需要填表單），學校會發 EMail 通知。2. 記得參加 TA 課程並提醒老師 TA 分配。
+如何設定405實驗室門禁？,設定405門禁需要準備一張卡片（如學生證、悠遊卡、一卡通），並提供卡號給門禁管理人。
 如何使用NFC功能進行卡片讀取？,使用具備NFC功能的手機，下載NFC Reader來讀取卡片信息。
 如何提供卡號給門禁管理人？,將卡號提供給門禁管理人，設定成功後進行測試。
 如何準備專題報告的 PPT？,PPT 需要包含問題與動機、心智圖、需求說明、情境說明等內容。可以用簡易的示意圖進行說明，使用 PPT 或 Figma 製作示意圖。
 專題報告 PPT 的注意事項有哪些？,"1. 記得加入頁碼。2. 數字超過 3 位數時使用逗號分隔，例如 1,000。3. 儘量使用圖片輔佐說明。"
 在專題計畫書中如何使用 ER Model / EER Model？,詳細列出所需功能，將需求敘述完整寫出，多人合作可以各自寫好需求描述再討論整合，可以開 Word 檔案條列式列出來幫助思考。
-撰寫報告或論文時需要注意什麼？,撰寫報告、計畫書或論文時，務必使用Word並遵守格式規範，方便老師修改。
 應該使用什麼範本來撰寫文件？,務必使用Normal.dotm範本來撰寫文件。
 如何處理圖片插入的問題？,圖片不要用Ctrl+V，要用選擇性貼上【Alt+e s】選【圖片增強】，避免圖片浮動難以編輯 (文繞圖：設定圖片為字元格式)。
 如何處理表格的格式（表格內容格式）？,表格建立後，選擇【全選表格】【表格內容置中】，並設置表格欄位名稱【置中】，其餘內容左右對齊，但欄位名稱置中對齊，欄位內容為數字一律【靠右】對齊。
@@ -29,25 +28,24 @@ WKE Lab 建議碩士班新生如何選修課程？,碩士班新生應修8門3學
 應該注意哪些細節和名詞大小寫？,注意名詞大小寫的正確性，尤其是公司或產品名稱，如YouTube、Yahoo!、Ptt、App。
 論文參考文獻撰寫與格式？,"格式參考要投稿論文的template或以發表論文PDF，注意閱讀論文參考文獻順序，例如：作者姓lastname (作者序) + 年，或是參考引用的出現順序都有可能。交互參照可能是數字 (e.g. [1], [10, 12, 8])，或是 (Lin & Chen 2023)，認真模仿論文就可以理解。還要注意期刊 (journal)、會議或研討會 (conference or workshop)、書籍等不同格式。若有中英文，先列出英文，在列中文論文。"
 論文章節開始要概述各小節之脈絡關係？,例如【2. 文獻探討與相關技術】就要說明針對論文題目，為何survey這些相關研究或技術的脈絡，而不是完全空白就接 2.1 小節。
-專有名詞縮寫？,論文第一次出現專有名詞縮寫，就要括號寫清楚，例如：ICM (Integrated Crop Management)。之後提到ICM就不需再括號說明。若摘要提到，寫ICM (Integrated Crop Management) 沒錯，但後續例如在Introduction第一次提到，還是要寫ICM (Integrated Crop Management)。
-論文擷圖注意？,"擷取PPT內容圖片，勿使用螢幕擷圖連投影片底圖或底色都擷取了。應該選取所有該張slide的物件，到WORD用選擇性貼上【Alt+E,S】，選擇【圖片(xxx)】，xxx格式看狀況自選。"
+專有名詞該怎麼縮寫？,論文第一次出現專有名詞縮寫，就要括號寫清楚，例如：ICM (Integrated Crop Management)。之後提到ICM就不需再括號說明。若摘要提到，寫ICM (Integrated Crop Management) 沒錯，但後續例如在Introduction第一次提到，還是要寫ICM (Integrated Crop Management)。
+論文擷圖要注意甚麼？,"擷取PPT內容圖片，勿使用螢幕擷圖連投影片底圖或底色都擷取了。應該選取所有該張slide的物件，到WORD用選擇性貼上【Alt+E,S】，選擇【圖片(xxx)】，xxx格式看狀況自選。"
 論文口試前要準備那些事項？,口試前一周，寄信給口試委員，禮貌邀請，並附件簡報和論文初稿PDF。準備好系統demo應用情境，並將demo錄製影片，以免demo出問題立刻切換撥放影片。
-口試申請流程？,畢業生口試務必主動了解各期限之截止日期，例如：成果展海報、精簡版論文、口試申請與口試委員名冊，口試後論文繳交期限 (超過就會晚一學期畢業)。
-字形一致，可各自選中英文字體；若不分，建議微軟正黑？,"中文與英文不須加空白，若用半形括號，建議空白，e.g. 使用長短期記憶網路 (Long Short-Term Memory, LSTM) 方法。若用全形括號，就不須空白，e.g. 使用長短期記憶網路（Long Short-Term Memory, LSTM）方法。半形括號後若為標點符號也不須空白，e.g. 使用長短期記憶網路 (Long Short-Term Memory, LSTM)，將 ..."
-調整圖形大小要確定等比例縮放？,按住SHIFT再click圖片角落挑拉，就可以等比例縮放。
-調整表格大小？,左上角hover選取表格，click右鍵選【表格內容】，對齊方式選【置中】，文繞圖選【無】。click右鍵選【自動調整】，若內容少，小於頁寬選【內容大小】，內容多到須換行，就選【視窗大小】。就算以PPT或Excel做表格，也要注意此細節。
-中英文摘要？,摘要是要簡短統整主要解決的問題、用何方法？做何實驗驗證效能？主要具體貢獻？不是把簡介開頭冗長問題動機說明重複一次。中文寫好後，在交給AI產生英文摘要，並仔細看過確認文意通順。
-找不到【交互參照】問題？,WORD內容複製到另一檔案編輯時，可能因為【交互參照】(e.g. 參考文獻[1][2]...) 未複製到而導致此問題。文件完成後，要仔細檢查前：關閉追蹤修訂 > Ctrl+A (全選) > F9 (更新功能變數，若被【交互參照】物件未複製到，就會出現此問題。到原複製文件複製被【交互參照】物件可解決，或是重新加入【交互參照】)。
-口試申請？,口試後盡快按照口試委員建議，完成論文完稿給老師改。確認後，才會給委員簽名之論文審定書，完稿送印。
-所有與老師溝通之文件一律用Qsync,Qsync提供個人PC與NAS同步服務，自己帳號的Qsync資料，只有自己和老師能存取。因次，進入LAB後，最好完成Qsync設定，並建立meeting目錄，將所有要老師檢閱、修改、server or db資料放在此，以方便老師檔案總管打開>修改>存檔，然後自己就看到修改版。
+如何申請論文口試？,畢業生口試務必主動了解各期限之截止日期，例如：成果展海報、精簡版論文、口試申請與口試委員名冊，口試後論文繳交期限 (超過就會晚一學期畢業)。
+WKE實驗室對於文件排版有哪些規範?,"字形一致，可各自選中英文字體，若不分，建議微軟正黑，中文與英文不須加空白，若用半形括號，建議空白，e.g. 使用長短期記憶網路 (Long Short-Term Memory, LSTM) 方法。若用全形括號，就不須空白，e.g. 使用長短期記憶網路（Long Short-Term Memory, LSTM）方法。半形括號後若為標點符號也不須空白，e.g. 使用長短期記憶網路 (Long Short-Term Memory, LSTM)"
+如何調整圖形等比例縮放？,按住SHIFT再click圖片角落拖曳，就可以等比例縮放。
+如何調整表格大小？,左上角hover選取表格，click右鍵選【表格內容】，對齊方式選【置中】，文繞圖選【無】。click右鍵選【自動調整】，若內容少，小於頁寬選【內容大小】，內容多到須換行，就選【視窗大小】。就算以PPT或Excel做表格，也要注意此細節。
+如何撰寫中英文摘要？,摘要是要簡短統整主要解決的問題、用何方法？做何實驗驗證效能？主要具體貢獻？不是把簡介開頭冗長問題動機說明重複一次。中文寫好後，再交給AI產生英文摘要，並仔細看過確認文意通順。
+"如何解決找不到""交互參照""問題？",WORD內容複製到另一檔案編輯時，可能因為【交互參照】(e.g. 參考文獻[1][2]...) 未複製到而導致此問題。文件完成後，要仔細檢查前：關閉追蹤修訂 > Ctrl+A (全選) > F9 (更新功能變數，若被【交互參照】物件未複製到，就會出現此問題。到原複製文件複製被【交互參照】物件可解決，或是重新加入【交互參照】)。
+論文口試結束後該做甚麼？,口試後盡快按照口試委員建議，完成論文完稿給老師改。確認後，才會給委員簽名之論文審定書，完稿送印。
+WKE實驗室與老師溝通之文件規範為何？,所有與老師溝通之文件一律用Qsync，Qsync提供個人PC與NAS同步服務，自己帳號的Qsync資料，只有自己和老師能存取。因此，進入LAB後，最好完成Qsync設定，並建立meeting目錄，將所有要老師檢閱、修改、server or db資料放在此，以方便老師檔案總管打開>修改>存檔，然後自己就看到修改版。
 Qsync的網址是什麼？,Qsync的網址是https://syncwke.csie.ncnu.edu.tw。
-如何網頁登入Qsync？,網頁登入Qsync，帳號格式為WKE+[Account]。
-如何使用區網資料夾登入Qsync？,使用區網資料夾登入Qsync，可以在CMD中輸入：net use \syncwke.csie.ncnu.edu.tw /user:WKE\[account] [password]。
+如何登入 Qsync？,Qsync 提供兩種登入方式，網頁版登入請至 https://syncwke.csie.ncnu.edu.tw，帳號格式為 WKE+[Account]，區網資料夾登入可在 CMD 輸入net use \syncwke.csie.ncnu.edu.tw /user:WKE\[account] [password]。
 如何設置同步資料夾？,設置同步資料夾，需到官方網站下載Qsync，並進行連線設定。
-為什麼需要建立meeting資料夾？,"建立meeting資料夾是為了方便與老師 (administrator) 分享、修改與討論文件，並且只有自己和老師能看到。由於Qsync的資料夾 "".qsync"" 是隱藏目錄，須要只定到子目錄 (xxx/.qsync/meeting) 才能透過網路芳鄰取得，xxx/.qsync 會不存在。分享Qsync給老師，請務必建立meeting folder，並告知xxx的帳號名稱，以便老師建立捷徑存取。(切記，請勿自誤，造成老師麻煩)"
-WKE Lab 提供哪些內部服務？,WKE Lab 提供內部服務如WKE DNS (wke.csie)、WKE Windows Domain Controllor (wke\* 網域)、IIS URL Rewrite (demo.wke.../demo/...)、QSync。
-WKE Lab 新生如何建立WKE帳號？,新生首先要註冊wke (Windows Domain) 帳號，請洽AD管理者，以便在LAB存取相關文件資源、gitlab、或是註冊host ip到wke dns。
-WKE Lab AD管理人員是誰？,AD管理人員：413辦公室的郭彥廷。
+為什麼需要建立meeting資料夾？,"建立meeting資料夾是為了方便與老師 (administrator) 分享、修改與討論文件，並且只有自己和老師能看到。由於Qsync的資料夾 "".qsync"" 是隱藏目錄，需要指定到子目錄 (xxx/.qsync/meeting) 才能透過網路芳鄰取得，xxx/.qsync 會不存在。分享Qsync給老師，請務必建立meeting folder，並告知xxx的帳號名稱，以便老師建立捷徑存取。"
+WKE實驗室提供哪些內部服務？,WKE 的內部服務包含：WKE DNS (wke.csie)、Windows Domain Controller、IIS URL Rewrite 及 QSync 等基礎設施。
+WKE實驗室新生如何建立WKE帳號？,新生首先要註冊wke (Windows Domain) 帳號，請洽AD管理者，以便在LAB存取相關文件資源、gitlab、或是註冊host ip到wke dns。
+WKE實驗室AD管理人員是誰？,AD管理人員：413辦公室的郭彥廷。
 建立WKE帳號的第一步是什麼？,建立WKE帳號的第一步是新增使用者，並確保帳號名稱易於識別，並參考填寫描述資訊。
 如何設定WKE帳號的密碼？,設定密碼時須符合高強度密碼要求，並請妥善記住個人密碼。
 如何將使用者加入對應群組？,針對單一使用者點選右鍵 > 內容 > 隸屬於 > 新增對應群組來加入群組，例如wke_member。
@@ -58,9 +56,9 @@ WKE帳號的使用者描述如何修改？,可以在使用者內容中修改人�
 使用 WKE Gitlab 的前提是什麼?,你需要擁有 WKE AD 帳號才能使用 WKE Gitlab。
 如何登入 WKE Gitlab?,你可以使用 WKE AD 登入，不需要輸入 WKE。
 WKE Gitlab 上有哪些實用的群組?,一些實用的群組包括 'Components' 用於尋找或製作組件，還有 'react_component' 群組。
-WKE Lab 的IP與服務清單有哪些？,WKE Lab 的IP與服務清單僅供內部成員檢視，需登入gitlab：https://gitlab.wke.csie.ncnu.edu.tw/rookie/rookiereadme/-/wikis/home
-WKE Lab 撰寫報告或論文等該注意哪些？,按規定使用normal.dotm，需登入gitlab詳細觀看注意：https://gitlab.wke.csie.ncnu.edu.tw/rookie/rookiereadme/-/wikis/home#%E8%AB%96%E6%96%87
+WKE實驗室的IP與服務清單有哪些？,WKE Lab 的IP與服務清單僅供內部成員檢視，需登入gitlab：https://gitlab.wke.csie.ncnu.edu.tw/rookie/rookiereadme/-/wikis/home
+WKE實驗室撰寫報告或論文等該注意哪些？,撰寫報告、計畫書或論文時務必使用Word並遵守格式規範，並按規定使用normal.dotm，詳細需登入gitlab觀看注意事項：https://gitlab.wke.csie.ncnu.edu.tw/rookie/rookiereadme/-/wikis/home#%E8%AB%96%E6%96%87
 VM管理人員會提供什麼服務？,VM管理人員會根據需求視情況建立VM，並在建立好後提供IP。
 如何建立對外可以展示的Web Apps？,1. 找 demo.wke的IIS管理人。2. 設定IIS URL Rewrite指向run localhost的IP，例如：https://demo.wke.csie.ncnu.edu.tw/chatbot指向http://10.10.10.10/。
-WKE Lab 提供哪些對外服務？,WKE Lab執行很多產學計畫，數十個網站使用中，不逐一列出。內部目前提供wiseling學寫程式的社群平台作為對外服務。
+WKE實驗室提供哪些對外服務？,WKE 的對外服務主要包含：多個產學計畫網站、以及 Wiseling 程式學習社群平台。
 專題計畫書需要包含哪些內容？,1. 問題與動機：描述為何要做這個題目以及所遇到的問題。2. 心智圖：列出想做的功能和資料來源。3. 需求說明：詳細說明你要提供的功能。4. 情境說明：假設使用者如何使用你的系統並說明提供的服務。

@@ -17,9 +17,8 @@ from typing import (
 )
 from uuid import UUID, uuid5
 
-import torch
 from langchain_core.documents import Document
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_ollama import OllamaEmbeddings
 from langchain_qdrant import QdrantVectorStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pypdf import PdfReader
@@ -41,7 +40,7 @@ class VectorService:
 
     def __init__(
         self,
-        embeddings: HuggingFaceEmbeddings,
+        embeddings: OllamaEmbeddings,
         qdrant_url: str,
         collection_name: str,
         timeout: float = 60.0,
@@ -71,23 +70,26 @@ class VectorService:
         )
 
     def _embedding_dim(self) -> int:
-        client = getattr(self.embeddings, "client", None)
-        if client is not None:
-            get_dim = getattr(client, "get_sentence_embedding_dimension", None)
-            if callable(get_dim):
-                try:
-                    dim = int(get_dim())
-                    if dim > 0:
-                        return dim
-                except Exception:
-                    pass
         return len(self.embeddings.embed_query("test"))
 
     def ensure_collection(self) -> None:
-        if self.client.collection_exists(self.collection):
-            return
-
         dim = self._embedding_dim()
+
+        if self.client.collection_exists(self.collection):
+            col_info = self.client.get_collection(self.collection)
+            existing_dim = None
+            if isinstance(col_info.config.params.vectors, qmodels.VectorParams):
+                existing_dim = col_info.config.params.vectors.size
+
+            if existing_dim == dim:
+                return
+            else:
+                logger.warning(
+                    f"[VectorService] 集合維度不匹配 (現有: {existing_dim}, 新模型: {dim})。"
+                    f"正在刪除舊集合並重建..."
+                )
+                self.client.delete_collection(self.collection)
+
         self.client.create_collection(
             collection_name=self.collection,
             vectors_config=qmodels.VectorParams(
@@ -196,11 +198,7 @@ class VectorService:
         if not texts:
             return 0
 
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-
         total = 0
-
         i = 0
         n = len(texts)
 
@@ -219,28 +217,19 @@ class VectorService:
                 total += len(chunk_texts)
                 i += len(chunk_texts)
 
-                if torch.cuda.is_available():
-                    torch.cuda.empty_cache()
-
-            except RuntimeError as e:
-                if "out of memory" in str(e).lower():
+            except Exception as e:
+                err_msg = str(e).lower()
+                if "timeout" in err_msg or "memory" in err_msg:
                     if current_batch_size <= 1:
-                        logger.error(
-                            "CUDA OOM even with batch_size=1. Critical memory shortage."
-                        )
-                        if torch.cuda.is_available():
-                            torch.cuda.empty_cache()
+                        logger.error("Critical error even with batch_size=1.")
                         gc.collect()
                         raise e
 
                     logger.warning(
-                        f"CUDA OOM with batch_size={current_batch_size}. "
-                        f"Cleaning cache and retrying with batch_size={current_batch_size // 2}..."
+                        f"Upsert error with batch_size={current_batch_size}: {e}. "
+                        f"Retrying with batch_size={current_batch_size // 2}..."
                     )
-                    if torch.cuda.is_available():
-                        torch.cuda.empty_cache()
                     gc.collect()
-
                     batch_size = current_batch_size // 2
                 else:
                     raise e

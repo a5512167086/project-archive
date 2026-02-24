@@ -6,20 +6,15 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated, Tuple
 
-import torch
 from fastapi import BackgroundTasks, Depends, FastAPI, Request
-from langchain_huggingface import (
-    ChatHuggingFace,
-    HuggingFaceEmbeddings,
-    HuggingFacePipeline,
-)
+from langchain_ollama import OllamaEmbeddings
 
 from app.configs.config import (
-    CHAT_MODEL,
-    EMBEDDING_MODEL,
     MONGODB_CHAT_COLLECTION,
     MONGODB_DB_NAME,
     MONGODB_URI,
+    OLLAMA_BASE_URL,
+    OLLAMA_EMBED_NAME,
     QDRANT_COLLECTION,
     QDRANT_URL,
 )
@@ -49,35 +44,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 STOPWORDS_PATH = f"{BASE_DIR}/data/stopwords.txt"
 
 
-def get_device() -> int:
-    return 0 if torch.cuda.is_available() else -1
-
-
-def build_embeddings(device: int) -> HuggingFaceEmbeddings:
-    return HuggingFaceEmbeddings(
-        model_name=EMBEDDING_MODEL,
-        model_kwargs={"device": device},
-        cache_folder="../cache",
+def build_embeddings() -> OllamaEmbeddings:
+    return OllamaEmbeddings(
+        model=OLLAMA_EMBED_NAME,
+        base_url=OLLAMA_BASE_URL,
     )
 
 
-def build_chat_model(device: int) -> ChatHuggingFace:
-    chat_pipeline = HuggingFacePipeline.from_model_id(
-        task="text-generation",
-        model_id=CHAT_MODEL,
-        device=device,
-        model_kwargs={"torch_dtype": torch.bfloat16} if device == 0 else {},
-        pipeline_kwargs=dict(
-            max_new_tokens=2048,
-            do_sample=False,
-            repetition_penalty=1.03,
-            return_full_text=False,
-        ),
-    )
-    return ChatHuggingFace(llm=chat_pipeline)
-
-
-def build_vector_service(embeddings: HuggingFaceEmbeddings) -> VectorService:
+def build_vector_service(embeddings: OllamaEmbeddings) -> VectorService:
     return VectorService(
         embeddings=embeddings,
         qdrant_url=QDRANT_URL,
@@ -93,7 +67,7 @@ def build_summary_memory(llm_service: LLMService) -> SummaryMemory:
         mongo_db_name=MONGODB_DB_NAME,
         mongo_collection=MONGODB_CHAT_COLLECTION,
         get_llm=llm_service.get_llm,
-        summary_model="gpt_5_mini",
+        summary_model="qwen2.5_local",
         summary_trigger_threshold=6,
         max_summary_messages=30,
         refresh_min_interval_sec=60,
@@ -102,10 +76,9 @@ def build_summary_memory(llm_service: LLMService) -> SummaryMemory:
 
 
 def build_services(
-    embeddings: HuggingFaceEmbeddings,
-    chat_model: ChatHuggingFace,
+    embeddings: OllamaEmbeddings,
 ) -> Tuple[RAGService, RetrievalService, VectorService]:
-    llm_service = LLMService(preloaded_hf_chat_model=chat_model)
+    llm_service = LLMService()
     prompt_service = PromptService(
         max_contexts_for_prompt=RAGService.DEFAULT_MAX_CONTEXTS_FOR_PROMPT
     )
@@ -129,7 +102,6 @@ def build_services(
     )
     rag_service = RAGService(
         embeddings=embeddings,
-        preloaded_hf_chat_model=chat_model,
         llm_service=llm_service,
         prompt_service=prompt_service,
         reranker_service=reranker_service,
@@ -142,20 +114,12 @@ def build_services(
     return rag_service, retrieval_service, vector_service
 
 
-def cleanup_gpu() -> None:
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    device = get_device()
-    embeddings = build_embeddings(device)
-    chat_model = build_chat_model(device)
+    embeddings = build_embeddings()
 
     rag_service, retrieval_service, vector_service = build_services(
         embeddings=embeddings,
-        chat_model=chat_model,
     )
 
     app.state.rag_service = rag_service
@@ -168,7 +132,6 @@ async def lifespan(app: FastAPI):
         app.state.rag_service = None
         app.state.retrieval_service = None
         app.state.vector_service = None
-        cleanup_gpu()
 
 
 def get_rag_service(request: Request) -> RAGService:
@@ -246,7 +209,7 @@ async def query(
         score_threshold=req.score_threshold,
         rerank_threshold=req.rerank_threshold,
         history_rounds=5,
-        rewrite_model="gpt_5_mini",
+        rewrite_model="qwen2.5_local",
         max_history_messages=rag_service.DEFAULT_MAX_HISTORY_MESSAGES,
         use_rewrite=True,
         use_summary_in_rewrite=True,
@@ -255,7 +218,7 @@ async def query(
     )
 
     hits = result.get("hits", []) or []
-    answer = result.get("answer", "") or ""
+    final_answer = result.get("answer", "") or ""
 
     logger.info(
         f"[Timer] Total Request: {(time.perf_counter() - start_total):.3f}s | Hits={len(hits)}"
@@ -263,7 +226,7 @@ async def query(
 
     if not hits:
         return QueryResponse(
-            answers={"default": "很抱歉，目前無法找到相關的回答"},
+            answer="很抱歉，目前無法找到相關的回答",
             hits=[],
         )
 
@@ -274,7 +237,7 @@ async def query(
         )
 
     return QueryResponse(
-        answers={req.model: answer},
+        answer=final_answer,
         hits=[
             QueryHit(**{k: v for k, v in h.items() if k in QueryHit.model_fields})
             for h in hits

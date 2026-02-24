@@ -4,8 +4,8 @@ import time
 from typing import Any, Dict, List, Optional, Tuple
 from uuid import UUID
 
+from langchain_core.embeddings import Embeddings
 from langchain_core.messages import BaseMessage
-from langchain_huggingface import ChatHuggingFace, HuggingFaceEmbeddings
 
 from app.configs.constans import (
     DEFAULT_BATCH_SIZE,
@@ -38,8 +38,7 @@ class RAGService:
 
     def __init__(
         self,
-        embeddings: HuggingFaceEmbeddings,
-        preloaded_hf_chat_model: Optional[ChatHuggingFace] = None,
+        embeddings: Embeddings,
         llm_service: Optional[LLMService] = None,
         prompt_service: Optional[PromptService] = None,
         reranker_service: Optional[RerankerService] = None,
@@ -49,9 +48,7 @@ class RAGService:
         memory: Optional[Any] = None,
     ) -> None:
         self.embeddings = embeddings
-        self.llm_service: LLMService = llm_service or LLMService(
-            preloaded_hf_chat_model=preloaded_hf_chat_model
-        )
+        self.llm_service: LLMService = llm_service or LLMService()
         self.prompt_service: PromptService = prompt_service or PromptService(
             max_contexts_for_prompt=self.DEFAULT_MAX_CONTEXTS_FOR_PROMPT
         )
@@ -192,7 +189,7 @@ class RAGService:
         score_threshold: Optional[float] = DEFAULT_SCORE_THRESHOLD,
         rerank_threshold: Optional[float] = None,
         history_rounds: int = DEFAULT_MAX_HISTORY_ROUNDS,
-        rewrite_model: str = "gpt_5_mini",
+        rewrite_model: str = "qwen2.5_local",
         use_rewrite: bool = True,
         use_summary_in_rewrite: bool = True,
         retrieval_mode: str = "hybrid",
@@ -316,7 +313,6 @@ class RAGService:
             original_query=original_query,
             rewritten_query=rewritten_query,
             contexts=contexts,
-            use_no_think=(model_name == "qwen3_local"),
             history=history,
         )
         logger.info(
@@ -338,9 +334,6 @@ class RAGService:
             text = getattr(resp, "text", None) if hasattr(resp, "text") else None
         if not isinstance(text, str) or not text:
             text = str(resp)
-
-        if model_name == "qwen3_local":
-            text = self.prompt_service.clean_hf_output(text)
 
         answer = (text or "").strip()
 
@@ -371,7 +364,7 @@ class RAGService:
         score_threshold: Optional[float] = DEFAULT_SCORE_THRESHOLD,
         rerank_threshold: Optional[float] = None,
         history_rounds: int = DEFAULT_MAX_HISTORY_ROUNDS,
-        rewrite_model: str = "gpt_5_mini",
+        rewrite_model: str = "qwen2.5_local",
         max_history_messages: int = DEFAULT_MAX_HISTORY_MESSAGES,
         use_rewrite: bool = True,
         use_summary_in_rewrite: bool = True,

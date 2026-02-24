@@ -52,9 +52,6 @@ class RetrievalService:
         return self._load_docs_fn is not None
 
     def refresh_index(self, bot_uuid: UUID) -> None:
-        """
-        Force rebuild BM25 index.
-        """
         key = str(bot_uuid)
         with self._get_lock(key):
             self._idx_cache.pop(key, None)
@@ -72,13 +69,10 @@ class RetrievalService:
         logger.info(f"[RetrievalService] {title} | q='{q}' | hits={len(hits)}")
 
         for i, h in enumerate(hits[: max(0, int(top_n))], 1):
-            # 優先顯示 chunk id，方便除錯
             obj_id = h.get("id") or h.get("object_id")
             score = h.get(score_key, h.get("score"))
 
-            # 顯示 Question 或 File Name
             q_snip = (h.get("question") or "").replace("\n", " ")[:60]
-            # 顯示 Answer 或 File Content
             a_snip = (h.get("answer") or "").replace("\n", " ")[:60]
 
             logger.info(
@@ -266,8 +260,6 @@ class RetrievalService:
             dropped_empty_tokens = 0
 
             for d in docs:
-                # 這裡處理相容性：File 類型的 content 通常沒有被 load_docs 載入 (太慢)
-                # BM25 目前主要針對 QA。若要包含 File，需在 loader 階段處理。
                 text = (d.get("text") or "").strip() or self._format_doc_text(d)
                 toks = ngram_tokenize_unigram_bigram(text, stopwords=self.stopwords)
                 if toks:
@@ -321,18 +313,15 @@ class RetrievalService:
             if not isinstance(d, dict):
                 continue
 
-            # QA 欄位
             q = (d.get("question") or "").strip()
             a = (d.get("answer") or "").strip()
 
-            # File 欄位相容 (如果 loader 有傳入)
             filename = d.get("filename", "")
 
-            # BM25 Tokenization 用
             text = (d.get("text") or "").strip()
             if not text:
                 if filename:
-                    text = f"{d.get('display_name', '')} {filename}"  # File 僅搜標題
+                    text = f"{d.get('display_name', '')} {filename}"
                 else:
                     text = self._format_doc_text({"question": q, "answer": a})
 
@@ -364,18 +353,10 @@ class RetrievalService:
         weight_vector: float,
         weight_lexical: float,
     ) -> List[Dict[str, Any]]:
-        """
-        RRF Fusion Logic:
-        1. 優先使用 'id' (Chunk UUID) 作為去重 Key，解決 File Chunks 被誤合併的問題。
-        2. 若無 'id' 則退回使用 'object_id'。
-        """
         t0 = time.perf_counter()
         rrf_k = max(int(rrf_k), 1)
 
         def _key(h: Dict[str, Any]) -> Any:
-            # === [Critical Fix] ===
-            # 使用 id (Chunk UUID) 作為唯一鍵值。
-            # 這樣同一檔案的不同 Chunks 會有不同的 Key，不會被合併。
             return h.get("id") or h.get("object_id")
 
         vec_rank: Dict[Any, int] = {}
@@ -396,13 +377,11 @@ class RetrievalService:
             if k in merged:
                 return merged[k]
 
-            # 確保所有下游需要的欄位都被複製
             base = {
                 "id": h.get("id") or str(h.get("object_id") or ""),
                 "object_id": h.get("object_id"),
                 "question": h.get("question", ""),
                 "answer": h.get("answer", ""),
-                # 若為 File，VectorService 有回傳 content/filename 等額外欄位，也需要保留
                 "content": h.get("content"),
                 "filename": h.get("filename"),
                 "display_name": h.get("display_name"),

@@ -8,7 +8,7 @@ from langchain_core.messages import BaseMessage
 from pydantic import BaseModel, ConfigDict, Field
 from rank_bm25 import BM25Okapi
 
-ModelName = Literal["gpt_5_mini", "qwen3_local", "gemini_2.5_flash"]
+ModelName = Literal["gpt_5_mini", "qwen2.5_local", "gemini_2.5_flash"]
 
 
 class IngestRequest(BaseModel):
@@ -23,7 +23,7 @@ class QueryRequest(BaseModel):
     fetch_k: Optional[int] = Field(default=15)
     score_threshold: float = 0.3
     rerank_threshold: float = Field(default=0.5)
-    model: str = Field(default="gpt_5_mini")
+    model: str = Field(default="qwen2.5_local")
 
 
 class QueryHit(BaseModel):
@@ -36,7 +36,7 @@ class QueryHit(BaseModel):
 
 
 class QueryResponse(BaseModel):
-    answers: Dict[str, str]
+    answer: str
     hits: List[QueryHit]
 
 

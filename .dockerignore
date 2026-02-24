@@ -1,0 +1,22 @@
+# 忽略虛擬環境
+.venv
+venv
+
+# 忽略快取與編譯產物
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+.uv
+
+# 忽略 Git 紀錄
+.git
+.gitignore
+
+# 忽略模型快取 (如果你有下載 HuggingFace 模型在本地)
+cache
+.cache
+
+# 忽略本地測試或不必要的巨型資料 (可根據你的情況調整)
+data/eval_dataset
+*.log

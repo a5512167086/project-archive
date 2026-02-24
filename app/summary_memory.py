@@ -1,4 +1,3 @@
-# app/services/summary_memory.py
 from __future__ import annotations
 
 import time
@@ -8,26 +7,13 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_mongodb.chat_message_histories import MongoDBChatMessageHistory
+from pymongo import MongoClient
 
 from app.logger import logger
 from app.schemas import MemorySnapshot
 
-try:
-    from pymongo import MongoClient
-except Exception:  # pragma: no cover
-    MongoClient = None  # type: ignore
-
 
 class SummaryMemory:
-    """
-    Mongo-backed chat memory with summary cache.
-
-    - load(): returns recent messages + cached summary (NO LLM)
-    - load_recent_only(): returns recent messages only (NO cache lookup)
-    - append_turn(): writes chat turns to Mongo history
-    - maybe_update_summary(): background job to update cached summary using LLM
-    """
-
     DEFAULT_CACHE_SUFFIX = "_summary_cache"
 
     def __init__(
@@ -36,7 +22,7 @@ class SummaryMemory:
         mongo_db_name: str,
         mongo_collection: str,
         get_llm: Callable[[str], Any],
-        summary_model: str = "gpt_5_mini",
+        summary_model: str = "qwen2.5_local",
         summary_trigger_threshold: int = 6,
         max_summary_messages: int = 30,
         refresh_min_interval_sec: int = 60,
@@ -46,17 +32,13 @@ class SummaryMemory:
         self.mongo_uri = mongo_uri
         self.mongo_db_name = mongo_db_name
         self.mongo_collection = mongo_collection
-
         self._get_llm = get_llm
         self.summary_model = summary_model
         self.summary_trigger_threshold = int(summary_trigger_threshold)
         self.max_summary_messages = int(max_summary_messages)
         self.refresh_min_interval_sec = int(refresh_min_interval_sec)
         self.refresh_every_n_new_msgs = int(refresh_every_n_new_msgs)
-
         self._history_cache: Dict[str, MongoDBChatMessageHistory] = {}
-
-        # summary cache
         self._cache_enabled = MongoClient is not None
         self._cache_col = None
 
@@ -78,9 +60,6 @@ class SummaryMemory:
                 "[SummaryMemory] pymongo not available; summary cache disabled."
             )
 
-    # ---------------------
-    # Mongo history
-    # ---------------------
     def _get_history(self, session_key: str) -> MongoDBChatMessageHistory:
         if session_key in self._history_cache:
             return self._history_cache[session_key]
@@ -103,16 +82,10 @@ class SummaryMemory:
         h = self._get_history(session_key)
         h.clear()
 
-    # ---------------------
-    # Summary cache helpers
-    # ---------------------
     def _clean(self, messages: List[BaseMessage]) -> List[BaseMessage]:
         return [m for m in messages if isinstance(m, (HumanMessage, AIMessage))]
 
     def _get_cached(self, session_key: str) -> Tuple[str, int, float]:
-        """
-        Returns: (summary, msg_count, updated_at_epoch)
-        """
         if not self._cache_enabled or self._cache_col is None:
             return "", 0, 0.0
 
@@ -155,13 +128,7 @@ class SummaryMemory:
         )
         logger.info(f"[Timer] Summary Cache Upsert: {(time.perf_counter() - t0):.3f}s")
 
-    # ---------------------
-    # Public APIs
-    # ---------------------
     def load(self, session_key: str, *, max_messages: int) -> MemorySnapshot:
-        """
-        Critical path: load history + recent; summary is READ FROM CACHE ONLY.
-        """
         t0 = time.perf_counter()
 
         t_hist = time.perf_counter()
@@ -187,9 +154,6 @@ class SummaryMemory:
     def load_recent_only(
         self, session_key: str, *, max_messages: int
     ) -> MemorySnapshot:
-        """
-        Faster: no summary/cache.
-        """
         t0 = time.perf_counter()
 
         h = self._get_history(session_key)
@@ -202,9 +166,6 @@ class SummaryMemory:
         return MemorySnapshot(recent_messages=recent, summary="")
 
     def _summarize(self, messages: List[BaseMessage]) -> str:
-        """
-        Heavy path (LLM). Do NOT call this in load().
-        """
         clean = self._clean(messages)
         if len(clean) < self.summary_trigger_threshold:
             return ""
@@ -233,12 +194,6 @@ class SummaryMemory:
         return content.strip()
 
     def maybe_update_summary(self, session_key: str, *, force: bool = False) -> bool:
-        """
-        Background task:
-        - Checks cache freshness based on msg_count and updated_at.
-        - If needed, computes summary via LLM and updates cache.
-        Returns True if updated.
-        """
         if not self._cache_enabled:
             return False
 

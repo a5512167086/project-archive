@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import re
 from typing import Any, Dict, List, Optional
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
@@ -17,12 +16,10 @@ class PromptService:
         original_query: str,
         rewritten_query: str,
         contexts: List[Dict[str, Any]],
-        use_no_think: bool,
         history: Optional[List[BaseMessage]] = None,
     ) -> List[BaseMessage]:
         ctx = contexts[: self.max_contexts_for_prompt]
 
-        # 優化 context 呈現格式
         context_lines = []
         for i, c in enumerate(ctx, 1):
             q = (c.get("question", "") or "").strip()
@@ -31,10 +28,7 @@ class PromptService:
 
         context_block = "\n\n".join(context_lines) if context_lines else "無相關知識"
 
-        no_think_prefix = "/no_think \n" if use_no_think else ""
-        # 優化後的 system prompt
         system = (
-            f"{no_think_prefix}"
             "你是知識客服助理。請嚴格依據下方[知識庫]回答問題。\n\n"
             "【回答規範】\n"
             "1. 引用原則：\n"
@@ -51,7 +45,7 @@ class PromptService:
             "4. 輸出要求：\n"
             "   - 繁體中文，目標200字內（確保資訊完整性優先）\n"
             "   - 第三人稱視角（例：「該產品」），除非知識庫原文為第一人稱\n"
-            "   - 直接回答，禁止寒暄或輸出 <think> 標籤\n"
+            "   - 直接回答，禁止寒暄、開場白或過渡轉折語\n"
             "5. 自我檢查：\n"
             "   - 是否優先使用了知識庫的原文表述\n"
             "   - 專有名詞、數字是否與原文完全一致\n"
@@ -59,7 +53,6 @@ class PromptService:
             "   - 沒有使用「可能」「應該」等推測性詞彙\n\n"
         )
 
-        # 優化後的 user prompt
         user = (
             f"【使用者問題】\n{original_query}\n\n"
             f"【語意理解】\n{rewritten_query}\n\n"
@@ -82,46 +75,3 @@ class PromptService:
 
         msgs.append(HumanMessage(content=user))
         return msgs
-
-    def clean_hf_output(self, raw: str) -> str:
-        """
-        更激進的清理策略，移除 HF chat template 和思考標籤
-        """
-        # 移除所有 XML 標籤（包含跨行的 <think>...</think>）
-        raw = re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL | re.IGNORECASE)
-
-        # 移除 chat template 標記
-        raw = re.sub(r"<\|im_start\|>.*?<\|im_end\|>", "", raw, flags=re.DOTALL)
-        if "<|im_start|>assistant" in raw:
-            raw = raw.split("<|im_start|>assistant", 1)[-1]
-        if "</think>" in raw:
-            raw = raw.split("</think>", 1)[-1]
-        if "<|im_end|>" in raw:
-            raw = raw.split("<|im_end|>", 1)[0]
-
-        # 移除常見的思考前綴詞
-        prefixes_to_remove = [
-            "讓我想想",
-            "首先",
-            "分析一下",
-            "根據常識",
-            "我認為",
-            "我覺得",
-            "我理解",
-            "讓我們來看",
-            "好的，",
-            "嗯，",
-        ]
-        for prefix in prefixes_to_remove:
-            if raw.strip().startswith(prefix):
-                # 保留第一個句號之後的內容
-                if "。" in raw:
-                    parts = raw.split("。", 1)
-                    if len(parts) > 1:
-                        raw = parts[1]
-
-        # 移除多餘空白和換行
-        raw = re.sub(r"\n\s*\n", "\n\n", raw)  # 多個空行變兩個
-        raw = re.sub(r"[ \t]+", " ", raw)  # 多個空格變一個
-
-        return raw.strip()

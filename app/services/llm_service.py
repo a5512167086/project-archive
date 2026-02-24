@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_huggingface import ChatHuggingFace
+from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
 
 from app.configs.config import (
@@ -12,16 +12,13 @@ from app.configs.config import (
     AZURE_OPENAI_DEPLOYMENT,
     AZURE_OPENAI_ENDPOINT,
     LLM_TEMPERATURE,
+    OLLAMA_BASE_URL,
+    OLLAMA_LLM_NAME,
 )
 
 
 class LLMService:
-    """Factory + cache for chat models used by RAG."""
-
-    def __init__(
-        self, preloaded_hf_chat_model: Optional[ChatHuggingFace] = None
-    ) -> None:
-        self._preloaded_hf = preloaded_hf_chat_model
+    def __init__(self) -> None:
         self._cache: Dict[str, Any] = {}
 
     def get_llm(self, model_name: str):
@@ -44,12 +41,14 @@ class LLMService:
                 temperature=float(LLM_TEMPERATURE),
                 max_output_tokens=2048,
             )
-        elif model_name == "qwen3_local":
-            if not self._preloaded_hf:
-                raise ValueError("HuggingFace model not pre-loaded.")
-            llm = self._preloaded_hf
+        elif model_name == "qwen2.5_local":
+            llm = ChatOllama(
+                base_url=OLLAMA_BASE_URL,
+                model=OLLAMA_LLM_NAME,
+                temperature=float(LLM_TEMPERATURE),
+            )
         else:
-            llm = self.get_llm("gpt_5_mini")
+            llm = self.get_llm("qwen2.5_local")
 
         self._cache[model_name] = llm
         return llm
