@@ -67,18 +67,31 @@ def delete_liff_app(channel_access_token: str, liffId: str):
         response.raise_for_status()
 
 
-def rag_customer_service(bot_uuid: str, query: str, top_k: str, score_threshold: str):
+def rag_customer_service(
+    bot_uuid: str,
+    line_id: str,
+    query: str,
+    model: str = "qwen2.5_local",
+    top_k: int = 3,
+    fetch_k: int = 15,
+    score_threshold: float = 0.3,
+    rerank_threshold: float = 0.5,
+):
     url = f"{RAG_BACKEND_URL}/query"
     response = requests.post(
         url,
         json={
             "bot_uuid": bot_uuid,
+            "line_id": line_id,
             "query": query,
             "top_k": top_k,
+            "fetch_k": fetch_k,
             "score_threshold": score_threshold,
-            "models": ["gpt35_azure", "huggingface_local"],
+            "rerank_threshold": rerank_threshold,
+            "model": model,
         },
     )
+
     if response.status_code != 200:
         response.raise_for_status()
 
