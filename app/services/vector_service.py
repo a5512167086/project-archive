@@ -53,9 +53,23 @@ class VectorService:
         self.client = QdrantClient(url=self.qdrant_url, timeout=timeout)
 
         self.text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=500,
-            chunk_overlap=50,
-            separators=["\n\n", "\n", "。", "！", "？", " ", ""],
+            chunk_size=600,
+            chunk_overlap=100,
+            separators=[
+                "\n\n",
+                "\n",
+                "。 ",
+                "。",
+                ". ",
+                "!",
+                "！",
+                "?",
+                "？",
+                ";",
+                "；",
+                " ",
+                "",
+            ],
             keep_separator=True,
         )
 
@@ -282,8 +296,16 @@ class VectorService:
     def _clean_text(self, text: str) -> str:
         if not text:
             return ""
+
         text = re.sub(r"(?<!\n)\n(?!\n)", " ", text)
+        chinese_char = r"[\u4e00-\u9fa5]"
+        text = re.sub(f"({chinese_char}) +({chinese_char})", r"\1\2", text)
+        text = re.sub(f"({chinese_char}) +({chinese_char})", r"\1\2", text)
+        fullwidth_punc = r"[，。！？：；（）「」『』]"
+        text = re.sub(f"({chinese_char}) +({fullwidth_punc})", r"\1\2", text)
+        text = re.sub(f"({fullwidth_punc}) +({chinese_char})", r"\1\2", text)
         text = re.sub(r"[ \t]+", " ", text)
+
         return text.strip()
 
     def upsert_file_items(
