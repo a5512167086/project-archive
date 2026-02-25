@@ -1,7 +1,7 @@
 from typing import Annotated, List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Request
 from linebot.v3.messaging import Configuration
 
 from modules.bot.bot_model import BotListView
@@ -126,6 +126,7 @@ def line_webhook(
     bot_header: Annotated[BotHeaders, Header()],
     bot_body: BotBodies,
     bot_uuid: str,
+    background_tasks: BackgroundTasks,
     bot_service: Annotated[BotService, Depends(get_bot_service)],
     module_service: Annotated[ModuleService, Depends(get_module_service)],
 ):
@@ -153,4 +154,5 @@ def line_webhook(
         configuration,
         bot_body,
         x_line_signature,
+        background_tasks,
     )

@@ -75,7 +75,7 @@ def rag_customer_service(
     top_k: int = 3,
     fetch_k: int = 15,
     score_threshold: float = 0.3,
-    rerank_threshold: float = 0.5,
+    rerank_threshold: float = 0.1,
 ):
     url = f"{RAG_BACKEND_URL}/query"
     response = requests.post(
