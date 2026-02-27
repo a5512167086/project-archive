@@ -303,6 +303,7 @@ class RetrievalService:
         bot_uuid: UUID,
     ) -> List[Dict[str, Any]]:
         try:
+            # 这里的 load_docs 通常会从数据库或缓存中读取之前 upsert 进去的 metadata
             docs = load_docs(bot_uuid) or []
         except Exception as e:
             logger.exception(f"[RetrievalService] load_docs failed: {e}")
@@ -313,19 +314,26 @@ class RetrievalService:
             if not isinstance(d, dict):
                 continue
 
+            # 1. 取得 Q&A 內容
             q = (d.get("question") or "").strip()
             a = (d.get("answer") or "").strip()
 
+            # 2. 取得 PDF 內文 (參考 VectorService 存放的 content 欄位)
+            # 同時也檢查是否有手動傳入的 text 欄位
+            content = (d.get("content") or d.get("text") or "").strip()
+
             filename = d.get("filename", "")
+            item_type = d.get("type", "qa")
 
-            text = (d.get("text") or "").strip()
-            if not text:
-                if filename:
-                    text = f"{d.get('display_name', '')} {filename}"
-                else:
-                    text = self._format_doc_text({"question": q, "answer": a})
-
-            if not q and not a and not filename:
+            if item_type == "file" and content:
+                text = f"File: {d.get('display_name', '')} {filename}\n{content}"
+            elif content:
+                text = content
+            elif q or a:
+                text = self._format_doc_text({"question": q, "answer": a})
+            elif filename:
+                text = f"{d.get('display_name', '')} {filename}"
+            else:
                 continue
 
             out.append({
@@ -334,6 +342,7 @@ class RetrievalService:
                 "question": q,
                 "answer": a,
                 "text": text,
+                "type": item_type,
             })
 
         return out

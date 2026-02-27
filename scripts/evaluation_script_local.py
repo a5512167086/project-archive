@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 from langsmith.run_helpers import trace
 from langsmith.wrappers import wrap_openai
 from openai import AsyncOpenAI
-from ragas.embeddings import embedding_factory
+from ragas.embeddings.base import embedding_factory
 from ragas.llms import llm_factory
 from ragas.metrics.collections import (
     AnswerCorrectness,
@@ -194,7 +194,7 @@ async def build_metrics_and_adapt_prompts(parent_run=None):
         client = wrap_openai(
             AsyncOpenAI(
                 base_url=f"{OLLAMA_BASE_URL}/v1",
-                api_key="ollama",  
+                api_key="ollama",
             )
         )
 

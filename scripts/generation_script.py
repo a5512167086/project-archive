@@ -56,15 +56,15 @@ class ExpConfig:
 EXPERIMENTS: List[ExpConfig] = [
     ExpConfig(name="baseline", use_rerank=False, use_rewrite=False),
     ExpConfig(name="rerank", use_rerank=True, use_rewrite=False),
-    ExpConfig(name="rewrite", use_rerank=False, use_rewrite=True),
-    ExpConfig(name="rerank_rewrite", use_rerank=True, use_rewrite=True),
+    # ExpConfig(name="rewrite", use_rerank=False, use_rewrite=True),
+    # ExpConfig(name="rerank_rewrite", use_rerank=True, use_rewrite=True),
 ]
 
 # retrieval modes to test (align with RetrievalService.search(mode=...))
 RETRIEVAL_MODES: List[str] = [
     "hybrid",
-    # "vector",
-    # "lexical",
+    "vector",
+    "lexical",
 ]
 
 
@@ -72,8 +72,12 @@ RETRIEVAL_MODES: List[str] = [
 # Dataset & model configs
 # -----------------------------
 DATASET_CONFIG: Dict[str, Dict[str, str]] = {
-    "wke_opt": {
-        "path": "./data/testset/wke_faq_testset.csv",
+    "1010_faq": {
+        "path": "./data/testset/faq_testset.csv",
+        "bot_uuid": "3a4d2c72-7ba4-47e8-8ebd-1aab455ee91e",
+    },
+    "1010_pdf": {
+        "path": "./data/testset/pdf_testset.csv",
         "bot_uuid": "3a4d2c72-7ba4-47e8-8ebd-1aab455ee91e",
     },
 }
