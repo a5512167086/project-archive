@@ -67,7 +67,7 @@ def build_summary_memory(llm_service: LLMService) -> SummaryMemory:
         mongo_db_name=MONGODB_DB_NAME,
         mongo_collection=MONGODB_CHAT_COLLECTION,
         get_llm=llm_service.get_llm,
-        summary_model="qwen2.5_local",
+        summary_model="local_model",
         summary_trigger_threshold=6,
         max_summary_messages=30,
         refresh_min_interval_sec=60,
@@ -93,7 +93,6 @@ def build_services(
     )
     retrieval_service = RetrievalService(
         vector_service=vector_service,
-        load_docs=None,
         bm25_enabled=True,
         bm25_refresh_ttl_sec=300,
         stopwords_path=STOPWORDS_PATH,
@@ -174,7 +173,6 @@ def ingest(
         req.bot_uuid, vector_service
     )
 
-    retrieval_service.bind_docs_loader(knowledge_service.export_knowledge_docs)
     retrieval_service.refresh_index(req.bot_uuid)
 
     return {
@@ -189,14 +187,9 @@ def ingest(
 async def query(
     req: QueryRequest,
     rag_service: Annotated[RAGService, Depends(get_rag_service)],
-    retrieval_service: Annotated[RetrievalService, Depends(get_retrieval_service)],
-    knowledge_service: Annotated[KnowledgeService, Depends(get_knowledge_service)],
     background_tasks: BackgroundTasks,
 ):
     start_total = time.perf_counter()
-
-    if not retrieval_service.has_loader():
-        retrieval_service.bind_docs_loader(knowledge_service.export_knowledge_docs)
 
     result = await asyncio.to_thread(
         rag_service.answer,
@@ -209,7 +202,7 @@ async def query(
         score_threshold=req.score_threshold,
         rerank_threshold=req.rerank_threshold,
         history_rounds=5,
-        rewrite_model="qwen2.5_local",
+        rewrite_model="local_model",
         max_history_messages=rag_service.DEFAULT_MAX_HISTORY_MESSAGES,
         use_rewrite=True,
         use_summary_in_rewrite=True,
@@ -235,13 +228,32 @@ async def query(
         background_tasks.add_task(
             rag_service.summary_service.maybe_update_summary, session_key
         )
+    clean_hits = []
+    for h in hits:
+        item_type = h.get("type", "qa")
+
+        if item_type == "file":
+            final_content = str(h.get("content") or "").strip()
+        else:
+            q = str(h.get("question") or "").strip()
+            a = str(h.get("answer") or "").strip()
+            final_content = f"Q: {q}\nA: {a}".strip() if a else f"Q: {q}"
+
+        if not final_content:
+            continue
+
+        clean_hits.append(
+            QueryHit(
+                id=str(h.get("id", "")),
+                score=float(h.get("score", 0.0)),
+                rerank_score=h.get("rerank_score"),
+                content=final_content,
+            )
+        )
 
     return QueryResponse(
         answer=final_answer,
-        hits=[
-            QueryHit(**{k: v for k, v in h.items() if k in QueryHit.model_fields})
-            for h in hits
-        ],
+        hits=clean_hits,
     )
 
 
@@ -250,13 +262,8 @@ def purge_bot_vectors(
     req: PurgeRequest,
     vector_service: Annotated[VectorService, Depends(get_vector_service)],
     retrieval_service: Annotated[RetrievalService, Depends(get_retrieval_service)],
-    knowledge_service: Annotated[KnowledgeService, Depends(get_knowledge_service)],
 ):
     ok = vector_service.delete_all_by_bot_uuid(req.bot_uuid)
-
-    if not retrieval_service.has_loader():
-        retrieval_service.bind_docs_loader(knowledge_service.export_knowledge_docs)
-
     retrieval_service.refresh_index(req.bot_uuid)
 
     return PurgeResponse(

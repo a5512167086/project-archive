@@ -1,51 +1,76 @@
-import json
 import logging
 import os
 import re
 
+import json_repair
 import pandas as pd
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_ollama import ChatOllama
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
+from app.configs.config import OLLAMA_LLM_NAME
+
 # ==========================================
-# 0. 設定 Logging
+# 1. 基礎設定與 Logging 初始化
 # ==========================================
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.INFO,  # 可以改為 logging.DEBUG 看到更細節的資訊
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler("testset_generation.log", encoding="utf-8"),
+        logging.FileHandler("data/testset/testset_generation.log", encoding="utf-8"),
         logging.StreamHandler(),
     ],
 )
 logger = logging.getLogger(__name__)
 
-logger.info("初始化 LLM 模型...")
-llm = ChatOllama(model="qwen3:14b", temperature=0.3)
-
-# --- 設定檔案基準路徑 ---
+# 使用 temperature=0.0 來確保改寫與生成的結果最穩定、最忠於原文
+llm = ChatOllama(model=OLLAMA_LLM_NAME, temperature=0.0)
 BASE_DIR = "data/dataset"
 
+# 用來收集所有最終要寫入 CSV 的資料
+combined_test_set = []
+
 
 # ==========================================
-# 1. 輔助與生成函數
+# 2. 輔助函數 (文字清理與 JSON 解析)
 # ==========================================
-def clean_text(text):
-    """清除字串中的換行與多餘空白"""
-    if isinstance(text, str):
-        # 把換行和 tab 替換為單一空白，並清除連續空白
-        text = re.sub(r"[\n\r\t]+", " ", text)
-        return re.sub(r"\s{2,}", " ", text).strip()
-    return text
+def clean_text(text: str) -> str:
+    if not text or not isinstance(text, str):
+        return ""
+
+    # 【步驟一：無差別壓扁】
+    # 把所有的換行 (\n, \r)、Tab (\t) 或連續多個空白，全部變成「單一個半形空格」。
+    # 範例："Hello \n\n World" -> "Hello World" (英文單字被完美隔開)
+    # 範例："訂單 \n\n 已取消" -> "訂單 已取消"
+    text = re.sub(r"[\s]+", " ", text)
+
+    # 【步驟二：精準打擊中文空白】
+    # 這裡的範圍 [\u4e00-\u9fa5]「只針對中文字」。
+    # 它會尋找「左邊是中文 + 空格 + 右邊是中文」的組合，然後把空格拔掉。
+    # 範例："訂單 已取消" -> "訂單已取消"
+    # 關鍵：因為英文字母 (a-z, A-Z) 不在這個範圍內，所以 "Hello World" 中間的空格絕對不會被誤刪！
+    chinese_char = r"[\u4e00-\u9fa5]"
+    text = re.sub(f"({chinese_char}) +({chinese_char})", r"\1\2", text)
+    text = re.sub(f"({chinese_char}) +({chinese_char})", r"\1\2", text)
+
+    # 【步驟三：處理中文全形標點】
+    # 一樣只針對中文標點符號與中文字之間的空格進行刪除。
+    fullwidth_punc = r"[，。！？：；（）「」『』]"
+    text = re.sub(f"({chinese_char}) +({fullwidth_punc})", r"\1\2", text)
+    text = re.sub(f"({fullwidth_punc}) +({chinese_char})", r"\1\2", text)
+
+    return text.strip()
 
 
 def parse_llm_json(content):
     try:
+        # 1. 移除 markdown 的 ```json 和 ``` 標籤
         clean_content = content.replace("```json", "").replace("```", "").strip()
-        parsed_data = json.loads(clean_content)
 
-        # 遞迴清理 JSON 裡面的換行符號
+        # 2. 使用 json_repair 取代原本的 json.loads
+        parsed_data = json_repair.loads(clean_content)
+
+        # 3. 清理文字內容
         if isinstance(parsed_data, list):
             for item in parsed_data:
                 if isinstance(item, dict):
@@ -56,56 +81,96 @@ def parse_llm_json(content):
         elif isinstance(parsed_data, dict):
             for k, v in parsed_data.items():
                 parsed_data[k] = clean_text(v)
-
         return parsed_data
+
     except Exception as e:
         logger.error(f"JSON 解析失敗: {e}\n原文內容: {content}")
         return None
 
 
+# ==========================================
+# 3. LLM 生成與改寫函數
+# ==========================================
 def generate_pdf_qa(context):
     prompt = f"""
-    你是一位專業的測試工程師。請根據以下文件片段，生成測試 RAG 系統的問題與標準答案。
+    你是一位專業的測試工程師。請根據以下【文件片段】，生成測試 RAG 系統的問題與標準答案。
+    
     文件內容：{context}
     
-    請嚴格以 JSON「陣列 (Array)」格式回傳，可以包含多組問答，不要包含任何 Markdown 標籤或其他文字，格式範例如下：
+    【生成要求】：
+    1. 語言一致性：必須根據原文內容的語言進行回答。
+    2. 結構要求(重要)：答案必須分為兩部分。
+       - 第一部分：用一句話「直接破題」，精準回答問題的核心。
+       - 第二部分：「嚴格且完整」地照抄或列出文件片段中相關的規定、術語與具體數值，不可省略細節。
+    3. 禁止前綴：問題與答案必須直接描述內容。嚴禁使用「根據文件內容...」、「問題：」或「答案：」作為開頭。
+    4. 輸出格式：僅回傳 JSON 陣列，不包含 Markdown 標記。
+
+    格式範例：
     [
         {{
-            "question": "根據內容設計的問題 1",
-            "answer": "根據內容提供的詳盡答案 1" 
-        }},
-        {{
-            "question": "根據內容設計的問題 2",
-            "answer": "根據內容提供的詳盡答案 2" 
+            "question": "問題內容",
+            "answer": "一句話破題核心答案。接著是完整的細節規定與步驟：..." 
         }}
     ]
     """
+    logger.debug("正在呼叫 LLM 生成 PDF QA...")
     response = llm.invoke(prompt)
     return parse_llm_json(response.content)
 
 
+def rewrite_faq_answer(question: str, original_answer: str) -> str:
+    prompt = f"""
+    你是一位專業的客服文案編輯。請根據「原始問題」與「原始答案」，將答案改寫為更友善且具備「破題」結構的版本。
+
+    【改寫規範】：
+    1. 第一句話必須「直接破題」，針對問題的問法，簡潔明確地回答使用者的核心疑問。
+    2. 破題之後，必須「100% 完整保留並照抄」原始答案中的所有步驟、條件、專有名詞與數值，不可省略任何細節。
+    3. 若原始答案為否定句（如：不需要喔），請保留並清楚說明原因。
+
+    原始問題：{question}
+    原始答案：{original_answer}
+
+    直接輸出改寫後的答案純文本，不要包含任何前綴。
+    """
+    try:
+        logger.debug(f"正在呼叫 LLM 改寫 FAQ 答案 (針對問題: {question[:15]}...)")
+        response = llm.invoke(prompt)
+        clean_ans = re.sub(r'^["\']|["\']$', "", response.content.strip())
+        final_ans = clean_text(clean_ans) if clean_ans else original_answer
+        return final_ans
+    except Exception as e:
+        logger.error(f"FAQ 答案改寫失敗: {e}")
+        return original_answer
+
+
 def generate_faq_variants(original_question):
     prompt = f"""
-    你是一位測試專家。請在不改變原始語意的前提下，針對以下問題產生 3 個不同的變體問法。
-    這些變體應該包含不同的口語習慣或句型結構，以便測試 RAG 的語意檢索能力。
+    你是一位測試專家。請在不改變原始語意的前提下，產生 3 個不同的變體問法。
+    請根據原始問題的語言（繁體中文或英文）生成對應語言的變體。
 
     原始問題：{original_question}
 
-    請嚴格只回傳一個包含 3 個字串的 JSON 陣列格式，不要包含其他文字，例如：
-    ["變體1", "變體2", "變體3"]
+    要求：
+    1. 直接回傳 JSON 陣列，例如 ["問法1", "問法2", "問法3"]。
+    2. 禁止包含「變體1：」等任何引導性文字。
     """
+    logger.debug(
+        f"正在呼叫 LLM 生成 FAQ 變體問題 (原問題: {original_question[:15]}...)"
+    )
     response = llm.invoke(prompt)
     variants = parse_llm_json(response.content)
     if isinstance(variants, list):
-        # 確保變體陣列內的值也被清洗過
         return [clean_text(v) for v in variants]
     return []
 
 
 # ==========================================
-# 2. 開始執行：處理 PDF 資料集
+# 4. 執行區塊：處理 PDF 文件
 # ==========================================
-pdf_test_set = []
+logger.info("========================================")
+logger.info("開始處理 PDF 文件生成測試集...")
+logger.info("========================================")
+
 pdf_files = [
     os.path.join(BASE_DIR, "membership_benefits_terms.pdf"),
     os.path.join(BASE_DIR, "payment_instructions.pdf"),
@@ -114,105 +179,161 @@ pdf_files = [
     os.path.join(BASE_DIR, "website_terms_of_use_&_privacy_policy.pdf"),
 ]
 
-logger.info("================ 開始處理 PDF 文件 ================")
 for file_path in pdf_files:
     if os.path.exists(file_path):
         file_name = os.path.basename(file_path)
-        logger.info(f"開始讀取與解析 PDF：{file_name}")
-
+        logger.info(f"正在載入 PDF: {file_name}")
         loader = PyPDFLoader(file_path)
         documents = loader.load()
         text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000, chunk_overlap=100
+            chunk_size=600, chunk_overlap=100
         )
         chunks = text_splitter.split_documents(documents)
-        logger.info(f"[{file_name}] 切分為 {len(chunks)} 個 chunks，準備生成 QA...")
+        logger.info(f"  - {file_name} 被切分為 {len(chunks)} 個文字區塊。")
 
-        # 為了示範，每個檔案取前 3 個區塊 (正式跑可移除 [:3])
-        for i, chunk in enumerate(chunks[:3]):
-            logger.info(f"  -> 正在處理 [{file_name}] 的第 {i + 1} 個 chunk...")
+        # 正式環境：處理所有區塊
+        process_chunks = chunks
+        logger.info(f"  - 開始處理 {len(process_chunks)} 個區塊生成 QA...")
 
-            # 【關鍵】清洗 PDF 原文內容，去除換行
+        for i, chunk in enumerate(process_chunks):
+            logger.info(f"    -> 處理區塊 {i + 1}/{len(process_chunks)}...")
             chunk_text = clean_text(chunk.page_content)
-
             qa_data_list = generate_pdf_qa(chunk_text)
 
             if qa_data_list:
-                if isinstance(qa_data_list, list):
-                    for qa in qa_data_list:
-                        qa["original_file"] = file_name
-                        qa["chunk"] = chunk_text
-                        pdf_test_set.append(qa)
-                    logger.info(
-                        f"  ✅ 成功生成 [{file_name}] 的 {len(qa_data_list)} 組 QA 對"
-                    )
-                elif isinstance(qa_data_list, dict):
-                    qa_data_list["original_file"] = file_name
-                    qa_data_list["chunk"] = chunk_text
-                    pdf_test_set.append(qa_data_list)
-                    logger.info(f"  ✅ 成功生成 [{file_name}] 的 1 組 QA 對")
+                items = (
+                    qa_data_list if isinstance(qa_data_list, list) else [qa_data_list]
+                )
+                logger.info(f"    -> 從區塊 {i + 1} 成功生成 {len(items)} 筆 QA。")
+                for qa in items:
+                    # 將結果加入合併清單中，並加上 type 與 source
+                    combined_test_set.append({
+                        "question": qa.get("question", ""),
+                        "answer": qa.get("answer", ""),
+                        "type": "pdf",
+                        "source": chunk_text,
+                    })
             else:
-                logger.warning(f"  ❌ [{file_name}] 第 {i + 1} 個 chunk 生成 QA 失敗")
+                logger.warning(f"    -> 區塊 {i + 1} 未能生成有效的 QA。")
     else:
-        logger.warning(f"找不到檔案，已跳過：{file_path}")
+        logger.warning(f"找不到指定的 PDF 檔案: {file_path}")
 
-if pdf_test_set:
-    df_pdf = pd.DataFrame(pdf_test_set)
-    df_pdf.to_csv("pdf_testset.csv", index=False, encoding="utf-8-sig")
-    logger.info(
-        f"🎉 PDF 測試資料集已儲存至：pdf_testset.csv (共 {len(pdf_test_set)} 筆)"
-    )
-else:
-    logger.warning("未能生成任何 PDF 測試資料。")
+logger.info("PDF 處理階段完成。")
+
 
 # ==========================================
-# 3. 開始執行：處理 FAQ 資料集
+# 5. 執行區塊：處理 FAQ 文件
 # ==========================================
-faq_test_set = []
+logger.info("========================================")
+logger.info("開始處理 FAQ 文件並改寫測試集...")
+logger.info("========================================")
+
 csv_path = os.path.join(BASE_DIR, "1010_faq_dataset.csv")
 
-logger.info("================ 開始處理 CSV FAQ 資料集 ================")
 if os.path.exists(csv_path):
     df_existing = pd.read_csv(csv_path)
-    total_rows = len(df_existing)
-    logger.info(f"成功讀取 CSV，共 {total_rows} 筆原始問答，開始生成變體...")
+    total_faqs = len(df_existing)
+    logger.info(f"找到 FAQ 資料集，共 {total_faqs} 筆原始問答。")
+
+    # 快取機制改為 (問題, 原始答案) 的組合，確保同一個問題配同一個答案時不再重複呼叫
+    rewritten_answers_cache = {}
+    variants_cache = {}  # 加入變體生成的快取，避免重複呼叫
 
     for index, row in df_existing.iterrows():
-        # 【關鍵】確保讀出來的問題也沒有異常換行
         orig_q = clean_text(row["question"])
-        ans = clean_text(row["answer"])
-        logger.info(f"正在處理 FAQ ({index + 1}/{total_rows}): {orig_q[:20]}...")
+        orig_ans = clean_text(row["answer"])
 
-        faq_test_set.append({
+        # 組合原始 FAQ 作為 source
+        source_text = f"Q: {orig_q}，A: {orig_ans}"
+
+        logger.info(f"[{index + 1}/{total_faqs}] 處理 FAQ: {orig_q[:30]}...")
+
+        # --------------------------------------------------
+        # 步驟 A：處理原始問題，並生成專屬的破題答案
+        # --------------------------------------------------
+        cache_key_orig = (orig_q, orig_ans)
+        if cache_key_orig not in rewritten_answers_cache:
+            rewritten_ans_orig = rewrite_faq_answer(orig_q, orig_ans)
+            rewritten_answers_cache[cache_key_orig] = rewritten_ans_orig
+        else:
+            rewritten_ans_orig = rewritten_answers_cache[cache_key_orig]
+
+        # 將原始問題與改寫答案加入合併清單
+        combined_test_set.append({
             "question": orig_q,
-            "answer": ans,
-            "original_question": orig_q,
-            "type": "Original",
+            "answer": rewritten_ans_orig,
+            "type": "faq",
+            "source": source_text,
         })
 
-        variants = generate_faq_variants(orig_q)
-        if variants:
-            for i, variant_q in enumerate(variants[:3]):
-                faq_test_set.append({
-                    "question": variant_q,
-                    "answer": ans,
-                    "original_question": orig_q,
-                    "type": f"Variant_{i + 1}",
-                })
-            logger.info(f"  ✅ 成功為 FAQ ({index + 1}/{total_rows}) 產生變體")
+        # --------------------------------------------------
+        # 步驟 B：生成變體問題
+        # --------------------------------------------------
+        if orig_q not in variants_cache:
+            variants = generate_faq_variants(orig_q)
+            variants_cache[orig_q] = variants
         else:
-            logger.warning(f"  ❌ FAQ ({index + 1}/{total_rows}) 生成變體失敗")
-else:
-    logger.warning(f"找不到 CSV 檔案，已跳過：{csv_path}")
+            variants = variants_cache[orig_q]
 
-if faq_test_set:
-    df_faq = pd.DataFrame(faq_test_set)
-    df_faq = df_faq[["question", "answer", "original_question", "type"]]
-    df_faq.to_csv("faq_testset.csv", index=False, encoding="utf-8-sig")
+        if variants:
+            logger.info(
+                f"  -> 成功生成 {len(variants[:3])} 個變體問題，準備生成對應的破題答案..."
+            )
+            # --------------------------------------------------
+            # 步驟 C：針對每一個變體問題，生成專屬於它的破題答案
+            # --------------------------------------------------
+            for j, variant_q in enumerate(variants[:3]):
+                cache_key_variant = (variant_q, orig_ans)
+
+                if cache_key_variant not in rewritten_answers_cache:
+                    logger.debug(
+                        f"  -> [{j + 1}/3] 為變體 '{variant_q[:15]}...' 改寫答案"
+                    )
+                    rewritten_ans_variant = rewrite_faq_answer(variant_q, orig_ans)
+                    rewritten_answers_cache[cache_key_variant] = rewritten_ans_variant
+                else:
+                    rewritten_ans_variant = rewritten_answers_cache[cache_key_variant]
+
+                # 將變體問題加入合併清單
+                combined_test_set.append({
+                    "question": variant_q,
+                    "answer": rewritten_ans_variant,
+                    "type": "faq",
+                    "source": source_text,
+                })
+        else:
+            logger.warning("  -> 無法為此 FAQ 生成變體問題。")
+else:
+    logger.warning(f"找不到指定的 FAQ 檔案: {csv_path}")
+
+
+# ==========================================
+# 6. 合併匯出 CSV
+# ==========================================
+logger.info("========================================")
+logger.info("開始統整並輸出最終測試集...")
+logger.info("========================================")
+
+if combined_test_set:
+    # 轉換為 DataFrame
+    df_combined = pd.DataFrame(combined_test_set)
+
+    # 確保欄位順序美觀且一致
+    columns_order = ["type", "question", "answer", "source"]
+    df_combined = df_combined[columns_order]
+
+    # 寫出為單一的 CSV 檔案
+    out_combined_path = "data/testset/rag_testset.csv"
+    df_combined.to_csv(out_combined_path, index=False, encoding="utf-8-sig")
+
     logger.info(
-        f"🎉 FAQ 測試資料集已儲存至：faq_testset.csv (共 {len(faq_test_set)} 筆)"
+        f"✅ 合併測試集生成完成！共 {len(df_combined)} 筆資料，已儲存至 {out_combined_path}"
     )
-else:
-    logger.warning("未能生成任何 FAQ 測試資料。")
 
-logger.info("================ 所有測試資料集皆已生成完畢 ================")
+    # 顯示一下各種 type 的數量統計
+    type_counts = df_combined["type"].value_counts()
+    logger.info("資料統計：")
+    for doc_type, count in type_counts.items():
+        logger.info(f"  - {doc_type.upper()}: {count} 筆")
+else:
+    logger.warning("未生成任何測試集資料，請檢查來源文件或 Log 紀錄。")

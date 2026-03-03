@@ -15,7 +15,6 @@ RESULT_DIR = Path("data/eval_result")
 RESULT_PATTERN = "ragas_eval_*.json"
 SUMMARY_REPORT_PATH = RESULT_DIR / "summary_report.json"
 
-# 你目前主要用的五個指標（固定輸出這些；缺的就當 0）
 METRIC_KEYS = [
     "answer_relevancy",
     "answer_correctness",
@@ -34,7 +33,6 @@ logger = logging.getLogger("summary_report_builder")
 # 分數清洗
 # -----------------------------------------------------------------------------
 def _is_nan(x: Any) -> bool:
-    # 只要是 float nan
     return isinstance(x, float) and math.isnan(x)
 
 
@@ -47,7 +45,6 @@ def _to_float_or_zero(x: Any) -> float:
     if _is_nan(x):
         return 0.0
 
-    # 有些序列化可能長這樣 {"value": ...}
     if isinstance(x, dict):
         if "value" in x:
             return _to_float_or_zero(x.get("value"))
@@ -74,7 +71,7 @@ def _to_float_or_zero(x: Any) -> float:
 # 檔名解析：ragas_eval_xxx.json -> xxx
 # -----------------------------------------------------------------------------
 def _dataset_name_from_filename(filename: str) -> str:
-    stem = Path(filename).stem  # ragas_eval_xxx
+    stem = Path(filename).stem
     m = re.match(r"ragas_eval_(.+)$", stem)
     return m.group(1) if m else stem
 

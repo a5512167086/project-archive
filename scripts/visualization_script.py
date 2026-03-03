@@ -29,17 +29,15 @@ KEY_RE = re.compile(r"^(?P<prefix>.+)_wke_opt_(?P<rest>.+)_result$")
 
 
 def parse_run_key(key: str) -> RunKey:
-    m = KEY_RE.match(key)
-    if not m:
+    parts = key.split("_")
+
+    if len(parts) < 3:
         raise ValueError(f"Unrecognized key format: {key}")
 
-    model = m.group("prefix")
-    rest = m.group("rest")
-    parts = rest.split("_", 1)
-    if len(parts) != 2:
-        raise ValueError(f"Unrecognized rest format: {rest} (from key={key})")
+    module = parts[-1]
+    retrieval = parts[-2]
+    model = "_".join(parts[:-2])
 
-    retrieval, module = parts[0], parts[1]
     return RunKey(model=model, retrieval=retrieval, module=module)
 
 
@@ -58,13 +56,6 @@ def ensure_outdir(outdir: Path) -> None:
     outdir.mkdir(parents=True, exist_ok=True)
 
 
-# ----------------------------
-# Plot: 3 figures (by retrieval)
-#   x = metrics
-#   line = dataset (model | module)
-# ----------------------------
-
-
 def plot_by_retrieval_lines_dataset_over_metrics(
     df: pd.DataFrame,
     outdir: Path,
@@ -74,14 +65,12 @@ def plot_by_retrieval_lines_dataset_over_metrics(
 ) -> None:
     df = df.copy()
 
-    # dataset = model + module
     df["dataset"] = df.apply(lambda r: f"{r['model']} | {r['module']}", axis=1)
 
     retrievals = [r for r in retrieval_order if r in set(df["retrieval"].unique())]
     modules = [m for m in module_order if m in set(df["module"].unique())]
 
     def dataset_sort_key(s: str) -> tuple:
-        # s = "model | module"
         model, module = [x.strip() for x in s.split("|")]
         module_rank = {m: i for i, m in enumerate(modules)}.get(module, 99)
         return (module_rank, model, s)
@@ -125,13 +114,6 @@ def plot_by_retrieval_lines_dataset_over_metrics(
         plt.savefig(out_path, dpi=200, bbox_inches="tight")
         plt.close()
         print(f"[OK] Saved: {out_path.resolve()}")
-
-
-# ----------------------------
-# Plot: 1 heatmap (all runs)
-#   rows = model | retrieval | module
-#   cols = metrics
-# ----------------------------
 
 
 def plot_one_heatmap(
@@ -181,7 +163,6 @@ def plot_one_heatmap(
     ax.set_yticks(range(n_rows))
     ax.set_yticklabels(pivot.index.tolist())
 
-    # Grid lines between cells
     ax.set_xticks([x - 0.5 for x in range(1, n_cols)], minor=True)
     ax.set_yticks([y - 0.5 for y in range(1, n_rows)], minor=True)
     ax.grid(which="minor", linestyle="-", linewidth=0.3, alpha=0.3)
@@ -190,7 +171,6 @@ def plot_one_heatmap(
     cbar = fig.colorbar(im, ax=ax, fraction=0.03, pad=0.02)
     cbar.set_label("Score")
 
-    # Annotate each cell
     for i in range(n_rows):
         for j in range(n_cols):
             v = pivot.values[i, j]
@@ -208,8 +188,6 @@ def plot_one_heatmap(
 # ----------------------------
 # Main
 # ----------------------------
-
-
 def main() -> None:
     in_path = INPUT_PATH
     outdir = OUTDIR
@@ -242,7 +220,6 @@ def main() -> None:
 
     df = pd.DataFrame(rows)
 
-    # Save flattened CSV
     csv_path = outdir / "results_flat.csv"
     df.to_csv(csv_path, index=False, encoding="utf-8-sig")
     print(f"[OK] Wrote: {csv_path.resolve()}")
@@ -257,7 +234,6 @@ def main() -> None:
     ]
     module_order = ["baseline", "rerank", "rewrite", "rerank+rewrite"]
 
-    # 3 line charts (by retrieval)
     plot_by_retrieval_lines_dataset_over_metrics(
         df=df,
         outdir=outdir,
@@ -266,7 +242,6 @@ def main() -> None:
         module_order=module_order,
     )
 
-    # 1 heatmap (all runs)
     plot_one_heatmap(
         df=df,
         outdir=outdir,

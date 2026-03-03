@@ -90,26 +90,3 @@ class KnowledgeService:
             )
 
         return {"upserted": upserted_count, "deleted": deleted_count}
-
-    def export_knowledge_docs(self, bot_uuid: UUID) -> list[dict]:
-        qa_items = self.get_all_qa_list(bot_uuid)
-        file_items = self.get_all_file_list(bot_uuid)
-
-        docs = []
-
-        for it in qa_items:
-            text = f"Q: {it.question}\nA: {it.answer or ''}".strip()
-            docs.append({
-                "object_id": it.object_id,
-                "text": text,
-                "metadata": {"type": "qa"},
-            })
-
-        for f in file_items:
-            docs.append({
-                "object_id": f.object_id,
-                "text": f"{f.display_name} {f.filename}",
-                "metadata": {"type": "file"},
-            })
-
-        return docs

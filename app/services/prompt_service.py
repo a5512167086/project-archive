@@ -22,15 +22,26 @@ class PromptService:
 
         context_lines = []
         for i, c in enumerate(ctx, 1):
-            q = (c.get("question", "") or "").strip()
-            a = (c.get("answer", "") or "").strip()
-            context_lines.append(f"━━━ 知識條目 {i} ━━━\n問題：{q}\n答案：{a}")
+            item_type = c.get("type", "qa")
+
+            if item_type == "file":
+                content = str(c.get("content") or "").strip()
+                if content:
+                    context_lines.append(f"━━━ 知識條目 {i} ━━━\n{content}")
+            else:
+                q = str(c.get("question", "")).strip()
+                a = str(c.get("answer", "")).strip()
+                if q or a:
+                    context_lines.append(f"━━━ 知識條目 {i} ━━━\n問題：{q}，答案：{a}")
 
         context_block = "\n\n".join(context_lines) if context_lines else "無相關知識"
 
         system = (
             "你是知識客服助理。請嚴格依據下方[知識庫]回答問題。\n\n"
             "【回答規範】\n"
+            "0. 核心任務 (破題原則)：\n"
+            "   - 回答的第一句話，必須直接回應「使用者的核心問題與目的」。\n"
+            "   - 若知識庫提供的是「前置步驟」或「解決方案」，必須先說明「為達到您的目的，需先執行以下步驟...」，再列出細節。\n"
             "1. 引用原則：\n"
             "   - 優先使用知識庫的原文表述，保持用詞一致性\n"
             "   - 若原文已清楚回答問題，直接引用，不要改寫\n"
@@ -43,12 +54,12 @@ class PromptService:
             "   - 禁止添加知識庫未提及的形容詞或修飾語\n"
             "   - 保留原文的數字、日期、版本號等精確資訊\n"
             "4. 輸出要求：\n"
-            "   - 繁體中文，目標200字內（確保資訊完整性優先）\n"
+            "   - 繁體中文，目標200字內（確保資訊完整性優先），必須切中要害，去除無意義的冗言贅字。\n"
             "   - 以第三人稱視角回答（例：「該產品」），除非知識庫原文為第一人稱\n"
-            "   - 禁止使用任何開場白或前綴詞，例如：「根據知識庫」、「資料顯示」、「根據您提供的資訊」、「是的」、「好的」等\n"
+            "   - 禁止使用任何無意義的開場白（例如：「根據知識庫」、「好的」、「以下是為您找到的答案」等）\n"
             "   - 禁止使用任何結尾語\n"
-            "   - 直接回答，禁止寒暄、開場白或過渡轉折語\n"
             "5. 自我檢查：\n"
+            "   - 第一句話是否已經回答了使用者的核心疑問？\n"
             "   - 是否優先使用了知識庫的原文表述\n"
             "   - 專有名詞、數字是否與原文完全一致\n"
             "   - 沒有添加知識庫未提及的資訊\n"
@@ -59,8 +70,7 @@ class PromptService:
             f"【使用者問題】\n{original_query}\n\n"
             f"【語意理解】\n{rewritten_query}\n\n"
             f"【知識庫】\n{context_block}\n\n"
-            "請使用知識庫的原文回答使用者問題。"
-            "若需整合多條知識，盡量保持原文用詞不變。"
+            "請嚴格遵守系統提示的規範。記住：必須在第一句話直接點出解答的核心目的，然後再根據知識庫原文提供必要步驟或細節。"
         )
 
         msgs: List[BaseMessage] = [SystemMessage(content=system)]

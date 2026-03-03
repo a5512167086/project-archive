@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import threading
 import time
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 from uuid import UUID
 
 from rank_bm25 import BM25Okapi
@@ -19,7 +19,6 @@ class RetrievalService:
     def __init__(
         self,
         vector_service: VectorService,
-        load_docs: Optional[Callable[[UUID], List[Dict[str, Any]]]] = None,
         stopwords: Optional[Set[str]] = None,
         stopwords_path: Optional[str] = None,
         bm25_enabled: bool = True,
@@ -28,7 +27,6 @@ class RetrievalService:
         debug_log_top_n: int = 5,
     ) -> None:
         self.vs = vector_service
-        self._load_docs_fn = load_docs
 
         self.stopwords: Set[str] = (
             load_stopwords(stopwords_path) if stopwords is None else set(stopwords)
@@ -42,14 +40,6 @@ class RetrievalService:
         self._idx_cache: Dict[str, BM25Index] = {}
         self._locks: Dict[str, threading.Lock] = {}
         self._global_lock = threading.Lock()
-
-    def bind_docs_loader(
-        self, load_docs: Callable[[UUID], List[Dict[str, Any]]]
-    ) -> None:
-        self._load_docs_fn = load_docs
-
-    def has_loader(self) -> bool:
-        return self._load_docs_fn is not None
 
     def refresh_index(self, bot_uuid: UUID) -> None:
         key = str(bot_uuid)
@@ -65,42 +55,28 @@ class RetrievalService:
         top_n: int,
         score_key: str,
     ) -> None:
-        q = (query_text or "").replace("\n", " ")[:120]
-        logger.info(f"[RetrievalService] {title} | q='{q}' | hits={len(hits)}")
+        q_text_log = (query_text or "").replace("\n", " ")[:120]
+        logger.info(f"[RetrievalService] {title} | q='{q_text_log}' | hits={len(hits)}")
 
         for i, h in enumerate(hits[: max(0, int(top_n))], 1):
             obj_id = h.get("id") or h.get("object_id")
             score = h.get(score_key, h.get("score"))
+            item_type = h.get("type", "qa")
 
-            q_snip = (h.get("question") or "").replace("\n", " ")[:60]
-            a_snip = (h.get("answer") or "").replace("\n", " ")[:60]
-
-            logger.info(
-                f"[RetrievalService] {title} top{i}: "
-                f"id={obj_id} {score_key}={score} q='{q_snip}' a='{a_snip}'"
-            )
-
-    def _log_hybrid_debug(
-        self,
-        query_text: str,
-        vec_hits: List[Dict[str, Any]],
-        lex_hits: List[Dict[str, Any]],
-    ) -> None:
-        top_n = self.debug_log_top_n
-        self._log_hits(
-            title="VectorSearch",
-            query_text=query_text,
-            hits=vec_hits,
-            top_n=top_n,
-            score_key="vec_score",
-        )
-        self._log_hits(
-            title="BM25Search",
-            query_text=query_text,
-            hits=lex_hits,
-            top_n=top_n,
-            score_key="lex_score",
-        )
+            if item_type == "file":
+                disp = str(h.get("display_name") or h.get("filename") or "").strip()
+                content = str(h.get("content") or "").replace("\n", " ")[:60]
+                logger.info(
+                    f"[RetrievalService] {title} top{i}: "
+                    f"id={obj_id} {score_key}={score} File='{disp}' Content='{content}'"
+                )
+            else:
+                q_snip = (h.get("question") or "").replace("\n", " ")[:60]
+                a_snip = (h.get("answer") or "").replace("\n", " ")[:60]
+                logger.info(
+                    f"[RetrievalService] {title} top{i}: "
+                    f"id={obj_id} {score_key}={score} q='{q_snip}' a='{a_snip}'"
+                )
 
     def search(
         self,
@@ -117,55 +93,77 @@ class RetrievalService:
     ) -> List[Dict[str, Any]]:
         mode = (mode or "hybrid").lower().strip()
         top_k = max(int(top_k), 1)
+        fetch_multiplier = 2
 
         if mode == "vector":
-            return self._vector_search(
+            raw_results = self._vector_search(
                 bot_uuid=bot_uuid,
                 query_text=query_text,
-                top_k=top_k,
+                top_k=top_k * fetch_multiplier,
                 fetch_k=fetch_k,
                 score_threshold=score_threshold,
             )
 
-        if mode == "lexical":
-            return self._lexical_search(
+        elif mode == "lexical":
+            raw_results = self._lexical_search(
                 bot_uuid=bot_uuid,
                 query_text=query_text,
-                top_k=top_k,
-                fetch_k=int(lexical_fetch_k or fetch_k or top_k),
+                top_k=top_k * fetch_multiplier,
+                fetch_k=int(lexical_fetch_k or fetch_k or top_k * fetch_multiplier),
             )
 
-        vec_fetch = int(fetch_k or top_k)
-        lex_fetch = int(lexical_fetch_k or fetch_k or top_k)
+        else:
+            vec_fetch = int(fetch_k or top_k * fetch_multiplier)
+            lex_fetch = int(lexical_fetch_k or fetch_k or top_k * fetch_multiplier)
 
-        vec_hits = self._vector_search(
-            bot_uuid=bot_uuid,
-            query_text=query_text,
-            top_k=vec_fetch,
-            fetch_k=vec_fetch,
-            score_threshold=score_threshold,
-        )
-        lex_hits = self._lexical_search(
-            bot_uuid=bot_uuid,
-            query_text=query_text,
-            top_k=lex_fetch,
-            fetch_k=lex_fetch,
-        )
-
-        if self.debug_log_hits:
-            self._log_hybrid_debug(
-                query_text=query_text, vec_hits=vec_hits, lex_hits=lex_hits
+            vec_hits = self._vector_search(
+                bot_uuid=bot_uuid,
+                query_text=query_text,
+                top_k=vec_fetch,
+                fetch_k=vec_fetch,
+                score_threshold=score_threshold,
+            )
+            lex_hits = self._lexical_search(
+                bot_uuid=bot_uuid,
+                query_text=query_text,
+                top_k=lex_fetch,
+                fetch_k=lex_fetch,
             )
 
-        return self._hybrid_fuse_rrf(
-            query_text=query_text,
-            vector_hits=vec_hits,
-            lexical_hits=lex_hits,
-            top_k=top_k,
-            rrf_k=int(rrf_k),
-            weight_vector=float(weight_vector),
-            weight_lexical=float(weight_lexical),
-        )
+            if self.debug_log_hits:
+                self._log_hits(
+                    "VectorSearch",
+                    query_text,
+                    vec_hits,
+                    self.debug_log_top_n,
+                    "vec_score",
+                )
+                self._log_hits(
+                    "BM25Search",
+                    query_text,
+                    lex_hits,
+                    self.debug_log_top_n,
+                    "lex_score",
+                )
+
+            raw_results = self._hybrid_fuse_rrf(
+                query_text=query_text,
+                vector_hits=vec_hits,
+                lexical_hits=lex_hits,
+                top_k=top_k * fetch_multiplier,
+                rrf_k=int(rrf_k),
+                weight_vector=float(weight_vector),
+                weight_lexical=float(weight_lexical),
+            )
+
+        final_results = raw_results[: int(top_k)]
+
+        if final_results:
+            logger.info(
+                f"[RetrievalService] {mode}_query='{(query_text or '')[:60]}' | "
+                f"top1_score={final_results[0].get('score', 0.0)}"
+            )
+        return final_results
 
     def _vector_search(
         self,
@@ -216,11 +214,16 @@ class RetrievalService:
         for rank, (i, s) in enumerate(ranked, 1):
             d = idx.docs[i]
             lex_score = float(s)
+
             out.append({
                 "id": d.get("id") or str(d.get("object_id") or ""),
                 "object_id": d.get("object_id"),
+                "type": d.get("type", "qa"),
                 "question": d.get("question", ""),
                 "answer": d.get("answer", ""),
+                "content": d.get("content", ""),
+                "filename": d.get("filename", ""),
+                "display_name": d.get("display_name", ""),
                 "lex_score": lex_score,
                 "lex_rank": rank,
                 "score": lex_score,
@@ -231,14 +234,6 @@ class RetrievalService:
             f"Corpus={idx.size} | Returned={len(out)}"
         )
         return out[: int(top_k)]
-
-    def _require_loader(self) -> Callable[[UUID], List[Dict[str, Any]]]:
-        if self._load_docs_fn is None:
-            raise RuntimeError(
-                "RetrievalService.load_docs is not bound. "
-                "Call retrieval_service.bind_docs_loader(...) before using BM25/hybrid."
-            )
-        return self._load_docs_fn
 
     def _ensure_bm25_index(self, bot_uuid: UUID, force: bool = False) -> BM25Index:
         key = str(bot_uuid)
@@ -254,26 +249,18 @@ class RetrievalService:
                     return cached
 
             t0 = time.perf_counter()
-            docs = self._safe_load_docs(self._require_loader(), bot_uuid)
+            docs = self._safe_load_docs(bot_uuid)
             raw_docs_cnt = len(docs)
             pairs: List[Tuple[Dict[str, Any], List[str]]] = []
-            dropped_empty_tokens = 0
 
             for d in docs:
-                text = (d.get("text") or "").strip() or self._format_doc_text(d)
+                text = (d.get("text") or "").strip()
                 toks = ngram_tokenize_unigram_bigram(text, stopwords=self.stopwords)
                 if toks:
                     pairs.append((d, toks))
-                else:
-                    dropped_empty_tokens += 1
 
             if not pairs:
-                idx = BM25Index(
-                    bm25=None,
-                    docs=[],
-                    built_at=time.time(),
-                    size=0,
-                )
+                idx = BM25Index(bm25=None, docs=[], built_at=time.time(), size=0)
                 self._idx_cache[key] = idx
                 return idx
 
@@ -297,16 +284,29 @@ class RetrievalService:
             )
             return idx
 
-    def _safe_load_docs(
-        self,
-        load_docs: Callable[[UUID], List[Dict[str, Any]]],
-        bot_uuid: UUID,
-    ) -> List[Dict[str, Any]]:
+    def _safe_load_docs(self, bot_uuid: UUID) -> List[Dict[str, Any]]:
+        docs = []
         try:
-            # 这里的 load_docs 通常会从数据库或缓存中读取之前 upsert 进去的 metadata
-            docs = load_docs(bot_uuid) or []
+            next_offset = None
+            filt = self.vs.filter_knowledge(bot_uuid)
+
+            while True:
+                points, next_offset = self.vs.client.scroll(
+                    collection_name=self.vs.collection,
+                    scroll_filter=filt,
+                    limit=200,
+                    with_payload=True,
+                    with_vectors=False,
+                )
+                if not points:
+                    break
+                for p in points:
+                    if p.payload and "metadata" in p.payload:
+                        docs.append(p.payload["metadata"])
+                if next_offset is None:
+                    break
         except Exception as e:
-            logger.exception(f"[RetrievalService] load_docs failed: {e}")
+            logger.exception(f"[RetrievalService] Failed to load docs from Qdrant: {e}")
             return []
 
         out: List[Dict[str, Any]] = []
@@ -314,23 +314,21 @@ class RetrievalService:
             if not isinstance(d, dict):
                 continue
 
-            # 1. 取得 Q&A 內容
-            q = (d.get("question") or "").strip()
-            a = (d.get("answer") or "").strip()
-
-            # 2. 取得 PDF 內文 (參考 VectorService 存放的 content 欄位)
-            # 同時也檢查是否有手動傳入的 text 欄位
-            content = (d.get("content") or d.get("text") or "").strip()
-
+            q = str(d.get("question") or "").strip()
+            a = str(d.get("answer") or "").strip()
+            content = str(d.get("content") or d.get("text") or "").strip()
             filename = d.get("filename", "")
-            item_type = d.get("type", "qa")
+
+            item_type = d.get("type")
+            if not item_type:
+                item_type = "file" if filename else "qa"
 
             if item_type == "file" and content:
                 text = f"File: {d.get('display_name', '')} {filename}\n{content}"
             elif content:
                 text = content
             elif q or a:
-                text = self._format_doc_text({"question": q, "answer": a})
+                text = f"Q: {q}\nA: {a}"
             elif filename:
                 text = f"{d.get('display_name', '')} {filename}"
             else:
@@ -341,16 +339,14 @@ class RetrievalService:
                 "object_id": d.get("object_id"),
                 "question": q,
                 "answer": a,
+                "content": content,
+                "filename": filename,
+                "display_name": d.get("display_name", ""),
                 "text": text,
                 "type": item_type,
             })
 
         return out
-
-    def _format_doc_text(self, d: Dict[str, Any]) -> str:
-        q = (d.get("question") or "").strip()
-        a = (d.get("answer") or "").strip()
-        return f"Q: {q}\nA: {a}" if a else f"Q: {q}"
 
     def _hybrid_fuse_rrf(
         self,
@@ -362,11 +358,15 @@ class RetrievalService:
         weight_vector: float,
         weight_lexical: float,
     ) -> List[Dict[str, Any]]:
-        t0 = time.perf_counter()
         rrf_k = max(int(rrf_k), 1)
 
         def _key(h: Dict[str, Any]) -> Any:
-            return h.get("id") or h.get("object_id")
+            item_type = h.get("type")
+            obj_id = h.get("object_id")
+            chunk_id = h.get("id")
+            if item_type == "file":
+                return chunk_id if chunk_id else obj_id
+            return obj_id if obj_id is not None else chunk_id
 
         vec_rank: Dict[Any, int] = {}
         for i, h in enumerate(vector_hits, 1):
@@ -383,25 +383,33 @@ class RetrievalService:
         merged: Dict[Any, Dict[str, Any]] = {}
 
         def _ensure_base(k: Any, h: Dict[str, Any]) -> Dict[str, Any]:
-            if k in merged:
-                return merged[k]
-
-            base = {
-                "id": h.get("id") or str(h.get("object_id") or ""),
-                "object_id": h.get("object_id"),
-                "question": h.get("question", ""),
-                "answer": h.get("answer", ""),
-                "content": h.get("content"),
-                "filename": h.get("filename"),
-                "display_name": h.get("display_name"),
-                "type": h.get("type"),
-                "vec_score": None,
-                "lex_score": None,
-                "vec_rank": None,
-                "lex_rank": None,
-                "score": 0.0,
-            }
-            merged[k] = base
+            if k not in merged:
+                merged[k] = {
+                    "id": h.get("id") or str(h.get("object_id") or ""),
+                    "object_id": h.get("object_id"),
+                    "question": h.get("question", ""),
+                    "answer": h.get("answer", ""),
+                    "content": h.get("content", ""),
+                    "filename": h.get("filename", ""),
+                    "display_name": h.get("display_name", ""),
+                    "type": h.get("type", "qa"),
+                    "vec_score": None,
+                    "lex_score": None,
+                    "vec_rank": None,
+                    "lex_rank": None,
+                    "score": 0.0,
+                }
+            base = merged[k]
+            for field in [
+                "question",
+                "answer",
+                "content",
+                "filename",
+                "display_name",
+                "type",
+            ]:
+                if not base.get(field) and h.get(field):
+                    base[field] = h.get(field)
             return base
 
         for h in vector_hits:
@@ -430,19 +438,8 @@ class RetrievalService:
                 s += float(weight_lexical) / float(rrf_k + lr)
             d["score"] = float(s)
 
-        results = sorted(merged.values(), key=lambda x: x["score"], reverse=True)[
-            : int(top_k)
-        ]
-
-        logger.info(
-            f"[Timer] Hybrid(RRF) Fuse: {(time.perf_counter() - t0):.3f}s | "
-            f"vec={len(vector_hits)} lex={len(lexical_hits)} -> {len(results)}"
-        )
-        logger.info(
-            f"[RetrievalService] hybrid_query='{(query_text or '')[:60]}' | "
-            f"top1_score={results[0]['score'] if results else None}"
-        )
-        return results
+        raw_results = sorted(merged.values(), key=lambda x: x["score"], reverse=True)
+        return raw_results
 
     def _get_lock(self, key: str) -> threading.Lock:
         with self._global_lock:

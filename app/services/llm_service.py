@@ -41,14 +41,14 @@ class LLMService:
                 temperature=float(LLM_TEMPERATURE),
                 max_output_tokens=2048,
             )
-        elif model_name == "qwen2.5_local":
+        elif model_name == "local_model":
             llm = ChatOllama(
                 base_url=OLLAMA_BASE_URL,
                 model=OLLAMA_LLM_NAME,
                 temperature=float(LLM_TEMPERATURE),
             )
         else:
-            llm = self.get_llm("qwen2.5_local")
+            llm = self.get_llm("local_model")
 
         self._cache[model_name] = llm
         return llm

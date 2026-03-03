@@ -22,7 +22,7 @@ class SummaryMemory:
         mongo_db_name: str,
         mongo_collection: str,
         get_llm: Callable[[str], Any],
-        summary_model: str = "qwen2.5_local",
+        summary_model: str = "local_model",
         summary_trigger_threshold: int = 6,
         max_summary_messages: int = 30,
         refresh_min_interval_sec: int = 60,

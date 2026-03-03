@@ -1,11 +1,10 @@
-from __future__ import annotations
-
 import asyncio
 import json
 import logging
 import shutil
 import time
 from collections import defaultdict
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -34,8 +33,22 @@ RESULT_DIR = "data/eval_result"
 MAX_CONTEXTS_PREVIEW = 3
 MAX_TEXT_PREVIEW_CHARS = 1200
 
+# -----------------------------------------------------------------------------
+# Logging 初始化
+# -----------------------------------------------------------------------------
+Path(DATASET_DONE_DIR).mkdir(parents=True, exist_ok=True)
+log_file = Path(DATASET_DONE_DIR) / "ragas_eval.log"
+
+# 設定 Logging：同時輸出到控制台與檔案，並具備輪替機制
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        RotatingFileHandler(
+            log_file, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"
+        ),
+        logging.StreamHandler(),
+    ],
 )
 logger = logging.getLogger(__name__)
 
@@ -110,6 +123,7 @@ def save_dataset_result(
     try:
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(output_data, f, ensure_ascii=False, indent=2)
+        logger.info(f"評估明細已儲存至: {file_path}")
     except Exception as e:
         logger.error(f"儲存檔案失敗 {file_path}: {str(e)}")
 
@@ -131,6 +145,7 @@ def update_summary_report(
     try:
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(current_data, f, ensure_ascii=False, indent=2)
+        logger.info(f"總報表已更新: {file_path}")
     except Exception as e:
         logger.error(f"更新總表失敗: {str(e)}")
 
@@ -142,6 +157,7 @@ def move_dataset_to_done(dataset_name: str) -> None:
     if source_path.exists():
         try:
             shutil.move(str(source_path), str(dest_path))
+            logger.info(f"已將處理完畢的資料集移動至: {DATASET_DONE_DIR}")
         except Exception as e:
             logger.error(f"移動檔案失敗: {e}")
 
@@ -165,18 +181,16 @@ async def adapt_prompt_helper(
         inputs={"language": language},
     ) as r:
         try:
+            logger.info(f"正在為 {metric_name} 適配 {prompt_attr_name}...")
             start_time = time.time()
             current_prompt = getattr(metric_obj, prompt_attr_name)
             adapted_prompt = await current_prompt.adapt(
                 target_language=language, llm=llm, adapt_instruction=True
             )
             setattr(metric_obj, prompt_attr_name, adapted_prompt)
-            r.end(
-                outputs={
-                    "status": "ok",
-                    "elapsed_sec": round(time.time() - start_time, 4),
-                }
-            )
+            elapsed = round(time.time() - start_time, 4)
+            logger.info(f"完成 {metric_name} 適配 (耗時 {elapsed}s)")
+            r.end(outputs={"status": "ok", "elapsed_sec": elapsed})
         except Exception as e:
             logger.warning(f"適配 Prompt 失敗 ({span_name})，將使用預設英文: {e}")
             r.end(outputs={"status": "failed", "error": str(e)})
@@ -319,7 +333,7 @@ async def process_single_item(
                 **ctx_meta,
             },
         ) as item_run:
-            logger.info(f"開始評估項目: {idx}/{total}")
+            logger.info(f"--- 處理項目 {idx}/{total} ---")
 
             pairs = await asyncio.gather(
                 _score_metric(
@@ -370,7 +384,7 @@ async def process_single_item(
             elapsed = time.time() - start_time
             score_str = ", ".join([f"{k}: {v:.4f}" for k, v in scores.items()])
             logger.info(
-                f"完成評估項目: {idx}/{total} (耗時: {elapsed:.2f}s) | 分數: {score_str}"
+                f"完成項目 {idx}/{total} (耗時: {elapsed:.2f}s) | 分數: {score_str}"
             )
 
             item_run.end(outputs={"elapsed_sec": round(elapsed, 4), "scores": scores})
@@ -402,7 +416,7 @@ async def evaluate_datasets(
     ) as eval_run:
         for dataset_name, dataset in datasets.items():
             dataset_start_time = time.time()
-            logger.info(f"\n評估資料集: {dataset_name} (共 {len(dataset)} 筆)")
+            logger.info(f"\n>>>> 評估資料集: {dataset_name} (共 {len(dataset)} 筆)")
 
             async with trace(
                 name=f"dataset:{dataset_name}",
@@ -456,7 +470,7 @@ async def evaluate_datasets(
 # 主程式
 # -----------------------------------------------------------------------------
 async def main() -> None:
-    logger.info("=== 程式開始執行 ===")
+    logger.info("=== Ragas 評估程式啟動 ===")
     Path(DATASET_DONE_DIR).mkdir(parents=True, exist_ok=True)
     Path(RESULT_DIR).mkdir(parents=True, exist_ok=True)
 
@@ -511,6 +525,7 @@ async def main() -> None:
             root_run.end(
                 outputs={"status": "ok", "datasets": list(evaluation_results.keys())}
             )
+            logger.info("=== 程式執行完畢 ===")
 
         except Exception as e:
             logger.error(f"=== 程式執行失敗 ===: {str(e)}", exc_info=True)

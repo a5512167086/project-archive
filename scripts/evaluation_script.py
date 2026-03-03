@@ -40,9 +40,9 @@ DATASET_DIR = "data/eval_dataset"
 DATASET_DONE_DIR = "data/eval_dataset_done"
 RESULT_DIR = "data/eval_result"
 
-# LangSmith / Tracing 調整（避免 inputs 太大）
-MAX_CONTEXTS_PREVIEW = 3  # 寫到 LangSmith inputs 的 contexts 預覽條數
-MAX_TEXT_PREVIEW_CHARS = 1200  # 避免 answer/gt 太長爆 payload
+# LangSmith / Tracing 調整
+MAX_CONTEXTS_PREVIEW = 3
+MAX_TEXT_PREVIEW_CHARS = 1200
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -242,7 +242,6 @@ async def adapt_prompt_helper(
                 }
             )
         except Exception as e:
-            # 不拋錯：沿用預設 prompt
             r.end(outputs={"status": "failed", "error": str(e)})
 
 
@@ -291,7 +290,6 @@ async def build_metrics_and_adapt_prompts(parent_run=None):
 
         logger.info("開始並行適配 Prompt 到繁體中文...")
 
-        # 讓 adapt prompt 全部掛在這個 build run 下面
         adapt_parent = run
 
         await asyncio.gather(
@@ -388,7 +386,6 @@ async def process_single_item(
         answer = item.get("answer", "")
         ground_truth = item.get("ground_truth", "")
 
-        # DEBUG: 檢查資料完整性（終端機 log）
         if not question:
             logger.warning(f"  [Item {idx}] 警告: 'question' 為空")
         if not contexts:
@@ -398,7 +395,6 @@ async def process_single_item(
         if not ground_truth:
             logger.warning(f"  [Item {idx}] 警告: 'ground_truth' 為空")
 
-        # LangSmith inputs 避免太大：只存 preview
         ctx_meta = _contexts_preview(contexts)
 
         async with trace(
@@ -415,7 +411,6 @@ async def process_single_item(
         ) as item_run:
             logger.info(f"開始評估項目: {idx}/{total}")
 
-            # 在 item_run 內建立 coroutine，確保 child run 正確掛上
             pairs = await asyncio.gather(
                 _score_metric(
                     "answer_relevancy",
@@ -469,7 +464,6 @@ async def process_single_item(
                 f"完成評估項目: {idx}/{total} (耗時: {elapsed:.2f}s) | 分數: {score_str}"
             )
 
-            # ✅ 這是你要的：一筆 item 的 outputs 直接看得到所有 metric 分數
             item_run.end(
                 outputs={
                     "elapsed_sec": round(elapsed, 4),
@@ -537,11 +531,8 @@ async def evaluate_datasets(
                     for key in avg_scores:
                         avg_scores[key] = round(avg_scores[key] / valid_count, 4)
 
-                # 1) 存詳細結果
                 save_dataset_result(dataset_name, dataset_results, dict(avg_scores))
-                # 2) 更新總表
                 update_summary_report(dataset_name, dict(avg_scores))
-                # 3) 移到 done
                 move_dataset_to_done(dataset_name)
 
                 dataset_elapsed = time.time() - dataset_start_time
@@ -579,7 +570,6 @@ async def main() -> None:
     Path(DATASET_DONE_DIR).mkdir(parents=True, exist_ok=True)
     Path(RESULT_DIR).mkdir(parents=True, exist_ok=True)
 
-    # 整次 run 的 root（讓 LangSmith 形成一棵完整 tree）
     async with trace(
         name="ragas_eval_run",
         run_type="chain",
@@ -645,7 +635,6 @@ async def main() -> None:
 
         except Exception as e:
             logger.error(f"=== 程式執行失敗 ===: {str(e)}", exc_info=True)
-            # 讓 LangSmith root run 也記錄失敗
             root_run.end(outputs={"status": "error", "error": str(e)})
             raise
 

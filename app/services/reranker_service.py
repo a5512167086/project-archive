@@ -32,9 +32,19 @@ class RerankerService:
 
         pairs: List[List[str]] = []
         for d in docs:
-            q_text = (d.get("question") or "").strip()
-            a_text = (d.get("answer") or "").strip()
-            doc_content = f"Q: {q_text}，A: {a_text}".strip()
+            item_type = d.get("type", "qa")
+
+            if item_type == "file":
+                doc_content = str(d.get("content") or d.get("text") or "").strip()
+            else:
+                q_text = str(d.get("question") or "").strip()
+                a_text = str(d.get("answer") or "").strip()
+                doc_content = f"Q: {q_text}，A: {a_text}" if a_text else f"Q: {q_text}"
+                doc_content = doc_content.strip()
+
+            if not doc_content:
+                doc_content = "無內容"
+
             pairs.append([query, doc_content])
 
         scores = self.model.compute_score(pairs, normalize=True)
@@ -46,8 +56,11 @@ class RerankerService:
 
         docs.sort(key=lambda x: float(x.get("rerank_score", 0.0) or 0.0), reverse=True)
 
-        results = docs[: int(top_k)]
+        final_docs = docs[: int(top_k)]
+
         logger.info(
-            f"[Timer] Reranker processed {len(docs)} docs -> top {len(results)} in {(time.perf_counter() - t0):.3f}s"
+            f"[Timer] Reranker processed {len(docs)} docs -> top {len(final_docs)} "
+            f"in {(time.perf_counter() - t0):.3f}s"
         )
-        return results
+
+        return final_docs

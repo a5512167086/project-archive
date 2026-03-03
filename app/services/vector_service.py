@@ -333,7 +333,6 @@ class VectorService:
                 continue
 
             file_stream.seek(0)
-
             raw_text = ""
             try:
                 if file_item.file_type.lower() == "pdf":
@@ -350,19 +349,22 @@ class VectorService:
                 )
                 continue
 
-            cleaned_text = self._clean_text(raw_text)
-
-            if not cleaned_text.strip():
+            cleaned_full_text = self._clean_text(raw_text)
+            if len(cleaned_full_text) < 5:
                 continue
 
-            raw_doc = Document(page_content=cleaned_text)
+            raw_doc = Document(page_content=cleaned_full_text)
             chunks = self.text_splitter.split_documents([raw_doc])
 
             for chunk in chunks:
-                chunk_id = str(uuid.uuid4())
+                content = self._clean_text(chunk.page_content)
+                if len(content) < 5:
+                    continue
 
-                docs_to_add.append(chunk.page_content)
+                chunk_id = str(uuid.uuid4())
+                docs_to_add.append(content)
                 ids_to_add.append(chunk_id)
+
                 metas_to_add.append({
                     "bot_uuid": bot_str,
                     "object_id": file_item.object_id,
@@ -370,10 +372,8 @@ class VectorService:
                     "display_name": file_item.display_name,
                     "source": "knowledge",
                     "type": "file",
-                    "content": chunk.page_content,
+                    "content": content,
                     "id": chunk_id,
-                    "question": "",
-                    "answer": chunk.page_content,
                 })
 
         total = self._safe_batch_upsert(
@@ -423,7 +423,7 @@ class VectorService:
 
         pairs = self.vs.similarity_search_with_relevance_scores(
             query=query_text,
-            k=int(top_k),
+            k=int(top_k * 2),
             filter=self._build_knowledge_filter(bot_uuid),
             score_threshold=score_threshold,
         )
@@ -438,21 +438,15 @@ class VectorService:
                 "score": float(score),
                 "object_id": md.get("object_id"),
                 "type": item_type,
+                "filename": md.get("filename", ""),
+                "display_name": md.get("display_name", ""),
+                "question": md.get("question", ""),
+                "answer": md.get("answer", ""),
+                "content": md.get("content", ""),
             }
-
-            if item_type == "file":
-                hit["content"] = md.get("content", "")
-                hit["filename"] = md.get("filename", "")
-                hit["display_name"] = md.get("display_name", "")
-                hit["answer"] = md.get("content", "")
-                hit["question"] = f"File: {md.get('display_name')}"
-            else:
-                hit["question"] = md.get("question", "")
-                hit["answer"] = md.get("answer", "")
-
             results.append(hit)
 
-        results = self._dedupe_and_sort(results)
+        results = self._dedupe_and_sort(results)[: int(top_k)]
 
         logger.info(
             f"[Timer] Search Total: {(time.perf_counter() - t0):.3f}s | Hits: {len(results)}"
