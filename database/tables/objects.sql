@@ -1,9 +1,9 @@
 CREATE TABLE IF NOT EXISTS objects(
     object_id SERIAL PRIMARY KEY,
     entity_id INT,
-    chinese_name VARCHAR(512),
+    chinese_name VARCHAR(2048),
     chinese_description VARCHAR(4000),
-    english_name VARCHAR(512),
+    english_name VARCHAR(2048),
     english_description VARCHAR(4000),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
