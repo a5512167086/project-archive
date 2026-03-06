@@ -19,7 +19,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-PRODUCTS_JSON_PATH = "products.json"
+PRODUCTS_JSON_PATH = "data/1010_products.json"
 
 
 def get_db() -> Session:

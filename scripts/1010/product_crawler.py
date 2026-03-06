@@ -262,7 +262,7 @@ async def get_categories_and_sample_products_with_details():
                 "sub_categories": sub_items,
             })
 
-        outfile = "products.json"
+        outfile = "data/1010_products.json"
         payload = {
             "crawl_meta": {
                 "source": URL,
