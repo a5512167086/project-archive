@@ -349,27 +349,42 @@ export const CustomDialog = <T extends Record<string, unknown>>({
                   </Button>
                   <Box display="flex" gap={2} flexWrap="wrap" mt={1}>
                     {Array.isArray(formState[field.name]) &&
-                      (formState[field.name] as File[]).map((file, idx) => (
-                        <Box
-                          key={idx}
-                          sx={{
-                            width: 80,
-                            height: 80,
-                            border: '1px solid #eee',
-                            borderRadius: 2,
-                            overflow: 'hidden',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                        >
-                          <img
-                            src={URL.createObjectURL(file)}
-                            alt={`preview-${idx}`}
-                            style={{ maxWidth: '100%', maxHeight: '100%' }}
-                          />
-                        </Box>
-                      ))}
+                      (formState[field.name] as File[]).map((file, idx) => {
+                        const isImage = file.type.startsWith('image/')
+
+                        return (
+                          <Box
+                            key={`${file.name}-${idx}`}
+                            sx={{
+                              width: 100,
+                              minHeight: 80,
+                              border: '1px solid #eee',
+                              borderRadius: 2,
+                              overflow: 'hidden',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              p: 1,
+                              textAlign: 'center'
+                            }}
+                          >
+                            {isImage ? (
+                              <img
+                                src={URL.createObjectURL(file)}
+                                alt={file.name}
+                                style={{ maxWidth: '100%', maxHeight: '100%' }}
+                              />
+                            ) : (
+                              <Typography
+                                variant="body2"
+                                sx={{ wordBreak: 'break-all' }}
+                              >
+                                {file.name}
+                              </Typography>
+                            )}
+                          </Box>
+                        )
+                      })}
                   </Box>
                 </Box>
               )
