@@ -35,6 +35,7 @@ import {
   KnowledgeItem
 } from '@/store/apis/knowledgeApi'
 import { FieldProps } from '@/components/CustomDialog/CustomDialog.type'
+import { StyledKnowledgeManagementPage } from './KnowledgeManagementPage.style'
 
 const KnowledgeManagementPage = () => {
   const { uuid } = useParams()
@@ -110,6 +111,7 @@ const KnowledgeManagementPage = () => {
     }
   }, [tabValue, uuid, getKnowledges, getFiles])
 
+  // ... (這裡保留你原本的 handlers：handleAddQAConfirm, handleAddCSVConfirm, 等等) ...
   const handleAddQAConfirm = async (data: {
     question: string
     answer: string
@@ -299,24 +301,24 @@ const KnowledgeManagementPage = () => {
   ]
 
   return (
-    <Box sx={{ p: 3 }}>
-      <CustomBreadcrumb
-        items={[
-          { linkText: t('botPage.myBot'), link: '/bots' },
-          { linkText: currentBot?.chinese_name || '', link: `/bots/${uuid}` }
-        ]}
-      />
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          mb: 3
-        }}
-      >
-        <Typography variant="h4">{t('knowledgeSettingPage.title')}</Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+    <StyledKnowledgeManagementPage disableGutters maxWidth={false}>
+      <Box sx={{ flexShrink: 0 }}>
+        <CustomBreadcrumb
+          items={[
+            { linkText: t('botPage.myBot'), link: '/bots' },
+            { linkText: currentBot?.chinese_name || '', link: `/bots/${uuid}` }
+          ]}
+        />
+      </Box>
+
+      <div className="knowledge__titleBox">
+        <Typography className="knowledge__title" variant="h4">
+          {t('knowledgeSettingPage.title')}
+        </Typography>
+
+        <Box>
           <Button
+            className="knowledge__button"
             variant="outlined"
             startIcon={
               isSyncRunning ? (
@@ -326,15 +328,16 @@ const KnowledgeManagementPage = () => {
               )
             }
             onClick={() => triggerSync({ bot_uuid: uuid! })}
-            // 只有當 canSync 為 true 且沒有在執行中時，才能點擊
             disabled={!canSync || isSyncRunning}
           >
             {getSyncText()}
           </Button>
+
           {tabValue === 0 && (
             <>
               {selectedQA.length > 0 && (
                 <Button
+                  className="knowledge__button"
                   variant="outlined"
                   color="error"
                   startIcon={<DeleteIcon />}
@@ -344,6 +347,7 @@ const KnowledgeManagementPage = () => {
                 </Button>
               )}
               <Button
+                className="knowledge__button"
                 variant="outlined"
                 startIcon={<FileUploadIcon />}
                 onClick={() => setIsAddCSVOpen(true)}
@@ -359,10 +363,12 @@ const KnowledgeManagementPage = () => {
               </Button>
             </>
           )}
+
           {tabValue === 1 && (
             <>
               {selectedFiles.length > 0 && (
                 <Button
+                  className="knowledge__button"
                   variant="outlined"
                   color="error"
                   startIcon={<DeleteIcon />}
@@ -377,37 +383,46 @@ const KnowledgeManagementPage = () => {
             </>
           )}
         </Box>
-      </Box>
-      <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)} sx={{ mb: 2 }}>
+      </div>
+
+      <Tabs
+        value={tabValue}
+        onChange={(_, v) => setTabValue(v)}
+        sx={{ mb: 2, flexShrink: 0 }}
+      >
         <Tab label={t('knowledgeSettingPage.qaTab')} />
         <Tab label={t('knowledgeSettingPage.fileTab')} />
       </Tabs>
-      {tabValue === 0 && (
-        <CustomTable
-          data={knowledgeItems}
-          columns={[
-            { id: 'question', label: 'knowledgeSettingPage.question' },
-            { id: 'answer', label: 'knowledgeSettingPage.answer' }
-          ]}
-          selected={selectedQA}
-          setSelected={setSelectedQA}
-          onEdit={(item: KnowledgeItem) => setEditingQA(item)}
-        />
-      )}
-      {tabValue === 1 && (
-        <CustomTable
-          data={knowledgeFiles}
-          columns={[
-            { id: 'display_name', label: 'knowledgeSettingPage.fileName' },
-            { id: 'file_type', label: 'knowledgeSettingPage.fileType' },
-            { id: 'created_at', label: 'knowledgeSettingPage.createdAt' }
-          ]}
-          selected={selectedFiles}
-          setSelected={setSelectedFiles}
-          onEdit={(item: KnowledgeFileItem) => setEditingFile(item)}
-          onDownload={(item: KnowledgeFileItem) => handleDownload(item)}
-        />
-      )}
+
+      <div className="knowledge__tableContainer">
+        {tabValue === 0 && (
+          <CustomTable
+            data={knowledgeItems}
+            columns={[
+              { id: 'question', label: 'knowledgeSettingPage.question' },
+              { id: 'answer', label: 'knowledgeSettingPage.answer' }
+            ]}
+            selected={selectedQA}
+            setSelected={setSelectedQA}
+            onEdit={(item: KnowledgeItem) => setEditingQA(item)}
+          />
+        )}
+        {tabValue === 1 && (
+          <CustomTable
+            data={knowledgeFiles}
+            columns={[
+              { id: 'display_name', label: 'knowledgeSettingPage.fileName' },
+              { id: 'file_type', label: 'knowledgeSettingPage.fileType' },
+              { id: 'created_at', label: 'knowledgeSettingPage.createdAt' }
+            ]}
+            selected={selectedFiles}
+            setSelected={setSelectedFiles}
+            onEdit={(item: KnowledgeFileItem) => setEditingFile(item)}
+            onDownload={(item: KnowledgeFileItem) => handleDownload(item)}
+          />
+        )}
+      </div>
+
       <CustomDialog
         open={isAddQAOpen}
         title="knowledgeSettingPage.addSingle"
@@ -465,7 +480,7 @@ const KnowledgeManagementPage = () => {
         handleClose={() => setIsDeleteFilesOpen(false)}
         onSubmit={handleConfirmDeleteFiles}
       />
-    </Box>
+    </StyledKnowledgeManagementPage>
   )
 }
 
