@@ -1,17 +1,16 @@
 from __future__ import annotations
 
 import json
-import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import List
 
 import matplotlib.pyplot as plt
 import pandas as pd
 
-INPUT_PATH = Path(r"./data/eval_result/summary_report.json")
+RAGAS_INPUT_PATH = Path(r"./data/eval_result/summary_report.json")
+TRAD_INPUT_PATH = Path(r"./data/eval_result/traditional_summary_report.json")
 OUTDIR = Path(r"./data/chart")
-
 
 # ----------------------------
 # Parsing
@@ -25,12 +24,8 @@ class RunKey:
     module: str
 
 
-KEY_RE = re.compile(r"^(?P<prefix>.+)_wke_opt_(?P<rest>.+)_result$")
-
-
 def parse_run_key(key: str) -> RunKey:
     parts = key.split("_")
-
     if len(parts) < 3:
         raise ValueError(f"Unrecognized key format: {key}")
 
@@ -56,52 +51,53 @@ def ensure_outdir(outdir: Path) -> None:
     outdir.mkdir(parents=True, exist_ok=True)
 
 
-def plot_by_retrieval_lines_dataset_over_metrics(
+# ----------------------------
+# Plotting Functions
+# ----------------------------
+
+
+def plot_by_retrieval_lines(
     df: pd.DataFrame,
     outdir: Path,
     retrieval_order: List[str],
     metric_order: List[str],
     module_order: List[str],
+    group_name: str,
 ) -> None:
-    df = df.copy()
+    df_plot = df[df["metric"].isin(metric_order)].copy()
+    if df_plot.empty:
+        return
 
-    df["dataset"] = df.apply(lambda r: f"{r['model']} | {r['module']}", axis=1)
-
-    retrievals = [r for r in retrieval_order if r in set(df["retrieval"].unique())]
-    modules = [m for m in module_order if m in set(df["module"].unique())]
+    df_plot["dataset"] = df_plot.apply(
+        lambda r: f"{r['model']} | {r['module']}", axis=1
+    )
+    retrievals = [r for r in retrieval_order if r in set(df_plot["retrieval"].unique())]
 
     def dataset_sort_key(s: str) -> tuple:
         model, module = [x.strip() for x in s.split("|")]
-        module_rank = {m: i for i, m in enumerate(modules)}.get(module, 99)
+        module_rank = {m: i for i, m in enumerate(module_order)}.get(module, 99)
         return (module_rank, model, s)
 
     for retrieval in retrievals:
-        sub = df[df["retrieval"] == retrieval].copy()
-        if sub.empty:
-            continue
-
+        sub = df_plot[df_plot["retrieval"] == retrieval].copy()
         pivot = sub.pivot_table(
             index="dataset", columns="metric", values="value", aggfunc="mean"
         ).reindex(columns=metric_order)
         pivot = pivot.loc[sorted(pivot.index, key=dataset_sort_key)]
 
         fig, ax = plt.subplots(figsize=(12, 6))
-
         xs = list(range(len(metric_order)))
         for dataset in pivot.index:
             ys = pivot.loc[dataset].tolist()
             ax.plot(xs, ys, marker="o", linewidth=1.5, label=dataset)
 
-        ax.set_title(
-            f"RAGAS Metrics (retrieval={retrieval}) | lines=datasets(model|module)"
-        )
+        ax.set_title(f"{group_name} Metrics (retrieval={retrieval})")
         ax.set_xlabel("Metric")
         ax.set_ylabel("Score")
-        ax.set_ylim(0, 1.0)
+        ax.set_ylim(0, 1.05)
         ax.set_xticks(xs)
         ax.set_xticklabels(metric_order, rotation=25, ha="right")
         ax.grid(axis="y", linestyle="--", linewidth=0.5, alpha=0.6)
-
         ax.legend(
             title="Dataset",
             loc="center left",
@@ -110,10 +106,9 @@ def plot_by_retrieval_lines_dataset_over_metrics(
         )
 
         plt.tight_layout()
-        out_path = outdir / f"lines_over_metrics__{retrieval}.png"
+        out_path = outdir / f"lines_{group_name.lower()}_{retrieval}.png"
         plt.savefig(out_path, dpi=200, bbox_inches="tight")
         plt.close()
-        print(f"[OK] Saved: {out_path.resolve()}")
 
 
 def plot_one_heatmap(
@@ -147,111 +142,105 @@ def plot_one_heatmap(
     pivot = pivot.loc[sorted(pivot.index, key=sort_key)]
 
     n_rows, n_cols = pivot.shape
-    fig_w = max(10, 1.8 * n_cols + 6)
-    fig_h = max(6, 0.35 * n_rows + 2)
+    fig_w = max(12, 1.2 * n_cols + 4)
+    fig_h = max(6, 0.4 * n_rows + 2)
 
     fig, ax = plt.subplots(figsize=(fig_w, fig_h))
-    im = ax.imshow(pivot.values, vmin=0.0, vmax=1.0, aspect="auto")
+    im = ax.imshow(pivot.values, vmin=0.0, vmax=1.0, aspect="auto", cmap="viridis")
 
-    ax.set_title("RAGAS Summary Heatmap (model | retrieval | module)", pad=12)
-    ax.set_xlabel("Metric")
-    ax.set_ylabel("Run")
-
+    ax.set_title("Combined Evaluation Heatmap (RAGAS & Traditional)", pad=20)
     ax.set_xticks(range(n_cols))
-    ax.set_xticklabels(pivot.columns.tolist(), rotation=25, ha="right")
-
+    ax.set_xticklabels(pivot.columns.tolist(), rotation=35, ha="right")
     ax.set_yticks(range(n_rows))
     ax.set_yticklabels(pivot.index.tolist())
-
-    ax.set_xticks([x - 0.5 for x in range(1, n_cols)], minor=True)
-    ax.set_yticks([y - 0.5 for y in range(1, n_rows)], minor=True)
-    ax.grid(which="minor", linestyle="-", linewidth=0.3, alpha=0.3)
-    ax.tick_params(which="minor", bottom=False, left=False)
-
-    cbar = fig.colorbar(im, ax=ax, fraction=0.03, pad=0.02)
-    cbar.set_label("Score")
 
     for i in range(n_rows):
         for j in range(n_cols):
             v = pivot.values[i, j]
-            if pd.isna(v):
-                continue
-            ax.text(j, i, f"{v:.3f}", ha="center", va="center", fontsize=8)
+            if not pd.isna(v):
+                color = "white" if v < 0.5 else "black"
+                ax.text(
+                    j, i, f"{v:.3f}", ha="center", va="center", fontsize=8, color=color
+                )
 
-    out_path = outdir / "all_results_heatmap.png"
+    fig.colorbar(im, ax=ax, label="Score", fraction=0.02, pad=0.02)
     plt.tight_layout()
+    out_path = outdir / "all_results_heatmap_combined.png"
     plt.savefig(out_path, dpi=200)
     plt.close()
-    print(f"[OK] Saved: {out_path.resolve()}")
+    print(f"[OK] Saved Combined Heatmap: {out_path.resolve()}")
 
 
 # ----------------------------
-# Main
+# Main Logic
 # ----------------------------
-def main() -> None:
-    in_path = INPUT_PATH
-    outdir = OUTDIR
 
-    if not in_path.exists():
-        raise FileNotFoundError(f"Input JSON not found: {in_path.resolve()}")
 
-    ensure_outdir(outdir)
-    data: Dict[str, Any] = json.loads(in_path.read_text(encoding="utf-8"))
+def load_and_preprocess(path: Path) -> List[dict]:
+    if not path.exists():
+        print(f"[Warn] File not found: {path}")
+        return []
 
+    data = json.loads(path.read_text(encoding="utf-8"))
     rows = []
     for k, metrics in data.items():
         rk = parse_run_key(k)
         module = normalize_module(rk.module)
-
-        if not isinstance(metrics, dict):
-            raise ValueError(
-                f"Metrics value must be dict, got {type(metrics)} for key={k}"
-            )
-
         for metric_name, value in metrics.items():
+            # 這裡動態把指標名稱轉小寫，並把底線換成空格
+            clean_metric_name = metric_name.lower().replace("_", " ")
             rows.append({
                 "model": rk.model,
                 "retrieval": rk.retrieval,
                 "module": module,
-                "metric": metric_name,
+                "metric": clean_metric_name,
                 "value": float(value),
-                "raw_key": k,
             })
+    return rows
 
-    df = pd.DataFrame(rows)
 
-    csv_path = outdir / "results_flat.csv"
-    df.to_csv(csv_path, index=False, encoding="utf-8-sig")
-    print(f"[OK] Wrote: {csv_path.resolve()}")
+def main() -> None:
+    ensure_outdir(OUTDIR)
 
-    retrieval_order = ["lexical", "vector", "hybrid"]
-    metric_order = [
-        "answer_relevancy",
-        "answer_correctness",
-        "context_precision",
-        "context_recall",
+    ragas_rows = load_and_preprocess(RAGAS_INPUT_PATH)
+    trad_rows = load_and_preprocess(TRAD_INPUT_PATH)
+
+    if not ragas_rows and not trad_rows:
+        print("No data found to plot.")
+        return
+
+    df = pd.DataFrame(ragas_rows + trad_rows)
+
+    # 修改這裡的名稱以匹配轉換後的乾淨格式
+    ragas_metrics = [
+        "answer relevancy",
+        "answer correctness",
+        "context precision",
+        "context recall",
         "faithfulness",
     ]
+    trad_metrics = [
+        "precision",
+        "recall",
+        "f1 score",
+        "rouge-1",
+        "rouge-l",
+        "bertscore",
+    ]
+    all_metrics = ragas_metrics + trad_metrics
+
+    retrieval_order = ["lexical", "vector", "hybrid"]
     module_order = ["baseline", "rerank", "rewrite", "rerank+rewrite"]
 
-    plot_by_retrieval_lines_dataset_over_metrics(
-        df=df,
-        outdir=outdir,
-        retrieval_order=retrieval_order,
-        metric_order=metric_order,
-        module_order=module_order,
+    plot_by_retrieval_lines(
+        df, OUTDIR, retrieval_order, ragas_metrics, module_order, "RAGAS"
     )
-
-    plot_one_heatmap(
-        df=df,
-        outdir=outdir,
-        metric_order=metric_order,
-        retrieval_order=retrieval_order,
-        module_order=module_order,
+    plot_by_retrieval_lines(
+        df, OUTDIR, retrieval_order, trad_metrics, module_order, "Traditional"
     )
+    plot_one_heatmap(df, OUTDIR, all_metrics, retrieval_order, module_order)
 
-    print(f"[OK] Input: {in_path.resolve()}")
-    print(f"[OK] Charts saved under: {outdir.resolve()}")
+    print(f"\n✨ All charts saved under: {OUTDIR.resolve()}")
 
 
 if __name__ == "__main__":
