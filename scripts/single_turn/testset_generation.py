@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import re
@@ -278,11 +279,15 @@ if os.path.exists(csv_path):
                 })
 
 # ==========================================
-# 6. 合併匯出
+# 6. 合併匯出 (只輸出 JSON)
 # ==========================================
+logger.info("================ 輸出結果 ================")
 if combined_test_set:
-    df_combined = pd.DataFrame(combined_test_set)
-    df_combined[["type", "question", "answer", "source"]].to_csv(
-        "data/testset/rag_testset.csv", index=False, encoding="utf-8-sig"
-    )
-    logger.info(f"✅ 生成完成！總計 {len(df_combined)} 筆測試資料")
+    json_path = "data/testset/rag_testset.json"
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(combined_test_set, f, ensure_ascii=False, indent=2)
+
+    logger.info(f"✅ 生成完成！總計 {len(combined_test_set)} 筆測試資料")
+    logger.info(f"檔案已儲存至: {json_path}")
+else:
+    logger.error("❌ 未能生成任何有效的測試集資料。")

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import time
 from typing import Any, Callable, List, Optional, Protocol
 
@@ -81,22 +82,43 @@ class RewriteService:
             self._use_summary_default if use_summary is None else bool(use_summary)
         )
 
+        # 簡單判定是否為中文 (若包含中文字元則為中文，否則視為英文)
+        is_chinese = bool(re.search(r"[\u4e00-\u9fff]", user_query))
+
         summary_context = ""
         used_summary = False
         if use_sum and (snapshot.summary or "").strip():
             used_summary = True
-            summary_context = f"【長期對話摘要】：{snapshot.summary.strip()}\n"
+            if is_chinese:
+                summary_context = f"【長期對話摘要】：{snapshot.summary.strip()}\n"
+            else:
+                summary_context = f"[Long-term Summary]: {snapshot.summary.strip()}\n"
 
-        system_prompt = (
-            "你是一個對話上下文解析器。"
-            f"{summary_context}"
-            "請參考上下文，將「最新使用者問題」補全省略的主詞或受詞，改寫為單一且完整的問句。"
-            "【重要約束】"
-            "1. 保持原意：不更改使用者問題的原始意圖或意思。"
-            "2. 簡潔精確：不要過度解釋名詞定義。"
-            "3. 只輸出改寫後的問題，不要回答。"
-            "4. 輸出必須使用繁體中文。"
-        )
+        # 根據語言動態切換 System Prompt
+        if is_chinese:
+            system_prompt = (
+                "你是一個專業的查詢改寫器 (Query Rewriter)。\n"
+                f"{summary_context}"
+                "請根據歷史對話，判斷使用者的「最新問題」是否缺少主詞、受詞或上下文。\n"
+                "【改寫規則】\n"
+                "1. 補全缺失：若問題包含代名詞 (例如：它、這個) 或明顯省略了前文提過的資訊，請用歷史對話將其替換為具體名詞，使其成為獨立且完整的問句。\n"
+                "2. 獨立話題不干擾 (極重要)：若最新問題是一個「全新話題」，或本身語意已經非常完整，請【原封不動】輸出原問題，絕對不要強加前文的不相關條件。\n"
+                "3. 鎖定關鍵字：必須極度忠於原句的用詞，盡可能保留原問句中的專有名詞與核心動詞，禁止自創同義詞替換。\n"
+                "4. 語言一致：改寫後的語言必須與「最新問題」完全相同 (繁體中文)。\n"
+                "5. 格式限制：不要回答問題，只准輸出改寫後的單一問句，禁止任何解釋或前言。"
+            )
+        else:
+            system_prompt = (
+                "You are a professional Query Rewriter.\n"
+                f"{summary_context}"
+                "Based on the conversation history, determine if the user's 'latest question' lacks a subject, object, or context.\n"
+                "[Rewrite Rules]\n"
+                "1. Resolve Coreferences: If the question contains pronouns (e.g., it, they) or omits previously mentioned context, replace them with specific nouns from the history to make it a standalone, complete question.\n"
+                "2. Isolate New Topics (Crucial): If the latest question introduces a 'completely new topic' or is already semantically complete, output the original question EXACTLY AS IS. Do not forcefully add irrelevant conditions from the history.\n"
+                "3. Lock Keywords: Strictly adhere to the original wording. Retain proper nouns and core verbs. Do not invent synonyms.\n"
+                "4. Language Consistency: The output must be in the exact same language as the 'latest question' (English).\n"
+                "5. Format Constraint: Do not answer the question. Only output the single rewritten question. No explanations, no conversational filler."
+            )
 
         t_fmt = time.perf_counter()
         messages = self._prompt_tpl.format_messages(

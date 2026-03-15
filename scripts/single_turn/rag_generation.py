@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import Any, Dict, List
 from uuid import UUID
 
-import pandas as pd
 from dotenv import load_dotenv
 from langchain_ollama import OllamaEmbeddings
 
@@ -60,8 +59,8 @@ RETRIEVAL_MODES: List[str] = [
 
 DATASET_CONFIG: Dict[str, Dict[str, str]] = {
     "rag_testset": {
-        "path": "./data/testset/rag_testset.csv",
-        "bot_uuid": "3a4d2c72-7ba4-47e8-8ebd-1aab455ee91e",
+        "path": "./data/testset/rag_testset.json",
+        "bot_uuid": "a6e042eb-7889-4bcb-996c-1845d2215fc2",
     },
 }
 
@@ -80,11 +79,15 @@ def _score_threshold_for_mode(mode: str) -> float:
     return 0.0
 
 
+# 讀取測試資料的邏輯改為解析 JSON
 def load_test_data(path: str) -> List[Dict[str, str]]:
-    df = pd.read_csv(path)
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
     test_data = []
-    for _, row in df.iterrows():
-        q, a = str(row.get("question", "")).strip(), str(row.get("answer", "")).strip()
+    for row in data:
+        q = str(row.get("question", "")).strip()
+        a = str(row.get("answer", "")).strip()
         if q and a and q.lower() != "nan":
             test_data.append({"question": q, "ground_truth": a})
     return test_data
@@ -182,7 +185,9 @@ def main():
     load_dotenv()
     embeddings = OllamaEmbeddings(model=OLLAMA_EMBED_NAME, base_url=OLLAMA_BASE_URL)
     rag, rs = build_services(embeddings)
-    out_dir = Path("./data/eval_dataset")
+
+    # 輸出資料夾改為 single_turn
+    out_dir = Path("./data/eval_dataset/single_turn")
     out_dir.mkdir(parents=True, exist_ok=True)
 
     for d_key, cfg in DATASET_CONFIG.items():
@@ -195,9 +200,10 @@ def main():
                 for exp in EXPERIMENTS:
                     print(f"\n>>> Running: {mode} | {exp.name} | {model}")
                     results = []
+
+                    # 重新加回 TXT log 檔案的邏輯
                     log_path = out_dir / f"runlog_{model}_{d_key}_{mode}_{exp.name}.txt"
 
-                    # 使用 with 打開 Log 檔案
                     with log_path.open("w", encoding="utf-8") as log_f:
                         for idx, item in enumerate(test_data):
                             t0 = time.perf_counter()
@@ -230,9 +236,9 @@ def main():
                                 "ground_truth": gt,
                             })
 
-                            # 組合即時 Log 訊息
+                            # 組合即時 Log 訊息並輸出到終端機
                             msg = f"[{idx + 1}/{len(test_data)}] {dur:.2f}s | Q: {item['question']}\n"
-                            msg += f"GT: {gt}\n"  # 新增顯示 Ground Truth
+                            msg += f"GT: {gt}\n"
                             msg += "Hits:\n"
                             msg += (
                                 "\n".join(_preview_hit(h) for h in hits[:3])
@@ -240,11 +246,9 @@ def main():
                                 + "-" * 50
                                 + "\n"
                             )
-
-                            # 輸出到終端機
                             print(msg)
 
-                            # 寫入檔案並強制 Flush (達成邊跑邊寫)
+                            # 寫入 Log 檔案並強制 Flush (邊跑邊寫)
                             log_f.write(msg + "\n")
                             log_f.flush()
 

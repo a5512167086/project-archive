@@ -1,0 +1,2402 @@
+{
+  "sess_0001": [
+    {
+      "session_id": "sess_0001",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What are cookies?",
+      "answer": "A cookie is a file that is downloaded to your computer when you access certain websites.",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "Cookies Policy In compliance with Law 34/2002, dated 11 July, on information society services and electronic commerce , DAEDO, SL, informs its users of the use of cookies to improve the service provided. What are cookies? A cookie is a file that is downloaded to your computer when you access certain websites. Cookies allow a website, among other things, to store and retrieve information about the browsing habits of a user or their computer so that, depending on the"
+    },
+    {
+      "session_id": "sess_0001",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can they store information about my browsing habits?",
+      "answer": "Cookies allow a website, among other things, to store and retrieve information about the browsing habits of a user or their computer so that, depending on the",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "Cookies Policy In compliance with Law 34/2002, dated 11 July, on information society services and electronic commerce , DAEDO, SL, informs its users of the use of cookies to improve the service provided. What are cookies? A cookie is a file that is downloaded to your computer when you access certain websites. Cookies allow a website, among other things, to store and retrieve information about the browsing habits of a user or their computer so that, depending on the"
+    },
+    {
+      "session_id": "sess_0001",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Can I cancel my order after it's placed?",
+      "answer": "We can only cancel an order if it hasn’t passed the picking stage, which typically happens within an hour of placing it.",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "【常見問題】\n使用者提問：Can I cancel or make changes to my order after I've placed it?\n官方解答：We can only cancel an order if it hasn’t passed the picking stage, which typically happens within an hour of placing it. To request a cancellation, please contact Customer Service via the contact form. You’ll receive a confirmation email once it’s processed. You may cancel the entire order or specific items. Unfortunately, we cannot modify or add items to an order once it has been placed. Once processed, you’ll receive a dispatch confirmation email. If an item is unsuitable upon delivery, please follow the returns instructions on your invoice. For more details, visit our After Sales section or check our Daedo International Terms and Conditions."
+    }
+  ],
+  "sess_0002": [
+    {
+      "session_id": "sess_0002",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What type of cookies does this website use?",
+      "answer": "Technical cookies",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "browsing habits of a user or their computer so that, depending on the type of browsing, they can offer a better service through the website. What type of cookies does this website use and what are their purposes? ● Technical cookies: These are those that allow the user to browse through a website, platform or application and use the different options or services that exist on it such as, for example, controlling traffic and data communication, identifying the"
+    },
+    {
+      "session_id": "sess_0002",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "And what are their purposes?",
+      "answer": "These are those that allow the user to browse through a website, platform or application and use the different options or services that exist on it such as, for example, controlling traffic and data communication, identifying the",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "browsing habits of a user or their computer so that, depending on the type of browsing, they can offer a better service through the website. What type of cookies does this website use and what are their purposes? ● Technical cookies: These are those that allow the user to browse through a website, platform or application and use the different options or services that exist on it such as, for example, controlling traffic and data communication, identifying the"
+    },
+    {
+      "session_id": "sess_0002",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "I forgot my account password. How can I reset it?",
+      "answer": "If you forget your password, please contact Customer Services for a reset.",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "【常見問題】\n使用者提問：I forgot my account password. How can I reset it?\n官方解答：If you forget your password, please contact Customer Services for a reset. Once your password has been reset, you can create a new one at your convenience in the My Account section."
+    }
+  ],
+  "sess_0003": [
+    {
+      "session_id": "sess_0003",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What are analysis cookies used for?",
+      "answer": "These cookies allow the party responsible for them to monitor and analyse the behaviour of the users of the websites to which they are linked.",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "broadcasting of videos or sound or sharing content through social networks. ● Analysis cookies: These cookies allow the party responsible for them to monitor and analyse the behaviour of the users of the websites to which they are linked. The information collected through this type of cookies is used to measure the activity of the websites, application or platform and for the elaboration of browsing profiles of the users of these sites, applications and"
+    },
+    {
+      "session_id": "sess_0003",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "How is the information collected through that used?",
+      "answer": "The information collected through this type of cookies is used to measure the activity of the websites, application or platform and for the elaboration of browsing profiles of the users of these sites, applications and",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "broadcasting of videos or sound or sharing content through social networks. ● Analysis cookies: These cookies allow the party responsible for them to monitor and analyse the behaviour of the users of the websites to which they are linked. The information collected through this type of cookies is used to measure the activity of the websites, application or platform and for the elaboration of browsing profiles of the users of these sites, applications and"
+    },
+    {
+      "session_id": "sess_0003",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What should users do if they find an issue with content on this Website?",
+      "answer": "they are requested to notify us so that appropriate corrective measures may be taken.",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "through this Website, they are requested to notify us so that appropriate corrective measures may be taken. 4. Website Content and Liability The Website provides general information about DAEDO BARCELONA and its products and services. Such information does not constitute a professional, commercial, or contractual relationship with the user. DAEDO BARCELONA reserves the right to modify, suspend, or remove, at any time and without prior notice, the presentation, configuration,"
+    }
+  ],
+  "sess_0004": [
+    {
+      "session_id": "sess_0004",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Where can I find information about the cookies used by Instagram?",
+      "answer": "https://help.instagram.com/1896641480634370?ref=ig",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "based on the analysis of the usage data of the users of the service. ● Facebook: https://www.facebook.com/policies/cookies/ ● Twitter: https://twitter.com/es/privacy ● Instagram: https://help.instagram.com/1896641480634370?ref=ig ● YouTube: https://policies.google.com/privacy?hl=es-419&gl=mx ● Pinterest: https://policy.pinterest.com/es/privacy-policy ● LinkedIn: https://www.linkedin.com/legal/cookie-policy?trk=hp-cookies Table of Cookies used by this website The table below summarises the cookies used by this website:"
+    },
+    {
+      "session_id": "sess_0004",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "And that policy for Twitter?",
+      "answer": "https://twitter.com/es/privacy",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "based on the analysis of the usage data of the users of the service. ● Facebook: https://www.facebook.com/policies/cookies/ ● Twitter: https://twitter.com/es/privacy ● Instagram: https://help.instagram.com/1896641480634370?ref=ig ● YouTube: https://policies.google.com/privacy?hl=es-419&gl=mx ● Pinterest: https://policy.pinterest.com/es/privacy-policy ● LinkedIn: https://www.linkedin.com/legal/cookie-policy?trk=hp-cookies Table of Cookies used by this website The table below summarises the cookies used by this website:"
+    },
+    {
+      "session_id": "sess_0004",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What personal data is collected when I use the web contact form on JAE HUN PARK LEE SL's website?",
+      "answer": "the personal data collected through this form will be used to inform you about the services you have requested",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "we process in the course of our business activities. JAE HUN PARK LEE SL collects the following personal data for the purposes set out below: a) Web contact form: the personal data collected through this form will be used to inform you about the services you have requested. b) Online purchases: in case you buy any of our products, your personal data will be used for the administrative management related to the purchased product. This involves from the invoicing of the"
+    }
+  ],
+  "sess_0005": [
+    {
+      "session_id": "sess_0005",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What is the purpose of PHPSESSID?",
+      "answer": "Functional",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "Name Purpose Responsible Duration Description PHPSESSID Functional Daedo.com Persistent Used to maintain information about the user's session. sf_redirect Functional Daedo.com Persistent Used to redirect to the user's session PrestaShop-# Functional Daedo.com Persistent Stores related data about your current session on the website. _atuvc Functional AddThis 13 months Stores the count of times shared on the site __atuvs Functional AddThis 1 year Stores the shares performed on the website. _ga"
+    },
+    {
+      "session_id": "sess_0005",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "How long does it last?",
+      "answer": "Persistent",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "Name Purpose Responsible Duration Description PHPSESSID Functional Daedo.com Persistent Used to maintain information about the user's session. sf_redirect Functional Daedo.com Persistent Used to redirect to the user's session PrestaShop-# Functional Daedo.com Persistent Stores related data about your current session on the website. _atuvc Functional AddThis 13 months Stores the count of times shared on the site __atuvs Functional AddThis 1 year Stores the shares performed on the website. _ga"
+    },
+    {
+      "session_id": "sess_0005",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Can I unsubscribe from promotional communications?",
+      "answer": "You may unsubscribe at any time by contacting our Customer Service team.",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "Marketing Communications When registering, you may opt to receive promotional communications and special offers. You may unsubscribe at any time by contacting our Customer Service team. International Data Transfers We do not transfer personal data outside the European Economic Area (EEA) unless: ● You are located outside the EEA, and ● Such transfer is necessary to deliver your order, process payments or refunds, or send subscribed promotional communications. Cookies"
+    }
+  ],
+  "sess_0006": [
+    {
+      "session_id": "sess_0006",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What is the purpose of the _ga cookie?",
+      "answer": "_ga Used to distinguish users",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "Functional AddThis 1 year Stores the shares performed on the website. _ga Statistics Google Analytics 2 years Used to distinguish users _ga_# Statistics Google Analytics 2 years Used to maintain session status"
+    },
+    {
+      "session_id": "sess_0006",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "And what about that one with a similar name, _ga_#?",
+      "answer": "_ga_# Used to maintain session status",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "Functional AddThis 1 year Stores the shares performed on the website. _ga Statistics Google Analytics 2 years Used to distinguish users _ga_# Statistics Google Analytics 2 years Used to maintain session status"
+    },
+    {
+      "session_id": "sess_0006",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Can I cancel my order if it's been more than an hour since placing it?",
+      "answer": "We can only cancel an order if it hasn’t passed the picking stage, which typically happens within an hour of placing it.",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "【常見問題】\n使用者提問：Can I cancel or make changes to my order after I've placed it?\n官方解答：We can only cancel an order if it hasn’t passed the picking stage, which typically happens within an hour of placing it. To request a cancellation, please contact Customer Service via the contact form. You’ll receive a confirmation email once it’s processed. You may cancel the entire order or specific items. Unfortunately, we cannot modify or add items to an order once it has been placed. Once processed, you’ll receive a dispatch confirmation email. If an item is unsuitable upon delivery, please follow the returns instructions on your invoice. For more details, visit our After Sales section or check our Daedo International Terms and Conditions."
+    }
+  ],
+  "sess_0007": [
+    {
+      "session_id": "sess_0007",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Can I delete cookies from my browser?",
+      "answer": "You can allow, block or delete cookies installed on your computer by configuring the options of the browser installed on your computer.",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "_gat Statistics Google Analytics 1 minute Used to limit the percentage of requests _gcl_au Marketing Google Adsense Persistent Used to track ads on the website. _gid Statistics Google Analytics 1 day Used to distinguish users. Allowing, blocking or deleting cookies You can allow, block or delete cookies installed on your computer by configuring the options of the browser installed on your computer. You can learn more about how to delete or block cookies from your browser at:"
+    },
+    {
+      "session_id": "sess_0007",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "How do I configure that?",
+      "answer": "You can learn more about how to delete or block cookies from your browser at:",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "_gat Statistics Google Analytics 1 minute Used to limit the percentage of requests _gcl_au Marketing Google Adsense Persistent Used to track ads on the website. _gid Statistics Google Analytics 1 day Used to distinguish users. Allowing, blocking or deleting cookies You can allow, block or delete cookies installed on your computer by configuring the options of the browser installed on your computer. You can learn more about how to delete or block cookies from your browser at:"
+    },
+    {
+      "session_id": "sess_0007",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What happens if someone misuses the website?",
+      "answer": "DAEDO BARCELONA reserves the right to suspend website access in case of misuse and will cooperate with authorities if necessary.",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "DAEDO BARCELONA reserves the right to suspend website access in case of misuse and will cooperate with authorities if necessary. SIXTH. COPYRIGHT AND TRADEMARK All website content is protected by copyright. Use, reproduction, or distribution is prohibited without express permission. Trademarks belong to their respective owners. SEVENTH. JURISDICTION AND APPLICABLE LAW"
+    }
+  ],
+  "sess_0008": [
+    {
+      "session_id": "sess_0008",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "How can I disable cookies in Chrome?",
+      "answer": "Disable cookies in Chrome: https://support.google.com/chrome/answer/95647?hl=es",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "You can learn more about how to delete or block cookies from your browser at: ● Disable cookies in Chrome: https://support.google.com/chrome/answer/95647?hl=es ● Disable cookies in Firefox: https://support.mozilla.org/es/kb/habilitar-y-deshabilitar-cookies-sitios-web-rastrear-preferencias ● Disable cookies in Internet Explorer: http://windows.microsoft.com/es-es/windows-vista/block-or-allow-cookies ● Disable cookies in Safari: https://support.apple.com/es-es/guide/safari/sfri11471/mac"
+    },
+    {
+      "session_id": "sess_0008",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "And for Firefox?",
+      "answer": "Disable cookies in Firefox: https://support.mozilla.org/es/kb/habilitar-y-deshabilitar-cookies-sitios-web-rastrear-preferencias",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "You can learn more about how to delete or block cookies from your browser at: ● Disable cookies in Chrome: https://support.google.com/chrome/answer/95647?hl=es ● Disable cookies in Firefox: https://support.mozilla.org/es/kb/habilitar-y-deshabilitar-cookies-sitios-web-rastrear-preferencias ● Disable cookies in Internet Explorer: http://windows.microsoft.com/es-es/windows-vista/block-or-allow-cookies ● Disable cookies in Safari: https://support.apple.com/es-es/guide/safari/sfri11471/mac"
+    },
+    {
+      "session_id": "sess_0008",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What is the purpose of DAEDO BARCELONA's Privacy Policy?",
+      "answer": "The following Privacy Policy sets out the terms on which we will treat personal data at DAEDO BARCELONA",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "Purpose What do we use the data for? The following Privacy Policy sets out the terms on which we will treat personal data at DAEDO BARCELONA ; this includes any personal data collected through our website https://www.daedo.com/, as well as any other data we process in the course of our business activities. DAEDO BARCELONA"
+    }
+  ],
+  "sess_0009": [
+    {
+      "session_id": "sess_0009",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "How do I disable cookies in Safari?",
+      "answer": "https://support.apple.com/es-es/guide/safari/sfri11471/mac",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "● Disable cookies in Safari: https://support.apple.com/es-es/guide/safari/sfri11471/mac If you have any questions about our cookies policy, please contact ecommerce@daedo.com"
+    },
+    {
+      "session_id": "sess_0009",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can you tell me more about that policy?",
+      "answer": "If you have any questions about our cookies policy, please contact ecommerce@daedo.com",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "● Disable cookies in Safari: https://support.apple.com/es-es/guide/safari/sfri11471/mac If you have any questions about our cookies policy, please contact ecommerce@daedo.com"
+    },
+    {
+      "session_id": "sess_0009",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "How do I place an order and checkout?",
+      "answer": "After adding items to your shopping cart, you can adjust the quantity by entering your desired amount in the Quantity field.",
+      "source_file_a": "cookies_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "【常見問題】\n使用者提問：How do I place an order and checkout?\n官方解答：After adding items to your shopping cart, you can adjust the quantity by entering your desired amount in the Quantity field. The cart icon in the upper right corner will update to show the total number of items. Hover over it to quickly remove items if needed. Click \"Proceed to Checkout\" to go to the Shipping Confirmation page, where you can select the correct delivery and billing address. Please ensure the billing address matches the one registered with your payment card. Your payment covers only the product cost and shipping fees. Customs duties and taxes are not included, as they vary by country. If ordering from outside the European Union, additional taxes may apply. To check limits and tax-free allowances, contact your local customs office or UPS, Daedo’s international shipping provider. Once you have selected your delivery method, click \"Proceed to Payment\" to complete your order on the Payment Page."
+    }
+  ],
+  "sess_0010": [
+    {
+      "session_id": "sess_0010",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Who is the website owner?",
+      "answer": "Jae Hun Park Lee S.L. (hereinafter, “DAEDO BARCELONA”)",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "Legal Notice If you have any questions or doubts related to this Legal Notice, please contact us at ecommerce@daedo.com. 1. Legal Information In compliance with Article 10 of Law 34/2002, of 11 July, on Information Society Services and Electronic Commerce (LSSI-CE), the following information is provided: Website Owner: Jae Hun Park Lee S.L. (hereinafter, “DAEDO BARCELONA”) Registered Address: Calle Balmes 55 08007 Barcelona, Spain Tax Identification Number (CIF): B-23974512 Email:"
+    },
+    {
+      "session_id": "sess_0010",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "What's their registered address?",
+      "answer": "Calle Balmes 55 08007 Barcelona, Spain",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "Legal Notice If you have any questions or doubts related to this Legal Notice, please contact us at ecommerce@daedo.com. 1. Legal Information In compliance with Article 10 of Law 34/2002, of 11 July, on Information Society Services and Electronic Commerce (LSSI-CE), the following information is provided: Website Owner: Jae Hun Park Lee S.L. (hereinafter, “DAEDO BARCELONA”) Registered Address: Calle Balmes 55 08007 Barcelona, Spain Tax Identification Number (CIF): B-23974512 Email:"
+    },
+    {
+      "session_id": "sess_0010",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "How much is the shipping fee for orders over 199.90€ in Spain (Baleares)?",
+      "answer": "13.50€",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "Shipping fees 1. Spain (National) 5.50€ for any orders under 199.90€. 6.50€ for any orders over 199.90€. 2. Spain (Baleares) 11.50€ for any orders under 199.90€. 13.50€ for any orders over 199.90€. 3. Spain (Canarias, Ceuta y Melilla) 12.50€ for any orders under 199.90€. 13.50€ for any orders over 199.90€. 4. For countries in the EU as listed below, the shipping fee will be: 13.50€ for any orders under 199.90€. 16.50 for any orders over 199.90€. 5. For international shipping countries listed below, the"
+    }
+  ],
+  "sess_0011": [
+    {
+      "session_id": "sess_0011",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What is the company registration information for Daedo Barcelona?",
+      "answer": "Registered on sheet B-645135, volume IRUS: 1000461573877, folio 0.",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "refund_and_return_policy.pdf",
+      "context_used": "55 08007 Barcelona, Spain Tax Identification Number (CIF): B-23974512 Email: ecommerce@daedo.com Company Registration: Registered on sheet B-645135, volume IRUS: 1000461573877, folio 0. 2. Terms of Use These terms and conditions govern access to and use of the Daedo Barcelona website (the “Website”). Please read them carefully before accessing or using the Website and/or placing any orders. By accessing the Website and/or placing an order, you agree to be bound by these terms and"
+    },
+    {
+      "session_id": "sess_0011",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can you provide the CIF number for that?",
+      "answer": "B-23974512",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "refund_and_return_policy.pdf",
+      "context_used": "55 08007 Barcelona, Spain Tax Identification Number (CIF): B-23974512 Email: ecommerce@daedo.com Company Registration: Registered on sheet B-645135, volume IRUS: 1000461573877, folio 0. 2. Terms of Use These terms and conditions govern access to and use of the Daedo Barcelona website (the “Website”). Please read them carefully before accessing or using the Website and/or placing any orders. By accessing the Website and/or placing an order, you agree to be bound by these terms and"
+    },
+    {
+      "session_id": "sess_0011",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "How long does it take to get a refund processed?",
+      "answer": "Please allow 5 to 10 business days for the amount to reflect, depending on your bank or card provider.",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "refund_and_return_policy.pdf",
+      "context_used": "● Your refund will be issued to the original payment method. ● Please allow 5 to 10 business days for the amount to reflect, depending on your bank or card provider. 4. Exchanges We do not process automatic exchanges. If you wish to change the size or item, we recommend placing a new order once your refund is completed. This helps ensure that both delivery and return are handled accurately and efficiently."
+    }
+  ],
+  "sess_0012": [
+    {
+      "session_id": "sess_0012",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What happens if I don't agree to the terms and conditions?",
+      "answer": "please refrain from using the Website",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "terms and conditions. If you do not agree, please refrain from using the Website. 3. Intellectual and Industrial Property All content on this Website, including but not limited to texts, images, logos, designs, and graphics, is the property of DAEDO BARCELONA and is protected by applicable intellectual and industrial property laws."
+    },
+    {
+      "session_id": "sess_0012",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "And what about it for content on the site?",
+      "answer": "is protected by applicable intellectual and industrial property laws",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "terms and conditions. If you do not agree, please refrain from using the Website. 3. Intellectual and Industrial Property All content on this Website, including but not limited to texts, images, logos, designs, and graphics, is the property of DAEDO BARCELONA and is protected by applicable intellectual and industrial property laws."
+    },
+    {
+      "session_id": "sess_0012",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Can you explain how analysis cookies are used?",
+      "answer": "The information collected through this type of cookies is used to measure the activity of the websites, application or platform and for the elaboration of browsing profiles of the users of these sites, applications",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "broadcasting of videos or sound or sharing content through social networks. ● Analysis cookies: These cookies allow the party responsible for them to monitor and analyse the behaviour of the users of the websites to which they are linked. The information collected through this type of cookies is used to measure the activity of the websites, application or platform and for the elaboration of browsing profiles of the users of these sites, applications and"
+    }
+  ],
+  "sess_0013": [
+    {
+      "session_id": "sess_0013",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What should users do if they find errors on the website?",
+      "answer": "they are requested to notify us so that appropriate corrective measures may be taken",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "through this Website, they are requested to notify us so that appropriate corrective measures may be taken. 4. Website Content and Liability The Website provides general information about DAEDO BARCELONA and its products and services. Such information does not constitute a professional, commercial, or contractual relationship with the user. DAEDO BARCELONA reserves the right to modify, suspend, or remove, at any time and without prior notice, the presentation, configuration,"
+    },
+    {
+      "session_id": "sess_0013",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can you clarify what happens after that notification?",
+      "answer": "appropriate corrective measures may be taken",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "through this Website, they are requested to notify us so that appropriate corrective measures may be taken. 4. Website Content and Liability The Website provides general information about DAEDO BARCELONA and its products and services. Such information does not constitute a professional, commercial, or contractual relationship with the user. DAEDO BARCELONA reserves the right to modify, suspend, or remove, at any time and without prior notice, the presentation, configuration,"
+    },
+    {
+      "session_id": "sess_0013",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What are technical cookies used for on this website?",
+      "answer": "These are those that allow the user to browse through a website, platform or application and use the different options or services that exist on it",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "browsing habits of a user or their computer so that, depending on the type of browsing, they can offer a better service through the website. What type of cookies does this website use and what are their purposes? ● Technical cookies: These are those that allow the user to browse through a website, platform or application and use the different options or services that exist on it such as, for example, controlling traffic and data communication, identifying the"
+    }
+  ],
+  "sess_0014": [
+    {
+      "session_id": "sess_0014",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Can you tell me which law governs the terms of use for this website?",
+      "answer": "These terms of use are governed exclusively by Spanish law.",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "and without prior notice, the presentation, configuration, content, or services of the Website. 5. Applicable Law and Jurisdiction These terms of use are governed exclusively by Spanish law. All users of the Website, whether national or international, expressly submit to Spanish law and jurisdiction for the resolution of any disputes arising from use of the Website. 6. Product Use Disclaimer All products offered on this Website are intended for the practice of martial arts,"
+    },
+    {
+      "session_id": "sess_0014",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Does that mean all disputes will be resolved under Spanish jurisdiction?",
+      "answer": "All users of the Website, whether national or international, expressly submit to Spanish law and jurisdiction for the resolution of any disputes arising from use of the Website.",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "and without prior notice, the presentation, configuration, content, or services of the Website. 5. Applicable Law and Jurisdiction These terms of use are governed exclusively by Spanish law. All users of the Website, whether national or international, expressly submit to Spanish law and jurisdiction for the resolution of any disputes arising from use of the Website. 6. Product Use Disclaimer All products offered on this Website are intended for the practice of martial arts,"
+    },
+    {
+      "session_id": "sess_0014",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What is the purpose of PHPSESSID on this website?",
+      "answer": "Used to maintain information about the user's session.",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "Name Purpose Responsible Duration Description PHPSESSID Functional Daedo.com Persistent Used to maintain information about the user's session. sf_redirect Functional Daedo.com Persistent Used to redirect to the user's session PrestaShop-# Functional Daedo.com Persistent Stores related data about your current session on the website. _atuvc Functional AddThis 13 months Stores the count of times shared on the site __atuvs Functional AddThis 1 year Stores the shares performed on the website. _ga"
+    }
+  ],
+  "sess_0015": [
+    {
+      "session_id": "sess_0015",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Are DAEDO BARCELONA responsible for any damages from improper use?",
+      "answer": "DAEDO BARCELONA shall not be held responsible for any damages or consequences arising from improper or unsafe use of the products.",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "All products offered on this Website are intended for the practice of martial arts, sports, or related activities. DAEDO BARCELONA shall not be held responsible for any damages or consequences arising from improper or unsafe use of the products. SECURITY POLICY & PRIVACY"
+    },
+    {
+      "session_id": "sess_0015",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "What about injuries caused by that?",
+      "answer": "DAEDO BARCELONA shall not be held responsible for any damages or consequences arising from improper or unsafe use of the products.",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "All products offered on this Website are intended for the practice of martial arts, sports, or related activities. DAEDO BARCELONA shall not be held responsible for any damages or consequences arising from improper or unsafe use of the products. SECURITY POLICY & PRIVACY"
+    },
+    {
+      "session_id": "sess_0015",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Can you explain what analysis cookies are used for?",
+      "answer": "These cookies allow the party responsible for them to monitor and analyse the behaviour of the users of the websites to which they are linked.",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "broadcasting of videos or sound or sharing content through social networks. ● Analysis cookies: These cookies allow the party responsible for them to monitor and analyse the behaviour of the users of the websites to which they are linked. The information collected through this type of cookies is used to measure the activity of the websites, application or platform and for the elaboration of browsing profiles of the users of these sites, applications and"
+    }
+  ],
+  "sess_0016": [
+    {
+      "session_id": "sess_0016",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "How is my personal information treated when I provide it to you?",
+      "answer": "stored securely and treated as confidential",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "Customer security and data protection are of paramount importance to us. Below is an overview of our security and privacy practices. If you have any questions, please contact our Customer Service team. Any personal information you provide that allows you to be identified is stored securely and treated as confidential. All data is processed lawfully, fairly, and transparently, in accordance with applicable data protection regulations. Data Protection Measures"
+    },
+    {
+      "session_id": "sess_0016",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Is that in accordance with data protection regulations?",
+      "answer": "in accordance with applicable data protection regulations",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "Customer security and data protection are of paramount importance to us. Below is an overview of our security and privacy practices. If you have any questions, please contact our Customer Service team. Any personal information you provide that allows you to be identified is stored securely and treated as confidential. All data is processed lawfully, fairly, and transparently, in accordance with applicable data protection regulations. Data Protection Measures"
+    },
+    {
+      "session_id": "sess_0016",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What's the shipping fee for an order over 199.90€ to France?",
+      "answer": "49.90€",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "for any orders over 199.90€. 5. For international shipping countries listed below, the shipping fee will be: 29.90€ for any orders under 199.90€. 49.90€ for any orders over 199.90€. EU Countries: Belgium, France, Luxembourg, Netherlands, Andorra, Austria, Bulgaria,"
+    }
+  ],
+  "sess_0017": [
+    {
+      "session_id": "sess_0017",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What measures do you take to protect personal data?",
+      "answer": "We implement appropriate technical and organizational measures to protect personal data against unauthorized or unlawful processing, accidental loss, destruction, or damage.",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "accordance with applicable data protection regulations. Data Protection Measures We implement appropriate technical and organizational measures to protect personal data against unauthorized or unlawful processing, accidental loss, destruction, or damage. These measures include encryption in line with industry standards. Data Collection and Retention During your visit to our Website, we may collect personal information necessary for:"
+    },
+    {
+      "session_id": "sess_0017",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Do these include encryption?",
+      "answer": "These measures include encryption in line with industry standards.",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "accordance with applicable data protection regulations. Data Protection Measures We implement appropriate technical and organizational measures to protect personal data against unauthorized or unlawful processing, accidental loss, destruction, or damage. These measures include encryption in line with industry standards. Data Collection and Retention During your visit to our Website, we may collect personal information necessary for:"
+    },
+    {
+      "session_id": "sess_0017",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What happens if my order is returned to you?",
+      "answer": "If your order is returned to us, it will be automatically refunded, except for personalized items, which will be",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "country to country. We recommend contacting your local customs office for further information before placing your order. Missed or Returned Deliveries If the courier was unable to deliver your order, they may have left it with a neighbor or attempted delivery but couldn't obtain a signature. Check your tracking link from the dispatch confirmation email for details. If your order is returned to us, it will be automatically refunded, except for personalized items, which will be"
+    }
+  ],
+  "sess_0018": [
+    {
+      "session_id": "sess_0018",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What kind of personal information do you collect from users on your website?",
+      "answer": "personal information necessary for: ● Account creation ● Billing and payment processing ● Order delivery ● Customer support and inquiries",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "refund_and_return_policy.pdf",
+      "context_used": "During your visit to our Website, we may collect personal information necessary for: ● Account creation ● Billing and payment processing ● Order delivery ● Customer support and inquiries Your data is retained only for as long as necessary to: ● Process your orders ● Manage refunds ● Respond to complaints or feedback ● Send promotional communications to which you have subscribed Payment Information We do not store or have access to your financial or payment card information. Such data is transmitted"
+    },
+    {
+      "session_id": "sess_0018",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "How long is that data retained?",
+      "answer": "only for as long as necessary to: ● Process your orders ● Manage refunds ● Respond to complaints or feedback ● Send promotional communications to which you have subscribed",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "refund_and_return_policy.pdf",
+      "context_used": "During your visit to our Website, we may collect personal information necessary for: ● Account creation ● Billing and payment processing ● Order delivery ● Customer support and inquiries Your data is retained only for as long as necessary to: ● Process your orders ● Manage refunds ● Respond to complaints or feedback ● Send promotional communications to which you have subscribed Payment Information We do not store or have access to your financial or payment card information. Such data is transmitted"
+    },
+    {
+      "session_id": "sess_0018",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Are original shipping fees refundable if I return an item because of a change of mind?",
+      "answer": "Original shipping fees are non-refundable in case of returns due to change of mind.",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "refund_and_return_policy.pdf",
+      "context_used": "shipping costs will be deducted from your refund. ● Please note: Refunds apply only to the product price. Original shipping fees are non-refundable in case of returns due to change of mind. After the returned item has been received and inspected:"
+    }
+  ],
+  "sess_0019": [
+    {
+      "session_id": "sess_0019",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "How is my data handled when I make a payment?",
+      "answer": "data is transmitted securely and directly to our authorized payment service providers, who process it strictly under our instructions.",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "data is transmitted securely and directly to our authorized payment service providers, who process it strictly under our instructions. Data Sharing We provide your personal information electronically to our courier partners solely for the purpose of delivering your orders."
+    },
+    {
+      "session_id": "sess_0019",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "And how about sharing this with courier partners?",
+      "answer": "We provide your personal information electronically to our courier partners solely for the purpose of delivering your orders.",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "data is transmitted securely and directly to our authorized payment service providers, who process it strictly under our instructions. Data Sharing We provide your personal information electronically to our courier partners solely for the purpose of delivering your orders."
+    },
+    {
+      "session_id": "sess_0019",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Can you guide me on disabling cookies in Safari?",
+      "answer": "https://support.apple.com/es-es/guide/safari/sfri11471/mac",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "● Disable cookies in Safari: https://support.apple.com/es-es/guide/safari/sfri11471/mac If you have any questions about our cookies policy, please contact ecommerce@daedo.com"
+    }
+  ],
+  "sess_0020": [
+    {
+      "session_id": "sess_0020",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Can I unsubscribe from promotional communications?",
+      "answer": "You may unsubscribe at any time by contacting our Customer Service team.",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "Marketing Communications When registering, you may opt to receive promotional communications and special offers. You may unsubscribe at any time by contacting our Customer Service team. International Data Transfers We do not transfer personal data outside the European Economic Area (EEA) unless: ● You are located outside the EEA, and ● Such transfer is necessary to deliver your order, process payments or refunds, or send subscribed promotional communications. Cookies"
+    },
+    {
+      "session_id": "sess_0020",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "How do they handle international data transfers?",
+      "answer": "We do not transfer personal data outside the European Economic Area (EEA) unless:",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "Marketing Communications When registering, you may opt to receive promotional communications and special offers. You may unsubscribe at any time by contacting our Customer Service team. International Data Transfers We do not transfer personal data outside the European Economic Area (EEA) unless: ● You are located outside the EEA, and ● Such transfer is necessary to deliver your order, process payments or refunds, or send subscribed promotional communications. Cookies"
+    },
+    {
+      "session_id": "sess_0020",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What are cookies used for according to your policy?",
+      "answer": "Cookies allow a website, among other things, to store and retrieve information about the browsing habits of a user or their computer so that, depending on",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "Cookies Policy In compliance with Law 34/2002, dated 11 July, on information society services and electronic commerce , DAEDO, SL, informs its users of the use of cookies to improve the service provided. What are cookies? A cookie is a file that is downloaded to your computer when you access certain websites. Cookies allow a website, among other things, to store and retrieve information about the browsing habits of a user or their computer so that, depending on the"
+    }
+  ],
+  "sess_0021": [
+    {
+      "session_id": "sess_0021",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Can you explain how this website uses cookies?",
+      "answer": "Our Website uses cookies to recognize returning users and personalize browsing experiences.",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "refunds, or send subscribed promotional communications. Cookies Our Website uses cookies to recognize returning users and personalize browsing experiences. You may disable cookies at any time through your browser settings. External Links This Website may contain links to third-party websites with their own privacy policies. DAEDO BARCELONA is not responsible for the privacy practices or content of such external websites. Internet Risks Disclaimer"
+    },
+    {
+      "session_id": "sess_0021",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "How can I disable them?",
+      "answer": "You may disable cookies at any time through your browser settings.",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "refunds, or send subscribed promotional communications. Cookies Our Website uses cookies to recognize returning users and personalize browsing experiences. You may disable cookies at any time through your browser settings. External Links This Website may contain links to third-party websites with their own privacy policies. DAEDO BARCELONA is not responsible for the privacy practices or content of such external websites. Internet Risks Disclaimer"
+    },
+    {
+      "session_id": "sess_0021",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What are technical cookies and what do they allow?",
+      "answer": "These are those that allow the user to browse through a website, platform or application and use the different options or services that exist on it such as, for example, controlling traffic and data communication, identifying the",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "browsing habits of a user or their computer so that, depending on the type of browsing, they can offer a better service through the website. What type of cookies does this website use and what are their purposes? ● Technical cookies: These are those that allow the user to browse through a website, platform or application and use the different options or services that exist on it such as, for example, controlling traffic and data communication, identifying the"
+    }
+  ],
+  "sess_0022": [
+    {
+      "session_id": "sess_0022",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What risks are associated with providing personal information via the Internet?",
+      "answer": "you acknowledge the inherent risks associated with online communications.",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "practices or content of such external websites. Internet Risks Disclaimer By providing personal information via the Internet, you acknowledge the inherent risks associated with online communications. DAEDO BARCELONA shall not be held liable for data loss unless it results from a breach of our duty of care. Contact – Data Protection If you have any questions regarding the processing of your personal data or this privacy policy, you may contact our Data Protection Compliance"
+    },
+    {
+      "session_id": "sess_0022",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Is DAEDO BARCELONA liable for data loss due to these risks?",
+      "answer": "DAEDO BARCELONA shall not be held liable for data loss unless it results from a breach of our duty of care.",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "practices or content of such external websites. Internet Risks Disclaimer By providing personal information via the Internet, you acknowledge the inherent risks associated with online communications. DAEDO BARCELONA shall not be held liable for data loss unless it results from a breach of our duty of care. Contact – Data Protection If you have any questions regarding the processing of your personal data or this privacy policy, you may contact our Data Protection Compliance"
+    },
+    {
+      "session_id": "sess_0022",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Can DAEDO BARCELONA process my data for promotional purposes without consent?",
+      "answer": "We will only process your data for promotional purposes if you have given us your specific consent to do so.",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "for which they are intended. Customer data will be processed by DAEDO BARCELONA , for the fulfillment of the contractual relationship.We will only process your data for promotional purposes if you have given us your specific consent to do so. Notwithstanding the above, we will process your data for promotional purposes, provided that you are a customer, in accordance with DAEDO BARCELONA 's legitimate interest. Recipients Transfer of data to third parties"
+    }
+  ],
+  "sess_0023": [
+    {
+      "session_id": "sess_0023",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "How can I contact your Data Protection Compliance Officer?",
+      "answer": "you may contact our Data Protection Compliance Officer by writing to: DAEDO BARCELONA Calle Balmes 55 08007 Barcelona, Spain",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "privacy policy, you may contact our Data Protection Compliance Officer by writing to: DAEDO BARCELONA Calle Balmes 55 08007 Barcelona, Spain"
+    },
+    {
+      "session_id": "sess_0023",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can you provide the address for that?",
+      "answer": "DAEDO BARCELONA Calle Balmes 55 08007 Barcelona, Spain",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "privacy policy, you may contact our Data Protection Compliance Officer by writing to: DAEDO BARCELONA Calle Balmes 55 08007 Barcelona, Spain"
+    },
+    {
+      "session_id": "sess_0023",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What should I do before interacting with DAEDO on Social Networks?",
+      "answer": "We recommend that you read and periodically review these Social Networks before interacting with DAEDO.",
+      "source_file_a": "legal_notice.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "treated in accordance with the Privacy Policies of each Social Network. We recommend that you read and periodically review these Social Networks before interacting with DAEDO."
+    }
+  ],
+  "sess_0024": [
+    {
+      "session_id": "sess_0024",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Who is the company behind www.daedo.com?",
+      "answer": "JAE HUN PARK LEE SL (DAEDO BARCELONA)",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "Privacy Policy Company name ● Identity: JAE HUN PARK LEE SL (DAEDO BARCELONA) ● Postal address: Calle Balmes 55, 08007, SPAIN ● Email: ecommerce@daedo.com What do we use the data for? The following Privacy Policy sets out the terms on which we will treat personal data at JAE HUN PARK LEE SL ; this includes any personal data collected through our website www.daedo.com, as well as any other data we process in the course of our business activities. JAE HUN PARK LEE"
+    },
+    {
+      "session_id": "sess_0024",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "What's their postal address?",
+      "answer": "Calle Balmes 55, 08007, SPAIN",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "Privacy Policy Company name ● Identity: JAE HUN PARK LEE SL (DAEDO BARCELONA) ● Postal address: Calle Balmes 55, 08007, SPAIN ● Email: ecommerce@daedo.com What do we use the data for? The following Privacy Policy sets out the terms on which we will treat personal data at JAE HUN PARK LEE SL ; this includes any personal data collected through our website www.daedo.com, as well as any other data we process in the course of our business activities. JAE HUN PARK LEE"
+    },
+    {
+      "session_id": "sess_0024",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Can you provide the company registration details for Daedo Barcelona?",
+      "answer": "Registered on sheet B-645135, volume IRUS: 1000461573877, folio 0.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "55 08007 Barcelona, Spain Tax Identification Number (CIF): B-23974512 Email: ecommerce@daedo.com Company Registration: Registered on sheet B-645135, volume IRUS: 1000461573877, folio 0. 2. Terms of Use These terms and conditions govern access to and use of the Daedo Barcelona website (the “Website”). Please read them carefully before accessing or using the Website and/or placing any orders. By accessing the Website and/or placing an order, you agree to be bound by these terms and"
+    }
+  ],
+  "sess_0025": [
+    {
+      "session_id": "sess_0025",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What personal data do you collect through the web contact form?",
+      "answer": "the personal data collected through this form will be used to inform you about the services you have requested",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "we process in the course of our business activities. JAE HUN PARK LEE SL collects the following personal data for the purposes set out below: a) Web contact form: the personal data collected through this form will be used to inform you about the services you have requested. b) Online purchases: in case you buy any of our products, your personal data will be used for the administrative management related to the purchased product. This involves from the invoicing of the"
+    },
+    {
+      "session_id": "sess_0025",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "And what happens with that data after it's collected?",
+      "answer": "will be used to inform you about the services you have requested",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "we process in the course of our business activities. JAE HUN PARK LEE SL collects the following personal data for the purposes set out below: a) Web contact form: the personal data collected through this form will be used to inform you about the services you have requested. b) Online purchases: in case you buy any of our products, your personal data will be used for the administrative management related to the purchased product. This involves from the invoicing of the"
+    },
+    {
+      "session_id": "sess_0025",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Where can I find my tracking number to track my order?",
+      "answer": "You can track your order using a unique tracking reference number, which can be found in your order history or in your dispatch email, along with a link to the courier's tracking page",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "【常見問題】\n使用者提問：Where can I find my tracking number to track my order?\n官方解答：You can track your order using a unique tracking reference number, which can be found in your order history or in your dispatch email, along with a link to the courier's tracking page. If you need further assistance, please contact our Customer Service team, and we’ll be happy to help."
+    }
+  ],
+  "sess_0026": [
+    {
+      "session_id": "sess_0026",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What happens to my data after I purchase a product?",
+      "answer": "These data will also be included in our database to keep you updated of the news through our newsletter.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "related to the purchased product. This involves from the invoicing of the product to the delivery of your data to the transport companies contracted by JAE HUN PARK LEE SL to make deliveries to the place you have indicated. These data will also be included in our database to keep you updated of the news through our newsletter. c) Creation of a profile: in case you create a profile on our website, the data will be included in our database that we"
+    },
+    {
+      "session_id": "sess_0026",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Will that include updates on new products?",
+      "answer": "to keep you updated of the news through our newsletter.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "related to the purchased product. This involves from the invoicing of the product to the delivery of your data to the transport companies contracted by JAE HUN PARK LEE SL to make deliveries to the place you have indicated. These data will also be included in our database to keep you updated of the news through our newsletter. c) Creation of a profile: in case you create a profile on our website, the data will be included in our database that we"
+    },
+    {
+      "session_id": "sess_0026",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "How do I disable cookies in Safari?",
+      "answer": "https://support.apple.com/es-es/guide/safari/sfri11471/mac",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "● Disable cookies in Safari: https://support.apple.com/es-es/guide/safari/sfri11471/mac If you have any questions about our cookies policy, please contact ecommerce@daedo.com"
+    }
+  ],
+  "sess_0027": [
+    {
+      "session_id": "sess_0027",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Will my data be used for promotional purposes without my consent?",
+      "answer": "We will only process your data for promotional purposes if you have given us your specific consent to do so.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "We will only process your data for promotional purposes if you have given us your specific consent to do so. You will always have the option to revoke your consent to the processing of your data for these purposes. Transfer of data to third parties Your personal data will not be disclosed to third parties without your consent, unless JAE HUN PARK LEE SL is obliged by law to do so. Type of data processed"
+    },
+    {
+      "session_id": "sess_0027",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can I revoke that consent later?",
+      "answer": "You will always have the option to revoke your consent to the processing of your data for these purposes.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "We will only process your data for promotional purposes if you have given us your specific consent to do so. You will always have the option to revoke your consent to the processing of your data for these purposes. Transfer of data to third parties Your personal data will not be disclosed to third parties without your consent, unless JAE HUN PARK LEE SL is obliged by law to do so. Type of data processed"
+    },
+    {
+      "session_id": "sess_0027",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "I'm not getting any emails from you. How can I make sure they don't go to my spam folder?",
+      "answer": "add our email address to your safe sender list",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "【常見問題】\n使用者提問：I'm not receiving your emails. How can I make sure they don't go to my spam folder?\n官方解答：To prevent our emails from being marked as spam, add our email address to your safe sender list. This helps ensure our messages arrive in your inbox without issues. Each Internet Service Provider (ISP) uses spam filters to sort emails. By whitelisting our email, you can ensure you receive important updates from us."
+    }
+  ],
+  "sess_0028": [
+    {
+      "session_id": "sess_0028",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What rights do I have regarding my personal data processed by JAE HUN PARK LEE SL?",
+      "answer": "You have the right to ● Access to personal data. ● Rectify personal data. ● Delete personal data. ● File a complaint or a writ for the protection of your rights before the Spanish Data Protection Agency or before the autonomous data protection agency, in case it exists.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "JAE HUN PARK LEE SL is obliged by law to do so. Type of data processed ● Identfication data(name and surname). ● Contact data(email, telephone, address). In no case we will collect sensitive data. You have the right to ● Access to personal data. ● Rectify personal data. ● Delete personal data. ● File a complaint or a writ for the protection of your rights before the Spanish Data Protection Agency or before the autonomous data protection agency, in case it exists."
+    },
+    {
+      "session_id": "sess_0028",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can I rectify my personal data under that policy?",
+      "answer": "You have the right to ● Rectify personal data.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "JAE HUN PARK LEE SL is obliged by law to do so. Type of data processed ● Identfication data(name and surname). ● Contact data(email, telephone, address). In no case we will collect sensitive data. You have the right to ● Access to personal data. ● Rectify personal data. ● Delete personal data. ● File a complaint or a writ for the protection of your rights before the Spanish Data Protection Agency or before the autonomous data protection agency, in case it exists."
+    },
+    {
+      "session_id": "sess_0028",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What happens if DAEDO BARCELONA decides to modify or remove website content?",
+      "answer": "DAEDO BARCELONA reserves the right to modify, suspend, or remove, at any time and without prior notice, the presentation, configuration,",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "through this Website, they are requested to notify us so that appropriate corrective measures may be taken. 4. Website Content and Liability The Website provides general information about DAEDO BARCELONA and its products and services. Such information does not constitute a professional, commercial, or contractual relationship with the user. DAEDO BARCELONA reserves the right to modify, suspend, or remove, at any time and without prior notice, the presentation, configuration,"
+    }
+  ],
+  "sess_0029": [
+    {
+      "session_id": "sess_0029",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "How can I be informed about any security incidents that may affect my rights?",
+      "answer": "Be informed of any security incident that may affect your rights.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "Agency or before the autonomous data protection agency, in case it exists. ● Be informed of any security incident that may affect your rights. Information on data protection Company name Identity: Jae Hun Park Lee S.L. (hereinafter “ DAEDO BARCELONA ”). Dir. Calle Balmes 55, 08007, Barcelona Email: ecommerce@daedo.com"
+    },
+    {
+      "session_id": "sess_0029",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can you provide the email address for this policy?",
+      "answer": "Email: ecommerce@daedo.com",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "Agency or before the autonomous data protection agency, in case it exists. ● Be informed of any security incident that may affect your rights. Information on data protection Company name Identity: Jae Hun Park Lee S.L. (hereinafter “ DAEDO BARCELONA ”). Dir. Calle Balmes 55, 08007, Barcelona Email: ecommerce@daedo.com"
+    },
+    {
+      "session_id": "sess_0029",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What law governs these terms and how are disputes resolved?",
+      "answer": "These terms are governed by Spanish law. Disputes will be resolved in accordance with Law 34/2002 on Information Society Services and E-commerce.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "These terms are governed by Spanish law. Disputes will be resolved in accordance with Law 34/2002 on Information Society Services and E-commerce. EIGHTH. SEVERABILITY If any clause is declared invalid, the remaining provisions will remain in force. Important Note on Import Taxes and Duties All international orders and those sent to the Canary Islands, Ceuta, and Melilla may be subject to import duties, local taxes, or customs clearance fees, depending on the destination. These"
+    }
+  ],
+  "sess_0030": [
+    {
+      "session_id": "sess_0030",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What does DAEDO BARCELONA use personal data for?",
+      "answer": "The following Privacy Policy sets out the terms on which we will treat personal data at DAEDO BARCELONA",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "refund_and_return_policy.pdf",
+      "context_used": "Purpose What do we use the data for? The following Privacy Policy sets out the terms on which we will treat personal data at DAEDO BARCELONA ; this includes any personal data collected through our website https://www.daedo.com/, as well as any other data we process in the course of our business activities. DAEDO BARCELONA"
+    },
+    {
+      "session_id": "sess_0030",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Does it cover data collected through their website too?",
+      "answer": "this includes any personal data collected through our website https://www.daedo.com/",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "refund_and_return_policy.pdf",
+      "context_used": "Purpose What do we use the data for? The following Privacy Policy sets out the terms on which we will treat personal data at DAEDO BARCELONA ; this includes any personal data collected through our website https://www.daedo.com/, as well as any other data we process in the course of our business activities. DAEDO BARCELONA"
+    },
+    {
+      "session_id": "sess_0030",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "How do I get a return shipping label once my request is approved?",
+      "answer": "You will receive a return shipping label by email.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "refund_and_return_policy.pdf",
+      "context_used": "3. Return Process & Refunds Once your return request has been approved: ● You will receive a return shipping label by email. ● If courier pickup is available in your area, we’ll help schedule collection. ● If pickup is not available, please drop off your return at the nearest FedEx location using the provided label. ● Unless the return is due to an error on our part or a defective item, return shipping costs will be deducted from your refund."
+    }
+  ],
+  "sess_0031": [
+    {
+      "session_id": "sess_0031",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What personal data do you collect when I fill out the contact form?",
+      "answer": "the personal data collected through this form will be used exclusively to manage your request",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "collects the following personal data for the purposes set out below: a. Contact form: the personal data collected through this form will be used exclusively to manage your request.b. Online purchases: In case of purchasing any of our products, your personal data will be used exclusively for the administrative management related to the contracted service.c. Creation of a profile: the personal data collected through this form will be used exclusively to create and manage user accounts and to keep you informed"
+    },
+    {
+      "session_id": "sess_0031",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "And what about that for online purchases?",
+      "answer": "your personal data will be used exclusively for the administrative management related to the contracted service",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "collects the following personal data for the purposes set out below: a. Contact form: the personal data collected through this form will be used exclusively to manage your request.b. Online purchases: In case of purchasing any of our products, your personal data will be used exclusively for the administrative management related to the contracted service.c. Creation of a profile: the personal data collected through this form will be used exclusively to create and manage user accounts and to keep you informed"
+    },
+    {
+      "session_id": "sess_0031",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Do I need an account to shop? How do I add a new shipping address?",
+      "answer": "To shop with us, you must first register an account using a valid email address and contact phone number. Having an account allows you to save your details, making future purchases faster and more convenient. Once registered, you can update your information anytime through the My Account section. To add an alternative shipping address, simply enter it in the Address Book within My Account.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "【常見問題】\n使用者提問：Do I need to create an account to shop? How do I add a new shipping address?\n官方解答：To shop with us, you must first register an account using a valid email address and contact phone number. Having an account allows you to save your details, making future purchases faster and more convenient. Once registered, you can update your information anytime through the My Account section. To add an alternative shipping address, simply enter it in the Address Book within My Account."
+    }
+  ],
+  "sess_0032": [
+    {
+      "session_id": "sess_0032",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What will my data be used for if I sign up?",
+      "answer": "will be used exclusively to create and manage user accounts and to keep you informed about Daedo updates.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "will be used exclusively to create and manage user accounts and to keep you informed about Daedo updates. d. Newsletter and commercial prospecting: the data collected will be used exclusively to send you newsletters, as well as commercial communications of promotions and/or advertising of our products and services. e. Social Networks: the data provided or that may be shared in the Social Networks in which DAEDO is active will be treated in accordance with the Privacy Policies of each Social Network. We recommend"
+    },
+    {
+      "session_id": "sess_0032",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can that also include commercial communications?",
+      "answer": "the data collected will be used exclusively to send you newsletters, as well as commercial communications of promotions and/or advertising of our products and services.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "will be used exclusively to create and manage user accounts and to keep you informed about Daedo updates. d. Newsletter and commercial prospecting: the data collected will be used exclusively to send you newsletters, as well as commercial communications of promotions and/or advertising of our products and services. e. Social Networks: the data provided or that may be shared in the Social Networks in which DAEDO is active will be treated in accordance with the Privacy Policies of each Social Network. We recommend"
+    },
+    {
+      "session_id": "sess_0032",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "How does the website use cookies when I browse?",
+      "answer": "as, for example, controlling traffic and data communication, identifying the session, accessing restricted access parts, remembering the elements that make up an order, carrying out the purchase process of an order, making the application for registration or participation in an event, using security elements during browsing, storing content for the broadcasting of videos or sound or sharing content through social networks.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "as, for example, controlling traffic and data communication, identifying the session, accessing restricted access parts, remembering the elements that make up an order, carrying out the purchase process of an order, making the application for registration or participation in an event, using security elements during browsing, storing content for the broadcasting of videos or sound or sharing content through social networks."
+    }
+  ],
+  "sess_0033": [
+    {
+      "session_id": "sess_0033",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What happens to my data if I don't show interest in your services?",
+      "answer": "In case of contracting any service, the data will be treated while the commercial relationship lasts and, once concluded for the time necessary to respond to possible legal responsibilities.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "customer has not shown further interest in our services. In case of contracting any service, the data will be treated while the commercial relationship lasts and, once concluded for the time necessary to respond to possible legal responsibilities.In the event that you give us your consent to inform you of our products or services, we will keep your data until you express your desire not to receive further communications from us. In the event that you contract any service, and in accordance with current"
+    },
+    {
+      "session_id": "sess_0033",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "And if I give consent to receive updates?",
+      "answer": "we will keep your data until you express your desire not to receive further communications from us.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "customer has not shown further interest in our services. In case of contracting any service, the data will be treated while the commercial relationship lasts and, once concluded for the time necessary to respond to possible legal responsibilities.In the event that you give us your consent to inform you of our products or services, we will keep your data until you express your desire not to receive further communications from us. In the event that you contract any service, and in accordance with current"
+    },
+    {
+      "session_id": "sess_0033",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "How can I confirm that my order was successful and when do I get a confirmation email?",
+      "answer": "After placing your order, you will see a confirmation screen displaying the details of your purchase, including items bought, total cost, and delivery options. You will also receive a confirmation email with these details for your records.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "【常見問題】\n使用者提問：How do I know if my order was successful? Will I get a confirmation?\n官方解答：After placing your order, you will see a confirmation screen displaying the details of your purchase, including items bought, total cost, and delivery options. You will also receive a confirmation email with these details for your records. However, this email does not indicate that your order has been processed or confirm a contract of purchase. Once your order has been processed, you will receive a second email with details of the items shipped and your tracking reference number. By clicking on the tracking link, you can check the status of your delivery on the courier's website."
+    }
+  ],
+  "sess_0034": [
+    {
+      "session_id": "sess_0034",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Can I opt out of receiving commercial communications from you?",
+      "answer": "In any case you can exercise your right of opposition through the channels announced in this Privacy Policy.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "consent to receive commercial communications from us. In any case you can exercise your right of opposition through the channels announced in this Privacy Policy. Legitimization Below, we inform you what allows us to treat your data, depending on the use for which they are intended. Customer data will be processed by DAEDO BARCELONA"
+    },
+    {
+      "session_id": "sess_0034",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "How do I use that right?",
+      "answer": "In any case you can exercise your right of opposition through the channels announced in this Privacy Policy.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "consent to receive commercial communications from us. In any case you can exercise your right of opposition through the channels announced in this Privacy Policy. Legitimization Below, we inform you what allows us to treat your data, depending on the use for which they are intended. Customer data will be processed by DAEDO BARCELONA"
+    },
+    {
+      "session_id": "sess_0034",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What is the warranty period for products purchased from DAEDO BARCELONA?",
+      "answer": "Warranty is 1 year from delivery.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "3.3 Guarantees ● All products comply with international safety standards. ● Warranty is 1 year from delivery. DAEDO BARCELONA acts as intermediary in managing claims with suppliers. ● Warranty applies to normal use; not valid for improper use or user-specific needs. ● DAEDO BARCELONA is not liable for indirect damages, data loss, or profit loss. 3.4 Right of Withdrawal The CONTRACTING PARTY may withdraw within 30 calendar days of receiving the product. To request a return, the CONTRACTING PARTY"
+    }
+  ],
+  "sess_0035": [
+    {
+      "session_id": "sess_0035",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Will my data be processed for promotional purposes without my consent?",
+      "answer": "We will only process your data for promotional purposes if you have given us your specific consent to do so.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "for which they are intended. Customer data will be processed by DAEDO BARCELONA , for the fulfillment of the contractual relationship.We will only process your data for promotional purposes if you have given us your specific consent to do so. Notwithstanding the above, we will process your data for promotional purposes, provided that you are a customer, in accordance with DAEDO BARCELONA 's legitimate interest. Recipients Transfer of data to third parties"
+    },
+    {
+      "session_id": "sess_0035",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "And what about it when I am a customer?",
+      "answer": "Notwithstanding the above, we will process your data for promotional purposes, provided that you are a customer, in accordance with DAEDO BARCELONA 's legitimate interest.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "for which they are intended. Customer data will be processed by DAEDO BARCELONA , for the fulfillment of the contractual relationship.We will only process your data for promotional purposes if you have given us your specific consent to do so. Notwithstanding the above, we will process your data for promotional purposes, provided that you are a customer, in accordance with DAEDO BARCELONA 's legitimate interest. Recipients Transfer of data to third parties"
+    },
+    {
+      "session_id": "sess_0035",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Do I need to create an account to shop? How do I add a new shipping address?",
+      "answer": "To shop with us, you must first register an account using a valid email address and contact phone number.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "【常見問題】\n使用者提問：Do I need to create an account to shop? How do I add a new shipping address?\n官方解答：To shop with us, you must first register an account using a valid email address and contact phone number. Having an account allows you to save your details, making future purchases faster and more convenient. Once registered, you can update your information anytime through the My Account section. To add an alternative shipping address, simply enter it in the Address Book within My Account."
+    }
+  ],
+  "sess_0036": [
+    {
+      "session_id": "sess_0036",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Will my personal data be disclosed to third parties without consent?",
+      "answer": "Your personal data will not be disclosed to third parties without your consent",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "BARCELONA 's legitimate interest. Recipients Transfer of data to third parties Your personal data will not be disclosed to third parties without your consent, except for those service providers with whom we have a service contract in force or where a law obliges DAEDO BARCELONA to such disclosure of data. Category of data Type of data processed: Contact form: ● Name / Company name. ● Country. ● E-mail ● Telephone number. Purchase form:"
+    },
+    {
+      "session_id": "sess_0036",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "What about service providers with a contract in force?",
+      "answer": "except for those service providers with whom we have a service contract in force",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "BARCELONA 's legitimate interest. Recipients Transfer of data to third parties Your personal data will not be disclosed to third parties without your consent, except for those service providers with whom we have a service contract in force or where a law obliges DAEDO BARCELONA to such disclosure of data. Category of data Type of data processed: Contact form: ● Name / Company name. ● Country. ● E-mail ● Telephone number. Purchase form:"
+    },
+    {
+      "session_id": "sess_0036",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Who operates the website and what is their address?",
+      "answer": "This website is operated by Jae Hun Park Lee: ● Address: Calle Balmes 55, 08007, Barcelona, Spain",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "Terms and Conditions Terms and Conditions If you have any doubts or questions, please contact us at: ecommerce@daedo.com. This document outlines the general conditions governing the contractual relationship between the user and JAE HUN PARK LEE SL (hereinafter \" DAEDO BARCELONA \"), for the sale of products offered through our website. This website is operated by Jae Hun Park Lee: ● Address: Calle Balmes 55, 08007, Barcelona, Spain ● Tax ID available upon request."
+    }
+  ],
+  "sess_0037": [
+    {
+      "session_id": "sess_0037",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What information is required for the purchase form?",
+      "answer": "Name and surname. ● E-mail. ● Date of birth. ● Mailing address. ● Telephone number. ● Economic data.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "● Name / Company name. ● Country. ● E-mail ● Telephone number. Purchase form: ● ● Name and surname. ● E-mail. ● Date of birth. ● Mailing address. ● Telephone number. ● Economic data. Newsletter form: ● ● E-mail address."
+    },
+    {
+      "session_id": "sess_0037",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Is that the same information needed for the newsletter form?",
+      "answer": "Newsletter form: ● ● E-mail address.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "● Name / Company name. ● Country. ● E-mail ● Telephone number. Purchase form: ● ● Name and surname. ● E-mail. ● Date of birth. ● Mailing address. ● Telephone number. ● Economic data. Newsletter form: ● ● E-mail address."
+    },
+    {
+      "session_id": "sess_0037",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What law governs these terms of use?",
+      "answer": "These terms of use are governed exclusively by Spanish law.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "and without prior notice, the presentation, configuration, content, or services of the Website. 5. Applicable Law and Jurisdiction These terms of use are governed exclusively by Spanish law. All users of the Website, whether national or international, expressly submit to Spanish law and jurisdiction for the resolution of any disputes arising from use of the Website. 6. Product Use Disclaimer All products offered on this Website are intended for the practice of martial arts,"
+    }
+  ],
+  "sess_0038": [
+    {
+      "session_id": "sess_0038",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Do I have the right to access my personal data?",
+      "answer": "Access to personal data.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "Rights You have the right to: ● ● Revoke the consent given. ● Access to personal data. ● Rectify the personal data. ● Delete personal data. ● File a complaint or a writ for the protection of their rights before the Spanish Data Protection Agency. ● Be informed of any security incident that may affect their rights. ● ● Limitation of processing. ● Data portability."
+    },
+    {
+      "session_id": "sess_0038",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can it also be rectified if needed?",
+      "answer": "Rectify the personal data.",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "Rights You have the right to: ● ● Revoke the consent given. ● Access to personal data. ● Rectify the personal data. ● Delete personal data. ● File a complaint or a writ for the protection of their rights before the Spanish Data Protection Agency. ● Be informed of any security incident that may affect their rights. ● ● Limitation of processing. ● Data portability."
+    },
+    {
+      "session_id": "sess_0038",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "How can I contact your Data Protection Compliance Officer?",
+      "answer": "DAEDO BARCELONA Calle Balmes 55 08007 Barcelona, Spain",
+      "source_file_a": "privacy_policy.pdf",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "privacy policy, you may contact our Data Protection Compliance Officer by writing to: DAEDO BARCELONA Calle Balmes 55 08007 Barcelona, Spain"
+    }
+  ],
+  "sess_0039": [
+    {
+      "session_id": "sess_0039",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "How do I submit my return request?",
+      "answer": "Submit Your Return Request To simplify the process, we recommend submitting your return request directly through the order page on our website.",
+      "source_file_a": "refund_and_return_policy.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "2. Submit Your Return Request To simplify the process, we recommend submitting your return request directly through the order page on our website. If you encounter any issues, you can also contact our Customer Service team by email. Please include the following information: ● Your order number ● The item(s) you wish to return ● A brief reason for the return (optional but appreciated) Contact: ecommerce@daedo.com 3. Return Process & Refunds Once your return request has been approved:"
+    },
+    {
+      "session_id": "sess_0039",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "What if I encounter issues with that?",
+      "answer": "If you encounter any issues, you can also contact our Customer Service team by email.",
+      "source_file_a": "refund_and_return_policy.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "2. Submit Your Return Request To simplify the process, we recommend submitting your return request directly through the order page on our website. If you encounter any issues, you can also contact our Customer Service team by email. Please include the following information: ● Your order number ● The item(s) you wish to return ● A brief reason for the return (optional but appreciated) Contact: ecommerce@daedo.com 3. Return Process & Refunds Once your return request has been approved:"
+    },
+    {
+      "session_id": "sess_0039",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Can you tell me about the technical cookies used on your website and their purposes?",
+      "answer": "Technical cookies: These are those that allow the user to browse through a website, platform or application and use the different options or services that exist on it such as, for example, controlling traffic and data communication, identifying the",
+      "source_file_a": "refund_and_return_policy.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "browsing habits of a user or their computer so that, depending on the type of browsing, they can offer a better service through the website. What type of cookies does this website use and what are their purposes? ● Technical cookies: These are those that allow the user to browse through a website, platform or application and use the different options or services that exist on it such as, for example, controlling traffic and data communication, identifying the"
+    }
+  ],
+  "sess_0040": [
+    {
+      "session_id": "sess_0040",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What happens once my return request is approved?",
+      "answer": "You will receive a return shipping label by email.",
+      "source_file_a": "refund_and_return_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "3. Return Process & Refunds Once your return request has been approved: ● You will receive a return shipping label by email. ● If courier pickup is available in your area, we’ll help schedule collection. ● If pickup is not available, please drop off your return at the nearest FedEx location using the provided label. ● Unless the return is due to an error on our part or a defective item, return shipping costs will be deducted from your refund."
+    },
+    {
+      "session_id": "sess_0040",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can I schedule collection if it's available in my area?",
+      "answer": "If courier pickup is available in your area, we’ll help schedule collection.",
+      "source_file_a": "refund_and_return_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "3. Return Process & Refunds Once your return request has been approved: ● You will receive a return shipping label by email. ● If courier pickup is available in your area, we’ll help schedule collection. ● If pickup is not available, please drop off your return at the nearest FedEx location using the provided label. ● Unless the return is due to an error on our part or a defective item, return shipping costs will be deducted from your refund."
+    },
+    {
+      "session_id": "sess_0040",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Where can I find the tracking number to track my order?",
+      "answer": "You can track your order using a unique tracking reference number, which can be found in your order history or in your dispatch email.",
+      "source_file_a": "refund_and_return_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "【常見問題】\n使用者提問：Where can I find my tracking number to track my order?\n官方解答：You can track your order using a unique tracking reference number, which can be found in your order history or in your dispatch email, along with a link to the courier's tracking page. If you need further assistance, please contact our Customer Service team, and we’ll be happy to help."
+    }
+  ],
+  "sess_0041": [
+    {
+      "session_id": "sess_0041",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Will shipping costs be deducted from my refund?",
+      "answer": "shipping costs will be deducted from your refund.",
+      "source_file_a": "refund_and_return_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "shipping costs will be deducted from your refund. ● Please note: Refunds apply only to the product price. Original shipping fees are non-refundable in case of returns due to change of mind. After the returned item has been received and inspected:"
+    },
+    {
+      "session_id": "sess_0041",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "And that applies even if I just changed my mind about the purchase?",
+      "answer": "Original shipping fees are non-refundable in case of returns due to change of mind.",
+      "source_file_a": "refund_and_return_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "shipping costs will be deducted from your refund. ● Please note: Refunds apply only to the product price. Original shipping fees are non-refundable in case of returns due to change of mind. After the returned item has been received and inspected:"
+    },
+    {
+      "session_id": "sess_0041",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Why do I need a password when paying online?",
+      "answer": "Payment authentication, also known as 3D Secure, is a fraud prevention system used by card issuers.",
+      "source_file_a": "refund_and_return_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "【常見問題】\n使用者提問：Why am I being asked for a password when paying? What is payment authentication?\n官方解答：Payment authentication, also known as 3D Secure, is a fraud prevention system used by card issuers. Verified by Visa (VbV) and MasterCard Secure Code (MSC) work similarly, requiring you to set up a password for added security when shopping online. For more information, please refer to the details provided by your card issuer. If you experience any issues with authentication, contact your card issuer directly, as we have no control over the authentication process and cannot assist with related inquiries."
+    }
+  ],
+  "sess_0042": [
+    {
+      "session_id": "sess_0042",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "How will my refund be processed?",
+      "answer": "Your refund will be issued to the original payment method.",
+      "source_file_a": "refund_and_return_policy.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "● Your refund will be issued to the original payment method. ● Please allow 5 to 10 business days for the amount to reflect, depending on your bank or card provider. 4. Exchanges We do not process automatic exchanges. If you wish to change the size or item, we recommend placing a new order once your refund is completed. This helps ensure that both delivery and return are handled accurately and efficiently."
+    },
+    {
+      "session_id": "sess_0042",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "And how long does it take for that to reflect in my account?",
+      "answer": "Please allow 5 to 10 business days for the amount to reflect, depending on your bank or card provider.",
+      "source_file_a": "refund_and_return_policy.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "● Your refund will be issued to the original payment method. ● Please allow 5 to 10 business days for the amount to reflect, depending on your bank or card provider. 4. Exchanges We do not process automatic exchanges. If you wish to change the size or item, we recommend placing a new order once your refund is completed. This helps ensure that both delivery and return are handled accurately and efficiently."
+    },
+    {
+      "session_id": "sess_0042",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Can you tell me about how my personal data is handled when I fill out a contact form?",
+      "answer": "Contact form: ● Name / Company name. ● Country. ● E-mail ● Telephone number.",
+      "source_file_a": "refund_and_return_policy.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "BARCELONA 's legitimate interest. Recipients Transfer of data to third parties Your personal data will not be disclosed to third parties without your consent, except for those service providers with whom we have a service contract in force or where a law obliges DAEDO BARCELONA to such disclosure of data. Category of data Type of data processed: Contact form: ● Name / Company name. ● Country. ● E-mail ● Telephone number. Purchase form:"
+    }
+  ],
+  "sess_0043": [
+    {
+      "session_id": "sess_0043",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What is your shipping policy?",
+      "answer": "Your payment covers only the product cost and shipping fees.",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "Shipping Policy"
+    },
+    {
+      "session_id": "sess_0043",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Does that include customs duties and taxes?",
+      "answer": "Customs duties and taxes are not included, as they vary by country.",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "Shipping Policy"
+    },
+    {
+      "session_id": "sess_0043",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "How do I proceed to checkout after adding items to my cart?",
+      "answer": "Click \"Proceed to Checkout\" to go to the Shipping Confirmation page, where you can select the correct delivery and billing address.",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "【常見問題】\n使用者提問：How do I place an order and checkout?\n官方解答：After adding items to your shopping cart, you can adjust the quantity by entering your desired amount in the Quantity field. The cart icon in the upper right corner will update to show the total number of items. Hover over it to quickly remove items if needed. Click \"Proceed to Checkout\" to go to the Shipping Confirmation page, where you can select the correct delivery and billing address. Please ensure the billing address matches the one registered with your payment card. Your payment covers only the product cost and shipping fees. Customs duties and taxes are not included, as they vary by country. If ordering from outside the European Union, additional taxes may apply. To check limits and tax-free allowances, contact your local customs office or UPS, Daedo’s international shipping provider. Once you have selected your delivery method, click \"Proceed to Payment\" to complete your order on the Payment Page."
+    }
+  ],
+  "sess_0044": [
+    {
+      "session_id": "sess_0044",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What's the shipping fee for an order under 200€ to Spain (Baleares)?",
+      "answer": "11.50€",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "Shipping fees 1. Spain (National) 5.50€ for any orders under 199.90€. 6.50€ for any orders over 199.90€. 2. Spain (Baleares) 11.50€ for any orders under 199.90€. 13.50€ for any orders over 199.90€. 3. Spain (Canarias, Ceuta y Melilla) 12.50€ for any orders under 199.90€. 13.50€ for any orders over 199.90€. 4. For countries in the EU as listed below, the shipping fee will be: 13.50€ for any orders under 199.90€. 16.50 for any orders over 199.90€. 5. For international shipping countries listed below, the"
+    },
+    {
+      "session_id": "sess_0044",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "And that for orders over 200€?",
+      "answer": "13.50€",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "Shipping fees 1. Spain (National) 5.50€ for any orders under 199.90€. 6.50€ for any orders over 199.90€. 2. Spain (Baleares) 11.50€ for any orders under 199.90€. 13.50€ for any orders over 199.90€. 3. Spain (Canarias, Ceuta y Melilla) 12.50€ for any orders under 199.90€. 13.50€ for any orders over 199.90€. 4. For countries in the EU as listed below, the shipping fee will be: 13.50€ for any orders under 199.90€. 16.50 for any orders over 199.90€. 5. For international shipping countries listed below, the"
+    },
+    {
+      "session_id": "sess_0044",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Can my personal data be transferred to third parties without my consent?",
+      "answer": "Your personal data will not be disclosed to third parties without your consent, unless JAE HUN PARK LEE SL is obliged by law to do so.",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "We will only process your data for promotional purposes if you have given us your specific consent to do so. You will always have the option to revoke your consent to the processing of your data for these purposes. Transfer of data to third parties Your personal data will not be disclosed to third parties without your consent, unless JAE HUN PARK LEE SL is obliged by law to do so. Type of data processed"
+    }
+  ],
+  "sess_0045": [
+    {
+      "session_id": "sess_0045",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What is the shipping fee for international orders under 199.90€?",
+      "answer": "29.90€",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "for any orders over 199.90€. 5. For international shipping countries listed below, the shipping fee will be: 29.90€ for any orders under 199.90€. 49.90€ for any orders over 199.90€. EU Countries: Belgium, France, Luxembourg, Netherlands, Andorra, Austria, Bulgaria,"
+    },
+    {
+      "session_id": "sess_0045",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "And what about that for over 199.90€?",
+      "answer": "49.90€",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "for any orders over 199.90€. 5. For international shipping countries listed below, the shipping fee will be: 29.90€ for any orders under 199.90€. 49.90€ for any orders over 199.90€. EU Countries: Belgium, France, Luxembourg, Netherlands, Andorra, Austria, Bulgaria,"
+    },
+    {
+      "session_id": "sess_0045",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Can I opt out of receiving commercial communications from you?",
+      "answer": "In any case you can exercise your right of opposition through the channels announced in this Privacy Policy.",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "consent to receive commercial communications from us. In any case you can exercise your right of opposition through the channels announced in this Privacy Policy. Legitimization Below, we inform you what allows us to treat your data, depending on the use for which they are intended. Customer data will be processed by DAEDO BARCELONA"
+    }
+  ],
+  "sess_0046": [
+    {
+      "session_id": "sess_0046",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Are there any additional charges for international orders?",
+      "answer": "All international orders may be subject to import duties, taxes, and customs fees imposed by the destination country.",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "Brazil, Chile, Colombia, Ecuador, Paraguay, Peru, Uruguay, Venezuela, United Kingdom, Türkiye, Australia, Iceland Important: All international orders may be subject to import duties, taxes, and customs fees imposed by the destination country. These charges are not included in the item price or shipping cost and are the responsibility of the customer. We have no control over these charges and cannot predict their amount. We recommend checking with your local customs office"
+    },
+    {
+      "session_id": "sess_0046",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Who is responsible for these charges?",
+      "answer": "These charges are not included in the item price or shipping cost and are the responsibility of the customer.",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "Brazil, Chile, Colombia, Ecuador, Paraguay, Peru, Uruguay, Venezuela, United Kingdom, Türkiye, Australia, Iceland Important: All international orders may be subject to import duties, taxes, and customs fees imposed by the destination country. These charges are not included in the item price or shipping cost and are the responsibility of the customer. We have no control over these charges and cannot predict their amount. We recommend checking with your local customs office"
+    },
+    {
+      "session_id": "sess_0046",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Can you share my data with third parties without consent?",
+      "answer": "Your personal data will not be disclosed to third parties without your consent, unless JAE HUN PARK LEE SL is obliged by law to do so.",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "We will only process your data for promotional purposes if you have given us your specific consent to do so. You will always have the option to revoke your consent to the processing of your data for these purposes. Transfer of data to third parties Your personal data will not be disclosed to third parties without your consent, unless JAE HUN PARK LEE SL is obliged by law to do so. Type of data processed"
+    }
+  ],
+  "sess_0047": [
+    {
+      "session_id": "sess_0047",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What is the standard processing time for orders?",
+      "answer": "Standard processing time is 7 business days",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "checking with your local customs office before placing an order if you have any questions. Delivery Order are processed Monday to Friday, excluding public holidays. Standard processing time is 7 business days, but may vary during peak seasons or for orders with customization (e.g., name stamping on doboks can take up to 4 weeks). You will receive a confirmation email with tracking details once your order has shipped. We ship worldwide using FedEx as our official courier."
+    },
+    {
+      "session_id": "sess_0047",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Does that include customization requests like name stamping on doboks?",
+      "answer": "orders with customization (e.g., name stamping on doboks can take up to 4 weeks)",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "checking with your local customs office before placing an order if you have any questions. Delivery Order are processed Monday to Friday, excluding public holidays. Standard processing time is 7 business days, but may vary during peak seasons or for orders with customization (e.g., name stamping on doboks can take up to 4 weeks). You will receive a confirmation email with tracking details once your order has shipped. We ship worldwide using FedEx as our official courier."
+    },
+    {
+      "session_id": "sess_0047",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Who is responsible for the package once it's delivered by the courier?",
+      "answer": "The CONTRACTING PARTY assumes all risk once the product is delivered by the courier",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "for all applicable import duties, VAT, tariffs, and customs clearance fees . 4.2 Responsibility The CONTRACTING PARTY assumes all risk once the product is delivered by the courier. They must inspect the package upon delivery and report any visible damage within 24 hours. FIFTH. LIABILITY DAEDO BARCELONA will not be responsible for: ● Website communication failures ● Damages caused by third parties DAEDO BARCELONA reserves the right to suspend website access in case of misuse and"
+    }
+  ],
+  "sess_0048": [
+    {
+      "session_id": "sess_0048",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "How long does it take to deliver my package within the US?",
+      "answer": "3-4 business days",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "Estimated Delivery Time National: 3-4 business days Europe: 7-14 business days International: 15-21 business days Important: Delivery times are estimates and may vary depending on destination and customs clearance. Undeliverable Packages / Refused Shipments: If an order is returned to us due to an incorrect address, failed delivery attempts, or refusal to pay import fees, the customer may be responsible for the cost of return shipping and any applicable fees."
+    },
+    {
+      "session_id": "sess_0048",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "And for Europe, how about that?",
+      "answer": "7-14 business days",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "Estimated Delivery Time National: 3-4 business days Europe: 7-14 business days International: 15-21 business days Important: Delivery times are estimates and may vary depending on destination and customs clearance. Undeliverable Packages / Refused Shipments: If an order is returned to us due to an incorrect address, failed delivery attempts, or refusal to pay import fees, the customer may be responsible for the cost of return shipping and any applicable fees."
+    },
+    {
+      "session_id": "sess_0048",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "If I email you a request, will my personal data be used exclusively to manage it?",
+      "answer": "the personal data collected in the same will be used exclusively to manage your request.",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "f. In the event that you contact us by email, the personal data collected in the same will be used exclusively to manage your request."
+    }
+  ],
+  "sess_0049": [
+    {
+      "session_id": "sess_0049",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Who is responsible for import duties and taxes on international orders?",
+      "answer": "These charges are not included in the item price or shipping cost and are the sole responsibility of the customer.",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "refund_and_return_policy.pdf",
+      "context_used": "be responsible for the cost of return shipping and any applicable fees. Import Duties and Taxes Please note that all international orders may be subject to import duties, taxes, and fees levied by the destination country. These charges are not included in the item price or shipping cost and are the sole responsibility of the customer. We have no control over these charges and cannot predict their amount, as they vary from country to country. We recommend contacting your"
+    },
+    {
+      "session_id": "sess_0049",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can you clarify if that includes all countries?",
+      "answer": "We have no control over these charges and cannot predict their amount, as they vary from country to country.",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "refund_and_return_policy.pdf",
+      "context_used": "be responsible for the cost of return shipping and any applicable fees. Import Duties and Taxes Please note that all international orders may be subject to import duties, taxes, and fees levied by the destination country. These charges are not included in the item price or shipping cost and are the sole responsibility of the customer. We have no control over these charges and cannot predict their amount, as they vary from country to country. We recommend contacting your"
+    },
+    {
+      "session_id": "sess_0049",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What happens once my return request is approved?",
+      "answer": "You will receive a return shipping label by email.",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "refund_and_return_policy.pdf",
+      "context_used": "3. Return Process & Refunds Once your return request has been approved: ● You will receive a return shipping label by email. ● If courier pickup is available in your area, we’ll help schedule collection. ● If pickup is not available, please drop off your return at the nearest FedEx location using the provided label. ● Unless the return is due to an error on our part or a defective item, return shipping costs will be deducted from your refund."
+    }
+  ],
+  "sess_0050": [
+    {
+      "session_id": "sess_0050",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What should I do if my neighbors don't have the parcel?",
+      "answer": "please contact Customer Service, and we will investigate further.",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "items, which will be resent. If you haven’t received your parcel and your neighbors don’t have it, please contact Customer Service, and we will investigate further."
+    },
+    {
+      "session_id": "sess_0050",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can you clarify how they will investigate?",
+      "answer": "we will investigate further.",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "items, which will be resent. If you haven’t received your parcel and your neighbors don’t have it, please contact Customer Service, and we will investigate further."
+    },
+    {
+      "session_id": "sess_0050",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "How do I start a return process for a product?",
+      "answer": "the CONTRACTING PARTY must initiate the process from their order page on our website.",
+      "source_file_a": "shipping_policy.pdf",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "product. To request a return, the CONTRACTING PARTY must initiate the process from their order page on our website. If there are any difficulties, please contact ecommerce@daedo.com and include the following information: the order number, the email used for the purchase, and the name of the product to be returned. Return costs are borne by the customer unless otherwise agreed. Refunds will be issued within 14 days of receiving the returned goods."
+    }
+  ],
+  "sess_0051": [
+    {
+      "session_id": "sess_0051",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "How can I contact DAEDO BARCELONA if I have questions about the Terms and Conditions?",
+      "answer": "please contact us at: ecommerce@daedo.com",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "Terms and Conditions Terms and Conditions If you have any doubts or questions, please contact us at: ecommerce@daedo.com. This document outlines the general conditions governing the contractual relationship between the user and JAE HUN PARK LEE SL (hereinafter \" DAEDO BARCELONA \"), for the sale of products offered through our website. This website is operated by Jae Hun Park Lee: ● Address: Calle Balmes 55, 08007, Barcelona, Spain ● Tax ID available upon request."
+    },
+    {
+      "session_id": "sess_0051",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can you provide me with their address in Barcelona?",
+      "answer": "Calle Balmes 55, 08007, Barcelona, Spain",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "Terms and Conditions Terms and Conditions If you have any doubts or questions, please contact us at: ecommerce@daedo.com. This document outlines the general conditions governing the contractual relationship between the user and JAE HUN PARK LEE SL (hereinafter \" DAEDO BARCELONA \"), for the sale of products offered through our website. This website is operated by Jae Hun Park Lee: ● Address: Calle Balmes 55, 08007, Barcelona, Spain ● Tax ID available upon request."
+    },
+    {
+      "session_id": "sess_0051",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Where can I find the privacy policy for Instagram?",
+      "answer": "https://help.instagram.com/1896641480634370?ref=ig",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "based on the analysis of the usage data of the users of the service. ● Facebook: https://www.facebook.com/policies/cookies/ ● Twitter: https://twitter.com/es/privacy ● Instagram: https://help.instagram.com/1896641480634370?ref=ig ● YouTube: https://policies.google.com/privacy?hl=es-419&gl=mx ● Pinterest: https://policy.pinterest.com/es/privacy-policy ● LinkedIn: https://www.linkedin.com/legal/cookie-policy?trk=hp-cookies Table of Cookies used by this website The table below summarises the cookies used by this website:"
+    }
+  ],
+  "sess_0052": [
+    {
+      "session_id": "sess_0052",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Can you provide your tax ID?",
+      "answer": "Tax ID available upon request.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "● Address: Calle Balmes 55, 08007, Barcelona, Spain ● Tax ID available upon request. These terms must be accepted electronically before any purchase is made and are made available to the CONTRACTING PARTY for reading, printing, and storage. FIRST. PURPOSE OF THE CONTRACT DAEDO BARCELONA undertakes to deliver the products requested through the website in exchange for the price specified at the time of purchase. By purchasing, the CONTRACTING PARTY confirms:"
+    },
+    {
+      "session_id": "sess_0052",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "How do I access that?",
+      "answer": "These terms must be accepted electronically before any purchase is made and are made available to the CONTRACTING PARTY for reading, printing, and storage.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "● Address: Calle Balmes 55, 08007, Barcelona, Spain ● Tax ID available upon request. These terms must be accepted electronically before any purchase is made and are made available to the CONTRACTING PARTY for reading, printing, and storage. FIRST. PURPOSE OF THE CONTRACT DAEDO BARCELONA undertakes to deliver the products requested through the website in exchange for the price specified at the time of purchase. By purchasing, the CONTRACTING PARTY confirms:"
+    },
+    {
+      "session_id": "sess_0052",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What happens if my order is returned?",
+      "answer": "If your order is returned to us, it will be automatically refunded, except for personalized items, which will be",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "country to country. We recommend contacting your local customs office for further information before placing your order. Missed or Returned Deliveries If the courier was unable to deliver your order, they may have left it with a neighbor or attempted delivery but couldn't obtain a signature. Check your tracking link from the dispatch confirmation email for details. If your order is returned to us, it will be automatically refunded, except for personalized items, which will be"
+    }
+  ],
+  "sess_0053": [
+    {
+      "session_id": "sess_0053",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Does purchasing confirm that I understand the General Conditions?",
+      "answer": "They have read, understood, and accepted these General Conditions.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "at the time of purchase. By purchasing, the CONTRACTING PARTY confirms: ● They are of legal age and legally capable of entering into contracts. ● They have read, understood, and accepted these General Conditions. SECOND. MODIFICATIONS DAEDO BARCELONA reserves the right to modify these General Conditions at any time without prior notice. The version in force at the time of purchase will apply. THIRD. RIGHTS AND OBLIGATIONS OF THE SERVICE PROVIDER 3.1 Product Delivery"
+    },
+    {
+      "session_id": "sess_0053",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can you remind me what it means to be a CONTRACTING PARTY?",
+      "answer": "They are of legal age and legally capable of entering into contracts.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "at the time of purchase. By purchasing, the CONTRACTING PARTY confirms: ● They are of legal age and legally capable of entering into contracts. ● They have read, understood, and accepted these General Conditions. SECOND. MODIFICATIONS DAEDO BARCELONA reserves the right to modify these General Conditions at any time without prior notice. The version in force at the time of purchase will apply. THIRD. RIGHTS AND OBLIGATIONS OF THE SERVICE PROVIDER 3.1 Product Delivery"
+    },
+    {
+      "session_id": "sess_0053",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "How will my data be used if I sign up for the newsletter?",
+      "answer": "the data collected will be used exclusively to send you newsletters, as well as commercial communications of promotions and/or advertising of our products and services.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "will be used exclusively to create and manage user accounts and to keep you informed about Daedo updates. d. Newsletter and commercial prospecting: the data collected will be used exclusively to send you newsletters, as well as commercial communications of promotions and/or advertising of our products and services. e. Social Networks: the data provided or that may be shared in the Social Networks in which DAEDO is active will be treated in accordance with the Privacy Policies of each Social Network. We recommend"
+    }
+  ],
+  "sess_0054": [
+    {
+      "session_id": "sess_0054",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Where will products be delivered?",
+      "answer": "Products will be delivered to the address specified by the CONTRACTING PARTY.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "apply. THIRD. RIGHTS AND OBLIGATIONS OF THE SERVICE PROVIDER 3.1 Product Delivery Products will be delivered to the address specified by the CONTRACTING PARTY. Delivery times are approximate and listed on product pages, not exceeding 15 days"
+    },
+    {
+      "session_id": "sess_0054",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "And how long does that take?",
+      "answer": "Delivery times are approximate and listed on product pages, not exceeding 15 days",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "apply. THIRD. RIGHTS AND OBLIGATIONS OF THE SERVICE PROVIDER 3.1 Product Delivery Products will be delivered to the address specified by the CONTRACTING PARTY. Delivery times are approximate and listed on product pages, not exceeding 15 days"
+    },
+    {
+      "session_id": "sess_0054",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Who is responsible for the import duties when ordering internationally?",
+      "answer": "These charges are not included in the item price or shipping cost and are the sole responsibility of the customer.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "be responsible for the cost of return shipping and any applicable fees. Import Duties and Taxes Please note that all international orders may be subject to import duties, taxes, and fees levied by the destination country. These charges are not included in the item price or shipping cost and are the sole responsibility of the customer. We have no control over these charges and cannot predict their amount, as they vary from country to country. We recommend contacting your"
+    }
+  ],
+  "sess_0055": [
+    {
+      "session_id": "sess_0055",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What happens if DAEDO BARCELONA cannot provide the service as per our contract?",
+      "answer": "the CONTRACTING PARTY will be informed and offered alternatives or cancellation with a full refund within 15 days.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "(national and international). In case of unavailability, the CONTRACTING PARTY will be informed and offered alternatives or cancellation with a full refund within 15 days. 3.2 Responsibility DAEDO BARCELONA is not responsible for: ● Internet-related issues, force majeure, or incorrect user data causing delivery issues. ● Misuse of the service by the CONTRACTING PARTY. ● Issues with the provided email for order confirmation. 3.3 Guarantees"
+    },
+    {
+      "session_id": "sess_0055",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can you clarify how that works if the service is unavailable due to force majeure?",
+      "answer": "DAEDO BARCELONA is not responsible for: Internet-related issues, force majeure, or incorrect user data causing delivery issues.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "(national and international). In case of unavailability, the CONTRACTING PARTY will be informed and offered alternatives or cancellation with a full refund within 15 days. 3.2 Responsibility DAEDO BARCELONA is not responsible for: ● Internet-related issues, force majeure, or incorrect user data causing delivery issues. ● Misuse of the service by the CONTRACTING PARTY. ● Issues with the provided email for order confirmation. 3.3 Guarantees"
+    },
+    {
+      "session_id": "sess_0055",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Is it mandatory to create an account before shopping? How can I add a new shipping address?",
+      "answer": "To shop with us, you must first register an account using a valid email address and contact phone number. Having an account allows you to save your details, making future purchases faster and more convenient. Once registered, you can update your information anytime through the My Account section.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "【常見問題】\n使用者提問：Do I need to create an account to shop? How do I add a new shipping address?\n官方解答：To shop with us, you must first register an account using a valid email address and contact phone number. Having an account allows you to save your details, making future purchases faster and more convenient. Once registered, you can update your information anytime through the My Account section. To add an alternative shipping address, simply enter it in the Address Book within My Account."
+    }
+  ],
+  "sess_0056": [
+    {
+      "session_id": "sess_0056",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What is the warranty period for products from DAEDO BARCELONA?",
+      "answer": "Warranty is 1 year from delivery.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "3.3 Guarantees ● All products comply with international safety standards. ● Warranty is 1 year from delivery. DAEDO BARCELONA acts as intermediary in managing claims with suppliers. ● Warranty applies to normal use; not valid for improper use or user-specific needs. ● DAEDO BARCELONA is not liable for indirect damages, data loss, or profit loss. 3.4 Right of Withdrawal The CONTRACTING PARTY may withdraw within 30 calendar days of receiving the product. To request a return, the CONTRACTING PARTY"
+    },
+    {
+      "session_id": "sess_0056",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Does that include improper use cases?",
+      "answer": "Warranty applies to normal use; not valid for improper use or user-specific needs.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "3.3 Guarantees ● All products comply with international safety standards. ● Warranty is 1 year from delivery. DAEDO BARCELONA acts as intermediary in managing claims with suppliers. ● Warranty applies to normal use; not valid for improper use or user-specific needs. ● DAEDO BARCELONA is not liable for indirect damages, data loss, or profit loss. 3.4 Right of Withdrawal The CONTRACTING PARTY may withdraw within 30 calendar days of receiving the product. To request a return, the CONTRACTING PARTY"
+    },
+    {
+      "session_id": "sess_0056",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Why was my order cancelled without me requesting it?",
+      "answer": "We may cancel an order for various reasons, with the most common being a mismatch between the billing address you provided and the one registered with your bank.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "【常見問題】\n使用者提問：Why was my order cancelled without my request?\n官方解答：We may cancel an order for various reasons, with the most common being a mismatch between the billing address you provided and the one registered with your bank. To prevent this, ensure your billing address matches your card’s registered address. Once an order is cancelled, it cannot be reinstated. You will need to place a new order with the correct details."
+    }
+  ],
+  "sess_0057": [
+    {
+      "session_id": "sess_0057",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "How do I start a return process?",
+      "answer": "the CONTRACTING PARTY must initiate the process from their order page on our website.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "product. To request a return, the CONTRACTING PARTY must initiate the process from their order page on our website. If there are any difficulties, please contact ecommerce@daedo.com and include the following information: the order number, the email used for the purchase, and the name of the product to be returned. Return costs are borne by the customer unless otherwise agreed. Refunds will be issued within 14 days of receiving the returned goods."
+    },
+    {
+      "session_id": "sess_0057",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "What if there are difficulties with that?",
+      "answer": "please contact ecommerce@daedo.com and include the following information: the order number, the email used for the purchase, and the name of the product to be returned.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "product. To request a return, the CONTRACTING PARTY must initiate the process from their order page on our website. If there are any difficulties, please contact ecommerce@daedo.com and include the following information: the order number, the email used for the purchase, and the name of the product to be returned. Return costs are borne by the customer unless otherwise agreed. Refunds will be issued within 14 days of receiving the returned goods."
+    },
+    {
+      "session_id": "sess_0057",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Can I cancel my order after placing it?",
+      "answer": "We can only cancel an order if it hasn’t passed the picking stage, which typically happens within an hour of placing it.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "【常見問題】\n使用者提問：Can I cancel or make changes to my order after I've placed it?\n官方解答：We can only cancel an order if it hasn’t passed the picking stage, which typically happens within an hour of placing it. To request a cancellation, please contact Customer Service via the contact form. You’ll receive a confirmation email once it’s processed. You may cancel the entire order or specific items. Unfortunately, we cannot modify or add items to an order once it has been placed. Once processed, you’ll receive a dispatch confirmation email. If an item is unsuitable upon delivery, please follow the returns instructions on your invoice. For more details, visit our After Sales section or check our Daedo International Terms and Conditions."
+    }
+  ],
+  "sess_0058": [
+    {
+      "session_id": "sess_0058",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Can you return personalized products under the right of withdrawal?",
+      "answer": "The right of withdrawal does not apply to personalized products",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "issued within 14 days of receiving the returned goods. The right of withdrawal does not apply to personalized products or unsealed items susceptible to copying. 3.5 Return Shipping Costs DAEDO BARCELONA covers shipping costs for returning defective products within the warranty period. FOURTH. RIGHTS AND OBLIGATIONS OF THE CONTRACTING PARTY"
+    },
+    {
+      "session_id": "sess_0058",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "And what about unsealed items that are susceptible to copying?",
+      "answer": "The right of withdrawal does not apply to ... unsealed items susceptible to copying",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "issued within 14 days of receiving the returned goods. The right of withdrawal does not apply to personalized products or unsealed items susceptible to copying. 3.5 Return Shipping Costs DAEDO BARCELONA covers shipping costs for returning defective products within the warranty period. FOURTH. RIGHTS AND OBLIGATIONS OF THE CONTRACTING PARTY"
+    },
+    {
+      "session_id": "sess_0058",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Where can I find the privacy policy for Instagram?",
+      "answer": "https://help.instagram.com/1896641480634370?ref=ig",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "cookies_policy.pdf",
+      "context_used": "based on the analysis of the usage data of the users of the service. ● Facebook: https://www.facebook.com/policies/cookies/ ● Twitter: https://twitter.com/es/privacy ● Instagram: https://help.instagram.com/1896641480634370?ref=ig ● YouTube: https://policies.google.com/privacy?hl=es-419&gl=mx ● Pinterest: https://policy.pinterest.com/es/privacy-policy ● LinkedIn: https://www.linkedin.com/legal/cookie-policy?trk=hp-cookies Table of Cookies used by this website The table below summarises the cookies used by this website:"
+    }
+  ],
+  "sess_0059": [
+    {
+      "session_id": "sess_0059",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Can I pay via bank transfer?",
+      "answer": "We do not accept bank transfers or PayPal payments.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "4.1 Payment The CONTRACTING PARTY agrees to pay in advance using one of the following methods: ● Credit or debit card (via secure Shopify checkout) Please note: We do not accept bank transfers or PayPal payments. Prices include VAT (21%) for national orders except for Canary Islands, Ceuta, Melilla, and international orders. For orders outside mainland Spain and the EU, the CONTRACTING PARTY is responsible for all applicable import duties, VAT, tariffs, and customs clearance fees ."
+    },
+    {
+      "session_id": "sess_0059",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "And what about that for PayPal?",
+      "answer": "We do not accept bank transfers or PayPal payments.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "4.1 Payment The CONTRACTING PARTY agrees to pay in advance using one of the following methods: ● Credit or debit card (via secure Shopify checkout) Please note: We do not accept bank transfers or PayPal payments. Prices include VAT (21%) for national orders except for Canary Islands, Ceuta, Melilla, and international orders. For orders outside mainland Spain and the EU, the CONTRACTING PARTY is responsible for all applicable import duties, VAT, tariffs, and customs clearance fees ."
+    },
+    {
+      "session_id": "sess_0059",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What's the shipping cost to Spain (Baleares)?",
+      "answer": "11.50€ for any orders under 199.90€. 13.50€ for any orders over 199.90€.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "Shipping fees 1. Spain (National) 5.50€ for any orders under 199.90€. 6.50€ for any orders over 199.90€. 2. Spain (Baleares) 11.50€ for any orders under 199.90€. 13.50€ for any orders over 199.90€. 3. Spain (Canarias, Ceuta y Melilla) 12.50€ for any orders under 199.90€. 13.50€ for any orders over 199.90€. 4. For countries in the EU as listed below, the shipping fee will be: 13.50€ for any orders under 199.90€. 16.50 for any orders over 199.90€. 5. For international shipping countries listed below, the"
+    }
+  ],
+  "sess_0060": [
+    {
+      "session_id": "sess_0060",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Who is responsible for all applicable import duties, VAT, tariffs, and customs clearance fees?",
+      "answer": "CONTRACTING PARTY",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "for all applicable import duties, VAT, tariffs, and customs clearance fees . 4.2 Responsibility The CONTRACTING PARTY assumes all risk once the product is delivered by the courier. They must inspect the package upon delivery and report any visible damage within 24 hours. FIFTH. LIABILITY DAEDO BARCELONA will not be responsible for: ● Website communication failures ● Damages caused by third parties DAEDO BARCELONA reserves the right to suspend website access in case of misuse and"
+    },
+    {
+      "session_id": "sess_0060",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "What about the responsibility once it's delivered by the courier?",
+      "answer": "The CONTRACTING PARTY assumes all risk once the product is delivered by the courier.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "for all applicable import duties, VAT, tariffs, and customs clearance fees . 4.2 Responsibility The CONTRACTING PARTY assumes all risk once the product is delivered by the courier. They must inspect the package upon delivery and report any visible damage within 24 hours. FIFTH. LIABILITY DAEDO BARCELONA will not be responsible for: ● Website communication failures ● Damages caused by third parties DAEDO BARCELONA reserves the right to suspend website access in case of misuse and"
+    },
+    {
+      "session_id": "sess_0060",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "If I haven't received my parcel and neither do my neighbors, what should I do next?",
+      "answer": "please contact Customer Service, and we will investigate further.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "items, which will be resent. If you haven’t received your parcel and your neighbors don’t have it, please contact Customer Service, and we will investigate further."
+    }
+  ],
+  "sess_0061": [
+    {
+      "session_id": "sess_0061",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What happens if someone misuses the website?",
+      "answer": "DAEDO BARCELONA reserves the right to suspend website access in case of misuse and will cooperate with authorities if necessary.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "DAEDO BARCELONA reserves the right to suspend website access in case of misuse and will cooperate with authorities if necessary. SIXTH. COPYRIGHT AND TRADEMARK All website content is protected by copyright. Use, reproduction, or distribution is prohibited without express permission. Trademarks belong to their respective owners. SEVENTH. JURISDICTION AND APPLICABLE LAW"
+    },
+    {
+      "session_id": "sess_0061",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can you clarify how they handle cooperation with authorities?",
+      "answer": "will cooperate with authorities if necessary",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "DAEDO BARCELONA reserves the right to suspend website access in case of misuse and will cooperate with authorities if necessary. SIXTH. COPYRIGHT AND TRADEMARK All website content is protected by copyright. Use, reproduction, or distribution is prohibited without express permission. Trademarks belong to their respective owners. SEVENTH. JURISDICTION AND APPLICABLE LAW"
+    },
+    {
+      "session_id": "sess_0061",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What personal data is collected when I fill out a contact form?",
+      "answer": "the personal data collected through this form will be used exclusively to manage your request.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "collects the following personal data for the purposes set out below: a. Contact form: the personal data collected through this form will be used exclusively to manage your request.b. Online purchases: In case of purchasing any of our products, your personal data will be used exclusively for the administrative management related to the contracted service.c. Creation of a profile: the personal data collected through this form will be used exclusively to create and manage user accounts and to keep you informed"
+    }
+  ],
+  "sess_0062": [
+    {
+      "session_id": "sess_0062",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Which law governs these terms?",
+      "answer": "These terms are governed by Spanish law.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "These terms are governed by Spanish law. Disputes will be resolved in accordance with Law 34/2002 on Information Society Services and E-commerce. EIGHTH. SEVERABILITY If any clause is declared invalid, the remaining provisions will remain in force. Important Note on Import Taxes and Duties All international orders and those sent to the Canary Islands, Ceuta, and Melilla may be subject to import duties, local taxes, or customs clearance fees, depending on the destination. These"
+    },
+    {
+      "session_id": "sess_0062",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "How will disputes be resolved under that?",
+      "answer": "Disputes will be resolved in accordance with Law 34/2002 on Information Society Services and E-commerce.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "These terms are governed by Spanish law. Disputes will be resolved in accordance with Law 34/2002 on Information Society Services and E-commerce. EIGHTH. SEVERABILITY If any clause is declared invalid, the remaining provisions will remain in force. Important Note on Import Taxes and Duties All international orders and those sent to the Canary Islands, Ceuta, and Melilla may be subject to import duties, local taxes, or customs clearance fees, depending on the destination. These"
+    },
+    {
+      "session_id": "sess_0062",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "I forgot my account password. How can I reset it?",
+      "answer": "If you forget your password, please contact Customer Services for a reset.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "faq.csv",
+      "context_used": "【常見問題】\n使用者提問：I forgot my account password. How can I reset it?\n官方解答：If you forget your password, please contact Customer Services for a reset. Once your password has been reset, you can create a new one at your convenience in the My Account section."
+    }
+  ],
+  "sess_0063": [
+    {
+      "session_id": "sess_0063",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Do local taxes apply to my order?",
+      "answer": "local taxes, or customs clearance fees, depending on the destination. These charges are not included in the product or shipping price and are the sole responsibility of the customer.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "local taxes, or customs clearance fees, depending on the destination. These charges are not included in the product or shipping price and are the sole responsibility of the customer. We recommend consulting your local customs office before placing an order."
+    },
+    {
+      "session_id": "sess_0063",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Are they included in the total cost?",
+      "answer": "These charges are not included in the product or shipping price and are the sole responsibility of the customer.",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "local taxes, or customs clearance fees, depending on the destination. These charges are not included in the product or shipping price and are the sole responsibility of the customer. We recommend consulting your local customs office before placing an order."
+    },
+    {
+      "session_id": "sess_0063",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "How long does delivery take to Europe?",
+      "answer": "Europe: 7-14 business days",
+      "source_file_a": "terms_and_conditions.pdf",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "Estimated Delivery Time National: 3-4 business days Europe: 7-14 business days International: 15-21 business days Important: Delivery times are estimates and may vary depending on destination and customs clearance. Undeliverable Packages / Refused Shipments: If an order is returned to us due to an incorrect address, failed delivery attempts, or refusal to pay import fees, the customer may be responsible for the cost of return shipping and any applicable fees."
+    }
+  ],
+  "sess_0064": [
+    {
+      "session_id": "sess_0064",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "How can I find a specific product on your website?",
+      "answer": "To find a product you want to buy you can access the different categories, located at the top of the page and within them choose the type of product you need.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "【常見問題】\n使用者提問：How can I find a specific product on your website?\n官方解答：To find a product you want to buy you can access the different categories, located at the top of the page and within them choose the type of product you need. You can also search by description, name or product code using the search tool located in the upper right corner of the page. From the product page you can add it to your shopping cart."
+    },
+    {
+      "session_id": "sess_0064",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can I also search by description or name?",
+      "answer": "You can also search by description, name or product code using the search tool located in the upper right corner of the page.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "【常見問題】\n使用者提問：How can I find a specific product on your website?\n官方解答：To find a product you want to buy you can access the different categories, located at the top of the page and within them choose the type of product you need. You can also search by description, name or product code using the search tool located in the upper right corner of the page. From the product page you can add it to your shopping cart."
+    },
+    {
+      "session_id": "sess_0064",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What payment methods do you accept for advance payments?",
+      "answer": "● Credit or debit card (via secure Shopify checkout)",
+      "source_file_a": "faq.csv",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "4.1 Payment The CONTRACTING PARTY agrees to pay in advance using one of the following methods: ● Credit or debit card (via secure Shopify checkout) Please note: We do not accept bank transfers or PayPal payments. Prices include VAT (21%) for national orders except for Canary Islands, Ceuta, Melilla, and international orders. For orders outside mainland Spain and the EU, the CONTRACTING PARTY is responsible for all applicable import duties, VAT, tariffs, and customs clearance fees ."
+    }
+  ],
+  "sess_0065": [
+    {
+      "session_id": "sess_0065",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "How do I place an order and checkout?",
+      "answer": "After adding items to your shopping cart, you can adjust the quantity by entering your desired amount in the Quantity field.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "refund_and_return_policy.pdf",
+      "context_used": "【常見問題】\n使用者提問：How do I place an order and checkout?\n官方解答：After adding items to your shopping cart, you can adjust the quantity by entering your desired amount in the Quantity field. The cart icon in the upper right corner will update to show the total number of items. Hover over it to quickly remove items if needed. Click \"Proceed to Checkout\" to go to the Shipping Confirmation page, where you can select the correct delivery and billing address. Please ensure the billing address matches the one registered with your payment card. Your payment covers only the product cost and shipping fees. Customs duties and taxes are not included, as they vary by country. If ordering from outside the European Union, additional taxes may apply. To check limits and tax-free allowances, contact your local customs office or UPS, Daedo’s international shipping provider. Once you have selected your delivery method, click \"Proceed to Payment\" to complete your order on the Payment Page."
+    },
+    {
+      "session_id": "sess_0065",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can it cover customs duties and taxes?",
+      "answer": "Customs duties and taxes are not included, as they vary by country.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "refund_and_return_policy.pdf",
+      "context_used": "【常見問題】\n使用者提問：How do I place an order and checkout?\n官方解答：After adding items to your shopping cart, you can adjust the quantity by entering your desired amount in the Quantity field. The cart icon in the upper right corner will update to show the total number of items. Hover over it to quickly remove items if needed. Click \"Proceed to Checkout\" to go to the Shipping Confirmation page, where you can select the correct delivery and billing address. Please ensure the billing address matches the one registered with your payment card. Your payment covers only the product cost and shipping fees. Customs duties and taxes are not included, as they vary by country. If ordering from outside the European Union, additional taxes may apply. To check limits and tax-free allowances, contact your local customs office or UPS, Daedo’s international shipping provider. Once you have selected your delivery method, click \"Proceed to Payment\" to complete your order on the Payment Page."
+    },
+    {
+      "session_id": "sess_0065",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What happens once my return request is approved?",
+      "answer": "You will receive a return shipping label by email.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "refund_and_return_policy.pdf",
+      "context_used": "3. Return Process & Refunds Once your return request has been approved: ● You will receive a return shipping label by email. ● If courier pickup is available in your area, we’ll help schedule collection. ● If pickup is not available, please drop off your return at the nearest FedEx location using the provided label. ● Unless the return is due to an error on our part or a defective item, return shipping costs will be deducted from your refund."
+    }
+  ],
+  "sess_0066": [
+    {
+      "session_id": "sess_0066",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "How do I know if my order was successful?",
+      "answer": "After placing your order, you will see a confirmation screen displaying the details of your purchase, including items bought, total cost, and delivery options.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "【常見問題】\n使用者提問：How do I know if my order was successful? Will I get a confirmation?\n官方解答：After placing your order, you will see a confirmation screen displaying the details of your purchase, including items bought, total cost, and delivery options. You will also receive a confirmation email with these details for your records. However, this email does not indicate that your order has been processed or confirm a contract of purchase. Once your order has been processed, you will receive a second email with details of the items shipped and your tracking reference number. By clicking on the tracking link, you can check the status of your delivery on the courier's website."
+    },
+    {
+      "session_id": "sess_0066",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Will I get a confirmation for that?",
+      "answer": "You will also receive a confirmation email with these details for your records.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "【常見問題】\n使用者提問：How do I know if my order was successful? Will I get a confirmation?\n官方解答：After placing your order, you will see a confirmation screen displaying the details of your purchase, including items bought, total cost, and delivery options. You will also receive a confirmation email with these details for your records. However, this email does not indicate that your order has been processed or confirm a contract of purchase. Once your order has been processed, you will receive a second email with details of the items shipped and your tracking reference number. By clicking on the tracking link, you can check the status of your delivery on the courier's website."
+    },
+    {
+      "session_id": "sess_0066",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What if the item is unavailable?",
+      "answer": "In case of unavailability, the CONTRACTING PARTY will be informed and offered alternatives or cancellation with a full refund within 15 days.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "(national and international). In case of unavailability, the CONTRACTING PARTY will be informed and offered alternatives or cancellation with a full refund within 15 days. 3.2 Responsibility DAEDO BARCELONA is not responsible for: ● Internet-related issues, force majeure, or incorrect user data causing delivery issues. ● Misuse of the service by the CONTRACTING PARTY. ● Issues with the provided email for order confirmation. 3.3 Guarantees"
+    }
+  ],
+  "sess_0067": [
+    {
+      "session_id": "sess_0067",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Can I cancel or make changes to my order after placing it?",
+      "answer": "We can only cancel an order if it hasn’t passed the picking stage, which typically happens within an hour of placing it.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "【常見問題】\n使用者提問：Can I cancel or make changes to my order after I've placed it?\n官方解答：We can only cancel an order if it hasn’t passed the picking stage, which typically happens within an hour of placing it. To request a cancellation, please contact Customer Service via the contact form. You’ll receive a confirmation email once it’s processed. You may cancel the entire order or specific items. Unfortunately, we cannot modify or add items to an order once it has been placed. Once processed, you’ll receive a dispatch confirmation email. If an item is unsuitable upon delivery, please follow the returns instructions on your invoice. For more details, visit our After Sales section or check our Daedo International Terms and Conditions."
+    },
+    {
+      "session_id": "sess_0067",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "What about that policy for specific items in my order?",
+      "answer": "You’ll receive a confirmation email once it’s processed. You may cancel the entire order or specific items.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "【常見問題】\n使用者提問：Can I cancel or make changes to my order after I've placed it?\n官方解答：We can only cancel an order if it hasn’t passed the picking stage, which typically happens within an hour of placing it. To request a cancellation, please contact Customer Service via the contact form. You’ll receive a confirmation email once it’s processed. You may cancel the entire order or specific items. Unfortunately, we cannot modify or add items to an order once it has been placed. Once processed, you’ll receive a dispatch confirmation email. If an item is unsuitable upon delivery, please follow the returns instructions on your invoice. For more details, visit our After Sales section or check our Daedo International Terms and Conditions."
+    },
+    {
+      "session_id": "sess_0067",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Who processes customer data and under what conditions for promotional purposes?",
+      "answer": "We will only process your data for promotional purposes if you have given us your specific consent to do so. Notwithstanding the above, we will process your data for promotional purposes, provided that you are a customer, in accordance with DAEDO BARCELONA 's legitimate interest.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "for which they are intended. Customer data will be processed by DAEDO BARCELONA , for the fulfillment of the contractual relationship.We will only process your data for promotional purposes if you have given us your specific consent to do so. Notwithstanding the above, we will process your data for promotional purposes, provided that you are a customer, in accordance with DAEDO BARCELONA 's legitimate interest. Recipients Transfer of data to third parties"
+    }
+  ],
+  "sess_0068": [
+    {
+      "session_id": "sess_0068",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Why was my order cancelled without my request?",
+      "answer": "We may cancel an order for various reasons, with the most common being a mismatch between the billing address you provided and the one registered with your bank.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "【常見問題】\n使用者提問：Why was my order cancelled without my request?\n官方解答：We may cancel an order for various reasons, with the most common being a mismatch between the billing address you provided and the one registered with your bank. To prevent this, ensure your billing address matches your card’s registered address. Once an order is cancelled, it cannot be reinstated. You will need to place a new order with the correct details."
+    },
+    {
+      "session_id": "sess_0068",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can it be reinstated once cancelled?",
+      "answer": "Once an order is cancelled, it cannot be reinstated.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "【常見問題】\n使用者提問：Why was my order cancelled without my request?\n官方解答：We may cancel an order for various reasons, with the most common being a mismatch between the billing address you provided and the one registered with your bank. To prevent this, ensure your billing address matches your card’s registered address. Once an order is cancelled, it cannot be reinstated. You will need to place a new order with the correct details."
+    },
+    {
+      "session_id": "sess_0068",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What's your shipping policy?",
+      "answer": "",
+      "source_file_a": "faq.csv",
+      "source_file_b": "shipping_policy.pdf",
+      "context_used": "Shipping Policy"
+    }
+  ],
+  "sess_0069": [
+    {
+      "session_id": "sess_0069",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Why am I being asked for a password when paying?",
+      "answer": "Payment authentication, also known as 3D Secure, is a fraud prevention system used by card issuers.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "【常見問題】\n使用者提問：Why am I being asked for a password when paying? What is payment authentication?\n官方解答：Payment authentication, also known as 3D Secure, is a fraud prevention system used by card issuers. Verified by Visa (VbV) and MasterCard Secure Code (MSC) work similarly, requiring you to set up a password for added security when shopping online. For more information, please refer to the details provided by your card issuer. If you experience any issues with authentication, contact your card issuer directly, as we have no control over the authentication process and cannot assist with related inquiries."
+    },
+    {
+      "session_id": "sess_0069",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can you explain how that works with my online shopping?",
+      "answer": "Verified by Visa (VbV) and MasterCard Secure Code (MSC) work similarly, requiring you to set up a password for added security when shopping online.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "【常見問題】\n使用者提問：Why am I being asked for a password when paying? What is payment authentication?\n官方解答：Payment authentication, also known as 3D Secure, is a fraud prevention system used by card issuers. Verified by Visa (VbV) and MasterCard Secure Code (MSC) work similarly, requiring you to set up a password for added security when shopping online. For more information, please refer to the details provided by your card issuer. If you experience any issues with authentication, contact your card issuer directly, as we have no control over the authentication process and cannot assist with related inquiries."
+    },
+    {
+      "session_id": "sess_0069",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "How long do you keep my personal data?",
+      "answer": "Personal data will be kept until the interested party requests its deletion.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "with Daedo through these social networks. How long do we keep your data? Personal data will be kept until the interested party requests its deletion. In any case you can exercise your right of opposition through the channels announced in this Privacy Policy. Legitimization Customer data will be processed by JAE HUN PARK LEE SL , as well as those related to employees, for the fulfillment of the contractual relationship."
+    }
+  ],
+  "sess_0070": [
+    {
+      "session_id": "sess_0070",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "When will my credit card actually be charged?",
+      "answer": "We only charge for the items we ship, and payment is processed at the time of dispatch.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "refund_and_return_policy.pdf",
+      "context_used": "【常見問題】\n使用者提問：When will my credit card actually be charged? Why does it look like I was charged twice?\n官方解答：When you enter your payment details, your bank places an authorization hold for the full order amount, which appears as a pending charge but is not deducted immediately. We only charge for the items we ship, and payment is processed at the time of dispatch. If any items are canceled, the final charge will be lower than the authorized amount and may appear as a separate transaction, sometimes giving the impression of being charged twice. Once payment is taken, we automatically request your bank to release any remaining authorization. This process can take up to 5 days, or longer for international orders, depending on your bank’s policies. For further details, please contact your bank directly."
+    },
+    {
+      "session_id": "sess_0070",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "And if any items are canceled?",
+      "answer": "If any items are canceled, the final charge will be lower than the authorized amount and may appear as a separate transaction, sometimes giving the impression of being charged twice.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "refund_and_return_policy.pdf",
+      "context_used": "【常見問題】\n使用者提問：When will my credit card actually be charged? Why does it look like I was charged twice?\n官方解答：When you enter your payment details, your bank places an authorization hold for the full order amount, which appears as a pending charge but is not deducted immediately. We only charge for the items we ship, and payment is processed at the time of dispatch. If any items are canceled, the final charge will be lower than the authorized amount and may appear as a separate transaction, sometimes giving the impression of being charged twice. Once payment is taken, we automatically request your bank to release any remaining authorization. This process can take up to 5 days, or longer for international orders, depending on your bank’s policies. For further details, please contact your bank directly."
+    },
+    {
+      "session_id": "sess_0070",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "How do I return an item?",
+      "answer": "You will receive a return shipping label by email. If courier pickup is available in your area, we’ll help schedule collection. If pickup is not available, please drop off your return at the nearest FedEx location using the provided label.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "refund_and_return_policy.pdf",
+      "context_used": "3. Return Process & Refunds Once your return request has been approved: ● You will receive a return shipping label by email. ● If courier pickup is available in your area, we’ll help schedule collection. ● If pickup is not available, please drop off your return at the nearest FedEx location using the provided label. ● Unless the return is due to an error on our part or a defective item, return shipping costs will be deducted from your refund."
+    }
+  ],
+  "sess_0071": [
+    {
+      "session_id": "sess_0071",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What payment methods do you accept, and is it safe to pay on your website?",
+      "answer": "Daedo International uses secure payment pages, allowing you to safely enter your card details. We accept Mastercard, VISA, VISA Debit, VISA Electron, and Maestro.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "【常見問題】\n使用者提問：What payment methods do you accept, and is it safe to pay on your website?\n官方解答：Daedo International uses secure payment pages, allowing you to safely enter your card details. We accept Mastercard, VISA, VISA Debit, VISA Electron, and Maestro. At checkout, select your preferred payment method and proceed to enter your card details. Depending on your card type, you may be required to verify your identity using a password set by your card issuer. If you haven't set one up, you can do so during the transaction. All payments undergo validation and authorization by both Daedo International and the card issuer to ensure security and prevent fraud. Store pickup orders still requires payment at checkout. Internet fraud is illegal and will be prosecuted."
+    },
+    {
+      "session_id": "sess_0071",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "How do I verify my identity during the payment process?",
+      "answer": "Depending on your card type, you may be required to verify your identity using a password set by your card issuer. If you haven't set one up, you can do so during the transaction.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "【常見問題】\n使用者提問：What payment methods do you accept, and is it safe to pay on your website?\n官方解答：Daedo International uses secure payment pages, allowing you to safely enter your card details. We accept Mastercard, VISA, VISA Debit, VISA Electron, and Maestro. At checkout, select your preferred payment method and proceed to enter your card details. Depending on your card type, you may be required to verify your identity using a password set by your card issuer. If you haven't set one up, you can do so during the transaction. All payments undergo validation and authorization by both Daedo International and the card issuer to ensure security and prevent fraud. Store pickup orders still requires payment at checkout. Internet fraud is illegal and will be prosecuted."
+    },
+    {
+      "session_id": "sess_0071",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Where is JAE HUN PARK LEE SL (DAEDO BARCELONA) located?",
+      "answer": "Calle Balmes 55, 08007, SPAIN",
+      "source_file_a": "faq.csv",
+      "source_file_b": "privacy_policy.pdf",
+      "context_used": "Privacy Policy Company name ● Identity: JAE HUN PARK LEE SL (DAEDO BARCELONA) ● Postal address: Calle Balmes 55, 08007, SPAIN ● Email: ecommerce@daedo.com What do we use the data for? The following Privacy Policy sets out the terms on which we will treat personal data at JAE HUN PARK LEE SL ; this includes any personal data collected through our website www.daedo.com, as well as any other data we process in the course of our business activities. JAE HUN PARK LEE"
+    }
+  ],
+  "sess_0072": [
+    {
+      "session_id": "sess_0072",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "What happens to the pending charge if my order cannot be fulfilled?",
+      "answer": "If we are unable to fulfill your order, we will request your bank to cancel the authorization.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "【常見問題】\n使用者提問：What happens to the pending charge if my order cannot be fulfilled?\n官方解答：Payment is only taken once your order has been dispatched. However, an authorization hold will be placed on your account, reserving the funds without deducting them immediately. If we are unable to fulfill your order, we will request your bank to cancel the authorization. If the hold remains after several days, please contact your bank to process the cancellation."
+    },
+    {
+      "session_id": "sess_0072",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "And what if that hold remains after several days?",
+      "answer": "please contact your bank to process the cancellation.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "【常見問題】\n使用者提問：What happens to the pending charge if my order cannot be fulfilled?\n官方解答：Payment is only taken once your order has been dispatched. However, an authorization hold will be placed on your account, reserving the funds without deducting them immediately. If we are unable to fulfill your order, we will request your bank to cancel the authorization. If the hold remains after several days, please contact your bank to process the cancellation."
+    },
+    {
+      "session_id": "sess_0072",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "How do you ensure my personal information is protected?",
+      "answer": "Any personal information you provide that allows you to be identified is stored securely and treated as confidential.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "Customer security and data protection are of paramount importance to us. Below is an overview of our security and privacy practices. If you have any questions, please contact our Customer Service team. Any personal information you provide that allows you to be identified is stored securely and treated as confidential. All data is processed lawfully, fairly, and transparently, in accordance with applicable data protection regulations. Data Protection Measures"
+    }
+  ],
+  "sess_0073": [
+    {
+      "session_id": "sess_0073",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "Do I need to create an account to shop?",
+      "answer": "To shop with us, you must first register an account using a valid email address and contact phone number.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "refund_and_return_policy.pdf",
+      "context_used": "【常見問題】\n使用者提問：Do I need to create an account to shop? How do I add a new shipping address?\n官方解答：To shop with us, you must first register an account using a valid email address and contact phone number. Having an account allows you to save your details, making future purchases faster and more convenient. Once registered, you can update your information anytime through the My Account section. To add an alternative shipping address, simply enter it in the Address Book within My Account."
+    },
+    {
+      "session_id": "sess_0073",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "How do I add a new shipping address?",
+      "answer": "Once registered, you can update your information anytime through the My Account section. To add an alternative shipping address, simply enter it in the Address Book within My Account.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "refund_and_return_policy.pdf",
+      "context_used": "【常見問題】\n使用者提問：Do I need to create an account to shop? How do I add a new shipping address?\n官方解答：To shop with us, you must first register an account using a valid email address and contact phone number. Having an account allows you to save your details, making future purchases faster and more convenient. Once registered, you can update your information anytime through the My Account section. To add an alternative shipping address, simply enter it in the Address Book within My Account."
+    },
+    {
+      "session_id": "sess_0073",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What are the conditions for a return?",
+      "answer": "You may request a return and refund for items that: ● Were purchased directly from Daedo.com ● Are in new, unused condition, with original tags and packaging intact ● Are returned within 30 calendar days from the delivery date",
+      "source_file_a": "faq.csv",
+      "source_file_b": "refund_and_return_policy.pdf",
+      "context_used": "Refund & Return Policy Refund & Return Policy At Daedo.com, we want you to be fully satisfied with your purchase. If you need to return a product and request a refund, please follow the steps outlined below. 1. Check Return Eligibility You may request a return and refund for items that: ● Were purchased directly from Daedo.com ● Are in new, unused condition, with original tags and packaging intact ● Are returned within 30 calendar days from the delivery date"
+    }
+  ],
+  "sess_0074": [
+    {
+      "session_id": "sess_0074",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "I forgot my account password. How can I reset it?",
+      "answer": "If you forget your password, please contact Customer Services for a reset.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "【常見問題】\n使用者提問：I forgot my account password. How can I reset it?\n官方解答：If you forget your password, please contact Customer Services for a reset. Once your password has been reset, you can create a new one at your convenience in the My Account section."
+    },
+    {
+      "session_id": "sess_0074",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can I create a new one after that?",
+      "answer": "Once your password has been reset, you can create a new one at your convenience in the My Account section.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "【常見問題】\n使用者提問：I forgot my account password. How can I reset it?\n官方解答：If you forget your password, please contact Customer Services for a reset. Once your password has been reset, you can create a new one at your convenience in the My Account section."
+    },
+    {
+      "session_id": "sess_0074",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "Do you transfer personal data outside the EEA?",
+      "answer": "We do not transfer personal data outside the European Economic Area (EEA) unless:",
+      "source_file_a": "faq.csv",
+      "source_file_b": "legal_notice.pdf",
+      "context_used": "Marketing Communications When registering, you may opt to receive promotional communications and special offers. You may unsubscribe at any time by contacting our Customer Service team. International Data Transfers We do not transfer personal data outside the European Economic Area (EEA) unless: ● You are located outside the EEA, and ● Such transfer is necessary to deliver your order, process payments or refunds, or send subscribed promotional communications. Cookies"
+    }
+  ],
+  "sess_0075": [
+    {
+      "session_id": "sess_0075",
+      "turn": 1,
+      "intent": "initial_query",
+      "question": "I'm not receiving your emails. How can I make sure they don't go to my spam folder?",
+      "answer": "add our email address to your safe sender list",
+      "source_file_a": "faq.csv",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "【常見問題】\n使用者提問：I'm not receiving your emails. How can I make sure they don't go to my spam folder?\n官方解答：To prevent our emails from being marked as spam, add our email address to your safe sender list. This helps ensure our messages arrive in your inbox without issues. Each Internet Service Provider (ISP) uses spam filters to sort emails. By whitelisting our email, you can ensure you receive important updates from us."
+    },
+    {
+      "session_id": "sess_0075",
+      "turn": 2,
+      "intent": "coreference",
+      "question": "Can you explain how that helps with the spam filters?",
+      "answer": "This helps ensure our messages arrive in your inbox without issues.",
+      "source_file_a": "faq.csv",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "【常見問題】\n使用者提問：I'm not receiving your emails. How can I make sure they don't go to my spam folder?\n官方解答：To prevent our emails from being marked as spam, add our email address to your safe sender list. This helps ensure our messages arrive in your inbox without issues. Each Internet Service Provider (ISP) uses spam filters to sort emails. By whitelisting our email, you can ensure you receive important updates from us."
+    },
+    {
+      "session_id": "sess_0075",
+      "turn": 3,
+      "intent": "topic_switch",
+      "question": "What's the warranty period for products from DAEDO BARCELONA?",
+      "answer": "Warranty is 1 year from delivery",
+      "source_file_a": "faq.csv",
+      "source_file_b": "terms_and_conditions.pdf",
+      "context_used": "3.3 Guarantees ● All products comply with international safety standards. ● Warranty is 1 year from delivery. DAEDO BARCELONA acts as intermediary in managing claims with suppliers. ● Warranty applies to normal use; not valid for improper use or user-specific needs. ● DAEDO BARCELONA is not liable for indirect damages, data loss, or profit loss. 3.4 Right of Withdrawal The CONTRACTING PARTY may withdraw within 30 calendar days of receiving the product. To request a return, the CONTRACTING PARTY"
+    }
+  ]
+}

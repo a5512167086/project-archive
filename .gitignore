@@ -23,3 +23,5 @@ cache
 experiments/*
 
 evaluation.log
+multiturn_generation.log
+testset_generation.log

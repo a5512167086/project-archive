@@ -3,7 +3,6 @@ import json
 import logging
 import os
 import re
-import shutil
 import time
 from collections import defaultdict
 from logging.handlers import RotatingFileHandler
@@ -38,14 +37,15 @@ from app.configs.config import (
 )
 
 MAX_CONCURRENT_REQUESTS = 5
-DATASET_DIR = "data/eval_dataset"
-DATASET_DONE_DIR = "data/eval_dataset_done"
-RESULT_DIR = "data/eval_result"
+# 修改 1：更新資料夾路徑
+DATASET_DIR = "data/eval_dataset/single_turn"
+RESULT_DIR = "data/eval_result/single_turn"
 MAX_CONTEXTS_PREVIEW = 3
 MAX_TEXT_PREVIEW_CHARS = 1200
 
-Path(DATASET_DONE_DIR).mkdir(parents=True, exist_ok=True)
-log_file = Path(DATASET_DONE_DIR) / "ragas_eval.log"
+# 修改 2：移除 DATASET_DONE_DIR，把 log 檔統一放在 RESULT_DIR
+Path(RESULT_DIR).mkdir(parents=True, exist_ok=True)
+log_file = Path(RESULT_DIR) / "ragas_eval.log"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -93,6 +93,8 @@ def detect_dataset_language(dataset: list[dict]) -> str:
 def load_eval_datasets(dataset_dir: str = DATASET_DIR) -> dict[str, list[dict]]:
     logger.info(f"開始載入評估資料集，目錄: {dataset_dir}")
     dataset_path = Path(dataset_dir)
+    result_path = Path(RESULT_DIR)
+
     if not dataset_path.exists():
         logger.error(f"資料集目錄不存在: {dataset_dir}")
         raise FileNotFoundError(f"目錄不存在: {dataset_dir}")
@@ -103,8 +105,15 @@ def load_eval_datasets(dataset_dir: str = DATASET_DIR) -> dict[str, list[dict]]:
         return datasets
     logger.info(f"找到 {len(json_files)} 個 JSON 檔案")
     for json_file in json_files:
+        file_name = json_file.stem
+
+        # 修改 3：檢查是否已經有評估結果，若有則略過
+        expected_result_file = result_path / f"{file_name}_result.json"
+        if expected_result_file.exists():
+            logger.info(f" ⏭️ 略過: {file_name} (已於 {RESULT_DIR} 找到評估結果)")
+            continue
+
         try:
-            file_name = json_file.stem
             with open(json_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
             if isinstance(data, list):
@@ -167,16 +176,7 @@ def update_summary_report(
         logger.error(f"更新總表失敗: {str(e)}")
 
 
-def move_dataset_to_done(dataset_name: str) -> None:
-    source_path = Path(DATASET_DIR) / f"{dataset_name}.json"
-    dest_path = Path(DATASET_DONE_DIR) / f"{dataset_name}.json"
-    dest_path.parent.mkdir(parents=True, exist_ok=True)
-    if source_path.exists():
-        try:
-            shutil.move(str(source_path), str(dest_path))
-            logger.info(f"已將處理完畢的資料集移動至: {DATASET_DONE_DIR}")
-        except Exception as e:
-            logger.error(f"移動檔案失敗: {e}")
+# 備註：已移除 move_dataset_to_done 函式
 
 
 async def adapt_prompt_helper(
@@ -492,7 +492,8 @@ async def evaluate_datasets(
 
                 save_dataset_result(dataset_name, dataset_results, dict(avg_scores))
                 update_summary_report(dataset_name, dict(avg_scores))
-                move_dataset_to_done(dataset_name)
+
+                # 修改 4：移除 move_dataset_to_done
 
                 dataset_elapsed = time.time() - dataset_start_time
                 all_results[dataset_name] = {
@@ -516,7 +517,6 @@ async def evaluate_datasets(
 
 async def main() -> None:
     logger.info("=== Ragas 評估程式啟動 ===")
-    Path(DATASET_DONE_DIR).mkdir(parents=True, exist_ok=True)
     Path(RESULT_DIR).mkdir(parents=True, exist_ok=True)
 
     with tracing_v2_enabled():
@@ -541,15 +541,6 @@ async def main() -> None:
                 logger.info(
                     f"初始化指向本機 Ollama ({OLLAMA_LLM_NAME}) 的 OpenAI Client..."
                 )
-
-                # For GPT
-                # client = wrap_openai(
-                #     AsyncAzureOpenAI(
-                #         api_key=AZURE_OPENAI_API_KEY,
-                #         api_version=AZURE_OPENAI_API_VERSION,
-                #         azure_endpoint=AZURE_OPENAI_ENDPOINT,
-                #     )
-                # )
 
                 client = wrap_openai(
                     AsyncOpenAI(
