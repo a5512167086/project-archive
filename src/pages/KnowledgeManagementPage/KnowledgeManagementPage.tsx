@@ -305,8 +305,8 @@ const KnowledgeManagementPage = () => {
       <Box sx={{ flexShrink: 0 }}>
         <CustomBreadcrumb
           items={[
-            { linkText: t('botPage.myBot'), link: '/bots' },
-            { linkText: currentBot?.chinese_name || '', link: `/bots/${uuid}` }
+            { linkText: t('botPage.myBot'), link: '/bot-list' },
+            { linkText: currentBot?.chinese_name || '', link: `/bot-list/${uuid}` }
           ]}
         />
       </Box>
