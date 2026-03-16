@@ -5,6 +5,7 @@ import random
 import re
 
 import json_repair
+import pandas as pd
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_ollama import ChatOllama
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -177,7 +178,6 @@ def verify_multiturn_quality(conversation: list, chunk_a: str, chunk_b: str) -> 
 # ==========================================
 # 4. 執行區塊：讀取並分類 PDF 與 FAQ 區塊
 # ==========================================
-import pandas as pd  # 只有讀取 FAQ 時會用到 pandas，所以我把它移到這附近了
 
 logger.info("================ 1. 讀取並處理 PDF 與 FAQ 文件 ================")
 

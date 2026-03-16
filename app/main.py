@@ -38,7 +38,7 @@ from app.services.retrieval_service import RetrievalService
 from app.services.rewrite_service import RewriteService
 from app.services.summary_service import SummaryService
 from app.services.vector_service import VectorService
-from app.summary_memory import SummaryMemory
+from app.utils.summary_memory import SummaryMemory
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 STOPWORDS_PATH = f"{BASE_DIR}/data/stopwords.txt"

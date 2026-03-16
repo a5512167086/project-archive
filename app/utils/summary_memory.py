@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import time
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional, Tuple
@@ -173,12 +174,30 @@ class SummaryMemory:
         clean = clean[-self.max_summary_messages :]
         llm = self._get_llm(self.summary_model)
 
-        system = (
-            "你是對話摘要器。"
-            "請用繁體中文把對話濃縮為長期摘要。"
-            "摘要必須包含：人物/角色、已確認事實、目前目標、已做決策、未解問題。"
-            "只輸出摘要內容，不要加標題、不要寒暄。"
-        )
+        # 把近期的對話內容拼接起來，用來偵測語言
+        combined_text = " ".join([str(m.content) for m in clean])
+        is_chinese = bool(re.search(r"[\u4e00-\u9fff]", combined_text))
+
+        if is_chinese:
+            system = (
+                "你是專門為「知識問答檢索系統」服務的對話上下文摘要器。\n"
+                "請用繁體中文將歷史對話濃縮成高度精煉的長期摘要。\n"
+                "【摘要重點（絕對規則）】\n"
+                "1. 核心實體（極重要）：必須明確保留對話中討論過的「專有名詞」、「產品名稱」、「系統代號」或「特定概念」。這是為了幫助後續系統還原代名詞（如：它、這個）。\n"
+                "2. 討論脈絡：簡短總結使用者關心的主要面向（例如：詢問價格、比較規格、詢問缺點）。\n"
+                "3. 排除雜訊：絕對不要記錄寒暄語、不要加標題、不要編造對話中未提及的資訊。\n"
+                "請保持摘要極度簡短，以精煉的段落或條列式輸出即可。"
+            )
+        else:
+            system = (
+                "You are a conversation context summarizer specifically designed for a 'Knowledge Retrieval-Augmented Generation (RAG) System'.\n"
+                "Please condense the conversation history into a highly refined long-term summary in English.\n"
+                "[Summary Focus (Absolute Rules)]\n"
+                "1. Core Entities (CRUCIAL): You MUST explicitly retain any 'proper nouns', 'product names', 'system codes', or 'specific concepts' discussed in the conversation. This is essential to help downstream systems resolve pronouns (e.g., it, this, they).\n"
+                "2. Discussion Context: Briefly summarize the main aspects the user is inquiring about (e.g., asking for price, comparing specs, asking about drawbacks).\n"
+                "3. Exclude Noise: ABSOLUTELY DO NOT record greetings/small talk, do not add titles, and do not invent information not mentioned in the conversation.\n"
+                "Keep the summary extremely concise, outputting as a refined paragraph or bullet points."
+            )
 
         prompt = ChatPromptTemplate.from_messages([
             ("system", system),
@@ -186,12 +205,18 @@ class SummaryMemory:
         ])
 
         final_messages = prompt.format_messages(chat_history=clean)
-        response = llm.invoke(final_messages)
 
-        content = getattr(response, "content", "")
-        if not isinstance(content, str):
-            content = str(content)
-        return content.strip()
+        try:
+            response = llm.invoke(final_messages)
+            content = getattr(response, "content", "")
+            if not isinstance(content, str):
+                content = str(content)
+            return content.strip()
+        except Exception as e:
+            from app.logger import logger
+
+            logger.error(f"[SummaryMemory] LLM invoke failed during summarize: {e}")
+            return ""
 
     def maybe_update_summary(self, session_key: str, *, force: bool = False) -> bool:
         if not self._cache_enabled:

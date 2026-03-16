@@ -28,7 +28,7 @@ from app.services.retrieval_service import RetrievalService
 from app.services.rewrite_service import RewriteService
 from app.services.summary_service import SummaryService
 from app.services.vector_service import VectorService
-from app.summary_memory import SummaryMemory
+from app.utils.summary_memory import SummaryMemory
 
 # -----------------------------
 # Paths (repo root)
