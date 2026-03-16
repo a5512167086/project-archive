@@ -163,7 +163,7 @@ def _rag_answer_with_retry(rag: RAGService, **kwargs) -> Dict[str, Any]:
     max_attempts = kwargs.pop("max_attempts", 5)
     for attempt in range(1, max_attempts + 1):
         try:
-            return rag.answer(rerank_threshold=0.0, **kwargs)
+            return rag.answer(**kwargs)
         except Exception as e:
             if attempt == max_attempts:
                 raise e
@@ -229,19 +229,23 @@ def main():
                             unique_line_id = f"eval_{session_id}_{int(time.time())}"
                             session_key = f"{bot_uuid}:{unique_line_id}"
 
-                            # 記錄下來以便後續刪除
                             eval_session_keys.add(session_key)
-
-                            log_f.write(
-                                f"\n{'=' * 60}\n[Session Start] {session_id} (line_id: {unique_line_id})\n{'=' * 60}\n"
-                            )
-                            print(f"\n{'=' * 40}\n[Session] {session_id}\n{'=' * 40}")
 
                             for turn_data in turns:
                                 turn_num = turn_data.get("turn")
-                                question = turn_data.get("question")
-                                gt = turn_data.get("answer")
-                                intent = turn_data.get("intent")
+
+                                query_for_rag = turn_data.get("raw_question")
+
+                                gt_query = turn_data.get("ground_truth_question")
+
+                                gt_answer = turn_data.get("answer")
+
+                                if query_for_rag is None:
+                                    err_msg = f"跳過錯誤資料：{session_id} Turn {turn_num} 缺少 raw_question"
+                                    print(err_msg)
+                                    log_f.write(err_msg + "\n")
+                                    log_f.flush()
+                                    continue
 
                                 t0 = time.perf_counter()
 
@@ -249,7 +253,7 @@ def main():
                                     rag,
                                     bot_uuid=bot_uuid,
                                     line_id=unique_line_id,
-                                    query_text=question,
+                                    query_text=query_for_rag,
                                     model_name=model,
                                     top_k=5,
                                     fetch_k=(30 if exp.use_rerank else 5),
@@ -266,20 +270,27 @@ def main():
                                 hits = res.get("hits", [])
                                 ans = str(res.get("answer", "")).strip()
 
+                                sys_rewritten_q = str(
+                                    res.get("rewritten_query", query_for_rag)
+                                ).strip()
+
                                 rag.summary_service.maybe_update_summary(session_key)
 
                                 results.append({
                                     "session_id": session_id,
                                     "turn": turn_num,
-                                    "intent": intent,
-                                    "question": question,
+                                    "intent": turn_data.get("intent"),
+                                    "raw_question": query_for_rag,
+                                    "question": gt_query,
+                                    "system_rewritten_query": sys_rewritten_q,
                                     "contexts": _contexts_for_ragas(hits),
                                     "answer": ans,
-                                    "ground_truth": gt,
+                                    "ground_truth": gt_answer,
                                 })
 
-                                msg = f"  -> Turn {turn_num} ({intent}) | {dur:.2f}s | Q: {question}\n"
-                                msg += f"     GT: {gt}\n"
+                                msg = f"  -> Turn {turn_num} ({turn_data.get('intent')}) | {dur:.2f}s | 輸入: {query_for_rag}\n"
+                                msg += f"     GT_Q: {gt_query}\n"
+                                msg += f"     系統改寫: {sys_rewritten_q}\n"
                                 msg += "     Hits:\n"
                                 msg += (
                                     (
@@ -291,8 +302,9 @@ def main():
                                     if hits
                                     else "       (No hits)\n"
                                 )
-                                msg += f"     A:  {ans}\n"
-                                msg += "  " + "-" * 50
+                                msg += f"     GT_A: {gt_answer}\n"
+                                msg += f"     AI_A: {ans}\n"
+                                msg += "  " + "-" * 60
 
                                 print(msg)
                                 log_f.write(msg + "\n")

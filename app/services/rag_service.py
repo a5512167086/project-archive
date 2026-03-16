@@ -72,7 +72,6 @@ class RAGService:
         top_k: int = 3,
         fetch_k: Optional[int] = None,
         score_threshold: Optional[float] = DEFAULT_SCORE_THRESHOLD,
-        rerank_threshold: Optional[float] = None,
         retrieval_mode: str = "hybrid",
         use_rerank: bool = True,
     ) -> List[Dict[str, Any]]:
@@ -135,36 +134,9 @@ class RAGService:
             top_k=int(top_k),
         )
 
-        if rerank_threshold is not None:
-            kept_hits: List[Dict[str, Any]] = []
-            dropped_hits: List[Dict[str, Any]] = []
-
-            thr = float(rerank_threshold)
-            for h in reranked_hits:
-                score = float(h.get("rerank_score", 0.0) or 0.0)
-                if score >= thr:
-                    kept_hits.append(h)
-                else:
-                    dropped_hits.append(h)
-
-            reranked_hits = kept_hits
-
-            if dropped_hits:
-                logger.info(
-                    f"--- [Rerank Filter] Dropped {len(dropped_hits)} items (Score < {thr}) ---"
-                )
-                for h in dropped_hits:
-                    q_snippet = (h.get("question", "") or "")[:30]
-                    logger.info(
-                        f"  [DROPPED] Score: {float(h.get('rerank_score', 0.0) or 0.0):.4f} "
-                        f"| ID: {h.get('object_id')} | Q: {q_snippet}..."
-                    )
-            else:
-                logger.info(f"[Rerank Filter] No items dropped (all >= {thr}).")
-
         if reranked_hits:
             logger.info(
-                f"--- [Step 2 Result] After Reranking & Filtering (Top {len(reranked_hits)}) ---"
+                f"--- [Step 2 Result] After Reranking (Top {len(reranked_hits)}) ---"
             )
             for i, h in enumerate(reranked_hits):
                 q_snippet = (h.get("question", "") or "")[:30]
@@ -172,10 +144,6 @@ class RAGService:
                     f"  #{i + 1} RerankScore: {float(h.get('rerank_score', 0.0) or 0.0):.4f} "
                     f"| ID: {h.get('object_id')} | Q: {q_snippet}..."
                 )
-        else:
-            logger.info(
-                "--- [Step 2 Result] Final list is EMPTY (all filtered out) ---"
-            )
 
         return reranked_hits
 
@@ -187,7 +155,6 @@ class RAGService:
         top_k: int = DEFAULT_TOP_K,
         fetch_k: Optional[int] = None,
         score_threshold: Optional[float] = DEFAULT_SCORE_THRESHOLD,
-        rerank_threshold: Optional[float] = None,
         history_rounds: int = DEFAULT_MAX_HISTORY_ROUNDS,
         rewrite_model: str = "local_model",
         use_rewrite: bool = True,
@@ -204,7 +171,6 @@ class RAGService:
                 top_k=top_k,
                 fetch_k=fetch_k,
                 score_threshold=score_threshold,
-                rerank_threshold=rerank_threshold,
                 retrieval_mode=retrieval_mode,
                 use_rerank=use_rerank,
             )
@@ -260,7 +226,6 @@ class RAGService:
             top_k=top_k,
             fetch_k=fetch_k,
             score_threshold=score_threshold,
-            rerank_threshold=rerank_threshold,
             retrieval_mode=retrieval_mode,
             use_rerank=use_rerank,
         )
@@ -362,7 +327,6 @@ class RAGService:
         top_k: int = DEFAULT_TOP_K,
         fetch_k: Optional[int] = None,
         score_threshold: Optional[float] = DEFAULT_SCORE_THRESHOLD,
-        rerank_threshold: Optional[float] = None,
         history_rounds: int = DEFAULT_MAX_HISTORY_ROUNDS,
         rewrite_model: str = "local_model",
         max_history_messages: int = DEFAULT_MAX_HISTORY_MESSAGES,
@@ -378,7 +342,6 @@ class RAGService:
             top_k=top_k,
             fetch_k=fetch_k,
             score_threshold=score_threshold,
-            rerank_threshold=rerank_threshold,
             history_rounds=history_rounds,
             rewrite_model=rewrite_model,
             use_rewrite=use_rewrite,

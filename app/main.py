@@ -200,7 +200,6 @@ async def query(
         top_k=req.top_k,
         fetch_k=req.fetch_k,
         score_threshold=req.score_threshold,
-        rerank_threshold=req.rerank_threshold,
         history_rounds=5,
         rewrite_model="local_model",
         max_history_messages=rag_service.DEFAULT_MAX_HISTORY_MESSAGES,

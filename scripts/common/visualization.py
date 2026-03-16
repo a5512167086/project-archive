@@ -127,65 +127,89 @@ def plot_by_retrieval_lines(
         plt.close()
 
 
-def plot_one_heatmap(
+def plot_heatmaps_by_turn(
     df: pd.DataFrame,
     outdir: Path,
     metric_order: List[str],
     retrieval_order: List[str],
     module_order: List[str],
 ) -> None:
-    df = df.copy()
-    df["run_id"] = df.apply(
-        lambda r: f"{r['turn_type']} | {r['retrieval']} | {r['module']}", axis=1
-    )
+    turn_types = df["turn_type"].unique()
 
-    valid_metrics = [m for m in metric_order if m in df["metric"].unique()]
-    pivot = df.pivot_table(
-        index="run_id", columns="metric", values="value", aggfunc="mean"
-    ).reindex(columns=valid_metrics)
+    for turn in turn_types:
+        # 過濾出當前對話類型的資料
+        df_turn = df[df["turn_type"] == turn].copy()
+        if df_turn.empty:
+            continue
 
-    retrieval_rank = {r: i for i, r in enumerate(retrieval_order)}
-    module_rank = {m: i for i, m in enumerate(module_order)}
-    turn_rank = {"Single-Turn": 0, "Multi-Turn": 1}
-
-    def sort_key(run_id: str) -> tuple:
-        turn, retrieval, module = [x.strip() for x in run_id.split("|")]
-        return (
-            turn_rank.get(turn, 99),
-            retrieval_rank.get(retrieval, 99),
-            module_rank.get(module, 99),
+        # run_id 不再需要包含 turn_type，因為圖表已經分開了
+        df_turn["run_id"] = df_turn.apply(
+            lambda r: f"{r['retrieval']} | {r['module']}", axis=1
         )
 
-    pivot = pivot.loc[sorted(pivot.index, key=sort_key)]
+        valid_metrics = [m for m in metric_order if m in df_turn["metric"].unique()]
+        pivot = df_turn.pivot_table(
+            index="run_id", columns="metric", values="value", aggfunc="mean"
+        ).reindex(columns=valid_metrics)
 
-    n_rows, n_cols = pivot.shape
-    fig_w = max(12, 1.2 * n_cols + 4)
-    fig_h = max(6, 0.4 * n_rows + 2)
+        # 移除全為 NaN 的欄位（例如 Single-Turn 的 coreference success）
+        pivot = pivot.dropna(axis=1, how="all")
 
-    fig, ax = plt.subplots(figsize=(fig_w, fig_h))
-    im = ax.imshow(pivot.values, vmin=0.5, vmax=1.0, aspect="auto", cmap="viridis")
+        retrieval_rank = {r: i for i, r in enumerate(retrieval_order)}
+        module_rank = {m: i for i, m in enumerate(module_order)}
 
-    ax.set_title("Combined Evaluation Heatmap (Single vs Multi-Turn)", pad=20)
-    ax.set_xticks(range(n_cols))
-    ax.set_xticklabels(pivot.columns.tolist(), rotation=35, ha="right")
-    ax.set_yticks(range(n_rows))
-    ax.set_yticklabels(pivot.index.tolist())
+        def sort_key(run_id: str) -> tuple:
+            retrieval, module = [x.strip() for x in run_id.split("|")]
+            return (
+                retrieval_rank.get(retrieval, 99),
+                module_rank.get(module, 99),
+            )
 
-    for i in range(n_rows):
-        for j in range(n_cols):
-            v = pivot.values[i, j]
-            if not pd.isna(v):
-                color = "white" if v < 0.75 else "black"
-                ax.text(
-                    j, i, f"{v:.3f}", ha="center", va="center", fontsize=9, color=color
-                )
+        pivot = pivot.loc[sorted(pivot.index, key=sort_key)]
 
-    fig.colorbar(im, ax=ax, label="Score", fraction=0.02, pad=0.02)
-    plt.tight_layout()
-    out_path = outdir / "all_results_heatmap_combined.png"
-    plt.savefig(out_path, dpi=200)
-    plt.close()
-    print(f"[OK] Saved Combined Heatmap: {out_path.resolve()}")
+        n_rows, n_cols = pivot.shape
+        fig_w = max(10, 1.2 * n_cols + 3)
+        fig_h = max(6, 0.4 * n_rows + 2)
+
+        fig, ax = plt.subplots(figsize=(fig_w, fig_h))
+
+        # 繪製熱力圖，設定顏色範圍 0.5 ~ 1.0 (可視需求調整)
+        im = ax.imshow(pivot.values, vmin=0.5, vmax=1.0, aspect="auto", cmap="viridis")
+
+        ax.set_title(
+            f"Evaluation Heatmap - {turn}", pad=20, fontsize=14, fontweight="bold"
+        )
+        ax.set_xticks(range(n_cols))
+        ax.set_xticklabels(pivot.columns.tolist(), rotation=35, ha="right")
+        ax.set_yticks(range(n_rows))
+        ax.set_yticklabels(pivot.index.tolist())
+
+        # 填上數值標籤
+        for i in range(n_rows):
+            for j in range(n_cols):
+                v = pivot.values[i, j]
+                if not pd.isna(v):
+                    # 數值越低顏色越深，為了對比度，低於 0.75 用白色字，高於用黑色
+                    color = "white" if v < 0.75 else "black"
+                    ax.text(
+                        j,
+                        i,
+                        f"{v:.3f}",
+                        ha="center",
+                        va="center",
+                        fontsize=10,
+                        color=color,
+                    )
+
+        # 加入 Colorbar
+        cbar = fig.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
+        cbar.set_label("Score", rotation=270, labelpad=15)
+
+        plt.tight_layout()
+        out_path = outdir / f"heatmap_{turn.lower().replace('-', '_')}.png"
+        plt.savefig(out_path, dpi=200)
+        plt.close()
+        print(f"[OK] Saved {turn} Heatmap: {out_path.resolve()}")
 
 
 # ----------------------------
@@ -281,7 +305,7 @@ def main() -> None:
             df, OUTDIR, retrieval_order, trad_metrics, module_order, "Traditional", turn
         )
 
-    plot_one_heatmap(df, OUTDIR, all_metrics, retrieval_order, module_order)
+    plot_heatmaps_by_turn(df, OUTDIR, all_metrics, retrieval_order, module_order)
 
     print(f"\n✨ All charts saved under: {OUTDIR.resolve()}")
 

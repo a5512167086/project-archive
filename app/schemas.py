@@ -22,7 +22,6 @@ class QueryRequest(BaseModel):
     top_k: int = 3
     fetch_k: Optional[int] = Field(default=15)
     score_threshold: float = 0.3
-    rerank_threshold: float = Field(default=0.5)
     model: str = Field(default="local_model")
 
 

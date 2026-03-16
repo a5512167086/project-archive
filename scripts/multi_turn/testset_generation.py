@@ -3,163 +3,131 @@ import logging
 import os
 import random
 import re
+from collections import defaultdict
 
 import json_repair
-import pandas as pd
-from langchain_community.document_loaders import PyPDFLoader
 from langchain_ollama import ChatOllama
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from app.configs.config import OLLAMA_LLM_NAME
 
 # ==========================================
-# 1. 基礎設定與 Logging 初始化
+# 1. 基礎設定
 # ==========================================
 os.makedirs("data/testset", exist_ok=True)
-
 logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s",
-    handlers=[
-        logging.FileHandler("data/testset/multiturn_generation.log", encoding="utf-8"),
-        logging.StreamHandler(),
-    ],
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
-logging.getLogger("httpx").setLevel(logging.WARNING)
-logging.getLogger("httpcore").setLevel(logging.WARNING)
-
-# 測試集生成建議 temperature 稍微調高一點點 (例如 0.2) 讓對話比較自然
-llm_gen = ChatOllama(model=OLLAMA_LLM_NAME, temperature=0.2)
-# Quality Check 階段維持 0.0，確保檢驗標準一致
+# 生成器：使用較低的 temperature
+llm = ChatOllama(model=OLLAMA_LLM_NAME, temperature=0.1)
+# 評審員：嚴格的 0.0
 llm_eval = ChatOllama(model=OLLAMA_LLM_NAME, temperature=0.0)
 
-BASE_DIR = "data/dataset"
+SINGLE_TURN_JSON = "data/testset/rag_testset.json"  # 你的輸入檔案
+OUTPUT_JSON = "data/testset/rag_multiturn_testset.json"  # 輸出的多輪檔案
 
 
 # ==========================================
 # 2. 輔助函數
 # ==========================================
-def clean_text(text: str) -> str:
-    if not text or not isinstance(text, str):
-        return str(text) if text else ""
-    text = text.strip()
-    while (text.startswith('"') and text.endswith('"')) or (
-        text.startswith("'") and text.endswith("'")
-    ):
-        if len(text) >= 2:
-            text = text[1:-1].strip()
-        else:
-            break
-    text = re.sub(r"[\s]+", " ", text)
-    chinese_char = r"[\u4e00-\u9fa5]"
-    text = re.sub(f"({chinese_char}) +({chinese_char})", r"\1\2", text)
-    fullwidth_punc = r"[，。！？：；（）「」『』]"
-    text = re.sub(f"({chinese_char}) +({fullwidth_punc})", r"\1\2", text)
-    text = re.sub(f"({fullwidth_punc}) +({chinese_char})", r"\1\2", text)
-    return text.strip()
-
-
-def is_mostly_english(text: str) -> bool:
-    chinese_chars = re.findall(r"[\u4e00-\u9fa5]", text)
-    return len(chinese_chars) < (len(text) * 0.05)
+def get_first_question(q_data) -> str:
+    """處理 FAQ 中 question 是 list 的情況"""
+    if isinstance(q_data, list) and len(q_data) > 0:
+        return str(q_data[0])
+    return str(q_data)
 
 
 def parse_llm_json(content):
     try:
         clean_content = content.replace("```json", "").replace("```", "").strip()
-        parsed_data = json_repair.loads(clean_content)
-        return parsed_data
+        return json_repair.loads(clean_content)
     except Exception as e:
         logger.error(f"[JSON 解析失敗] {e}")
         return None
 
 
 # ==========================================
-# 3. LLM 生成與 Quality Check 函數
+# 3. 核心改寫與 QC 函數
 # ==========================================
-def generate_multiturn_qa(chunk_a: str, chunk_b: str):
-    """生成 3 輪對話，包含初始問題、指代消解、話題轉換"""
-    context = f"[主題 A (Turn 1 & 2 的依據)]:\n{chunk_a}\n\n[主題 B (Turn 3 的依據)]:\n{chunk_b}"
-    is_eng = is_mostly_english(context)
+def synthesize_dialogue_questions(q1: str, q2: str, q3: str) -> dict:
+    """請 LLM 扮演編劇，只改寫問題，不碰答案"""
+    is_eng = not bool(re.search(r"[\u4e00-\u9fff]", q1 + q2 + q3))
 
     if is_eng:
         prompt = f"""
-        You are an expert conversational AI tester. Based on the [Context] below, generate a 3-turn realistic user conversation with a customer service AI.
+        You are a dialogue scriptwriter. I have 3 independent questions. 
+        Your task is to rewrite them to sound like a natural 3-turn conversation from a single user.
         
-        [Context]:
-        {context}
+        [Original Questions]:
+        - Q1 (Turn 1): {q1}
+        - Q2 (Turn 2): {q2}
+        - Q3 (Turn 3): {q3}
         
-        [Requirements]:
-        - Turn 1 (initial_query): Ask a clear question based strictly on [Topic A].
-        - Turn 2 (coreference): Ask a follow-up question to Turn 1. The user MUST use pronouns (e.g., it, that, they, this policy) or omit the subject to test the AI's coreference resolution. The answer must still come from [Topic A].
-        - Turn 3 (topic_switch): The user abruptly changes the subject and asks a question based strictly on [Topic B] to test topic switching.
+        [Rewrite Rules]:
+        - Turn 1: Keep it exactly the same or very similar to Q1.
+        - Turn 2 (Coreference): Rewrite Q2 to logically follow Turn 1. You MUST replace the main subject with a pronoun (e.g., 'it', 'this', 'they') so it relies on Turn 1's context.
+        - Turn 3 (Topic Switch): Rewrite Q3 to abruptly change the topic. Start with a transition phrase like "By the way,", "On another note,", etc.
         
-        【CRITICAL REQUIREMENTS FOR AI'S ANSWER】:
-        1. The 'answer' MUST be a direct, strict extraction from the Context. It must be the shortest complete sentence that directly answers the question.
-        2. ABSOLUTELY NO conversational fillers, introductory remarks, or polite phrases (e.g., DO NOT use "Yes", "Of course", "Certainly", "The table below shows").
-        3. ABSOLUTELY NO substituting words, reordering sentences, or paraphrasing. You MAY add punctuation or capitalize the first word for grammatical correctness, but MUST NOT add any words not present in the original text.
-        
-        Output MUST be a valid JSON array of objects with keys: "turn", "intent", "question", "answer".
+        Output MUST be a JSON object with keys: "turn1_q", "turn2_q", "turn3_q".
         """
     else:
         prompt = f"""
-        你是一位專業的對話系統測試工程師。請根據以下的【上下文】，生成一段使用者與客服 AI 的 3 輪真實對話。
+        你是一個對話編劇。我會給你 3 個獨立的問題。
+        請幫我把它們改寫成一個自然連貫的「單一使用者 3 輪對話」。
         
-        【上下文】：
-        {context}
+        【原始問題】：
+        - Q1 (第1輪): {q1}
+        - Q2 (第2輪): {q2}
+        - Q3 (第3輪): {q3}
         
-        【生成要求】：
-        - 第 1 輪 (initial_query)：根據 [主題 A] 提出一個明確的問題。
-        - 第 2 輪 (coreference)：提出與第 1 輪相關的後續問題。使用者【必須】使用代名詞（如：它、這個、那、這項規定）或省略主詞，來測試系統的「指代消解」能力。答案必須從 [主題 A] 中擷取。
-        - 第 3 輪 (topic_switch)：使用者突然改變話題，根據 [主題 B] 提出一個全新的問題，以測試系統的「話題轉換」能力。答案必須從 [主題 B] 中擷取。
+        【改寫規則】：
+        - 第 1 輪：保持與 Q1 相同或極度相似。
+        - 第 2 輪 (指代消解)：將 Q2 改寫成追問第 1 輪的語氣。你【必須】把 Q2 中的主詞替換成代名詞（例如：它、這個、那），讓這句話必須依賴第 1 輪的上下文才能看懂。
+        - 第 3 輪 (話題轉換)：將 Q3 改寫成突然切換話題的語氣。請在開頭加上轉換詞（例如：「對了，我想另外問一下」、「順帶一提」）。
         
-        【AI 答案的絕對硬性規定】：
-        1. AI 的「答案」必須是嚴格從上下文中擷取的「最短完整句子」，直接切入重點。
-        2. 絕對禁止在答案中加入開場白、結語或客套話（例如：絕對不要出現「是的」、「沒問題」、「當然」、「下表總結了」等字眼）。
-        3. 絕對禁止替換詞彙、改變語序或用自己的話改寫原文，允許加上句尾標點符號或調整首字大小寫，但不得新增任何原文中不存在的字詞。   
-        僅回傳 JSON 陣列，格式如下：
-        [
-          {{"turn": 1, "intent": "initial_query", "question": "...", "answer": "..."}},
-          {{"turn": 2, "intent": "coreference", "question": "...", "answer": "..."}},
-          {{"turn": 3, "intent": "topic_switch", "question": "...", "answer": "..."}}
-        ]
+        請【僅】回傳 JSON 格式，包含三個 key: "turn1_q", "turn2_q", "turn3_q"。
         """
-
-    response = llm_gen.invoke(prompt)
+    response = llm.invoke(prompt)
     return parse_llm_json(response.content)
 
 
-def verify_multiturn_quality(conversation: list, chunk_a: str, chunk_b: str) -> bool:
-    """寬鬆檢驗多輪對話的品質，提升良率"""
-    if not conversation or len(conversation) != 3:
-        logger.warning("  -> [QC 失敗] 對話輪數不等於 3。")
-        return False
+def verify_rewrite_quality(
+    q1: str, q2: str, q3: str, rq1: str, rq2: str, rq3: str
+) -> bool:
+    """輕量級 QC：只檢查問題是否改歪了，或是忘記用代名詞"""
 
-    conv_str = "\n".join([
-        f"Turn {turn.get('turn')} ({turn.get('intent')}): Q: {turn.get('question')} | A: {turn.get('answer')}"
-        for turn in conversation
-    ])
-    context = f"[主題 A]: {chunk_a}\n[主題 B]: {chunk_b}"
+    # 🚨 新增：把改寫前後的問題漂亮地印出來！
+    logger.info(f"\n{'=' * 20} [編劇改寫結果] {'=' * 20}")
+    logger.info("【Turn 1】 (目標：維持原意)")
+    logger.info(f" 原始 (GT): {q1}")
+    logger.info(f" 改寫 (RQ): {rq1}")
+    logger.info("【Turn 2】 (目標：使用代名詞/省略主詞)")
+    logger.info(f" 原始 (GT): {q2}")
+    logger.info(f" 改寫 (RQ): {rq2}")
+    logger.info("【Turn 3】 (目標：話題切換)")
+    logger.info(f" 原始 (GT): {q3}")
+    logger.info(f" 改寫 (RQ): {rq3}")
+    logger.info(f"{'=' * 56}")
 
-    # 大幅放寬的 QC Prompt
     prompt = f"""
-    你是一位 QA 審核員。請審核以下 3 輪對話是否符合基本的測試標準。
+    你是一位嚴格的對話品質審核員。請檢查「改寫後的多輪對話問題」是否符合測試標準。
     
-    【原文】:
-    {context}
+    【原始獨立問題 (標準)】:
+    T1: {q1}
+    T2: {q2}
+    T3: {q3}
     
-    【對話內容】:
-    {conv_str}
+    【改寫後的多輪對話問題】:
+    T1: {rq1}
+    T2: {rq2}
+    T3: {rq3}
     
-    【檢驗標準】(只要大致符合即可通過):
-    1. 【指代消解測試】Turn 2 的問題是否有延續 Turn 1 的語境？（只要 Turn 2 看起來像是追問，有使用代名詞如 it, that, this, these, 這個, 那個，或省略主詞，即算通過。即使稍微包含一點前面的名詞，或是出現類似 'that policy' 這樣的片語，也都算通過，請不要太苛刻）。
-    2. 【話題轉換測試】Turn 3 是否有切換到不同的話題，並根據 [主題 B] 發問？
-    3. 【無幻覺測試】AI 的回答 (Answer) 是否合理且基於【原文】？ (只要沒有嚴重的捏造或偏離事實就算通過，允許加上標點符號或首字大小寫調整，但若有明顯的詞彙替換或語序改變則不通過)。
+    【檢查標準】:
+    1. 語意一致性：改寫後的問題 (結合上下文看) 是否依然在問跟「原始獨立問題」一模一樣的事情？(若偏離原意，會導致原始答案不匹配)。
+    2. 指代消解 (Turn 2)：改寫後的 T2 是否有成功使用「代名詞」(例如: 它、這個) 或省略主詞，讓它聽起來像是在追問 T1？
     
-    請「務必」只回覆 JSON 格式，包含 "pass" (布林值 true/false) 與 "reason" (簡短解釋原因)。
-    範例: {{"pass": true, "reason": "對話流暢，Turn 2 有追問，Turn 3 成功切換話題，無嚴重幻覺。"}}
+    請回傳 JSON 格式: {{"pass": true/false, "reason": "簡單說明原因"}}
     """
 
     try:
@@ -176,132 +144,130 @@ def verify_multiturn_quality(conversation: list, chunk_a: str, chunk_b: str) -> 
 
 
 # ==========================================
-# 4. 執行區塊：讀取並分類 PDF 與 FAQ 區塊
+# 4. 主程式
 # ==========================================
+# ==========================================
+# 4. 主程式
+# ==========================================
+def main():
+    logger.info("================ 開始讀取 Single-Turn QA ================")
+    with open(SINGLE_TURN_JSON, "r", encoding="utf-8") as f:
+        data = json.load(f)
 
-logger.info("================ 1. 讀取並處理 PDF 與 FAQ 文件 ================")
+    groups = defaultdict(list)
+    for item in data:
+        groups[item["source"]].append(item)
 
-chunks_by_file = {}
+    valid_groups = {k: v for k, v in groups.items() if len(v) >= 2}
+    logger.info(f"共有 {len(valid_groups)} 個 Chunk 可以用來產生連貫的 Turn 1 & Turn 2")
 
-# --- 處理 PDF ---
-pdf_files = [
-    os.path.join(BASE_DIR, f)
-    for f in [
-        "cookies_policy.pdf",
-        "legal_notice.pdf",
-        "privacy_policy.pdf",
-        "refund_and_return_policy.pdf",
-        "shipping_policy.pdf",
-        "terms_and_conditions.pdf",
-    ]
-]
+    multiturn_test_set = []
+    session_id_counter = 1
 
-for file_path in pdf_files:
-    if os.path.exists(file_path):
-        file_name = os.path.basename(file_path)
-        loader = PyPDFLoader(file_path)
-        chunks = RecursiveCharacterTextSplitter(
-            chunk_size=600, chunk_overlap=100
-        ).split_documents(loader.load())
+    for source_a, qa_list_a in valid_groups.items():
+        logger.info(f" -> 正在組裝 Session {session_id_counter} ...")
 
-        chunks_by_file[file_name] = [clean_text(c.page_content) for c in chunks]
-        logger.info(
-            f"成功載入 PDF {file_name}: 取得 {len(chunks_by_file[file_name])} 個區塊"
-        )
+        session_success = False
 
-# --- 處理 FAQ ---
-faq_csv_path = os.path.join(BASE_DIR, "faq.csv")
-if os.path.exists(faq_csv_path):
-    try:
-        df_faq = pd.read_csv(faq_csv_path)
-        faq_chunks = []
-        for index, row in df_faq.iterrows():
-            if pd.isna(row["question"]) or pd.isna(row["answer"]):
+        # 🚨 加入 Retry 機制：最多給它 3 次機會重抽或交換順序
+        for attempt in range(3):
+            if len(qa_list_a) > 2:
+                qa1, qa2 = random.sample(qa_list_a, 2)
+            else:
+                # 如果這個 Chunk 剛好只有兩題，就在第二次嘗試時交換它們的順序
+                qa1, qa2 = qa_list_a[0], qa_list_a[1]
+                if attempt == 1:
+                    qa1, qa2 = qa_list_a[1], qa_list_a[0]
+
+            other_sources = [k for k in groups.keys() if k != source_a]
+            if not other_sources:
+                break
+            source_b = random.choice(other_sources)
+            qa3 = random.choice(groups[source_b])
+
+            q1_text = get_first_question(qa1["question"])
+            q2_text = get_first_question(qa2["question"])
+            q3_text = get_first_question(qa3["question"])
+
+            # 1. 召喚 LLM 改寫問題
+            rewritten_qs = synthesize_dialogue_questions(q1_text, q2_text, q3_text)
+
+            if not rewritten_qs or "turn2_q" not in rewritten_qs:
+                logger.warning(f"  [嘗試 {attempt + 1}/3] LLM 產出格式錯誤。")
                 continue
-            q_clean = clean_text(str(row["question"]))
-            a_clean = clean_text(str(row["answer"]))
 
-            chunk_text = f"【常見問題】\n使用者提問：{q_clean}\n官方解答：{a_clean}"
-            faq_chunks.append(chunk_text)
+            rq1 = rewritten_qs.get("turn1_q", q1_text)
+            rq2 = rewritten_qs.get("turn2_q", q2_text)
+            rq3 = rewritten_qs.get("turn3_q", q3_text)
 
-        if faq_chunks:
-            chunks_by_file["faq.csv"] = faq_chunks
-            logger.info(f"成功載入 FAQ faq.csv: 取得 {len(faq_chunks)} 個區塊")
-    except Exception as e:
-        logger.error(f"讀取 faq.csv 失敗: {e}")
+            # 2. 輕量級 QC
+            if verify_rewrite_quality(q1_text, q2_text, q3_text, rq1, rq2, rq3):
+                session_success = True
+                break  # 🎉 通過 QC！直接跳出 Retry 迴圈
+            else:
+                logger.warning(
+                    f"  [嘗試 {attempt + 1}/3] 被 QC 攔截，嘗試重抽或交換順序..."
+                )
 
-# --- 攤平所有 Chunk ---
-all_chunks_with_meta = []
-for file_name, chunks in chunks_by_file.items():
-    for chunk in chunks:
-        all_chunks_with_meta.append({"file": file_name, "text": chunk})
+        if not session_success:
+            logger.error(
+                f"  ❌ Session {session_id_counter} 嘗試 3 次皆失敗，捨棄此 Chunk。"
+            )
+            continue
 
-# ==========================================
-# 5. 執行區塊：生成多輪對話
-# ==========================================
-logger.info("================ 2. 開始生成多輪對話測試集 ================")
-
-multiturn_test_set = []
-session_id_counter = 1
-
-for idx, chunk_data_a in enumerate(all_chunks_with_meta):
-    file_a = chunk_data_a["file"]
-    text_a = chunk_data_a["text"]
-
-    # 強制從「不同的檔案」中隨機抽取一個 chunk 作為話題轉換來源
-    different_file_chunks = [c for c in all_chunks_with_meta if c["file"] != file_a]
-
-    if not different_file_chunks:
-        logger.warning(f"找不到不同檔案的 chunk 來配對 {file_a}，跳過。")
-        continue
-
-    chunk_data_b = random.choice(different_file_chunks)
-    file_b = chunk_data_b["file"]
-    text_b = chunk_data_b["text"]
-
-    logger.info(
-        f" -> 處理 Session {session_id_counter} | 主題 A: {file_a} -> 主題 B: {file_b}"
-    )
-
-    # 生成對話
-    conversation = generate_multiturn_qa(text_a, text_b)
-
-    # 進行 Quality Check
-    if verify_multiturn_quality(conversation, text_a, text_b):
-        for turn_data in conversation:
-            multiturn_test_set.append({
+        # 3. 完美組裝
+        session_data = [
+            {
                 "session_id": f"sess_{session_id_counter:04d}",
-                "turn": turn_data.get("turn"),
-                "intent": turn_data.get("intent"),
-                "question": clean_text(turn_data.get("question")),
-                "answer": clean_text(turn_data.get("answer")),
-                "source_file_a": file_a,
-                "source_file_b": file_b,
-                "context_used": text_a if turn_data.get("turn") in [1, 2] else text_b,
-            })
-        logger.info(f"  -> Session {session_id_counter} ✅ 成功寫入")
+                "turn": 1,
+                "intent": "initial_query",
+                "raw_question": rq1,
+                "ground_truth_question": q1_text,
+                "answer": qa1["answer"],
+                "context_used": qa1["source"],
+                "source_file_a": qa1.get("type", "unknown"),
+            },
+            {
+                "session_id": f"sess_{session_id_counter:04d}",
+                "turn": 2,
+                "intent": "coreference",
+                "raw_question": rq2,
+                "ground_truth_question": q2_text,
+                "answer": qa2["answer"],
+                "context_used": qa2["source"],
+                "source_file_a": qa2.get("type", "unknown"),
+            },
+            {
+                "session_id": f"sess_{session_id_counter:04d}",
+                "turn": 3,
+                "intent": "topic_switch",
+                "raw_question": rq3,
+                "ground_truth_question": q3_text,
+                "answer": qa3["answer"],
+                "context_used": qa3["source"],
+                "source_file_b": qa3.get("type", "unknown"),
+            },
+        ]
+
+        multiturn_test_set.extend(session_data)
+        logger.info(f"  ✅ Session {session_id_counter} 組裝成功！")
         session_id_counter += 1
-    else:
-        logger.warning(f"  -> Session {session_id_counter} ❌ QC 未通過，捨棄此筆資料")
 
-# ==========================================
-# 6. 合併匯出 (只輸出 JSON)
-# ==========================================
-logger.info("================ 3. 輸出結果 ================")
-if multiturn_test_set:
-    # 儲存為 JSON 格式
-    json_path = "data/testset/rag_multiturn_testset.json"
-    sessions_dict = {}
+    # ==========================================
+    # 5. 儲存輸出 (維持不變)
+    # ==========================================
+    sessions_dict = defaultdict(list)
     for item in multiturn_test_set:
-        sid = item["session_id"]
-        if sid not in sessions_dict:
-            sessions_dict[sid] = []
-        sessions_dict[sid].append(item)
+        sessions_dict[item["session_id"]].append(item)
 
-    with open(json_path, "w", encoding="utf-8") as f:
+    with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
         json.dump(sessions_dict, f, ensure_ascii=False, indent=2)
 
-    logger.info(f"✅ 生成完成！總計 {session_id_counter - 1} 個有效的多輪 Sessions。")
-    logger.info(f"檔案已儲存至: {json_path}")
-else:
-    logger.error("❌ 未能生成任何有效的測試集資料。")
+    logger.info(
+        f"\n🎉 完美收工！成功組裝了 {session_id_counter - 1} 個 100% 良率的多輪對話測試集。"
+    )
+    logger.info(f"檔案已儲存至: {OUTPUT_JSON}")
+
+
+if __name__ == "__main__":
+    main()

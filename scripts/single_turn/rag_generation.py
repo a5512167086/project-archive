@@ -145,7 +145,7 @@ def _rag_answer_with_retry(rag: RAGService, **kwargs) -> Dict[str, Any]:
     max_attempts = kwargs.pop("max_attempts", 5)
     for attempt in range(1, max_attempts + 1):
         try:
-            return rag.answer(line_id=None, rerank_threshold=0.0, **kwargs)
+            return rag.answer(line_id=None, **kwargs)
         except Exception as e:
             if attempt == max_attempts:
                 raise e

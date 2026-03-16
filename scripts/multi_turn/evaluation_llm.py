@@ -79,36 +79,36 @@ async def coreference_judge(
 
     if language == "english":
         user_prompt = f"""You are a strict dialogue system evaluation expert.
-[Conversation History]
-{history_text}
+        [Conversation History]
+        {history_text}
 
-[Current Question]
-{question}
+        [Current Question]
+        {question}
 
-[Ground Truth]
-{ground_truth}
+        [Ground Truth]
+        {ground_truth}
 
-[AI's Answer]
-{answer}
+        [AI's Answer]
+        {answer}
 
-Evaluate: Did the AI's answer successfully resolve the pronoun(s) in the current question to the correct entity from the history, providing information consistent with the ground truth?
-Output strictly in JSON format: {{"score": 1, "reason": "brief reason"}}. Give 1 for successful understanding, 0 for pronoun resolution failure or irrelevant answer."""
+        Evaluate: Did the AI's answer successfully resolve the pronoun(s) in the current question to the correct entity from the history, providing information consistent with the ground truth?
+        Output strictly in JSON format: {{"score": 1, "reason": "brief reason"}}. Give 1 for successful understanding, 0 for pronoun resolution failure or irrelevant answer."""
     else:
         user_prompt = f"""你是一個嚴格的對話系統評估專家。
-[歷史對話]
-{history_text}
+        [歷史對話]
+        {history_text}F
 
-[當前問題]
-{question}
+        [當前問題]
+        {question}
 
-[標準答案]
-{ground_truth}
+        [標準答案]
+        {ground_truth}
 
-[AI 實際回答]
-{answer}
+        [AI 實際回答]
+        {answer}
 
-請評估：AI 實際回答是否成功理解了當前問題中的代名詞（例如：它、他們）所指代的真實事物，並且給出了與標準答案一致的資訊？
-請嚴格輸出 JSON 格式：{{"score": 1, "reason": "你的簡短理由"}}。成功理解請給 1，指代錯誤或答非所問請給 0。"""
+        請評估：AI 實際回答是否成功理解了當前問題中的代名詞（例如：它、他們）所指代的真實事物，並且給出了與標準答案一致的資訊？
+        請嚴格輸出 JSON 格式：{{"score": 1, "reason": "你的簡短理由"}}。成功理解請給 1，指代錯誤或答非所問請給 0。"""
 
     try:
         response = await client.chat.completions.create(
@@ -141,36 +141,36 @@ async def topic_switch_judge(
 
     if language == "english":
         user_prompt = f"""You are a strict dialogue system evaluation expert.
-[Conversation History]
-{history_text}
+        [Conversation History]
+        {history_text}
 
-[Current Question (New Topic)]
-{question}
+        [Current Question (New Topic)]
+        {question}
 
-[Ground Truth]
-{ground_truth}
+        [Ground Truth]
+        {ground_truth}
 
-[AI's Answer]
-{answer}
+        [AI's Answer]
+        {answer}
 
-Evaluate: Did the AI cleanly answer the new topic WITHOUT incorrectly applying conditions or context from the conversation history (e.g., previous constraints or subjects) to this new topic?
-Output strictly in JSON format: {{"score": 1, "reason": "brief reason"}}. Give 1 for a successful switch, 0 for hallucination caused by historical interference."""
+        Evaluate: Did the AI cleanly answer the new topic WITHOUT incorrectly applying conditions or context from the conversation history (e.g., previous constraints or subjects) to this new topic?
+        Output strictly in JSON format: {{"score": 1, "reason": "brief reason"}}. Give 1 for a successful switch, 0 for hallucination caused by historical interference."""
     else:
         user_prompt = f"""你是一個嚴格的對話系統評估專家。
-[歷史對話]
-{history_text}
+        [歷史對話]
+        {history_text}
 
-[當前問題 (全新話題)]
-{question}
+        [當前問題 (全新話題)]
+        {question}
 
-[標準答案]
-{ground_truth}
+        [標準答案]
+        {ground_truth}
 
-[AI 實際回答]
-{answer}
+        [AI 實際回答]
+        {answer}
 
-請評估：AI 是否乾淨俐落地回答了新話題，並且**沒有**錯誤地把歷史對話中的條件（例如上個話題的限制或對象）帶入新話題中產生幻覺？
-請嚴格輸出 JSON 格式：{{"score": 1, "reason": "你的簡短理由"}}。切換成功給 1，受歷史干擾給 0。"""
+        請評估：AI 是否乾淨俐落地回答了新話題，並且**沒有**錯誤地把歷史對話中的條件（例如上個話題的限制或對象）帶入新話題中產生幻覺？
+        請嚴格輸出 JSON 格式：{{"score": 1, "reason": "你的簡短理由"}}。切換成功給 1，受歷史干擾給 0。"""
 
     try:
         response = await client.chat.completions.create(
@@ -469,7 +469,11 @@ async def process_single_item(
 ) -> dict:
     async with sem:
         start_time = time.time()
+
         question = item.get("question", "")
+        raw_question = item.get("raw_question", question)
+        sys_rewritten_q = item.get("system_rewritten_query", "")
+
         contexts = item.get("contexts", [])
         answer = item.get("answer", "")
         ground_truth = item.get("ground_truth", "")
@@ -485,6 +489,7 @@ async def process_single_item(
                 "index": idx,
                 "intent": intent,
                 "question": _clip_text(question),
+                "raw_question": _clip_text(raw_question),
                 "answer_preview": _clip_text(answer),
                 "ground_truth_preview": _clip_text(ground_truth),
                 **ctx_meta,
@@ -542,7 +547,7 @@ async def process_single_item(
                         "coreference_success",
                         coreference_judge(
                             history=chat_history,
-                            question=question,
+                            question=raw_question,
                             answer=answer,
                             ground_truth=ground_truth,
                             client=client,
@@ -557,7 +562,7 @@ async def process_single_item(
                         "topic_switch_success",
                         topic_switch_judge(
                             history=chat_history,
-                            question=question,
+                            question=raw_question,
                             answer=answer,
                             ground_truth=ground_truth,
                             client=client,
@@ -577,11 +582,14 @@ async def process_single_item(
             )
 
             item_run.end(outputs={"elapsed_sec": round(elapsed, 4), "scores": scores})
+
             return {
                 "index": idx,
                 "intent": intent,
                 "turn": item.get("turn", 0),
+                "raw_question": raw_question,
                 "question": question,
+                "system_rewritten_query": sys_rewritten_q,
                 "contexts": contexts,
                 "answer": answer,
                 "ground_truth": ground_truth,
@@ -622,7 +630,8 @@ async def evaluate_datasets(
             for item in dataset:
                 sid = item.get("session_id", "unknown")
                 item["chat_history"] = list(session_histories[sid])
-                session_histories[sid].append(f"User: {item.get('question', '')}")
+                user_say = item.get("raw_question", item.get("question", ""))
+                session_histories[sid].append(f"User: {user_say}")
                 session_histories[sid].append(f"AI: {item.get('ground_truth', '')}")
 
             async with trace(
@@ -666,8 +675,6 @@ async def evaluate_datasets(
 
                 save_dataset_result(dataset_name, dataset_results, dict(avg_scores))
                 update_summary_report(dataset_name, dict(avg_scores))
-
-                # 修改 4：這裡原本有 move_dataset_to_done，已經拿掉了
 
                 dataset_elapsed = time.time() - dataset_start_time
                 all_results[dataset_name] = {

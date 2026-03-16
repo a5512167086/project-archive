@@ -1,6 +1,7 @@
 import glob
 import json
 import os
+import re
 import warnings
 
 import jieba
@@ -13,9 +14,13 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="jieba")
 warnings.filterwarnings("ignore", category=UserWarning, module="jieba")
 
 
-class ChineseTokenizer(tokenizers.Tokenizer):
+class AdaptiveTokenizer(tokenizers.Tokenizer):
     def tokenize(self, text):
-        return list(jieba.cut(text))
+        # 簡單偵測是否有中文字元
+        if re.search(r"[\u4e00-\u9fff]", text):
+            return list(jieba.cut(text))
+        # 英文則轉小寫並過濾標點符號後以空白斷詞
+        return re.findall(r"\w+", text.lower())
 
 
 def evaluate_single_file(json_file_path):
@@ -25,18 +30,27 @@ def evaluate_single_file(json_file_path):
     if not data:
         return None
 
+    # 使用自適應斷詞器
     scorer = rouge_scorer.RougeScorer(
-        ["rouge1", "rougeL"], use_stemmer=False, tokenizer=ChineseTokenizer()
+        ["rouge1", "rougeL"], tokenizer=AdaptiveTokenizer()
     )
 
     answers = [str(item.get("answer", "")) for item in data]
     ground_truths = [str(item.get("ground_truth", "")) for item in data]
 
-    print(" └─ 計算 BERTScore...")
-    _, _, F1_bert = bert_score(answers, ground_truths, lang="zh", verbose=False)
+    # 自動偵測語言以計算 BERTScore (答案相似度)
+    eval_lang = (
+        "en"
+        if not re.search(r"[\u4e00-\u9fff]", answers[0] if answers else "")
+        else "zh"
+    )
+    print(f" └─ 偵測語系: {eval_lang}，計算 BERTScore...")
+
+    # 計算答案相似度
+    _, _, F1_bert = bert_score(answers, ground_truths, lang=eval_lang, verbose=False)
 
     results = []
-    print(" └─ 計算 ROUGE...")
+    print(" └─ 計算 ROUGE 與各項指標...")
     for idx, item in enumerate(data):
         ans, gt = answers[idx], ground_truths[idx]
         rouge_scores = scorer.score(gt, ans)
@@ -46,8 +60,8 @@ def evaluate_single_file(json_file_path):
             "turn": item.get("turn", 0),
             "intent": item.get("intent", "unknown"),
             "question": item.get("question", ""),
-            "rouge-1-precision": rouge_scores["rouge1"].precision,
-            "rouge-1-recall": rouge_scores["rouge1"].recall,
+            "rouge-1-precision": rouge_scores["rouge1"].precision,  # 👑 加回 Precision
+            "rouge-1-recall": rouge_scores["rouge1"].recall,  # 👑 加回 Recall
             "rouge-1-f1": rouge_scores["rouge1"].fmeasure,
             "rouge-l-f1": rouge_scores["rougeL"].fmeasure,
             "bertscore": F1_bert[idx].item(),
@@ -55,6 +69,7 @@ def evaluate_single_file(json_file_path):
 
     df = pd.DataFrame(results)
 
+    # 👑 把 precision 和 recall 加回統計欄位中
     metric_cols = [
         "rouge-1-precision",
         "rouge-1-recall",
@@ -92,6 +107,15 @@ def process_all_datasets(
 
     summary_dict = {}
 
+    # 這裡的欄位對應回剛剛設定的 metric_cols
+    metric_cols = [
+        "rouge-1-precision",
+        "rouge-1-recall",
+        "rouge-1-f1",
+        "rouge-l-f1",
+        "bertscore",
+    ]
+
     for file_path in json_files:
         result = evaluate_single_file(file_path)
 
@@ -99,15 +123,14 @@ def process_all_datasets(
             file_name, metrics_dict, details, df = result
             run_id = file_name.replace(".json", "")
 
-            # 1. 儲存每個資料集的詳細記錄為獨立 JSON 檔
+            # 1. 儲存每個資料集的詳細記錄
             details_json_path = os.path.join(output_dir, f"{run_id}_details.json")
             with open(details_json_path, "w", encoding="utf-8") as f:
                 json.dump(details, f, indent=4, ensure_ascii=False)
 
-            # 2. 將平均分數加入總表中
+            # 2. 將平均分數加入總表
             summary_dict[run_id] = metrics_dict
 
-            # 在終端機印出更清晰的分組報告
             print("\n" + "=" * 85)
             print(f"🎉 [{file_name}] 評估完成！")
             print("=" * 85)
@@ -119,7 +142,7 @@ def process_all_datasets(
             print("\n【依據 Intent (意圖) 分組平均】")
             intent_df = (
                 df
-                .groupby("intent")[["rouge-1-f1", "rouge-l-f1", "bertscore"]]
+                .groupby("intent")[metric_cols]  # 👑 直接使用 metric_cols
                 .mean()
                 .reset_index()
             )
@@ -128,19 +151,19 @@ def process_all_datasets(
             print("\n【依據 Turn (輪數) 分組平均】")
             turn_df = (
                 df
-                .groupby("turn")[["rouge-1-f1", "rouge-l-f1", "bertscore"]]
+                .groupby("turn")[metric_cols]  # 👑 直接使用 metric_cols
                 .mean()
                 .reset_index()
             )
             print(turn_df.round(4).to_string(index=False))
             print("-" * 85)
 
-    # 3. 儲存乾淨的總結報告
+    # 3. 儲存總結報告
     summary_json_path = os.path.join(output_dir, "traditional_summary_report.json")
     with open(summary_json_path, "w", encoding="utf-8") as f:
         json.dump(summary_dict, f, indent=4, ensure_ascii=False)
 
-    print("\n✅ 各項測驗明細已分別存為 *_details.json 檔案")
+    print("\n✅ 各項測驗明細已儲存")
     print(f"✅ 平均分數總表已儲存至: {summary_json_path}")
 
 
