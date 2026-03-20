@@ -1,0 +1,20 @@
+{
+  "name": "easybot_testing",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test:load": "vite build && dotenv -- k6 run dist/load-test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/k6": "^1.6.0",
+    "@types/node": "^25.5.0",
+    "dotenv-cli": "^11.0.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.1"
+  }
+}
