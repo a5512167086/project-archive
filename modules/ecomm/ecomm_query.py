@@ -1,8 +1,7 @@
 import logging
-from typing import List
 from uuid import UUID
 
-from sqlmodel import Session, select
+from sqlmodel import Session, select, text
 
 from modules.ecomm.ecomm_model import (
     BrandListView,
@@ -41,7 +40,7 @@ class EcommQuery:
 
         return result
 
-    def get_all_brands_by_class_id(self, class_id: int) -> List[BrandListView]:
+    def get_all_brands_by_class_id(self, class_id: int) -> list[BrandListView]:
         statement = select(BrandListView).where(BrandListView.class_id == class_id)
         result = self.session.exec(statement)
         return result.all()
@@ -79,8 +78,8 @@ class EcommQuery:
         return result
 
     def get_categories_by_class_id(
-        self, category_id_list: List[int]
-    ) -> List[CategoryListView]:
+        self, category_id_list: list[int]
+    ) -> list[CategoryListView]:
         statement = select(CategoryListView).where(
             CategoryListView.parent_class_id.in_(category_id_list)
         )
@@ -89,18 +88,62 @@ class EcommQuery:
 
     def get_all_categories_by_class_id(
         self, parent_class_id: int
-    ) -> List[CategoryListView]:
-        result = []
-        queue = [parent_class_id]
-        while queue:
-            pid = queue.pop(0)
-            statement = select(CategoryListView).where(
-                CategoryListView.parent_class_id == pid
+    ) -> list[CategoryListView]:
+        stmt = text("""
+            WITH RECURSIVE category_tree AS (
+                SELECT
+                    i.parent_class_id,
+                    i.child_class_id,
+                    ARRAY[i.parent_class_id, i.child_class_id]::int[] AS path,
+                    1 AS depth
+                FROM inheritances i
+                WHERE i.parent_class_id = :parent_class_id
+
+                UNION ALL
+
+                SELECT
+                    i.parent_class_id,
+                    i.child_class_id,
+                    (ct.path || i.child_class_id)::int[] AS path,
+                    ct.depth + 1 AS depth
+                FROM inheritances i
+                JOIN category_tree ct
+                  ON i.parent_class_id = ct.child_class_id
+                WHERE NOT i.child_class_id = ANY(ct.path)
             )
-            children = self.session.exec(statement).all()
-            result.extend(children)
-            queue.extend([child.class_id for child in children])
-        return result
+            SELECT
+                ct.parent_class_id,
+                c.class_id,
+                c.entity_id,
+                c.chinese_name AS category_name,
+                c.chinese_description AS category_description,
+                c.created_at,
+                c.updated_at
+            FROM category_tree ct
+            JOIN classes c
+              ON c.class_id = ct.child_class_id
+            JOIN entities e
+              ON e.entity_id = c.entity_id
+            WHERE e.chinese_name = '類別'
+            ORDER BY ct.depth, c.class_id
+        """)
+
+        result = self.session.exec(
+            stmt.bindparams(parent_class_id=parent_class_id)
+        ).all()
+
+        return [
+            CategoryListView(
+                parent_class_id=row.parent_class_id,
+                class_id=row.class_id,
+                entity_id=row.entity_id,
+                category_name=row.category_name,
+                category_description=row.category_description,
+                created_at=row.created_at,
+                updated_at=row.updated_at,
+            )
+            for row in result
+        ]
 
     def check_category_name_exists(
         self, parent_class_id: int, category_name: str
@@ -175,14 +218,16 @@ class EcommQuery:
             select(ProductDetail).where(ProductDetail.object_id == object_id)
         ).first()
 
-    def get_product_images_by_object_id(self, object_id: int) -> List[ProductImage]:
+    def get_product_images_by_object_id(self, object_id: int) -> list[ProductImage]:
         return self.session.exec(
             select(ProductImage)
             .where(ProductImage.object_id == object_id)
             .order_by(ProductImage.created_at)
         ).all()
 
-    def get_product_images_by_object_ids(self, object_ids: List[int]) -> List[ProductImage]:
+    def get_product_images_by_object_ids(
+        self, object_ids: list[int]
+    ) -> list[ProductImage]:
         if not object_ids:
             return []
         return self.session.exec(
@@ -194,14 +239,14 @@ class EcommQuery:
     def get_product_image_by_id(self, image_id: int) -> ProductImage | None:
         return self.session.get(ProductImage, image_id)
 
-    def get_product_variants_by_object_id(self, object_id: int) -> List[ProductVariant]:
+    def get_product_variants_by_object_id(self, object_id: int) -> list[ProductVariant]:
         return self.session.exec(
             select(ProductVariant).where(ProductVariant.object_id == object_id)
         ).all()
 
     def get_product_variants_by_object_ids(
-        self, object_ids: List[int]
-    ) -> List[ProductVariant]:
+        self, object_ids: list[int]
+    ) -> list[ProductVariant]:
         if not object_ids:
             return []
         return self.session.exec(
@@ -249,25 +294,15 @@ class EcommQuery:
         ).first()
         return result is not None
 
-    def get_products_by_class_id(self, class_id: int) -> List[dict]:
-        objects = self.session.exec(
-            select(Object)
+    def get_products_by_class_id(self, class_id: int) -> list[ProductDetail]:
+        return self.session.exec(
+            select(ProductDetail)
+            .join(Object, ProductDetail.object_id == Object.object_id)
             .join(SubClassView, Object.entity_id == SubClassView.entity_id)
             .where(SubClassView.class_id == class_id)
         ).all()
 
-        products = []
-        for obj in objects:
-            product_detail = self.get_product_by_object_id(obj.object_id)
-            if product_detail:
-                products.append({
-                    "product_detail": product_detail,
-                    "object": obj,
-                })
-
-        return products
-
-    def get_all_products_view(self, category_ids: List[int]) -> List[ProductListView]:
+    def get_all_products_view(self, category_ids: list[int]) -> list[ProductListView]:
         statement = select(ProductListView).where(
             ProductListView.category_id.in_(category_ids)
         )
@@ -289,13 +324,13 @@ class EcommQuery:
 
         return result
 
-    def get_all_orders_view(self, class_id: int) -> List[OrderListView]:
+    def get_all_orders_view(self, class_id: int) -> list[OrderListView]:
         statement = select(OrderListView).where(OrderListView.class_id == class_id)
         return self.session.exec(statement).all()
 
     def get_all_user_orders_view(
         self, user_id: UUID, class_id: int
-    ) -> List[OrderListView]:
+    ) -> list[OrderListView]:
         user_order_object_ids = self.session.exec(
             select(Object.object_id).where(Object.owner_id == str(user_id))
         ).all()
@@ -312,7 +347,7 @@ class EcommQuery:
     def get_order_by_id(self, order_id: UUID) -> OrderDetail | None:
         return self.session.get(OrderDetail, order_id)
 
-    def get_order_items_by_object_id(self, object_id: int) -> List[OrderItem]:
+    def get_order_items_by_object_id(self, object_id: int) -> list[OrderItem]:
         return self.session.exec(
             select(OrderItem).where(OrderItem.object_id == object_id)
         ).all()

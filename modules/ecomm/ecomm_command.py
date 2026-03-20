@@ -1,6 +1,5 @@
 import logging
-from datetime import datetime, timezone
-from typing import List, Optional
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlmodel import Session, delete, select, text, update
@@ -49,7 +48,7 @@ class EcommCommand:
             children_map[parent_id].append(child_id)
             parent_map[child_id] = parent_id
 
-        all_child_ids = set(str(inh.child_class_id) for inh in inheritances)
+        all_child_ids = {str(inh.child_class_id) for inh in inheritances}
         root_ids = [
             str(cat.class_id)
             for cat in categories
@@ -90,7 +89,7 @@ class EcommCommand:
         )
         self.session.add(relation)
 
-    def delete_brands(self, brand_class_id: int, delete_brands_object_id: List[int]):
+    def delete_brands(self, brand_class_id: int, delete_brands_object_id: list[int]):
         relation_stmt = select(ClassObjectRelation).where(
             ClassObjectRelation.class_id == brand_class_id,
             ClassObjectRelation.object_id.in_(delete_brands_object_id),
@@ -111,8 +110,8 @@ class EcommCommand:
         self,
         brand_class_id: int,
         object_id: int,
-        brand_name: Optional[str] = None,
-        brand_description: Optional[str] = None,
+        brand_name: str | None = None,
+        brand_description: str | None = None,
     ):
         relation = self.session.exec(
             select(ClassObjectRelation).where(
@@ -140,8 +139,8 @@ class EcommCommand:
         category_class_id: int,
         category_name: str,
         category_description: str,
-        parent_category_id: Optional[int] = None,
-        owner_id: Optional[str] = None,
+        parent_category_id: int | None = None,
+        owner_id: str | None = None,
     ):
         category_entity_id = get_entity_id_by_name(self.session, "類別")
 
@@ -158,7 +157,7 @@ class EcommCommand:
 
         return result
 
-    def delete_categories(self, delete_categories_class_id: List[int]):
+    def delete_categories(self, delete_categories_class_id: list[int]):
         for class_id in delete_categories_class_id:
             parent_inheritance = self.session.exec(
                 select(Inheritance.parent_class_id).where(
@@ -194,9 +193,9 @@ class EcommCommand:
         self,
         category_class_id: int,
         class_id: int,
-        category_name: Optional[str] = None,
-        category_description: Optional[str] = None,
-        parent_category_id: Optional[int] = None,
+        category_name: str | None = None,
+        category_description: str | None = None,
+        parent_category_id: int | None = None,
     ):
         category_class = self.session.get(Class, class_id)
         if not category_class:
@@ -231,13 +230,13 @@ class EcommCommand:
         product_class_id: int,
         product_name: str,
         product_description: str,
-        brand_id: Optional[int],
-        sku_code: Optional[str],
+        brand_id: int | None,
+        sku_code: str | None,
         price: int,
-        stock: Optional[int],
+        stock: int | None,
         is_active: bool,
-        images: List[dict],
-        owner_id: Optional[str] = None,
+        images: list[dict],
+        owner_id: str | None = None,
     ) -> int:
         product_entity_id = get_entity_id_by_name(self.session, "產品")
 
@@ -276,7 +275,7 @@ class EcommCommand:
 
         return new_product_object.object_id
 
-    def delete_products(self, product_ids: List[UUID]):
+    def delete_products(self, product_ids: list[UUID]):
         product_details = self.session.exec(
             select(ProductDetail).where(ProductDetail.product_id.in_(product_ids))
         ).all()
@@ -307,14 +306,14 @@ class EcommCommand:
     def update_product(
         self,
         product_id: UUID,
-        product_name: Optional[str] = None,
-        product_description: Optional[str] = None,
-        brand_id: Optional[int] = None,
-        sku_code: Optional[str] = None,
-        price: Optional[int] = None,
-        stock: Optional[int] = None,
-        is_active: Optional[bool] = None,
-        category_id: Optional[int] = None,
+        product_name: str | None = None,
+        product_description: str | None = None,
+        brand_id: int | None = None,
+        sku_code: str | None = None,
+        price: int | None = None,
+        stock: int | None = None,
+        is_active: bool | None = None,
+        category_id: int | None = None,
     ) -> bool:
         product_detail = self.session.get(ProductDetail, product_id)
         if not product_detail:
@@ -339,7 +338,7 @@ class EcommCommand:
         product_detail.sku_code = sku_code
         product_detail.stock = stock
 
-        product_detail.updated_at = datetime.now(timezone.utc)
+        product_detail.updated_at = datetime.now(UTC)
         self.session.add(product_detail)
 
         if category_id is not None:
@@ -355,9 +354,9 @@ class EcommCommand:
         self,
         object_id: int,
         variant_name: str,
-        sku_code: Optional[str],
-        price: Optional[int],
-        stock: Optional[int],
+        sku_code: str | None,
+        price: int | None,
+        stock: int | None,
     ) -> ProductVariant:
         product_variant = ProductVariant(
             object_id=object_id,
@@ -375,10 +374,10 @@ class EcommCommand:
     def update_product_variant(
         self,
         variant_id: UUID,
-        variant_name: Optional[str] = None,
-        sku_code: Optional[str] = None,
-        price: Optional[int] = None,
-        stock: Optional[int] = None,
+        variant_name: str | None = None,
+        sku_code: str | None = None,
+        price: int | None = None,
+        stock: int | None = None,
     ) -> bool:
         variant = self.session.get(ProductVariant, variant_id)
         if not variant:
@@ -393,17 +392,17 @@ class EcommCommand:
         if stock is not None:
             variant.stock = stock
 
-        variant.updated_at = datetime.now(timezone.utc)
+        variant.updated_at = datetime.now(UTC)
         self.session.add(variant)
         return True
 
-    def delete_product_variants(self, variant_ids: List[UUID]):
+    def delete_product_variants(self, variant_ids: list[UUID]):
         self.session.exec(
             delete(ProductVariant).where(ProductVariant.variant_id.in_(variant_ids))
         )
 
     def move_products_to_root_category(
-        self, root_category_class_id: int, moved_category_class_ids: List[int]
+        self, root_category_class_id: int, moved_category_class_ids: list[int]
     ):
         stmt = (
             update(ClassObjectRelation)
@@ -414,7 +413,7 @@ class EcommCommand:
         self.session.exec(stmt)
 
     async def update_shipping_setting(
-        self, bot_uuid: str, shipping_options: List[ShippingOption]
+        self, bot_uuid: str, shipping_options: list[ShippingOption]
     ):
         setting = await ShippingSetting.find_one(ShippingSetting.bot_uuid == bot_uuid)
         if setting:
@@ -442,9 +441,9 @@ class EcommCommand:
         recipient_name: str,
         recipient_phone: str,
         shipping_address: str,
-        items: List[dict],
-        owner_id: Optional[str] = None,
-        notes: Optional[str] = None,
+        items: list[dict],
+        owner_id: str | None = None,
+        notes: str | None = None,
     ) -> UUID:
         order_entity_id = get_entity_id_by_name(self.session, "訂單")
 
@@ -489,7 +488,7 @@ class EcommCommand:
 
         return order_detail.order_id
 
-    def delete_orders(self, order_ids: List[UUID]):
+    def delete_orders(self, order_ids: list[UUID]):
         orders = self.session.exec(
             select(OrderDetail).where(OrderDetail.order_id.in_(order_ids))
         ).all()
@@ -513,9 +512,9 @@ class EcommCommand:
     def update_order(
         self,
         order_id: UUID,
-        status: Optional[str] = None,
-        payment_status: Optional[str] = None,
-        tracking_number: Optional[str] = None,
+        status: str | None = None,
+        payment_status: str | None = None,
+        tracking_number: str | None = None,
     ) -> bool:
         order_detail = self.session.get(OrderDetail, order_id)
         if not order_detail:
@@ -528,7 +527,7 @@ class EcommCommand:
         if tracking_number is not None:
             order_detail.tracking_number = tracking_number
 
-        order_detail.updated_at = datetime.now(timezone.utc)
+        order_detail.updated_at = datetime.now(UTC)
         self.session.add(order_detail)
 
         return True
@@ -550,7 +549,7 @@ class EcommCommand:
         self.session.exec(delete(ProductImage).where(ProductImage.image_id == image_id))
 
     def update_product_image(
-        self, image_id: int, is_primary: Optional[bool] = None
+        self, image_id: int, is_primary: bool | None = None
     ) -> bool:
         image = self.session.get(ProductImage, image_id)
         if not image:

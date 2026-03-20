@@ -1,4 +1,4 @@
-from typing import Annotated, Any, Dict, Optional
+from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import Depends
@@ -12,14 +12,14 @@ from shared.exception import GlobalErrorException
 from shared.services.group_service import GroupService
 
 
-def get_current_user(payload: Dict[str, Any] = Depends(verify_auth)) -> Dict[str, str]:
+def get_current_user(payload: dict[str, Any] = Depends(verify_auth)) -> dict[str, str]:
     return {
         "user_id": payload["sub"],
         "email": payload.get("email"),
     }
 
 
-def get_reset_user(payload: Dict[str, Any] = Depends(verify_reset)) -> Dict[str, str]:
+def get_reset_user(payload: dict[str, Any] = Depends(verify_reset)) -> dict[str, str]:
     return {
         "user_id": payload["sub"],
         "email": payload.get("email"),
@@ -42,14 +42,12 @@ class BotAccessController:
     def verify(
         self,
         bot_uuid: UUID,
-        module_name: Optional[str] = None,
+        module_name: str | None = None,
         owner_only: bool = False,
     ):
         bot = self.bot_service.validate_line_bot_exists(bot_uuid)
 
-        is_owner = self.bot_service.validate_bot_ownership(
-            self.user_id, bot.bot_detail_id
-        )
+        is_owner = self.bot_service.validate_bot_ownership_by_bot(self.user_id, bot)
 
         if owner_only and not is_owner:
             raise GlobalErrorException(

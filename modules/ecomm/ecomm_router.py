@@ -1,5 +1,5 @@
 import io
-from typing import Annotated, List, Optional
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
@@ -88,7 +88,7 @@ async def delete_shipping_settings(
     await ecomm_service.delete_shipping_setting(bot, body)
 
 
-@brand_router.get("/{bot_uuid}", response_model=List[BrandResponse])
+@brand_router.get("/{bot_uuid}", response_model=list[BrandResponse])
 def list_brands(
     bot_uuid: UUID,
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
@@ -135,7 +135,7 @@ def update_brand(
     ecomm_service.session.commit()
 
 
-@category_router.get("/{bot_uuid}", response_model=List[CategoryResponse])
+@category_router.get("/{bot_uuid}", response_model=list[CategoryResponse])
 def list_categories(
     bot_uuid: UUID,
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
@@ -187,7 +187,7 @@ def update_category(
     ecomm_service.session.commit()
 
 
-@product_router.get("/{bot_uuid}", response_model=List[ProductResponse])
+@product_router.get("/{bot_uuid}", response_model=list[ProductResponse])
 def list_products(
     bot_uuid: UUID,
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
@@ -206,12 +206,12 @@ def create_product(
     product_name: str = Form(...),
     product_description: str = Form(...),
     price: int = Form(...),
-    sku_code: Optional[str] = Form(None),
-    stock: Optional[str] = Form(None, description="庫存數量，留空則為無限"),
+    sku_code: str | None = Form(None),
+    stock: str | None = Form(None, description="庫存數量，留空則為無限"),
     is_active: bool = Form(True, description="是否啟用產品"),
     category_id: str = Form("", description="分類ID，留空則使用根分類"),
     brand_id: str = Form("", description="品牌ID，可選"),
-    images: List[UploadFile] = File([], description="產品圖片檔案"),
+    images: list[UploadFile] = File([], description="產品圖片檔案"),
 ):
     bot = access.verify(bot_uuid, module_name=ModuleType.Ecomm, owner_only=True)
     user_id = current_user["user_id"]
@@ -236,7 +236,7 @@ def create_product(
                 error_message="Invalid brand_id format",
             )
 
-    parsed_stock: Optional[int] = None
+    parsed_stock: int | None = None
     if stock and stock.strip():
         try:
             parsed_stock = int(stock)
@@ -365,7 +365,7 @@ async def get_product_image(
         else:
             raise HTTPException(status_code=500, detail=f"MinIO error: {e}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {e!s}")
 
 
 @product_router.post("/images/upload")
@@ -374,7 +374,7 @@ def upload_product_image(
     access: Annotated[BotAccessController, Depends(get_bot_access)],
     bot_uuid: UUID = Form(...),
     product_id: UUID = Form(...),
-    images: List[UploadFile] = File(...),
+    images: list[UploadFile] = File(...),
 ):
     bot = access.verify(bot_uuid, module_name=ModuleType.Ecomm, owner_only=True)
     ecomm_service.upload_product_image(bot, product_id, images)
@@ -407,7 +407,7 @@ def delete_product_image(
     ecomm_service.session.commit()
 
 
-@order_router.get("/{bot_uuid}", response_model=List[OrderResponse])
+@order_router.get("/{bot_uuid}", response_model=list[OrderResponse])
 def list_bot_orders(
     bot_uuid: UUID,
     ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
@@ -417,7 +417,7 @@ def list_bot_orders(
     return ecomm_service.get_all_orders(bot)
 
 
-@order_router.get("/user/{bot_uuid}", response_model=List[OrderResponse])
+@order_router.get("/user/{bot_uuid}", response_model=list[OrderResponse])
 def list_user_orders(
     bot_uuid: UUID,
     current_user: Annotated[dict, Depends(get_current_user)],

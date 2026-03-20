@@ -1,4 +1,3 @@
-from typing import List, Optional
 from uuid import UUID
 
 from fastapi import UploadFile
@@ -50,7 +49,7 @@ class EcommService:
         self.minio = MinioService()
 
     def get_nested_categories(
-        self, category_class_id: int, category_list: List[CategoryListView]
+        self, category_class_id: int, category_list: list[CategoryListView]
     ):
         category_dict = {}
         for cat in category_list:
@@ -106,7 +105,7 @@ class EcommService:
             brand_class_id, body.brand_name, body.brand_description
         )
 
-    def get_all_brands(self, bot: BotListWithCredentialView) -> List[BrandListView]:
+    def get_all_brands(self, bot: BotListWithCredentialView) -> list[BrandListView]:
         brand_class_id = self.validate_brand_class(bot.class_id)
         return self.query.get_all_brands_by_class_id(brand_class_id)
 
@@ -128,14 +127,16 @@ class EcommService:
     ):
         brand_class_id = self.validate_brand_class(bot.class_id)
 
-        if body.brand_name is not None:
-            if self.query.check_brand_name_exists_exclude_self(
+        if (
+            body.brand_name is not None
+            and self.query.check_brand_name_exists_exclude_self(
                 brand_class_id, body.brand_name, body.object_id
-            ):
-                raise GlobalErrorException(
-                    error_code=ErrorCode.BRAND_ALREADY_EXISTS,
-                    error_message=f"Brand name '{body.brand_name}' already exists",
-                )
+            )
+        ):
+            raise GlobalErrorException(
+                error_code=ErrorCode.BRAND_ALREADY_EXISTS,
+                error_message=f"Brand name '{body.brand_name}' already exists",
+            )
 
         success = self.command.update_brand(
             brand_class_id,
@@ -164,12 +165,13 @@ class EcommService:
                 error_message=f"Category name '{body.category_name}' already exists",
             )
 
-        if body.parent_category_id:
-            if not self.query.check_parent_category_exists(body.parent_category_id):
-                raise GlobalErrorException(
-                    error_code=ErrorCode.PARENT_CATEGORY_NOT_FOUND,
-                    error_message="Parent category not found",
-                )
+        if body.parent_category_id and not self.query.check_parent_category_exists(
+            body.parent_category_id
+        ):
+            raise GlobalErrorException(
+                error_code=ErrorCode.PARENT_CATEGORY_NOT_FOUND,
+                error_message="Parent category not found",
+            )
 
         self.command.insert_category(
             category_class_id,
@@ -181,7 +183,7 @@ class EcommService:
 
     def get_all_categories(
         self, bot: BotListWithCredentialView
-    ) -> List[CategoryListView]:
+    ) -> list[CategoryListView]:
         category_class_id = self.validate_category_class(bot.class_id)
         return self.query.get_all_categories_by_class_id(
             category_class_id
@@ -212,22 +214,26 @@ class EcommService:
     ):
         category_class_id = self.validate_category_class(bot.class_id)
 
-        if body.category_name is not None:
-            if self.query.check_category_name_exists_exclude_self(
+        if (
+            body.category_name is not None
+            and self.query.check_category_name_exists_exclude_self(
                 category_class_id, body.category_name, body.class_id
-            ):
-                raise GlobalErrorException(
-                    error_code=ErrorCode.CATEGORY_ALREADY_EXISTS,
-                    error_message=f"Category name '{body.category_name}' already exists",
-                )
+            )
+        ):
+            raise GlobalErrorException(
+                error_code=ErrorCode.CATEGORY_ALREADY_EXISTS,
+                error_message=f"Category name '{body.category_name}' already exists",
+            )
 
-        if body.parent_category_id is not None:
-            if body.parent_category_id != 0:
-                if not self.query.check_parent_category_exists(body.parent_category_id):
-                    raise GlobalErrorException(
-                        error_code=ErrorCode.PARENT_CATEGORY_NOT_FOUND,
-                        error_message="Parent category not found",
-                    )
+        if (
+            body.parent_category_id is not None
+            and body.parent_category_id != 0
+            and not self.query.check_parent_category_exists(body.parent_category_id)
+        ):
+            raise GlobalErrorException(
+                error_code=ErrorCode.PARENT_CATEGORY_NOT_FOUND,
+                error_message="Parent category not found",
+            )
 
         self.command.update_category(
             category_class_id,
@@ -245,17 +251,19 @@ class EcommService:
                 error_message="Invalid category hierarchy: circular reference detected",
             )
 
-    def get_all_products(self, bot: BotListWithCredentialView) -> List[ProductResponse]:
-        category_class_id = self.validate_category_class(bot.class_id)
-        category_ids = self.query.get_all_categories_by_class_id(category_class_id)
-        all_category_ids = [cat.class_id for cat in category_ids]
-        all_category_ids.append(category_class_id)
-        products_data = self.query.get_all_products_view(all_category_ids)
+    def get_all_products(self, bot) -> list[ProductResponse]:
+        category_class_id = self.query.get_category_class_id_by_bot_class_id(
+            bot.class_id
+        )
+        all_categories = self.query.get_all_categories_by_class_id(category_class_id)
+        category_ids = [c.class_id for c in all_categories]
 
-        if not products_data:
+        products = self.query.get_all_products_view(category_ids)
+        if not products:
             return []
 
-        object_ids = [p.object_id for p in products_data]
+        object_ids = [p.object_id for p in products]
+
         all_images = self.query.get_product_images_by_object_ids(object_ids)
         all_variants = self.query.get_product_variants_by_object_ids(object_ids)
 
@@ -278,46 +286,39 @@ class EcommService:
                 variants_map[var.object_id] = []
             variants_map[var.object_id].append(var)
 
-        products = []
-        for product_data in products_data:
-            images = images_map.get(product_data.object_id, [])
-            variants = variants_map.get(product_data.object_id, [])
-            products.append(
-                ProductResponse(
-                    product_id=product_data.product_id,
-                    object_id=product_data.object_id,
-                    product_name=product_data.product_name,
-                    product_description=product_data.product_description,
-                    brand_id=product_data.brand_id,
-                    category_id=product_data.category_id
-                    if product_data.category_id != category_class_id
-                    else None,
-                    sku_code=product_data.sku_code,
-                    price=product_data.price,
-                    stock=product_data.stock,
-                    is_active=product_data.is_active,
-                    created_at=product_data.created_at,
-                    updated_at=product_data.updated_at,
-                    images=images,
-                    variants=variants,
-                )
+        return [
+            ProductResponse(
+                product_id=p.product_id,
+                object_id=p.object_id,
+                product_name=p.product_name,
+                product_description=p.product_description,
+                brand_id=p.brand_id,
+                category_id=p.category_id,
+                sku_code=p.sku_code,
+                price=p.price,
+                stock=p.stock,
+                is_active=p.is_active,
+                created_at=p.created_at,
+                updated_at=p.updated_at,
+                images=images_map.get(p.object_id, []),
+                variants=variants_map.get(p.object_id, []),
             )
-
-        return products
+            for p in products
+        ]
 
     def insert_product(
         self,
         bot: BotListWithCredentialView,
         product_name: str,
         product_description: str,
-        sku_code: Optional[str],
+        sku_code: str | None,
         price: int,
-        stock: Optional[int],
+        stock: int | None,
         is_active: bool,
-        images: List[UploadFile],
+        images: list[UploadFile],
         user_id: str,
-        category_id: int = None,
-        brand_id: int = None,
+        category_id: int | None = None,
+        brand_id: int | None = None,
     ):
         if category_id is None:
             product_class_id = self.validate_category_class(bot.class_id)
@@ -363,14 +364,16 @@ class EcommService:
     ):
         self.validate_brand_class(bot.class_id)
 
-        if body.sku_code is not None:
-            if self.query.check_product_sku_exists_exclude_self(
+        if (
+            body.sku_code is not None
+            and self.query.check_product_sku_exists_exclude_self(
                 body.sku_code, body.product_id
-            ):
-                raise GlobalErrorException(
-                    error_code=ErrorCode.PRODUCT_SKU_ALREADY_EXISTS,
-                    error_message=f"SKU '{body.sku_code}' already exists",
-                )
+            )
+        ):
+            raise GlobalErrorException(
+                error_code=ErrorCode.PRODUCT_SKU_ALREADY_EXISTS,
+                error_message=f"SKU '{body.sku_code}' already exists",
+            )
         if body.sku_code == "":
             body.sku_code = None
 
@@ -454,7 +457,7 @@ class EcommService:
             )
         return order_class_id
 
-    def get_all_orders(self, bot: BotListWithCredentialView) -> List[OrderResponse]:
+    def get_all_orders(self, bot: BotListWithCredentialView) -> list[OrderResponse]:
         order_class_id = self.validate_order_class(bot.class_id)
         orders_data = self.query.get_all_orders_view(order_class_id)
         orders = []
@@ -479,7 +482,7 @@ class EcommService:
 
     def get_all_user_orders(
         self, bot: BotListWithCredentialView, user_id: UUID
-    ) -> List[OrderResponse]:
+    ) -> list[OrderResponse]:
         order_class_id = self.validate_order_class(bot.class_id)
         orders_data = self.query.get_all_user_orders_view(user_id, order_class_id)
         orders = []
@@ -657,7 +660,7 @@ class EcommService:
         self,
         bot: BotListWithCredentialView,
         product_id: UUID,
-        images: List[UploadFile],
+        images: list[UploadFile],
     ):
         product = self.query.get_product_by_id(product_id)
         if not product:

@@ -11,4 +11,4 @@ COPY . /app
 RUN uv sync --frozen --no-cache
 
 # Run FastAPI app using uvicorn
-CMD ["/app/.venv/bin/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["/app/.venv/bin/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80", "--workers", "4"]

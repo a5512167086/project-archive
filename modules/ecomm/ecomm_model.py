@@ -1,5 +1,5 @@
-from datetime import datetime, timezone
-from typing import Annotated, List, Literal, Optional
+from datetime import UTC, datetime
+from typing import Annotated, Literal
 from uuid import UUID, uuid4
 
 from beanie import Document, Indexed
@@ -21,17 +21,17 @@ class BrandListView(SQLModel, table=True):
     class_id: int = Field(primary_key=True)
     object_id: int = Field(primary_key=True)
     brand_name: str
-    brand_description: Optional[str] = None
+    brand_description: str | None = None
 
 
 class CategoryListView(SQLModel, table=True):
     __tablename__ = "vs_category_list"
 
-    parent_class_id: Optional[int] = None
+    parent_class_id: int | None = None
     class_id: int = Field(primary_key=True)
     entity_id: int
     category_name: str
-    category_description: Optional[str] = None
+    category_description: str | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -39,39 +39,39 @@ class CategoryListView(SQLModel, table=True):
 class ProductDetail(SQLModel, table=True):
     __tablename__ = "product_details"
 
-    product_id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
-    brand_id: Optional[int] = None
+    product_id: UUID | None = Field(default_factory=uuid4, primary_key=True)
+    brand_id: int | None = None
     object_id: int = Field(index=True)
     is_active: bool = Field(default=True)
-    sku_code: Optional[str] = Field(default=None, max_length=64, unique=True)
+    sku_code: str | None = Field(default=None, max_length=64, unique=True)
     price: int
-    stock: Optional[int] = Field(default=None)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    stock: int | None = Field(default=None)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class ProductImage(SQLModel, table=True):
     __tablename__ = "product_images"
     __table_args__ = (UniqueConstraint("object_id", "filename"),)
 
-    image_id: Optional[int] = Field(default=None, primary_key=True)
+    image_id: int | None = Field(default=None, primary_key=True)
     filename: str
     object_id: int = Field(index=True)
     is_primary: bool = Field(default=False)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class ProductVariant(SQLModel, table=True):
     __tablename__ = "product_variants"
 
-    variant_id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
-    object_id: Optional[int] = None
+    variant_id: UUID | None = Field(default_factory=uuid4, primary_key=True)
+    object_id: int | None = None
     variant_name: str = Field(max_length=100)
-    sku_code: Optional[str] = Field(default=None, max_length=64)
-    price: Optional[int] = Field(default=None)
-    stock: Optional[int] = Field(default=None)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    sku_code: str | None = Field(default=None, max_length=64)
+    price: int | None = Field(default=None)
+    stock: int | None = Field(default=None)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class ProductListView(SQLModel, table=True):
@@ -80,12 +80,12 @@ class ProductListView(SQLModel, table=True):
     product_id: UUID = Field(primary_key=True)
     object_id: int
     product_name: str
-    product_description: Optional[str] = None
+    product_description: str | None = None
     category_id: int
-    brand_id: Optional[int] = None
-    sku_code: Optional[str]
+    brand_id: int | None = None
+    sku_code: str | None
     price: int
-    stock: Optional[int]
+    stock: int | None
     is_active: bool
     created_at: datetime
     updated_at: datetime
@@ -99,7 +99,7 @@ class ShippingOption(BaseModel):
 
 class ShippingSetting(Document):
     bot_uuid: Annotated[str, Indexed(unique=True)]
-    shipping_options: List[ShippingOption] = PydanticField(default_factory=list)
+    shipping_options: list[ShippingOption] = PydanticField(default_factory=list)
 
     class Settings:
         name = "shipping_settings"
@@ -108,30 +108,30 @@ class ShippingSetting(Document):
 class OrderDetail(SQLModel, table=True):
     __tablename__ = "order_details"
 
-    order_id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    order_id: UUID | None = Field(default_factory=uuid4, primary_key=True)
     object_id: int = Field(index=True)
     total_amount: int
     status: OrderStatus = Field(default=OrderStatus.pending, max_length=16)
-    payment_method: Optional[PaymentMethod] = Field(default=None, max_length=32)
-    payment_status: Optional[PaymentStatus] = Field(default=None, max_length=16)
-    shipping_method: Optional[ShippingMethod] = Field(default=None, max_length=32)
+    payment_method: PaymentMethod | None = Field(default=None, max_length=32)
+    payment_status: PaymentStatus | None = Field(default=None, max_length=16)
+    shipping_method: ShippingMethod | None = Field(default=None, max_length=32)
     shipping_fee: int = Field(default=0)
-    tracking_number: Optional[str] = Field(default=None, max_length=128)
-    recipient_name: Optional[str] = Field(default=None, max_length=128)
-    recipient_phone: Optional[str] = Field(default=None, max_length=32)
-    shipping_address: Optional[str] = Field(default=None)
-    notes: Optional[str] = Field(default=None)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    tracking_number: str | None = Field(default=None, max_length=128)
+    recipient_name: str | None = Field(default=None, max_length=128)
+    recipient_phone: str | None = Field(default=None, max_length=32)
+    shipping_address: str | None = Field(default=None)
+    notes: str | None = Field(default=None)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class OrderItem(SQLModel, table=True):
     __tablename__ = "order_items"
 
-    order_item_id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    order_item_id: UUID | None = Field(default_factory=uuid4, primary_key=True)
     object_id: int = Field(index=True)
     product_id: UUID
-    variant_id: Optional[UUID] = Field(default=None, index=True)
+    variant_id: UUID | None = Field(default=None, index=True)
     quantity: int
     unit_price: int
     subtotal: int
@@ -144,14 +144,14 @@ class OrderListView(SQLModel, table=True):
     object_id: int
     total_amount: int
     status: str
-    payment_method: Optional[str] = None
-    payment_status: Optional[str] = None
-    shipping_method: Optional[str] = None
+    payment_method: str | None = None
+    payment_status: str | None = None
+    shipping_method: str | None = None
     shipping_fee: int
-    tracking_number: Optional[str] = None
-    recipient_name: Optional[str] = None
-    recipient_phone: Optional[str] = None
-    shipping_address: Optional[str] = None
-    notes: Optional[str] = None
+    tracking_number: str | None = None
+    recipient_name: str | None = None
+    recipient_phone: str | None = None
+    shipping_address: str | None = None
+    notes: str | None = None
     created_at: datetime
     updated_at: datetime

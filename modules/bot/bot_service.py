@@ -88,18 +88,12 @@ class BotService:
                 "取得 Login Channel Token 時發生錯誤",
             )
 
-    def validate_bot_ownership(
-        self, user_id: str, bot_uuid: UUID
-    ) -> BotListWithCredentialView:
-        logger.info(
-            f"Validating bot ownership for user_id: {user_id}, bot_uuid: {bot_uuid}"
-        )
-        bot_data = self.query.get_bot_by_uuid(bot_uuid)
-
-        if not bot_data or str(bot_data.owner_id) != user_id:
-            return False
-
-        return True
+    def validate_bot_ownership_by_bot(
+        self,
+        user_id: str,
+        bot: BotListWithCredentialView,
+    ) -> bool:
+        return str(bot.owner_id) == user_id
 
     def create_new_bot(self, user_id: str, new_bot: InsertBotRequest):
         logger.info(f"Creating new bot for user_id: {user_id} with data: {new_bot}")
@@ -306,7 +300,7 @@ class BotService:
                 logger.error(f"Failed to provision new LINE resources: {e}")
                 self.raise_global_error(
                     ErrorCode.INVALID_LINE_BOT,
-                    f"New credentials invalid or failed to create resources: {str(e)}",
+                    f"New credentials invalid or failed to create resources: {e!s}",
                 )
             logger.info(
                 "New resources created successfully. Cleaning up old resources..."
