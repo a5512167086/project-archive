@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 PRODUCTS_JSON_PATH = "data/daedo_products.json"
 FIXED_BRAND_NAME = "Daedo"
 MINIO_BUCKET_NAME = "product-images"
-EUR_TO_TWD_RATE = Decimal("35")
+EUR_TO_TWD_RATE = Decimal(35)
 
 
 def get_db() -> Session:
@@ -68,7 +68,7 @@ def parse_price(price_value: Any) -> Decimal | None:
             return None
 
     twd_price = (eur_price * EUR_TO_TWD_RATE).quantize(
-        Decimal("1"),
+        Decimal(1),
         rounding=ROUND_HALF_UP,
     )
     return twd_price
@@ -118,7 +118,7 @@ def upload_image_to_minio(
             content_type = "image/jpeg"
 
         new_filename = generate_filename(original_filename)
-
+        minio_service._ensure_bucket(MINIO_BUCKET_NAME)
         minio_service.client.put_object(
             MINIO_BUCKET_NAME,
             new_filename,
