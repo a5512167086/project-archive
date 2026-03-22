@@ -13,6 +13,7 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 
 # Qdrant Configuration
 QDRANT_URL = os.getenv("QDRANT_URL")
+QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
 QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION")
 
 # MongoDB Configuration
@@ -31,7 +32,6 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 # LLM Configuration
 LLM_TEMPERATURE = os.getenv("LLM_TEMPERATURE")
 LLM_MAX_NEW_TOKENS = os.getenv("LLM_MAX_NEW_TOKENS")
-TOP_K = 5
 
 # Azure OpenAI Configuration
 AZURE_OPENAI_DEPLOYMENT = os.getenv("AZURE_OPENAI_DEPLOYMENT")

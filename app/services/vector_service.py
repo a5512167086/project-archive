@@ -4,15 +4,9 @@ import gc
 import re
 import time
 import uuid
+from collections.abc import Iterable
 from typing import (
-    TYPE_CHECKING,
     Any,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    Set,
-    Tuple,
     TypeAlias,
 )
 from uuid import UUID, uuid5
@@ -22,17 +16,15 @@ from langchain_ollama import OllamaEmbeddings
 from langchain_qdrant import QdrantVectorStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pypdf import PdfReader
-from qdrant_client import QdrantClient
 from qdrant_client import models as qmodels
 
+from app.database import client
 from app.logger import logger
+from app.models.knowledge_model import KnowledgeFileListView
 from app.schemas import KnowledgeItem
+from app.services.storage_service import StorageService
 
-if TYPE_CHECKING:
-    from app.models.knowledge_model import KnowledgeFileListView
-    from app.services.storage_service import StorageService
-
-Hit: TypeAlias = Dict[str, Any]
+Hit: TypeAlias = dict[str, Any]
 
 
 class VectorService:
@@ -49,8 +41,7 @@ class VectorService:
         self.embeddings = embeddings
         self.qdrant_url = qdrant_url
         self.collection = collection_name
-
-        self.client = QdrantClient(url=self.qdrant_url, timeout=timeout)
+        self.client = client
 
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=600,
@@ -140,9 +131,9 @@ class VectorService:
     def _build_knowledge_filter(
         self,
         bot_uuid: UUID,
-        object_ids: Optional[List[int]] = None,
+        object_ids: list[int] | None = None,
     ) -> qmodels.Filter:
-        must: List[qmodels.FieldCondition] = [
+        must: list[qmodels.FieldCondition] = [
             qmodels.FieldCondition(
                 key="metadata.bot_uuid",
                 match=qmodels.MatchValue(value=str(bot_uuid)),
@@ -170,8 +161,8 @@ class VectorService:
         self,
         bot_uuid: UUID,
         batch_size: int = DEFAULT_BATCH_SIZE,
-    ) -> Set[int]:
-        object_ids: Set[int] = set()
+    ) -> set[int]:
+        object_ids: set[int] = set()
         next_offset = None
         filt = self._build_knowledge_filter(bot_uuid)
 
@@ -204,9 +195,9 @@ class VectorService:
 
     def _safe_batch_upsert(
         self,
-        texts: List[str],
-        metadatas: List[Dict[str, Any]],
-        ids: List[str],
+        texts: list[str],
+        metadatas: list[dict[str, Any]],
+        ids: list[str],
         batch_size: int,
     ) -> int:
         if not texts:
@@ -263,11 +254,11 @@ class VectorService:
         self,
         bot_uuid: UUID,
         items: Iterable[KnowledgeItem],
-    ) -> Tuple[List[str], List[Dict[str, Any]], List[str]]:
+    ) -> tuple[list[str], list[dict[str, Any]], list[str]]:
         bot_str = str(bot_uuid)
-        docs: List[str] = []
-        metas: List[Dict[str, Any]] = []
-        ids: List[str] = []
+        docs: list[str] = []
+        metas: list[dict[str, Any]] = []
+        ids: list[str] = []
 
         for it in items:
             text = self._format_knowledge_text(it)
@@ -311,12 +302,12 @@ class VectorService:
     def upsert_file_items(
         self,
         bot_uuid: UUID,
-        files: List["KnowledgeFileListView"],
-        storage_service: "StorageService",
+        files: list[KnowledgeFileListView],
+        storage_service: StorageService,
     ) -> int:
-        docs_to_add: List[str] = []
-        metas_to_add: List[Dict[str, Any]] = []
-        ids_to_add: List[str] = []
+        docs_to_add: list[str] = []
+        metas_to_add: list[dict[str, Any]] = []
+        ids_to_add: list[str] = []
 
         bot_str = str(bot_uuid)
 
@@ -386,7 +377,7 @@ class VectorService:
     def delete_knowledge_items(
         self,
         bot_uuid: UUID,
-        object_ids: Optional[List[int]] = None,
+        object_ids: list[int] | None = None,
     ) -> bool:
         filt = self._build_knowledge_filter(bot_uuid, object_ids=object_ids)
         self.client.delete(
@@ -417,8 +408,8 @@ class VectorService:
         bot_uuid: UUID,
         query_text: str,
         top_k: int,
-        score_threshold: Optional[float],
-    ) -> List[Hit]:
+        score_threshold: float | None,
+    ) -> list[Hit]:
         t0 = time.perf_counter()
 
         pairs = self.vs.similarity_search_with_relevance_scores(
@@ -428,7 +419,7 @@ class VectorService:
             score_threshold=score_threshold,
         )
 
-        results: List[Hit] = []
+        results: list[Hit] = []
         for doc, score in pairs:
             md = doc.metadata or {}
             item_type = md.get("type", "qa")
@@ -453,11 +444,11 @@ class VectorService:
         )
         return results
 
-    def _dedupe_and_sort(self, results: List[Hit]) -> List[Hit]:
+    def _dedupe_and_sort(self, results: list[Hit]) -> list[Hit]:
         results.sort(key=lambda x: float(x.get("score", 0.0) or 0.0), reverse=True)
 
-        seen: Set[Any] = set()
-        deduped: List[Hit] = []
+        seen: set[Any] = set()
+        deduped: list[Hit] = []
         for r in results:
             obj_id = r.get("object_id")
             chunk_id = r.get("id")

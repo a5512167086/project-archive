@@ -4,7 +4,7 @@ import asyncio
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Annotated, Tuple
+from typing import Annotated
 
 from fastapi import BackgroundTasks, Depends, FastAPI, Request
 from langchain_ollama import OllamaEmbeddings
@@ -77,7 +77,7 @@ def build_summary_memory(llm_service: LLMService) -> SummaryMemory:
 
 def build_services(
     embeddings: OllamaEmbeddings,
-) -> Tuple[RAGService, RetrievalService, VectorService]:
+) -> tuple[RAGService, RetrievalService, VectorService]:
     llm_service = LLMService()
     prompt_service = PromptService(
         max_contexts_for_prompt=RAGService.DEFAULT_MAX_CONTEXTS_FOR_PROMPT

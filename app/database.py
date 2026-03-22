@@ -10,6 +10,7 @@ from app.configs.config import (
     DB_PASSWORD,
     DB_PORT,
     DB_USER,
+    QDRANT_API_KEY,
     QDRANT_URL,
 )
 
@@ -26,4 +27,4 @@ def get_session():
 SessionDep = Annotated[Session, Depends(get_session)]
 
 # VectorDB
-client = QdrantClient(url=QDRANT_URL)
+client = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
