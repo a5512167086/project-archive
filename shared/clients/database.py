@@ -9,8 +9,8 @@ DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NA
 engine = create_engine(
     DATABASE_URL,
     echo=False,
-    pool_size=8,
-    max_overflow=8,
+    pool_size=10,
+    max_overflow=20,
     pool_timeout=30,
     pool_recycle=1800,
     pool_pre_ping=True,
