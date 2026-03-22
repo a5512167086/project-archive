@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 from langchain_core.embeddings import Embeddings
@@ -18,6 +18,7 @@ from app.configs.constans import (
     DEFAULT_TOP_K,
 )
 from app.logger import logger
+from app.services.dynamic_prompt_service import DynamicPromptService
 from app.services.llm_service import LLMService
 from app.services.prompt_service import PromptService
 from app.services.reranker_service import RerankerService
@@ -40,7 +41,7 @@ class RAGService:
         self,
         embeddings: Embeddings,
         llm_service: Optional[LLMService] = None,
-        prompt_service: Optional[PromptService] = None,
+        prompt_service: Optional[Union[PromptService, DynamicPromptService]] = None,
         reranker_service: Optional[RerankerService] = None,
         retrieval_service: Optional[RetrievalService] = None,
         summary_service: Optional[SummaryService] = None,
@@ -49,8 +50,11 @@ class RAGService:
     ) -> None:
         self.embeddings = embeddings
         self.llm_service: LLMService = llm_service or LLMService()
-        self.prompt_service: PromptService = prompt_service or PromptService(
-            max_contexts_for_prompt=self.DEFAULT_MAX_CONTEXTS_FOR_PROMPT
+        self.prompt_service: Union[PromptService, DynamicPromptService] = (
+            prompt_service
+            or PromptService(
+                max_contexts_for_prompt=self.DEFAULT_MAX_CONTEXTS_FOR_PROMPT
+            )
         )
         self.reranker = reranker_service
         self.retrieval_service = retrieval_service
