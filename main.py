@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from prometheus_fastapi_instrumentator import Instrumentator
 
@@ -20,7 +21,7 @@ from modules.reservation.reservation_router import reservation_router, service_r
 from modules.user.user_router import user_router
 from shared.clients.mongodb import init_monogo_db
 from shared.exception import add_global_exception_handler
-from shared.models import *  # noqa: F403
+from shared.models import *
 from shared.schemas.common_schema import ErrorResponse
 
 
@@ -48,6 +49,7 @@ async def validation_exception_handler(request, exc):
     )
 
 
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
