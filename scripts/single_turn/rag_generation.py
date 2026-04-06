@@ -5,7 +5,7 @@ import json
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 from uuid import UUID
 
 from dotenv import load_dotenv
@@ -46,25 +46,29 @@ class ExpConfig:
     use_rerank: bool
 
 
-EXPERIMENTS: List[ExpConfig] = [
+EXPERIMENTS: list[ExpConfig] = [
     ExpConfig(name="baseline", use_rerank=False),
     ExpConfig(name="rerank", use_rerank=True),
 ]
 
-RETRIEVAL_MODES: List[str] = [
+RETRIEVAL_MODES: list[str] = [
     "hybrid",
     "vector",
     "lexical",
 ]
 
-DATASET_CONFIG: Dict[str, Dict[str, str]] = {
+DATASET_CONFIG: dict[str, dict[str, str]] = {
     "rag_testset": {
         "path": "./data/testset/rag_testset.json",
         "bot_uuid": "a6e042eb-7889-4bcb-996c-1845d2215fc2",
     },
+    "wke_rag_testset": {
+        "path": "./data/testset/wke_rag_testset.json",
+        "bot_uuid": "22a78f31-6b25-419e-af63-848a4463caf2",
+    },
 }
 
-MODELS_TO_RUN: List[str] = [
+MODELS_TO_RUN: list[str] = [
     "local_model",
 ]
 
@@ -80,7 +84,7 @@ def _score_threshold_for_mode(mode: str) -> float:
 
 
 # 讀取測試資料的邏輯改為解析 JSON
-def load_test_data(path: str) -> List[Dict[str, str]]:
+def load_test_data(path: str) -> list[dict[str, str]]:
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
@@ -100,7 +104,7 @@ def save_json(results, filename):
         json.dump(results, f, ensure_ascii=False, indent=2)
 
 
-def _preview_hit(h: Dict[str, Any]) -> str:
+def _preview_hit(h: dict[str, Any]) -> str:
     """與 PromptService 邏輯同步的 Log 顯示"""
     score_str = f"score={h.get('score', 0):.4f}"
     if h.get("rerank_score"):
@@ -121,7 +125,7 @@ def _preview_hit(h: Dict[str, Any]) -> str:
     return f"- {score_str} | {preview}"
 
 
-def _contexts_for_ragas(hits: List[Dict[str, Any]]) -> List[str]:
+def _contexts_for_ragas(hits: list[dict[str, Any]]) -> list[str]:
     contexts = []
     for h in hits:
         item_type = h.get("type", "qa")
@@ -141,7 +145,7 @@ def _contexts_for_ragas(hits: List[Dict[str, Any]]) -> List[str]:
 # -----------------------------
 # Core Wrapper
 # -----------------------------
-def _rag_answer_with_retry(rag: RAGService, **kwargs) -> Dict[str, Any]:
+def _rag_answer_with_retry(rag: RAGService, **kwargs) -> dict[str, Any]:
     max_attempts = kwargs.pop("max_attempts", 5)
     for attempt in range(1, max_attempts + 1):
         try:

@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import List
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -41,6 +40,14 @@ TRAD_METRICS = [
 
 ALL_METRICS = RAGAS_METRICS + TRAD_METRICS
 
+# ============================
+# 2. 定義三大面向與對應的指標 (注意需符合本檔的 snake_case 命名)
+# ============================
+THREE_DIMENSIONS = {
+    "Retrieval Correctness": ["context_precision", "context_recall"],
+    "Answer Correctness": ["answer_correctness", "faithfulness", "bertscore"],
+    "Answer Relevancy": ["answer_relevancy"],
+}
 
 # ============================
 # Utils
@@ -68,7 +75,7 @@ def variant_sort_key(variant: str) -> int:
     return int(m.group(1)) if m else 999
 
 
-def load_metric_json(path: Path, source: str) -> List[dict]:
+def load_metric_json(path: Path, source: str) -> list[dict]:
     if not path.exists():
         print(f"[Warn] File not found: {path}")
         return []
@@ -92,7 +99,7 @@ def load_metric_json(path: Path, source: str) -> List[dict]:
 def annotate_bars(ax) -> None:
     for p in ax.patches:
         h = p.get_height()
-        if pd.notna(h):
+        if pd.notna(h) and h > 0:
             ax.annotate(
                 f"{h:.3f}",
                 (p.get_x() + p.get_width() / 2, h),
@@ -112,7 +119,7 @@ def annotate_bars(ax) -> None:
 def plot_grouped_bar(
     df: pd.DataFrame,
     source: str,
-    metric_order: List[str],
+    metric_order: list[str],
     out_path: Path,
     title: str,
 ) -> None:
@@ -155,7 +162,7 @@ def plot_grouped_bar(
 
 def plot_heatmap_all_metrics(
     df: pd.DataFrame,
-    metric_order: List[str],
+    metric_order: list[str],
     out_path: Path,
 ) -> None:
     sub = df[df["metric"].isin(metric_order)].copy()
@@ -210,7 +217,7 @@ def plot_heatmap_all_metrics(
 
 def plot_delta_vs_baseline(
     df: pd.DataFrame,
-    metric_order: List[str],
+    metric_order: list[str],
     baseline_variant: str,
     out_path: Path,
 ) -> None:
@@ -284,7 +291,7 @@ def plot_delta_vs_baseline(
 def plot_variant_profile_lines(
     df: pd.DataFrame,
     source: str,
-    metric_order: List[str],
+    metric_order: list[str],
     out_path: Path,
     title: str,
 ) -> None:
@@ -320,6 +327,82 @@ def plot_variant_profile_lines(
     plt.savefig(out_path, dpi=200, bbox_inches="tight")
     plt.close()
     print(f"[OK] Saved profile line chart: {out_path.resolve()}")
+
+
+def plot_three_dimensions_bar(df: pd.DataFrame, out_path: Path) -> None:
+    """繪製 AB Test 的三大面向長條圖"""
+    n_cols = len(THREE_DIMENSIONS)
+    fig_width = 7.0 * n_cols
+    fig, axes = plt.subplots(1, n_cols, figsize=(fig_width, 6.5))
+
+    if n_cols == 1:
+        axes = [axes]
+
+    fig.suptitle(
+        "Three Dimensions Performance - AB Test",
+        fontsize=20,
+        fontweight="bold",
+        y=0.98,
+    )
+
+    colors = ["#66c2a5", "#fc8d62", "#8da0cb", "#e78ac3", "#a6d854", "#ffd92f"]
+
+    for idx, (dim_name, metrics) in enumerate(THREE_DIMENSIONS.items()):
+        ax = axes[idx]
+
+        # 過濾屬於該面向的指標
+        sub = df[df["metric"].isin(metrics)].copy()
+
+        if sub.empty:
+            ax.text(
+                0.5, 0.5, "No Data", ha="center", va="center", fontsize=14, color="gray"
+            )
+            ax.set_title(dim_name, fontsize=16, fontweight="bold")
+            ax.axis("off")
+            continue
+
+        # 計算每個版本在該面向的平均分數
+        pivot = sub.groupby("variant")["value"].mean().reset_index()
+        pivot["sort_key"] = pivot["variant"].apply(variant_sort_key)
+        pivot = pivot.sort_values("sort_key")
+
+        x_labels = pivot["variant"].tolist()
+        y_values = pivot["value"].tolist()
+
+        # 繪製長條圖，給不同版本不同的顏色
+        bars = ax.bar(x_labels, y_values, width=0.6, color=colors[: len(x_labels)])
+
+        # 動態計算 Y 軸起點放大差異
+        if len(y_values) > 0 and min(y_values) > 0:
+            y_min = max(0.0, min(y_values) - 0.08)
+        else:
+            y_min = 0.4
+
+        ax.set_title(dim_name, fontsize=16, fontweight="bold")
+        ax.set_xlabel("Variants", fontsize=12)
+        ax.set_ylabel("Average Score", fontsize=12)
+        ax.set_ylim(y_min, 1.05)
+        ax.tick_params(axis="x", labelsize=11)
+        ax.grid(axis="y", linestyle="--", alpha=0.7)
+
+        # 標註數字
+        for bar in bars:
+            val = bar.get_height()
+            if val > 0:
+                ax.annotate(
+                    f"{val:.3f}",
+                    (bar.get_x() + bar.get_width() / 2.0, val),
+                    ha="center",
+                    va="bottom",
+                    xytext=(0, 5),
+                    textcoords="offset points",
+                    fontsize=11,
+                )
+
+    plt.tight_layout(rect=[0, 0, 1, 0.93])
+    plt.savefig(out_path, dpi=200)
+    plt.close()
+    print(f"[OK] Saved 3-Dimensions Bar Chart: {out_path.resolve()}")
 
 
 # ============================
@@ -388,6 +471,9 @@ def main() -> None:
         baseline_variant="v1",
         out_path=OUTDIR / "ab_delta_vs_v1.png",
     )
+
+    # 🚀 NEW: Three Dimensions
+    plot_three_dimensions_bar(df=df, out_path=OUTDIR / "ab_three_dimensions.png")
 
     print(f"\n✨ All AB test charts saved under: {OUTDIR.resolve()}")
 
