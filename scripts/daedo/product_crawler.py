@@ -47,7 +47,7 @@ async def scrape_products(page, target_id):
     return products
 
 
-# 💡 階段二核心：並發抓取單一商品詳細資訊
+# 💡 修改後的階段二核心：加入 Description 抓取
 async def fetch_detail(context, product, sema):
     async with sema:
         page = await context.new_page()
@@ -67,19 +67,42 @@ async def fetch_detail(context, product, sema):
             except Exception:
                 product["detailed_name"] = product["name"]
 
-            # --- 💡 新增：抓取商品價格 ---
+            # --- 抓取商品價格 ---
             try:
-                # 注意：CSS class 中間有空格代表是兩個 class，選擇器要用 . 連接
                 price_locator = page.locator(".price-item.price-item--regular")
                 if await price_locator.count() > 0:
-                    # 通常取第一個就是正確價格
                     price_text = await price_locator.first.text_content()
                     product["price"] = _norm(price_text)
                 else:
                     product["price"] = None
-            except Exception as e:
-                print(f"      ⚠️ 價格抓取發生錯誤: {e}")
+            except Exception:
                 product["price"] = None
+
+            # --- 💡 新增：抓取 Description (Information & Composition) ---
+            try:
+                description_parts = []
+                # 定位到該區塊下的所有 dt 和 dd
+                data_sheet = page.locator(".product-features .data-sheet")
+
+                if await data_sheet.count() > 0:
+                    dt_elements = data_sheet.locator("dt.name")
+                    dd_elements = data_sheet.locator("dd.value")
+
+                    count = await dt_elements.count()
+                    for i in range(count):
+                        key = _norm(await dt_elements.nth(i).text_content())
+                        val = _norm(await dd_elements.nth(i).text_content())
+
+                        if key in ["Information", "Composition", "Compositions"]:
+                            description_parts.append(f"{key}: {val}")
+
+                # 用換行符號連接起來，如果陣列是空的就會回傳 None
+                product["description"] = (
+                    "\n".join(description_parts) if description_parts else None
+                )
+            except Exception as e:
+                print(f"      ⚠️ 描述抓取發生錯誤: {e}")
+                product["description"] = None
 
             # --- 抓取圖片 src ---
             images = []
@@ -99,19 +122,16 @@ async def fetch_detail(context, product, sema):
                 pass
             product["images"] = images
 
-            # --- 抓取變體選項並產生排列組合 ---
+            # --- 抓取變體選項 ---
             variants = []
             try:
                 fieldset_locator = page.locator(".product-form__input")
                 fieldset_count = await fieldset_locator.count()
-
                 groups_options = []
                 for i in range(fieldset_count):
                     options = []
-
                     inputs = fieldset_locator.nth(i).locator('input[type="radio"]')
                     input_count = await inputs.count()
-
                     if input_count > 0:
                         for j in range(input_count):
                             val = await inputs.nth(j).get_attribute("value")
@@ -124,29 +144,28 @@ async def fetch_detail(context, product, sema):
                             val = await selects.nth(j).get_attribute("value")
                             if val:
                                 options.append(val.strip())
-
                     if options:
                         groups_options.append(options)
-
                 if groups_options:
                     for combo in itertools.product(*groups_options):
                         variants.append(" / ".join(combo))
-
-            except Exception as e:
-                print(f"      ⚠️ 變體抓取發生錯誤: {e}")
-
+            except Exception:
+                pass
             product["variants"] = variants
 
             print(
-                f"   ✅ 完成詳情: {product['detailed_name'][:20]}... | 價格: {product['price']} | 圖片數: {len(images)} | 變體數: {len(variants)}"
+                f"    ✅ 完成詳情: {product['detailed_name'][:15]}... | 價格: {product['price']} | 描述: {'有' if product['description'] else '無'}"
             )
 
         except Exception as e:
-            print(f"   ❌ 詳情失敗: {product['url']} | 錯誤: {e}")
-            product["detailed_name"] = product["name"]
-            product["price"] = None
-            product["images"] = []
-            product["variants"] = []
+            print(f"    ❌ 詳情失敗: {product['url']} | 錯誤: {e}")
+            product.update({
+                "detailed_name": product["name"],
+                "price": None,
+                "images": [],
+                "variants": [],
+                "description": None,
+            })
         finally:
             await page.close()
 

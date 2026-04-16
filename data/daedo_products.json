@@ -8,9 +8,10 @@
         "products": [
           {
             "name": "WT DAEDO BASIC DOBOK",
-            "url": "https://www.daedo.com/products/daedo-wt-daedo-basic-dobok",
+            "url": "https://www.daedo.com/products/ta-1001",
             "detailed_name": "WT DAEDO BASIC DOBOK WT DAEDO BASIC DOBOK",
             "price": "€21,00",
+            "description": "Information: Lightweight Taekwondo Uniform (Dobok) with white collar jacket – No back lettering, Stretch waist pants for comfortable training.Custom orders require approximately 15 business days for delivery.\nComposition: 80% Polyester, 20% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-1001-1_50e820ab-5510-4f39-a1f0-a1d47202a290.png?v=1739775432&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-1001-2_c7d8ea57-cfd9-4f5d-99f3-2d1f330e999f.png?v=1739775432&width=1946",
@@ -31,9 +32,10 @@
           },
           {
             "name": "WT BASIC DOBOK EMBROIDERY",
-            "url": "https://www.daedo.com/products/daedo-wt-basic-dobok-embroidery",
+            "url": "https://www.daedo.com/products/ta-1011",
             "detailed_name": "WT BASIC DOBOK EMBROIDERY WT BASIC DOBOK EMBROIDERY",
             "price": "€28,00",
+            "description": "Information: Beginner Taekwondo Uniform (Dobok) with white collar. Lightweight jacket with “TAEKWONDO” back embroidery and elastic waist pants for comfortable training.\nCompositions: 80% Polyester, 20% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-1011-1_b8080924-044f-43ee-937c-a309b48244f0.png?v=1739775461&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-1011-2_c11e11e3-42b6-42fe-a8a3-b96a278cb33b.png?v=1739775461&width=1946",
@@ -58,6 +60,7 @@
             "url": "https://www.daedo.com/products/ta-1021",
             "detailed_name": "WT DOBOK BLACK NECK WT DOBOK BLACK NECK",
             "price": "€27,50",
+            "description": "Information: Black collar dobok designed for Taekwondo training and competition. Features an embroidered Taekwondo logo on the back for an authentic martial arts look. Made from lightweight fabric that ensures comfort, breathability, and freedom of movement during practice. The trousers include a flexible elastic waistband for a secure and comfortable fit.\nComposition: 80% Polyester, 20% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-1021-1_c46cfdc3-6dfc-42cd-9e83-19d2ae3416f2.png?v=1739775470&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-1021-2_ba5ead33-92d4-4c01-a301-000b3f9fd7e3.png?v=1739775470&width=1946",
@@ -84,6 +87,7 @@
             "url": "https://www.daedo.com/products/ta-1051",
             "detailed_name": "WT DOBOK POOM WT DOBOK POOM",
             "price": "€33,50",
+            "description": "Information: DOBOK POOM uniform set including jacket and pants.Features a distinctive red and black collar jacket with “TAEKWONDO” embroidered on the back, delivering an authentic martial arts look. Designed for Taekwondo practitioners, the dobok offers comfort, durability, and freedom of movement during training and competition.\nComposition: 80% Polyester, 20% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-1051-1_1497e55d-8e0c-44a3-bbc3-3c5f31c10549.png?v=1739775515&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-1051-2_34de0b7e-1673-4f63-965a-78b32e854eca.png?v=1739775515&width=1946",
@@ -105,6 +109,7 @@
             "url": "https://www.daedo.com/products/ta-1003",
             "detailed_name": "SUMMER DOBOK BLUE/RED SUMMER DOBOK BLUE/RED",
             "price": "€34,50",
+            "description": "Information: Summer Dobok Blue/Red uniform set including jacket and pants. Designed especially for younger Taekwondo athletes, this lightweight dobok features a short-sleeved jacket and short trousers for maximum comfort during warm-weather training. Made from breathable ribbed fabric that helps keep young practitioners cool and comfortable. The jacket includes a distinctive red and blue collar, combining functionality with a classic Taekwondo style. Ideal for summer training sessions and intense practice.\nComposition: 80% Polyester, 20% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-1003-1_962ebd35-a1c3-4bf6-9533-7d316d429c8a.png?v=1739775451&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-1003-2_c62bbdd1-969a-4c31-a46e-a5f135b5e527.png?v=1739775451&width=1946",
@@ -125,6 +130,7 @@
             "url": "https://www.daedo.com/products/ta-1002",
             "detailed_name": "SUMMER DOBOK YELLOW/RED SUMMER DOBOK YELLOW/RED",
             "price": "€34,50",
+            "description": "Information: Summer Dobok Yellow/Red uniform set including jacket and pants. Designed especially for younger Taekwondo athletes, this lightweight dobok features a short-sleeved jacket and short trousers for maximum comfort during warm-weather training. Made from breathable ribbed fabric that helps keep young practitioners cool and comfortable. The jacket includes a distinctive red and blue collar, combining functionality with a classic Taekwondo style. Ideal for summer training sessions and intense practice.\nComposition: 80% Polyester, 20% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-1002-1_a1835ae0-dfdb-4be0-a84f-96c3ec21718d.png?v=1739775442&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-1002-2_497a9e91-32a1-4d20-aad5-f0b30c56378b.png?v=1739775442&width=1946",
@@ -146,10 +152,11 @@
         "sub_category_name": "COMPETITION DOBOK",
         "products": [
           {
-            "name": "WT STYLE COMPETITION DOBOK BLACK COLLAR",
+            "name": "WT \"DRY-TECH\" COMPETITION UNIFORM BLACK COLLAR",
             "url": "https://www.daedo.com/products/ta-2025",
-            "detailed_name": "WT STYLE COMPETITION DOBOK BLACK COLLAR WT STYLE COMPETITION DOBOK BLACK COLLAR",
+            "detailed_name": "WT \"DRY-TECH\" COMPETITION UNIFORM BLACK COLLAR WT \"DRY-TECH\" COMPETITION UNIFORM BLACK COLLAR",
             "price": "€101,00",
+            "description": "Composition: 96% Polyester, 4% Spandex",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-2025-1_f8242893-eb70-4d64-8608-c1daf01a99ab.png?v=1739775652&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-2025-2_067491fc-42c1-4534-b71c-e7f1eb4ec4cf.png?v=1739775652&width=1946",
@@ -170,10 +177,11 @@
             ]
           },
           {
-            "name": "DAEDO COMPETITION DOBOK WHITE COLLAR",
-            "url": "https://www.daedo.com/products/daedo-competition-dobok-white-collar",
-            "detailed_name": "DAEDO COMPETITION DOBOK WHITE COLLAR DAEDO COMPETITION DOBOK WHITE COLLAR",
-            "price": "€112,50",
+            "name": "WT \"DRY-TECH\" COMPETITION UNIFORM WHITE COLLAR",
+            "url": "https://www.daedo.com/products/ta-2026",
+            "detailed_name": "WT \"DRY-TECH\" COMPETITION UNIFORM WHITE COLLAR WT \"DRY-TECH\" COMPETITION UNIFORM WHITE COLLAR",
+            "price": "€101,00",
+            "description": "Information: Daedo Taekwondo competition uniform (Dobok) – Ultra-lightweight, stretch and breathable fabric with quick-dry technology.\nComposition: 96% Polyester, 4% Spandex",
             "images": [
               "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-competition-ta2026-1.png?v=1772621826&width=1946",
               "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-competition-TA2026-2.png?v=1772621826&width=1946",
@@ -192,15 +200,16 @@
             ]
           },
           {
-            "name": "WT COMPETITION DOBOK",
+            "name": "DAEDO COMPETITION DOBOK",
             "url": "https://www.daedo.com/products/ta-20054",
-            "detailed_name": "WT COMPETITION DOBOK WT COMPETITION DOBOK",
+            "detailed_name": "DAEDO COMPETITION DOBOK DAEDO COMPETITION DOBOK",
             "price": "€58,50",
+            "description": "Information: Recommended for high-level competition. Crafted from ultra-lightweight performance fabric that promotes faster movement and agility. Strategic ultra-breathable zones improve ventilation and temperature control for elite athletes. The wide-fit trousers feature a flexible elastic waistband, delivering superior comfort, mobility, and performance during training or competition.\nComposition: 100% Polyester",
             "images": [
-              "https://www.daedo.com/cdn/shop/files/ta-20054-1_26f8cd57-72b5-48c4-b16a-d1b29c844c72.png?v=1739775595&width=1946",
-              "https://www.daedo.com/cdn/shop/files/ta-20054-2_cc29c24a-73c7-4906-be4b-223e120417ce.png?v=1739775595&width=1946",
-              "https://www.daedo.com/cdn/shop/files/ta-20054-3_7a45d54c-e1cb-469c-875c-e93fcfb553ab.png?v=1739775595&width=1946",
-              "https://www.daedo.com/cdn/shop/files/ta-20054-4_6940cf91-a012-4b0f-9516-23b3661360db.png?v=1739775595&width=1946"
+              "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-competition-wt-ta20054-1.png?v=1772797735&width=1946",
+              "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-competition-wt-ta20054-2.png?v=1772797735&width=1946",
+              "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-competition-wt-ta20054-3.jpg?v=1772797735&width=1946",
+              "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-competition-wt-ta20054-4.png?v=1772797735&width=1946"
             ],
             "variants": [
               "1",
@@ -214,10 +223,11 @@
             ]
           },
           {
-            "name": "WT \"ULTRA II\" DOBOK",
+            "name": "WT \"ULTRA MESH\" DOBOK",
             "url": "https://www.daedo.com/products/ta-20057",
-            "detailed_name": "WT \"ULTRA II\" DOBOK WT \"ULTRA II\" DOBOK",
+            "detailed_name": "WT \"ULTRA MESH\" DOBOK WT \"ULTRA MESH\" DOBOK",
             "price": "€74,00",
+            "description": "Information: New design featuring mesh fabric panels on the back, sides, and behind the knees to enhance breathability and ventilation. This advanced construction helps regulate body temperature and keeps athletes cool and comfortable during intense training or competition.\nComposition: 100% Polyester",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-20057-2_3521148b-4241-48f3-a7e4-e0f5f58e0bf8.png?v=1740589578&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-20057-1_c85ca327-b2bd-4398-bc24-cbc1005f294a.png?v=1740589578&width=1946",
@@ -238,31 +248,11 @@
             ]
           },
           {
-            "name": "WT STYLE COMPETITION DOBOK POOM COLLAR",
-            "url": "https://www.daedo.com/products/ta-2028",
-            "detailed_name": "WT STYLE COMPETITION DOBOK POOM COLLAR WT STYLE COMPETITION DOBOK POOM COLLAR",
-            "price": "€101,00",
-            "images": [
-              "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-poom-ta2028.png?v=1743583407&width=1946",
-              "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-poom-ta2028_2.png?v=1743583408&width=1946"
-            ],
-            "variants": [
-              "0",
-              "1",
-              "2",
-              "3",
-              "4",
-              "5",
-              "6",
-              "7",
-              "8"
-            ]
-          },
-          {
             "name": "WT COMPETITION UNIFORM “SHELRON”",
             "url": "https://www.daedo.com/products/ta-2024",
             "detailed_name": "WT COMPETITION UNIFORM “SHELRON” WT COMPETITION UNIFORM “SHELRON”",
             "price": "€169,50",
+            "description": "Information: WT competition uniform set including jacket and pants. This new-generation dobok was used during the 2023 World Taekwondo Championships in Baku. Made with advanced textile technology, the fabric is ultra-lightweight, elastic, and highly breathable to support maximum performance. The quick-dry material helps athletes stay cool and comfortable during intense training and competition.\nComposition: 100% Polyester",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-2024-1_64c17bc8-a228-4b0e-b839-9cd8297d1189.png?v=1739775640&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-2024-2_ab3efaa8-7282-4ec9-99d2-dec56413c75c.png?v=1739775641&width=1946",
@@ -281,10 +271,33 @@
             ]
           },
           {
+            "name": "WT \"DRY-TECH\" COMPETITION UNIFORM POOM COLLAR",
+            "url": "https://www.daedo.com/products/ta-2028",
+            "detailed_name": "WT \"DRY-TECH\" COMPETITION UNIFORM POOM COLLAR WT \"DRY-TECH\" COMPETITION UNIFORM POOM COLLAR",
+            "price": "€101,00",
+            "description": "Compositions: 96% Poliéster, 4% Spandex",
+            "images": [
+              "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-poom-ta2028.png?v=1743583407&width=1946",
+              "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-poom-ta2028_2.png?v=1743583408&width=1946"
+            ],
+            "variants": [
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8"
+            ]
+          },
+          {
             "name": "WT COMPETITION UNIFORM DOBOK",
             "url": "https://www.daedo.com/products/ta-2020",
             "detailed_name": "WT COMPETITION UNIFORM DOBOK WT COMPETITION UNIFORM DOBOK",
             "price": "€296,00",
+            "description": "Composition: 78% Spandex, 22% Polyester\nInformation: Jacket and pants",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-2020-1_2f1755ee-2a19-46f5-a3fa-7ef26e376a9a.png?v=1739775629&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-2020-2_c44df169-3335-4c30-a6bf-f5e9b4f21195.png?v=1739775629&width=1946",
@@ -309,9 +322,10 @@
         "products": [
           {
             "name": "DOBOK WHITE NECK",
-            "url": "https://www.daedo.com/products/daedo-dobok-white-neck",
+            "url": "https://www.daedo.com/products/ta-1036",
             "detailed_name": "DOBOK WHITE NECK DOBOK WHITE NECK",
             "price": "€34,50",
+            "description": "Information: White Collar Taekwondo Dobok (Jacket & Trousers) – New lightweight performance fabric, Modern replacement for the classic TA 1030.\nCompositions: 80% Polyester, 20% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-master-ta1036-1.png?v=1772621754&width=1946",
               "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-master-ta1036-2.png?v=1772621755&width=1946",
@@ -331,9 +345,10 @@
           },
           {
             "name": "DOBOK - BLACK NECK",
-            "url": "https://www.daedo.com/products/daedo-dobok-black-neck",
+            "url": "https://www.daedo.com/products/ta-1035",
             "detailed_name": "DOBOK - BLACK NECK DOBOK - BLACK NECK",
             "price": "€38,00",
+            "description": "Information: Black Collar Taekwondo Dobok (Jacket & Trousers) – New lightweight performance fabric, Modern replacement for the classic TA 1030.\nComposition: 80% Polyester, 20% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-master-ta1035-small-watermark-1.png?v=1772621033&width=1946",
               "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-master-ta1035-small-watermark-2.png?v=1772621033&width=1946",
@@ -355,11 +370,11 @@
             "url": "https://www.daedo.com/products/ta-20052",
             "detailed_name": "WT ULTRA COMPETITION DOBOK - WHITE NECK WT ULTRA COMPETITION DOBOK - WHITE NECK",
             "price": "€62,00",
+            "description": "Information: New design white-collar dobok featuring strategically placed mesh fabric panels on the back, sides, and behind the knees to maximize breathability and airflow. This advanced construction enhances ventilation and helps regulate body temperature, keeping athletes cool, dry, and comfortable during intense training sessions or competition. Designed to support performance with improved mobility and lightweight comfort.\nComposition: 100% Polyester",
             "images": [
-              "https://www.daedo.com/cdn/shop/files/ta-20052-1_e319c8f7-c0d3-483f-b0f1-40cbbd850fc5.png?v=1739775587&width=1946",
-              "https://www.daedo.com/cdn/shop/files/ta-20052-2_0e185fb0-1a0c-4357-82c2-cf3a28fcc6c6.png?v=1739775587&width=1946",
-              "https://www.daedo.com/cdn/shop/files/ta-20052-3_3bbd65f0-125b-4f36-85fc-49b21182fea7.png?v=1739775587&width=1946",
-              "https://www.daedo.com/cdn/shop/files/ta-20052-4_561a7030-9fa1-434b-8ba6-96390f702655.png?v=1739775587&width=1946"
+              "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-competition-ta20052-big-1.png?v=1774859971&width=1946",
+              "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-competition-ta20052-3.jpg?v=1774859971&width=1946",
+              "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-competition-ta20052-2.png?v=1774859962&width=1946"
             ],
             "variants": [
               "0",
@@ -378,6 +393,7 @@
             "url": "https://www.daedo.com/products/ta-20051",
             "detailed_name": "MASTER “TAEKWONDO” DOBOK MASTER “TAEKWONDO” DOBOK",
             "price": "€48,00",
+            "description": "Information: Master Taekwondo Dobok made from high-quality fabric with a distinctive star pattern for a modern martial arts look. Features newly designed “Taekwondo” side stripes and “Daedo” embroidery on the sleeve and pant leg. Finished with bold Taekwondo embroidery on the back, combining durability, comfort, and performance for training and competition.\nCompositions: 65% Polyester, 35% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-20051-4_7a16e38b-8e26-490f-98d5-2984bbc71c24.png?v=1740590049&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-20051-1_6fea4488-84d6-4ae0-b49d-9723c9c31b76.png?v=1740590049&width=1946"
@@ -399,6 +415,7 @@
             "url": "https://www.daedo.com/products/ta-20056",
             "detailed_name": "HI-TECH TAEKWONDO DOBOK HI-TECH TAEKWONDO DOBOK",
             "price": "€69,00",
+            "description": "Information: Hi-Tech Taekwondo Dobok designed for high performance and maximum comfort. This advanced uniform features ultra-breathable textile panels on the back to improve airflow and ventilation during intense training and competition. The trousers include elastic fabric in the crotch area to allow greater flexibility and unrestricted movement. Finished with newly designed “Taekwondo” stripes on the sleeves and pant legs, this dobok combines modern style, durability, and performance for serious Taekwondo practitioners.\nCompositions: 100% Polyester",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-20056-1_3294ec3a-83ef-422f-91f5-b35cf06314a8.png?v=1739775607&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-20056-2_da878885-73f7-482d-9b0e-7084741572f9.png?v=1739775607&width=1946",
@@ -421,6 +438,7 @@
             "url": "https://www.daedo.com/products/ta-2005",
             "detailed_name": "COMPETITION “TAEKWONDO” DOBOK COMPETITION “TAEKWONDO” DOBOK",
             "price": "€39,00",
+            "description": "Information: Competition “Taekwondo” Dobok made from high-quality fabric featuring a distinctive star pattern for a modern and professional look. The uniform includes newly designed “Taekwondo” side stripes on the sleeves and pant legs, adding a dynamic martial arts style. Designed without lettering on the back for a clean and minimalist appearance. This dobok combines durability, comfort, and performance, making it ideal for Taekwondo training and competition.\nComposition: 65% Polyester, 35% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-2005-1_8b2d61c5-76b2-4d05-b008-45715e84b8ee.png?v=1739775571&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-2005-2_f149046c-5eb4-4ff4-a601-5a5100d8ec28.png?v=1739775571&width=1946",
@@ -444,6 +462,7 @@
             "url": "https://www.daedo.com/products/ta-1092",
             "detailed_name": "MASTER DOBOK MASTER DOBOK",
             "price": "€56,50",
+            "description": "Information: Master Dobok designed for experienced Taekwondo practitioners and instructors. Features elegant black diamond embroidery on a white jacket for a distinctive and professional martial arts look. The uniform includes a classic black collar and is made from durable, high-resistance fabric to withstand intensive training. The trousers are designed with a flexible elastic waistband for a secure and comfortable fit. Ideal for masters seeking durability, comfort, and a refined Taekwondo style during training and demonstrations.\nComposition: 55% Cotton, 45% Polyester",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-1092-1_50fb9f64-6e1e-4d99-909b-c94ba1e7c603.png?v=1739775548&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-1092-2_4905c860-00b2-4720-b36a-8a031abe8a1b.png?v=1739775548&width=1946",
@@ -463,6 +482,7 @@
             "url": "https://www.daedo.com/products/ta-1045",
             "detailed_name": "\"SEOUL\" DOBOK BLACK COLLAR \"SEOUL\" DOBOK BLACK COLLAR",
             "price": "€43,00",
+            "description": "Information: Seoul Dobok Black Collar made from durable striped fabric for comfort and freedom of movement during training. Features a classic black collar, “Daedo” embroidery on the sleeves, and bold “Taekwondo” lettering on the back for an authentic martial arts look. Ideal for regular Taekwondo training.\nComposition: 80% Polyester, 20% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-1045-1_6baa51db-caad-46a8-93b4-a8d5225f9f43.png?v=1739775496&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-1045-2_dc8ae19c-4d78-4d41-b052-4aa29defa15e.png?v=1739775496&width=1946",
@@ -483,9 +503,10 @@
           },
           {
             "name": "GRAN MASTER DOBOK WITH PHEONIX EMBROIDERY",
-            "url": "https://www.daedo.com/products/daedo-gran-master-dobok-with-pheonix-embroidery",
+            "url": "https://www.daedo.com/products/ta-3088",
             "detailed_name": "GRAN MASTER DOBOK WITH PHEONIX EMBROIDERY GRAN MASTER DOBOK WITH PHEONIX EMBROIDERY",
-            "price": "€133,50",
+            "price": "€135,00",
+            "description": "Information: Premium taekwondo uniform designed for grand masters and high-level practitioners. This elegant dobok features distinctive phoenix embroidery symbolizing strength, mastery, and tradition. Crafted from high-quality fabric for comfort, durability, and freedom of movement during demonstrations, training, and official events.\nComposition: 80% Polyester, 20% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-master-ta3088-small-watermark-1.png?v=1772622005&width=1946",
               "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-master-ta3088-small-watermark-2.png?v=1772622005&width=1946",
@@ -507,6 +528,7 @@
             "url": "https://www.daedo.com/products/ta-1047",
             "detailed_name": "F.E.TKD TAEKWONDO DOBOK F.E.TKD TAEKWONDO DOBOK",
             "price": "€54,50",
+            "description": "Compositions: 65% Polyester, 35% Cotton\nInformation: Jacket and pants",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-1047-1_d9bff448-7cfd-4fbb-bd5c-ed394ac7a824.png?v=1739775504&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-1047-2_b81623b1-4f7a-4674-99f3-5f9730168639.png?v=1739775504&width=1946",
@@ -534,6 +556,7 @@
             "url": "https://www.daedo.com/products/ta-3013",
             "detailed_name": "POOMSAE \"DAN\" WOMEN POOMSAE \"DAN\" WOMEN",
             "price": "€55,00",
+            "description": "Composition: 65% Polyester, 35% Cotton\nInformation: Jacket and trousers",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-3013-1_53892d12-491b-4fbe-acd6-3c8d43867015.png?v=1739775692&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-3013-2_61cdff88-8fff-4cea-9766-b46353608c8e.png?v=1739775692&width=1946",
@@ -556,6 +579,7 @@
             "url": "https://www.daedo.com/products/ta-3014",
             "detailed_name": "POOMSAE \"DAN\" MEN POOMSAE \"DAN\" MEN",
             "price": "€57,00",
+            "description": "Compositions: 65% Polyester, 35% Cotton\nInformation: Jacket and trousers",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-3014-1_7d3a02da-5584-4592-9319-bb10aa0469b3.png?v=1739775706&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-3014-2_b35939a1-f6f8-4ca4-b74d-c41b7e00d629.png?v=1739775706&width=1946",
@@ -577,6 +601,7 @@
             "url": "https://www.daedo.com/products/ta-3016",
             "detailed_name": "POOMSAE \"POOM\" WOMEN POOMSAE \"POOM\" WOMEN",
             "price": "€49,50",
+            "description": "Compositions: 65% Polyester, 35% Cotton\nInformation: Jacket and trousers",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-3016-1_682d9dcd-dea3-47bb-ab2c-a8b3dec4afca.png?v=1739775725&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-3016-2_e1abf4f1-a60a-488c-b543-425c3cac995e.png?v=1739775725&width=1946",
@@ -600,6 +625,7 @@
             "url": "https://www.daedo.com/products/ta-3015",
             "detailed_name": "POOMSAE \"POOM\" MEN POOMSAE \"POOM\" MEN",
             "price": "€49,50",
+            "description": "Composition: 65% Polyester, 35% Cotton\nInformation: Jacket and trousers",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-3015-1_e84a1c93-9742-4423-bbc4-10758018db0c.png?v=1739775715&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-3015-2_74057fa6-09ab-447c-90e2-a4662041688c.png?v=1739775715&width=1946",
@@ -623,6 +649,7 @@
             "url": "https://www.daedo.com/products/ta-3010",
             "detailed_name": "DOBOK “GRAND MASTER” POOMSAE DOBOK “GRAND MASTER” POOMSAE",
             "price": "€60,50",
+            "description": "Composition: 65% Polyester, 35% Cotton\nInformation: Jacket and trousers",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-3010-1_a86ac50f-196a-4292-bbb3-8230e8af5ef6.png?v=1739775679&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-3010-2_6b9d9027-c2f8-45fc-b3df-154140a47f9e.png?v=1739775679&width=1946",
@@ -641,9 +668,10 @@
           },
           {
             "name": "GRAN MASTER POOMSAE DOBOK WITH PHONEIX EMBROIDERY",
-            "url": "https://www.daedo.com/products/daedo-gran-master-poomsae-dobok-with-phoneix-embroidery",
+            "url": "https://www.daedo.com/products/ta-3099",
             "detailed_name": "GRAN MASTER POOMSAE DOBOK WITH PHONEIX EMBROIDERY GRAN MASTER POOMSAE DOBOK WITH PHONEIX EMBROIDERY",
             "price": "€148,00",
+            "description": "Information: Premium taekwondo uniform designed for grand masters and advanced poomsae practitioners. This distinctive dobok features a yellow jacket and black trousers, highlighted by elegant phoenix embroidery symbolizing strength, mastery, and tradition. Crafted from high-quality fabric to provide comfort, durability, and freedom of movement during poomsae performance, demonstrations, training, and official events.\nComposition: 65% Polyester, 35% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-poomsae-grand-master-ta3099-small-1.png?v=1772622213&width=1946",
               "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-poomsae-grand-master-ta3099-small-2.png?v=1772622213&width=1946",
@@ -668,9 +696,10 @@
         "products": [
           {
             "name": "HI-TECH DOBOK COLOR",
-            "url": "https://www.daedo.com/products/daedo-hi-tech-dobok-color-wt",
+            "url": "https://www.daedo.com/products/ta-20030",
             "detailed_name": "HI-TECH DOBOK COLOR HI-TECH DOBOK COLOR",
             "price": "€61,00",
+            "description": "Information: Hi-Tech Taekwondo Dobok (Jacket and Trousers) in Ultra-Light Red/Blue Fabric – Ideal for Team Competitions Lightweight performance taekwondo uniform made from advanced ultra-light fabric for maximum comfort, breathability, and freedom of movement. The dynamic red and blue design makes it especially suitable for team competitions, training, and demonstrations.\nCompositions: 100% Polyester",
             "images": [
               "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-color-ta20030-azul-big-watermark-1.png?v=1772622656&width=1946",
               "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-dobok-color-ta20030-rojo-1.png?v=1772623080&width=1946",
@@ -701,6 +730,7 @@
             "url": "https://www.daedo.com/products/ta-20045",
             "detailed_name": "SEOUL DOBOK HI-TECH SEOUL DOBOK HI-TECH",
             "price": "€71,00",
+            "description": "Compositions: 100% Polyester\nInformation: Jacket and trousers",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-20045-1_e532d783-7a27-4b33-ba11-187d60ee5728.jpg?v=1739775563&width=1946",
               "https://www.daedo.com/cdn/shop/files/ta-20045-2_137bef41-dc94-4c87-8d0a-213a8ceba61a.jpg?v=1739775563&width=1946"
@@ -732,6 +762,7 @@
             "url": "https://www.daedo.com/products/ta-1070",
             "detailed_name": "TROUSERS WITH LOGO TROUSERS WITH LOGO",
             "price": "€16,00",
+            "description": "Compositions: 65% Polyester, 35% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-1070-1_cacba6c7-2e31-47f5-a082-b82c1b4d8e95.png?v=1739775519&width=1946"
             ],
@@ -752,6 +783,7 @@
             "url": "https://www.daedo.com/products/ta-1074",
             "detailed_name": "BLACK DAEDO TROUSERS BLACK DAEDO TROUSERS",
             "price": "€14,00",
+            "description": "Compositions: 65% Polyester, 35% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ta-1074-1_c52b17c3-990b-4d84-8a29-cca981a56102.jpg?v=1739775522&width=1946"
             ],
@@ -772,6 +804,7 @@
             "url": "https://www.daedo.com/products/ta-1072",
             "detailed_name": "DAEDO TROUSERS DAEDO TROUSERS",
             "price": "€13,00",
+            "description": "Compositions: 65% Polyester, 35% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/daedo-pantalon-2-fh.jpg?v=1740582866&width=1946"
             ],
@@ -803,6 +836,7 @@
             "url": "https://www.daedo.com/products/pro-16533",
             "detailed_name": "WT TRUNK PROTECTOR REVERSIBLE WT TRUNK PROTECTOR REVERSIBLE",
             "price": "€47,00",
+            "description": "Composition: Synthetic leather, foam, elastic fabric",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pro-16533-1_3ec2b9c2-e677-4228-a320-2e3b36b2a5d2.png?v=1739775383&width=1946",
               "https://www.daedo.com/cdn/shop/files/pro-16533-2_3e42dd70-c8f7-460c-b648-bc9144dcb372.png?v=1739775383&width=1946",
@@ -821,9 +855,10 @@
           },
           {
             "name": "OFFICIAL WT HEAD GEAR WITH MASK",
-            "url": "https://www.daedo.com/products/daedo-official-wt-head-gear-with-mask",
+            "url": "https://www.daedo.com/products/pro-20916",
             "detailed_name": "OFFICIAL WT HEAD GEAR WITH MASK OFFICIAL WT HEAD GEAR WITH MASK",
             "price": "€66,50",
+            "description": "Information: Taekwondo head guard with face mask protection. Lightweight design with secure rear Velcro fastening.\nComposition: Foam coated with plastic paint, hard plastic (mask)",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pro-20916-1_6531f23c-f77e-413a-9659-3f841bedc865.png?v=1739775423&width=1946",
               "https://www.daedo.com/cdn/shop/files/pro-20916-2_0b78644e-40a0-4209-891f-b4d6e952c270.png?v=1739775423&width=1946",
@@ -853,6 +888,7 @@
             "url": "https://www.daedo.com/products/pro-20553",
             "detailed_name": "OFFICIAL WT HEAD GEAR OFFICIAL WT HEAD GEAR",
             "price": "€44,50",
+            "description": "Composition: Foam coated with plastic paint",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pro-20553-1_ad9a35b5-491c-42bc-a7af-07a869910d78.png?v=1739775394&width=1946",
               "https://www.daedo.com/cdn/shop/files/pro-20553-2_c59cc1af-4a05-4c5a-b5ae-31bb838d5908.png?v=1739775394&width=1946",
@@ -887,6 +923,7 @@
             "url": "https://www.daedo.com/products/pro-15713",
             "detailed_name": "WT SHIN GUARD WT SHIN GUARD",
             "price": "€30,50",
+            "description": "Compositions: Synthetic leather, foam",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pro-15713-1_df251917-2171-49d6-beac-0a0493b13ff4.png?v=1739775316&width=1946",
               "https://www.daedo.com/cdn/shop/files/pro-15713-2_57fad757-606d-48a9-a2cf-4d9eb56772de.png?v=1739775316&width=1946",
@@ -903,9 +940,10 @@
           },
           {
             "name": "WT FOREARM GUARD",
-            "url": "https://www.daedo.com/products/daedo-wt-forearm-guard",
+            "url": "https://www.daedo.com/products/pro-15733",
             "detailed_name": "WT FOREARM GUARD WT FOREARM GUARD",
             "price": "€27,00",
+            "description": "Information: High-quality protective equipment offering maximum impact protection, comfort, and adaptability. Engineered with an ergonomic design to provide a secure fit and reliable performance during intense training sessions and competition.\nComposition: Durable PU outer shell with anatomically shaped inner foam for enhanced comfort and effective shock absorption.",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pro-15733-1_00734d0f-f19f-4fe3-a652-df5cb3750b85.png?v=1739775343&width=1946",
               "https://www.daedo.com/cdn/shop/files/pro-15733-2_d476753f-c19a-499d-ab83-b22f904cb0e8.png?v=1739775343&width=1946",
@@ -925,6 +963,7 @@
             "url": "https://www.daedo.com/products/pro-15743",
             "detailed_name": "WT SILVER FIT FOREARM GUARD WT SILVER FIT FOREARM GUARD",
             "price": "€30,00",
+            "description": "Composition: Synthetic leather, foam",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pro-15743-1_70ca11c2-2446-42f3-9458-2795f839ed0c.png?v=1739775354&width=1946",
               "https://www.daedo.com/cdn/shop/files/pro-15743-2_1ac5ae6d-1e6e-4d7e-b1ab-448226ab8ff2.png?v=1739775354&width=1946",
@@ -944,6 +983,7 @@
             "url": "https://www.daedo.com/products/pro-15723",
             "detailed_name": "WT SILVER FIT SHIN GUARD WT SILVER FIT SHIN GUARD",
             "price": "€33,00",
+            "description": "Composition: Synthetic leather, foam",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pro-15723-1_4bf46bc4-3261-4a42-9fa6-f7a597a7abbe.png?v=1739775329&width=1946",
               "https://www.daedo.com/cdn/shop/files/pro-15723-2_67605465-202f-4b47-9132-9ef8f0e89aaa.png?v=1739775329&width=1946",
@@ -968,6 +1008,7 @@
             "url": "https://www.daedo.com/products/pro-15943",
             "detailed_name": "WT TAEKWONDO HAND MITT WT TAEKWONDO HAND MITT",
             "price": "€36,00",
+            "description": "Composition: Synthetic leather, foam, elastic fabric",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pro-15943-1_2729f33b-8a3d-4533-a794-355b048abd23.png?v=1739775364&width=1946",
               "https://www.daedo.com/cdn/shop/files/pro-15943-2_17ecfeec-8d42-4dc2-9053-aa7efd0acb68.png?v=1739775364&width=1946",
@@ -991,6 +1032,7 @@
             "url": "https://www.daedo.com/products/pro-15613",
             "detailed_name": "WT MALE GROIN GUARD WT MALE GROIN GUARD",
             "price": "€27,00",
+            "description": "Composition: Synthetic leather, foam",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pro-15613-1_40bdad65-526a-4b0d-9f3b-51cd831c4cdb.png?v=1739775307&width=1946",
               "https://www.daedo.com/cdn/shop/files/pro-15613-2_cf571efd-aa6a-44a4-848f-237a66333d81.png?v=1739775307&width=1946",
@@ -1010,6 +1052,7 @@
             "url": "https://www.daedo.com/products/pro-20663",
             "detailed_name": "WT FEMALE GROIN GUARD WT FEMALE GROIN GUARD",
             "price": "€25,00",
+            "description": "Composition: Synthetic leather, foam",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pro-20663-1_cddd4a1e-b9a5-493b-8661-74ff1c796044.png?v=1739775403&width=1946",
               "https://www.daedo.com/cdn/shop/files/pro-20663-2_fd480025-3441-4f80-91a7-2f52c049e8e3.png?v=1739775403&width=1946",
@@ -1037,9 +1080,10 @@
         "products": [
           {
             "name": "GEN3 SENSING HAND MITT",
-            "url": "https://www.daedo.com/products/daedo-gen3-sensing-hand-mit",
+            "url": "https://www.daedo.com/products/epro-29943",
             "detailed_name": "GEN3 SENSING HAND MITT GEN3 SENSING HAND MITT",
             "price": "€38,00",
+            "description": "Information: Official Daedo Gen3 Hand Mitt for Competition and Training, fully compatible with the Daedo Gen3 system.\nComposition: Synthetic leather, foam, elastic fabrics and sensors.",
             "images": [
               "https://www.daedo.com/cdn/shop/files/epro29943-gen3-e-glove-punche-daedo-1.png?v=1772452714&width=1946",
               "https://www.daedo.com/cdn/shop/files/epro29943-gen3-e-glove-punche-daedo-4.png?v=1772452725&width=1946",
@@ -1062,9 +1106,10 @@
           },
           {
             "name": "GEN3 WT TAEKWONDO SENSOR SOCK",
-            "url": "https://www.daedo.com/products/daedo-gen3-wt-taekwondo-sensor-sock",
+            "url": "https://www.daedo.com/products/epro-29039",
             "detailed_name": "GEN3 WT TAEKWONDO SENSOR SOCK GEN3 WT TAEKWONDO SENSOR SOCK",
             "price": "€75,00",
+            "description": "Information: Official Daedo Gen3 Taekwondo Socks for competition and training, designed for use with the Daedo Gen3 electronic scoring system.\nComposition: Synthetic leather, foam, elastic fabrics, sensors.",
             "images": [
               "https://www.daedo.com/cdn/shop/files/epro-29039-1_969a36d3-97c2-4b53-94dd-eb47a2a27e23.png?v=1739774410&width=1946",
               "https://www.daedo.com/cdn/shop/files/epro-29039-2_88737b9f-f778-4666-9312-3e9d802c5179.png?v=1739774410&width=1946",
@@ -1089,6 +1134,7 @@
             "url": "https://www.daedo.com/products/epro-29902",
             "detailed_name": "GEN3 TRANSMITTER TK-STRIKE (HEAD) GEN3 TRANSMITTER TK-STRIKE (HEAD)",
             "price": null,
+            "description": null,
             "images": [
               "https://www.daedo.com/cdn/shop/files/epro-29902-1_1a824570-6d42-4bc4-83c7-c6506a7bf9a3.png?v=1739773387&width=1946"
             ],
@@ -1099,6 +1145,7 @@
             "url": "https://www.daedo.com/products/epro-29901",
             "detailed_name": "GEN3 TRANSMITTER TK-STRIKE (BODY) GEN3 TRANSMITTER TK-STRIKE (BODY)",
             "price": null,
+            "description": null,
             "images": [
               "https://www.daedo.com/cdn/shop/files/epro-29901-1_ead56673-427a-4274-81ae-ed05539c97fd.png?v=1739773385&width=1946"
             ],
@@ -1109,6 +1156,7 @@
             "url": "https://www.daedo.com/products/epro-29926",
             "detailed_name": "TK-STRIKE GEN3 RECEIVER TK-STRIKE GEN3 RECEIVER",
             "price": null,
+            "description": "Information: One receiver per track (USB connection)Not suitable for online sales. Request a quote",
             "images": [
               "https://www.daedo.com/cdn/shop/files/epro-29926-1_3e33ac99-7a9c-47a9-a8d9-0def7d33a9b4.png?v=1739773398&width=1946",
               "https://www.daedo.com/cdn/shop/files/epro-29926-2_b0cdd1dc-91cf-4949-94df-fbfbab417036.png?v=1739773398&width=1946"
@@ -1120,6 +1168,7 @@
             "url": "https://www.daedo.com/products/epro-2990",
             "detailed_name": "GEN3 ELECTRONIC BODY PROTECTOR GEN3 ELECTRONIC BODY PROTECTOR",
             "price": null,
+            "description": null,
             "images": [
               "https://www.daedo.com/cdn/shop/files/epro2990-gen3-bodyprotector-daedo-blue.png?v=1741176721&width=1946",
               "https://www.daedo.com/cdn/shop/files/epro2990-gen3-bodyprotector-daedo-blue-side.png?v=1741176721&width=1946",
@@ -1146,6 +1195,7 @@
             "url": "https://www.daedo.com/products/epro-29907",
             "detailed_name": "GEN3 SOFTWARE GEN3 SOFTWARE",
             "price": null,
+            "description": "Information: TK-Strike SystemNot suitable for online sales. Request a quote",
             "images": [
               "https://www.daedo.com/cdn/shop/files/Daedo-taekwondo-pss-epro29907.png?v=1741958990&width=1946"
             ],
@@ -1156,6 +1206,7 @@
             "url": "https://www.daedo.com/products/epro-29913",
             "detailed_name": "GEN3 E-HEAD GEAR GEN3 E-HEAD GEAR",
             "price": null,
+            "description": null,
             "images": [
               "https://www.daedo.com/cdn/shop/files/epro-29913-2_7f7bed52-fea5-4062-995b-aabb15bed6a3.png?v=1765882847&width=1946",
               "https://www.daedo.com/cdn/shop/files/epro-29913-1_f2c8f911-2781-434d-84d5-8508a51f301b.png?v=1765882847&width=1946",
@@ -1185,9 +1236,10 @@
         "products": [
           {
             "name": "WT TAEKWONDO SENSOR SOCK",
-            "url": "https://www.daedo.com/products/daedo-wt-taekwondo-sensor-sock",
+            "url": "https://www.daedo.com/products/epro-29037",
             "detailed_name": "WT TAEKWONDO SENSOR SOCK WT TAEKWONDO SENSOR SOCK",
             "price": "€56,00",
+            "description": "Information: Taekwondo socks for competition and training.\nComposition: Synthetic leather, foam, elastic fabrics, sensors",
             "images": [
               "https://www.daedo.com/cdn/shop/files/epro-29037-1_7f0cf1b3-9d34-48b2-8d6d-dc39d1dc91a8.png?v=1739774400&width=1946",
               "https://www.daedo.com/cdn/shop/files/epro-29037-2_ff98a0b0-63f5-464c-a9c4-74b8a8418852.png?v=1739774400&width=1946",
@@ -1213,6 +1265,7 @@
             "url": "https://www.daedo.com/products/epro-29916",
             "detailed_name": "E-HEAD GEAR WITH MASK FOR CADETS E-HEAD GEAR WITH MASK FOR CADETS",
             "price": null,
+            "description": "Composition: Foam coated with plastic paint, hard plastic (mask), sensors\nInformation: Not suitable for online sales. Request a quote.",
             "images": [
               "https://www.daedo.com/cdn/shop/files/epro-29916-3.png?v=1740582972&width=1946",
               "https://www.daedo.com/cdn/shop/files/epro-29916-1.png?v=1740582972&width=1946",
@@ -1236,6 +1289,7 @@
             "url": "https://www.daedo.com/products/epro-29915",
             "detailed_name": "E-HEADGEAR WITH MASK FOR CADETS E-HEADGEAR WITH MASK FOR CADETS",
             "price": null,
+            "description": "Composition: Foam coated with plastic paint, hard plastic (mask), sensors\nInformation: Not suitable for online sales. Request a quote",
             "images": [
               "https://www.daedo.com/cdn/shop/files/epro-29915-1_27f03572-ab65-4879-8bfb-0fe86fa6aa30.png?v=1739774466&width=1946",
               "https://www.daedo.com/cdn/shop/files/epro-29915-2_8376a497-d9b0-490e-b61a-d84945059f7b.png?v=1739774466&width=1946",
@@ -1260,6 +1314,7 @@
             "url": "https://www.daedo.com/products/epro-29807",
             "detailed_name": "SOFTWARE GEN2 SOFTWARE GEN2",
             "price": null,
+            "description": "Information: TK-Strike SystemNot suitable for online sales. Request a quote.",
             "images": [
               "https://www.daedo.com/cdn/shop/files/epro-29807-1_3e327440-8c3e-45df-914d-1e29cb2957ea.png?v=1739773375&width=1946"
             ],
@@ -1281,6 +1336,7 @@
             "url": "https://www.daedo.com/products/pe-1651",
             "detailed_name": "CHEST PROTECTOR TAEKWONDO BLUE/RED REVERSIBLE CHEST PROTECTOR TAEKWONDO BLUE/RED REVERSIBLE",
             "price": "€39,00",
+            "description": "Composition: Synthetic leather, hard foam, elastic fabric\nInformation: Reversible chest guard, body protection",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pe-1651-1_f1179361-3f81-4ca0-8cb6-39d028c844b2.png?v=1739775034&width=1946",
               "https://www.daedo.com/cdn/shop/files/pe-1651-2_3adbaf8f-3c74-4b02-ab32-b6a85bc05a4a.png?v=1739775034&width=1946",
@@ -1300,6 +1356,7 @@
             "url": "https://www.daedo.com/products/pr-5012",
             "detailed_name": "E-TRUNK PROTECTOR \"HERO\" E-TRUNK PROTECTOR \"HERO\"",
             "price": "€206,50",
+            "description": "Composition: PU EVA foam, built-in sensor\nInformation: The scoreboard is securely and firmly fixed, yet it is removable, interchangeable, and rechargeable",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-5012-1_9d83fced-ea1e-4c4f-9607-f6cdd68bb6af.png?v=1739775200&width=1946"
             ],
@@ -1317,6 +1374,7 @@
             "url": "https://www.daedo.com/products/pr-5011",
             "detailed_name": "E-TRUNK PROTECTOR \"HERO\" BLUE E-TRUNK PROTECTOR \"HERO\" BLUE",
             "price": "€206,50",
+            "description": "Composition: PU EVA foam, built-in sensor\nInformation: The scoreboard is securely and firmly fixed, yet it is removable, interchangeable, and rechargeable",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-5011-1_cfe17f2d-a6b2-4fc7-9eef-ee9b48ad71e2.png?v=1739775197&width=1946"
             ],
@@ -1334,6 +1392,7 @@
             "url": "https://www.daedo.com/products/pr-2056",
             "detailed_name": "DAEDO \"FIGHTER\" HEAD GEAR DAEDO \"FIGHTER\" HEAD GEAR",
             "price": "€100,50",
+            "description": "Composition: Molded foam",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-2056-1_840cdf36-0aa5-4c07-b27c-d6de43ab7022.png?v=1739775172&width=1946",
               "https://www.daedo.com/cdn/shop/files/pr-2056-2_7a4c35f8-75e4-436e-b82a-80cfb562540a.png?v=1739775172&width=1946",
@@ -1355,6 +1414,7 @@
             "url": "https://www.daedo.com/products/pr-2055",
             "detailed_name": "CASCO DAEDO CASCO DAEDO",
             "price": "€37,00",
+            "description": "Compositions: Espuma recubierta de pintura plástica",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-2055-1_fac3cdc7-b5c8-4458-9d3a-fa3c7c0b68d8.png?v=1739775166&width=1946",
               "https://www.daedo.com/cdn/shop/files/pr-2055-2_5b7a3185-4595-45c5-8cb6-c77cf0cbc9a8.png?v=1739775166&width=1946",
@@ -1384,6 +1444,7 @@
             "url": "https://www.daedo.com/products/pr-1591",
             "detailed_name": "HEAD GEAR WITH TRANSPARENT MASK HEAD GEAR WITH TRANSPARENT MASK",
             "price": "€59,00",
+            "description": "Composition: Foam coated with plastic paint",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1591-1_7f1907b4-b5b1-41cf-920c-11efbbb160aa.jpg?v=1739775096&width=1946"
             ],
@@ -1410,6 +1471,7 @@
             "url": "https://www.daedo.com/products/pr-1573",
             "detailed_name": "COMFORT FOREARM COMFORT FOREARM",
             "price": "€24,50",
+            "description": "Composition: Synthetic leather",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1573-1_5222f7ec-c161-40e0-8ac3-df31bdbe0791.png?v=1739775078&width=1946"
             ],
@@ -1426,6 +1488,7 @@
             "url": "https://www.daedo.com/products/pr-1571",
             "detailed_name": "COMFORT SHIN GUARD COMFORT SHIN GUARD",
             "price": "€24,50",
+            "description": "Composition: Synthetic leather",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1571-1_d82a559b-5c18-438b-9d1b-8b72bdbea5ff.png?v=1739775060&width=1946"
             ],
@@ -1442,6 +1505,7 @@
             "url": "https://www.daedo.com/products/pr-1570",
             "detailed_name": "FLAT SHIN AND INSTEP GUARD FLAT SHIN AND INSTEP GUARD",
             "price": "€23,00",
+            "description": "Composition: Foam coated with fabric, elastic strap, and Velcro",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1570-1_6ff4a342-e758-425d-bae8-d02627eb1cd1.png?v=1739775057&width=1946"
             ],
@@ -1458,6 +1522,7 @@
             "url": "https://www.daedo.com/products/pr-15961",
             "detailed_name": "INSTEP GUARD INSTEP GUARD",
             "price": "€23,00",
+            "description": "Composition: Foam covered in synthetic leather",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-15961-1_7afaa38a-101e-46e4-be14-d493e3792115.png?v=1739775112&width=1946"
             ],
@@ -1474,6 +1539,7 @@
             "url": "https://www.daedo.com/products/pr-1575",
             "detailed_name": "DAEDO TUBE FOREARM GUARD DAEDO TUBE FOREARM GUARD",
             "price": "€15,00",
+            "description": "Composition: Foam, elastic fabric",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1575-1_b96dc1b7-d25a-4bca-9c11-efdd067aac50.png?v=1739775081&width=1946"
             ],
@@ -1490,6 +1556,7 @@
             "url": "https://www.daedo.com/products/pr-1566",
             "detailed_name": "DAEDO TUBE SHIN GUARD DAEDO TUBE SHIN GUARD",
             "price": "€16,50",
+            "description": "Composition: Foam, elastic fabric",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1566-1_1f7bd07d-9731-4584-95d9-4d4322a124b9.png?v=1739775051&width=1946",
               "https://www.daedo.com/cdn/shop/files/pr-1566-2_ce126919-402e-452d-ba9d-ed86035a4ada.png?v=1739775051&width=1946"
@@ -1507,6 +1574,7 @@
             "url": "https://www.daedo.com/products/pr-1568",
             "detailed_name": "DAEDO TUBE SHIN AND INSTEP GUARD DAEDO TUBE SHIN AND INSTEP GUARD",
             "price": "€17,50",
+            "description": "Composition: Foam, elastic fabric",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1568-1_05f57039-0e87-4fa0-bc5c-fd5a1d0e26dd.png?v=1739775054&width=1946"
             ],
@@ -1528,6 +1596,7 @@
             "url": "https://www.daedo.com/products/pro-15944",
             "detailed_name": "TAEKWONDO SOCK TAEKWONDO SOCK",
             "price": "€37,50",
+            "description": "Composition: Synthetic leather, foam, elastic fabric",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pro-15944-1_89b522e9-c303-4880-909e-0b69084b6bb7.png?v=1739775370&width=1946",
               "https://www.daedo.com/cdn/shop/files/pro-15944-2_1f732fe3-2ce4-4802-a645-be5e192dc5ba.png?v=1739775370&width=1946"
@@ -1552,9 +1621,10 @@
         "products": [
           {
             "name": "MOUTHGUARD GEL SENIOR",
-            "url": "https://www.daedo.com/products/daedo-mouthguard-gel-senior",
+            "url": "https://www.daedo.com/products/pr-15657",
             "detailed_name": "MOUTHGUARD GEL SENIOR MOUTHGUARD GEL SENIOR",
             "price": "€6,00",
+            "description": "Information: Single gel-fit sports mouthguard for enhanced comfort and custom fit.\nComposition: Gelfit",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-15657-1_83e608ee-5665-432f-8f8b-8f71f3f993c2.png?v=1739773779&width=1946",
               "https://www.daedo.com/cdn/shop/files/pr-15657-2_99dd7334-6955-4f2d-b18d-1407806f754c.png?v=1739773779&width=1946"
@@ -1566,6 +1636,7 @@
             "url": "https://www.daedo.com/products/pr-15656",
             "detailed_name": "MOUTHGUARD GEL JUNIOR MOUTHGUARD GEL JUNIOR",
             "price": "€6,00",
+            "description": "Composition: Gelfit",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-15656-1_78bf352e-3273-44fe-9215-3417df69165e.png?v=1739773775&width=1946",
               "https://www.daedo.com/cdn/shop/files/pr-15656-2_05157ff3-52d7-4da9-bb95-1603c472b37f.png?v=1739773775&width=1946"
@@ -1577,6 +1648,7 @@
             "url": "https://www.daedo.com/products/pr-15651",
             "detailed_name": "MOUTH GUARD SINGLE JUNIOR MOUTH GUARD SINGLE JUNIOR",
             "price": "€3,50",
+            "description": "Composition: Rubber, silicone",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-15651-1_8dbc1530-82f5-4a4d-8b3a-36e618af0aea.png?v=1739773770&width=1946"
             ],
@@ -1587,6 +1659,7 @@
             "url": "https://www.daedo.com/products/pr-1561",
             "detailed_name": "COMPLETE MALE CUP GROIN GUARD COMPLETE MALE CUP GROIN GUARD",
             "price": "€18,50",
+            "description": "Composition: Polyester, elastane, plastic",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1561-1_cd6d9095-d0e8-4aec-93d9-70334058e287.png?v=1739775045&width=1946",
               "https://www.daedo.com/cdn/shop/files/pr-1561-2_2c071e32-a561-42a4-9922-7ed5e4075a86.png?v=1739775045&width=1946",
@@ -1606,6 +1679,7 @@
             "url": "https://www.daedo.com/products/pr-15652",
             "detailed_name": "SENIOR SINGLE MOUTH GUARD SENIOR SINGLE MOUTH GUARD",
             "price": "€3,50",
+            "description": "Composition: Rubber, silicone",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-15652-1_e1b6d785-5035-4465-8646-db768151283a.png?v=1739773772&width=1946"
             ],
@@ -1616,6 +1690,7 @@
             "url": "https://www.daedo.com/products/pr-1549",
             "detailed_name": "MALE CUP GROIN GUARD MALE CUP GROIN GUARD",
             "price": "€18,50",
+            "description": "Composition: Polyester, elastane, plastic",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1549_8dba280c-a849-4938-a6da-941f3c82f636.png?v=1740148707&width=1946"
             ],
@@ -1632,6 +1707,7 @@
             "url": "https://www.daedo.com/products/pr-1560",
             "detailed_name": "DOUBLE MOUTH GUARD DOUBLE MOUTH GUARD",
             "price": "€6,00",
+            "description": "Composition: Rubber and silicone\nInformation: One-piece design for both upper and lower teeth",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1560-1_461279bd-3196-45e6-9d53-acf7f3004c61.png?v=1739773768&width=1946"
             ],
@@ -1642,6 +1718,7 @@
             "url": "https://www.daedo.com/products/pr-2066",
             "detailed_name": "COMPLETE FEMALE CUP GROIN GUARD COMPLETE FEMALE CUP GROIN GUARD",
             "price": "€17,00",
+            "description": "Composition: Synthetic leather, foam",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-2066-1_e7612d63-8551-4510-9e55-9d10caeb939c.png?v=1739775188&width=1946",
               "https://www.daedo.com/cdn/shop/files/pr-2066-2_726bd502-7626-4d7e-8287-85282236a750.png?v=1739775188&width=1946",
@@ -1671,6 +1748,7 @@
             "url": "https://www.daedo.com/products/ci-1501",
             "detailed_name": "240CM BELT- WHITE 240CM BELT- WHITE",
             "price": "€3,00",
+            "description": "Compositions: 100% Cotton\nInformation: Strong and durable",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-1501_d044b3e8-daf3-4e50-a56f-d1514ddac6a4.jpg?v=1740148654&width=1946"
             ],
@@ -1681,8 +1759,20 @@
             "url": "https://www.daedo.com/products/ci-1505",
             "detailed_name": "240CM BELT- ORANGE 240CM BELT- ORANGE",
             "price": "€3,50",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-1505-1_fda79077-8b6e-4f18-9946-47a850159895.jpg?v=1739773112&width=1946"
+            ],
+            "variants": []
+          },
+          {
+            "name": "240CM BELT- WHITE/YELLOW",
+            "url": "https://www.daedo.com/products/ci-1502",
+            "detailed_name": "240CM BELT- WHITE/YELLOW 240CM BELT- WHITE/YELLOW",
+            "price": "€3,50",
+            "description": "Composition: 100% Cotton\nInformation: Strong and durable",
+            "images": [
+              "https://www.daedo.com/cdn/shop/files/ci-1502_01109669-ffb3-4008-a50b-5a9da765425d.jpg?v=1740148657&width=1946"
             ],
             "variants": []
           },
@@ -1691,6 +1781,7 @@
             "url": "https://www.daedo.com/products/ci-1507",
             "detailed_name": "240CM BELT- GREEN 240CM BELT- GREEN",
             "price": "€3,50",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-1507-1_e4923260-7094-4ef5-93b5-0c8a0671d44d.jpg?v=1739773119&width=1946"
             ],
@@ -1701,18 +1792,9 @@
             "url": "https://www.daedo.com/products/ci-1503",
             "detailed_name": "240CM BELT- YELLOW 240CM BELT- YELLOW",
             "price": "€3,50",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-1503-1_c7a4a143-c58c-450c-9771-3819c01599e1.jpg?v=1739773102&width=1946"
-            ],
-            "variants": []
-          },
-          {
-            "name": "240CM BELT- WHITE/YELLOW",
-            "url": "https://www.daedo.com/products/ci-1502",
-            "detailed_name": "240CM BELT- WHITE/YELLOW 240CM BELT- WHITE/YELLOW",
-            "price": "€3,50",
-            "images": [
-              "https://www.daedo.com/cdn/shop/files/ci-1502_01109669-ffb3-4008-a50b-5a9da765425d.jpg?v=1740148657&width=1946"
             ],
             "variants": []
           },
@@ -1721,18 +1803,9 @@
             "url": "https://www.daedo.com/products/ci-1504",
             "detailed_name": "240CM BELT- YELLOW/ORANGE 240CM BELT- YELLOW/ORANGE",
             "price": "€3,50",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-1504-1_589d7b93-ce99-42eb-b1d3-d2f9675302f3.jpg?v=1739773109&width=1946"
-            ],
-            "variants": []
-          },
-          {
-            "name": "240CM BELT- ORANGE/GREEN",
-            "url": "https://www.daedo.com/products/ci-1506",
-            "detailed_name": "240CM BELT- ORANGE/GREEN 240CM BELT- ORANGE/GREEN",
-            "price": "€3,50",
-            "images": [
-              "https://www.daedo.com/cdn/shop/files/ci-1506-1_be5e4e82-d67c-4b7a-8965-bcb2c8175b4f.jpg?v=1739773116&width=1946"
             ],
             "variants": []
           },
@@ -1741,8 +1814,20 @@
             "url": "https://www.daedo.com/products/ci-1509",
             "detailed_name": "240CM BELT- BLUE 240CM BELT- BLUE",
             "price": "€3,50",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-1509-1_0ba380b5-4925-4f94-a939-64b6386384c9.jpg?v=1739773127&width=1946"
+            ],
+            "variants": []
+          },
+          {
+            "name": "240CM BELT- ORANGE/GREEN",
+            "url": "https://www.daedo.com/products/ci-1506",
+            "detailed_name": "240CM BELT- ORANGE/GREEN 240CM BELT- ORANGE/GREEN",
+            "price": "€3,50",
+            "description": "Composition: 100% Cotton",
+            "images": [
+              "https://www.daedo.com/cdn/shop/files/ci-1506-1_be5e4e82-d67c-4b7a-8965-bcb2c8175b4f.jpg?v=1739773116&width=1946"
             ],
             "variants": []
           },
@@ -1751,6 +1836,7 @@
             "url": "https://www.daedo.com/products/ci-1508",
             "detailed_name": "240CM BELT- GREEN/BLUE 240CM BELT- GREEN/BLUE",
             "price": "€3,50",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-1508-1_36b076d6-f38c-43b6-8e30-66151b485cd8.jpg?v=1739773125&width=1946"
             ],
@@ -1761,18 +1847,9 @@
             "url": "https://www.daedo.com/products/ci-15121",
             "detailed_name": "220CM BELT- RED 220CM BELT- RED",
             "price": "€3,50",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-15121-1_1f5a4ce2-de5d-4229-a2ba-1aac6182c6df.jpg?v=1739773141&width=1946"
-            ],
-            "variants": []
-          },
-          {
-            "name": "240CM BELT- BLUE/BROWN",
-            "url": "https://www.daedo.com/products/ci-1510",
-            "detailed_name": "240CM BELT- BLUE/BROWN 240CM BELT- BLUE/BROWN",
-            "price": "€3,50",
-            "images": [
-              "https://www.daedo.com/cdn/shop/files/ci-1510-1_74a8d7b6-d0cb-4a9d-8706-c5bbaafe6359.jpg?v=1739773133&width=1946"
             ],
             "variants": []
           },
@@ -1781,8 +1858,20 @@
             "url": "https://www.daedo.com/products/ci-15111",
             "detailed_name": "260CM BELT- BROWN 260CM BELT- BROWN",
             "price": "€4,00",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-15111-1_44de8734-734b-4d92-983b-34561516a47e.jpg?v=1739773137&width=1946"
+            ],
+            "variants": []
+          },
+          {
+            "name": "240CM BELT- BLUE/BROWN",
+            "url": "https://www.daedo.com/products/ci-1510",
+            "detailed_name": "240CM BELT- BLUE/BROWN 240CM BELT- BLUE/BROWN",
+            "price": "€3,50",
+            "description": "Composition: 100% Cotton",
+            "images": [
+              "https://www.daedo.com/cdn/shop/files/ci-1510-1_74a8d7b6-d0cb-4a9d-8706-c5bbaafe6359.jpg?v=1739773133&width=1946"
             ],
             "variants": []
           },
@@ -1791,6 +1880,7 @@
             "url": "https://www.daedo.com/products/ci-1528",
             "detailed_name": "240CM BELT- PURPLE 240CM BELT- PURPLE",
             "price": "€4,50",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-1528-1_44717ad3-a501-4c8d-b058-80ba246642ec.jpg?v=1739773208&width=1946"
             ],
@@ -1801,6 +1891,7 @@
             "url": "https://www.daedo.com/products/ci-1511",
             "detailed_name": "240CM BELT- BROWN 240CM BELT- BROWN",
             "price": "€3,50",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-1511-1_d004bd7b-b9f7-45d1-a2ba-1676fbacc556.jpg?v=1739773135&width=1946"
             ],
@@ -1811,6 +1902,7 @@
             "url": "https://www.daedo.com/products/ci-15031",
             "detailed_name": "220CM BELT- YELLOW 220CM BELT- YELLOW",
             "price": "€3,50",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-15031-1_1aa8967b-3901-4fcf-bfdb-71621a24636e.jpg?v=1739773105&width=1946"
             ],
@@ -1821,6 +1913,7 @@
             "url": "https://www.daedo.com/products/ci-15071",
             "detailed_name": "220CM BELT- GREEN 220CM BELT- GREEN",
             "price": "€3,50",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-15071-1_6d3370b7-cbe5-446a-8b60-9224ff1cc73e.jpg?v=1739773121&width=1946"
             ],
@@ -1831,6 +1924,7 @@
             "url": "https://www.daedo.com/products/ci-15091",
             "detailed_name": "220CM BELT- BLUE 220CM BELT- BLUE",
             "price": "€3,50",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-15091-1_10267b51-c4c1-4434-b227-e8432c881e3d.jpg?v=1739773129&width=1946"
             ],
@@ -1841,6 +1935,7 @@
             "url": "https://www.daedo.com/products/ci-1513",
             "detailed_name": "240CM BELT- BROWN/BLACK 240CM BELT- BROWN/BLACK",
             "price": "€4,50",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-1513-1_37014a5b-814e-4f85-9b4f-cc830f664646.jpg?v=1739773146&width=1946"
             ],
@@ -1856,6 +1951,7 @@
             "url": "https://www.daedo.com/products/ci-15077",
             "detailed_name": "260CM BELT- GREEN 260CM BELT- GREEN",
             "price": "€4,00",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-15077-1_9661cc97-080c-42b6-ae50-dc42017d431e.jpg?v=1739773123&width=1946"
             ],
@@ -1866,6 +1962,7 @@
             "url": "https://www.daedo.com/products/ci-15099",
             "detailed_name": "260CM BELT- BLUE 260CM BELT- BLUE",
             "price": "€4,00",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-15099-1_3f23a1f4-a8e2-4039-8a85-147398d905fe.jpg?v=1739773131&width=1946"
             ],
@@ -1876,6 +1973,7 @@
             "url": "https://www.daedo.com/products/ci-15011",
             "detailed_name": "260CM BELT- WHITE 260CM BELT- WHITE",
             "price": "€4,00",
+            "description": "Composition: 100% Cotton\nInformation: Durable and resistant",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-15011-1_feda3adc-6158-4ca2-a93d-9341dcbe2e65.jpg?v=1739773095&width=1946"
             ],
@@ -1886,6 +1984,7 @@
             "url": "https://www.daedo.com/products/ci-15033",
             "detailed_name": "260CM BELT- YELLOW 260CM BELT- YELLOW",
             "price": "€4,00",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-15033-1_6cf06fb8-b922-44ff-bb06-38ea13a8b50c.jpg?v=1739773107&width=1946"
             ],
@@ -1896,6 +1995,7 @@
             "url": "https://www.daedo.com/products/ci-15055",
             "detailed_name": "260CM BELT- ORANGE 260CM BELT- ORANGE",
             "price": "€4,00",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-15055-1_fb6237d9-5c9c-4638-9c7a-b07d90811c69.jpg?v=1739773114&width=1946"
             ],
@@ -1906,6 +2006,7 @@
             "url": "https://www.daedo.com/products/ci-14022",
             "detailed_name": "260CM BELT- YELLOW/GREEN KYOKUSHINKAI 260CM BELT- YELLOW/GREEN KYOKUSHINKAI",
             "price": "€4,00",
+            "description": null,
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-14022-1_18738c74-70a6-4ed6-8176-17d3fd0b23d2.jpg?v=1739773063&width=1946"
             ],
@@ -1916,6 +2017,7 @@
             "url": "https://www.daedo.com/products/ci-14055",
             "detailed_name": "260CM BELT- BLUE/RED KYOKUSHINKAI 260CM BELT- BLUE/RED KYOKUSHINKAI",
             "price": "€3,50",
+            "description": "Composition: 100% Cotton\nInformation: Strong and durable",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-14055-1_e6cfa1e5-e83c-4c23-a386-540a23629371.jpg?v=1739773073&width=1946"
             ],
@@ -1931,28 +2033,9 @@
             "url": "https://www.daedo.com/products/ci-1520",
             "detailed_name": "285CM BELT- WHITE 285CM BELT- WHITE",
             "price": "€3,00",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-1520-1_405b6029-2c32-4600-9de6-f3ea8a1c6782.jpg?v=1739773154&width=1946"
-            ],
-            "variants": []
-          },
-          {
-            "name": "310CM BELT- WHITE",
-            "url": "https://www.daedo.com/products/ci-15203",
-            "detailed_name": "310CM BELT- WHITE 310CM BELT- WHITE",
-            "price": "€4,50",
-            "images": [
-              "https://www.daedo.com/cdn/shop/files/ci-15203-1_cd84a064-a389-4843-883a-0aa0b2017071.jpg?v=1739773160&width=1946"
-            ],
-            "variants": []
-          },
-          {
-            "name": "285CM BELT- RED",
-            "url": "https://www.daedo.com/products/ci-1526",
-            "detailed_name": "285CM BELT- RED 285CM BELT- RED",
-            "price": "€4,00",
-            "images": [
-              "https://www.daedo.com/cdn/shop/files/ci-1526-1_e1adb042-2960-4925-b346-2862ab0d4d77.jpg?v=1739773201&width=1946"
             ],
             "variants": []
           },
@@ -1961,18 +2044,20 @@
             "url": "https://www.daedo.com/products/ci-1523",
             "detailed_name": "285CM BELT- GREEN 285CM BELT- GREEN",
             "price": "€4,00",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-1523-1_9bc61d67-bfd2-49e4-aa01-ccf84c440d1c.jpg?v=1739773183&width=1946"
             ],
             "variants": []
           },
           {
-            "name": "310CM BELT- BLUE",
-            "url": "https://www.daedo.com/products/ci-15243",
-            "detailed_name": "310CM BELT- BLUE 310CM BELT- BLUE",
-            "price": "€5,00",
+            "name": "310CM BELT- WHITE",
+            "url": "https://www.daedo.com/products/ci-15203",
+            "detailed_name": "310CM BELT- WHITE 310CM BELT- WHITE",
+            "price": "€4,50",
+            "description": "Composition: 100% Cotton",
             "images": [
-              "https://www.daedo.com/cdn/shop/files/ci-15243-1_8f0e5964-4a73-46cd-b6e6-d843871d3a5c.jpg?v=1739773194&width=1946"
+              "https://www.daedo.com/cdn/shop/files/ci-15203-1_cd84a064-a389-4843-883a-0aa0b2017071.jpg?v=1739773160&width=1946"
             ],
             "variants": []
           },
@@ -1981,18 +2066,31 @@
             "url": "https://www.daedo.com/products/ci-1524",
             "detailed_name": "285CM BELT- BLUE 285CM BELT- BLUE",
             "price": "€4,00",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-1524-1_d9b7c6d2-c294-4de8-b1a1-6423ebc39287.jpg?v=1739773190&width=1946"
             ],
             "variants": []
           },
           {
-            "name": "310CM BELT- YELLOW",
-            "url": "https://www.daedo.com/products/ci-15213",
-            "detailed_name": "310CM BELT- YELLOW 310CM BELT- YELLOW",
+            "name": "310CM BELT- BLUE",
+            "url": "https://www.daedo.com/products/ci-15243",
+            "detailed_name": "310CM BELT- BLUE 310CM BELT- BLUE",
             "price": "€5,00",
+            "description": "Composition: 100% Cotton",
             "images": [
-              "https://www.daedo.com/cdn/shop/files/ci-15213-1_23e67e4d-b2ff-4ae2-9a53-c96c130b4e0e.jpg?v=1739773168&width=1946"
+              "https://www.daedo.com/cdn/shop/files/ci-15243-1_8f0e5964-4a73-46cd-b6e6-d843871d3a5c.jpg?v=1739773194&width=1946"
+            ],
+            "variants": []
+          },
+          {
+            "name": "285CM BELT- RED",
+            "url": "https://www.daedo.com/products/ci-1526",
+            "detailed_name": "285CM BELT- RED 285CM BELT- RED",
+            "price": "€4,00",
+            "description": "Composition: 100% Cotton",
+            "images": [
+              "https://www.daedo.com/cdn/shop/files/ci-1526-1_e1adb042-2960-4925-b346-2862ab0d4d77.jpg?v=1739773201&width=1946"
             ],
             "variants": []
           },
@@ -2001,8 +2099,20 @@
             "url": "https://www.daedo.com/products/ci-1525",
             "detailed_name": "285CM BELT- BROWN 285CM BELT- BROWN",
             "price": "€4,00",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-1525-1_d09fb4ce-ff36-4a8d-a983-bea642421373.jpg?v=1739773197&width=1946"
+            ],
+            "variants": []
+          },
+          {
+            "name": "310CM BELT- YELLOW",
+            "url": "https://www.daedo.com/products/ci-15213",
+            "detailed_name": "310CM BELT- YELLOW 310CM BELT- YELLOW",
+            "price": "€5,00",
+            "description": "Composition: 100% Cotton",
+            "images": [
+              "https://www.daedo.com/cdn/shop/files/ci-15213-1_23e67e4d-b2ff-4ae2-9a53-c96c130b4e0e.jpg?v=1739773168&width=1946"
             ],
             "variants": []
           },
@@ -2011,6 +2121,7 @@
             "url": "https://www.daedo.com/products/ci-15263",
             "detailed_name": "310CM BELT- RED 310CM BELT- RED",
             "price": "€5,00",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-15263-1_ba750155-2461-4169-827e-fb026e85c040.jpg?v=1739773203&width=1946"
             ],
@@ -2021,29 +2132,10 @@
             "url": "https://www.daedo.com/products/ci-1521",
             "detailed_name": "285CM BELT- YELLOW 285CM BELT- YELLOW",
             "price": "€4,00",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-1521-1_c70cc483-3bd7-444d-9981-c7df07ba9504.jpg?v=1739773164&width=1946",
               "https://www.daedo.com/cdn/shop/files/ci-1521-2_0a4f254b-e0c8-4d6f-aa92-349752da3c66.jpg?v=1739773164&width=1946"
-            ],
-            "variants": []
-          },
-          {
-            "name": "285CM- AZUL/MARRON",
-            "url": "https://www.daedo.com/products/ci-15241",
-            "detailed_name": "285CM- AZUL/MARRON 285CM- AZUL/MARRON",
-            "price": "€4,50",
-            "images": [
-              "https://www.daedo.com/cdn/shop/files/ci-15241-1_1865a774-a7ef-4f30-8f59-cdd89a826081.jpg?v=1739773192&width=1946"
-            ],
-            "variants": []
-          },
-          {
-            "name": "310CM- VERDE",
-            "url": "https://www.daedo.com/products/ci-15233",
-            "detailed_name": "310CM- VERDE 310CM- VERDE",
-            "price": "€5,00",
-            "images": [
-              "https://www.daedo.com/cdn/shop/files/ci-15233-1_c307e33b-f9c7-4031-bd82-ac290efde2ed.jpg?v=1739773187&width=1946"
             ],
             "variants": []
           },
@@ -2052,8 +2144,20 @@
             "url": "https://www.daedo.com/products/ci-1522",
             "detailed_name": "285CM BELT- ORANGE 285CM BELT- ORANGE",
             "price": "€4,00",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-1522-1_f8b382e2-4244-4099-ab80-ed03e5b8f40c.jpg?v=1739773176&width=1946"
+            ],
+            "variants": []
+          },
+          {
+            "name": "285CM- AZUL/MARRON",
+            "url": "https://www.daedo.com/products/ci-15241",
+            "detailed_name": "285CM- AZUL/MARRON 285CM- AZUL/MARRON",
+            "price": "€4,50",
+            "description": "Compositions: 100% Algodón",
+            "images": [
+              "https://www.daedo.com/cdn/shop/files/ci-15241-1_1865a774-a7ef-4f30-8f59-cdd89a826081.jpg?v=1739773192&width=1946"
             ],
             "variants": []
           },
@@ -2062,8 +2166,20 @@
             "url": "https://www.daedo.com/products/ci-15253",
             "detailed_name": "310CM BELT- BROWN 310CM BELT- BROWN",
             "price": "€5,00",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-15253-1_cb673637-e3ed-4128-b82a-17f6dda01296.jpg?v=1739773199&width=1946"
+            ],
+            "variants": []
+          },
+          {
+            "name": "310CM- VERDE",
+            "url": "https://www.daedo.com/products/ci-15233",
+            "detailed_name": "310CM- VERDE 310CM- VERDE",
+            "price": "€5,00",
+            "description": "Compositions: 100% Algodón",
+            "images": [
+              "https://www.daedo.com/cdn/shop/files/ci-15233-1_c307e33b-f9c7-4031-bd82-ac290efde2ed.jpg?v=1739773187&width=1946"
             ],
             "variants": []
           },
@@ -2072,9 +2188,21 @@
             "url": "https://www.daedo.com/products/ci-15201",
             "detailed_name": "285CM BELT- WHITE/YELLOW 285CM BELT- WHITE/YELLOW",
             "price": "€4,50",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-15201-1_743eb00e-a495-4b16-8be5-95cdd04a9624.jpg?v=1739773158&width=1946",
               "https://www.daedo.com/cdn/shop/files/ci-15201-2_78c41306-6a99-4393-a557-4774992db7d7.jpg?v=1739773158&width=1946"
+            ],
+            "variants": []
+          },
+          {
+            "name": "285CM BELT- ORANGE/GREEN",
+            "url": "https://www.daedo.com/products/ci-15221",
+            "detailed_name": "285CM BELT- ORANGE/GREEN 285CM BELT- ORANGE/GREEN",
+            "price": "€4,50",
+            "description": "Composition: 100% Cotton",
+            "images": [
+              "https://www.daedo.com/cdn/shop/files/ci-15221-1_09f9bbc2-e5de-46b3-b04e-86b139d27815.jpg?v=1739773178&width=1946"
             ],
             "variants": []
           },
@@ -2083,6 +2211,7 @@
             "url": "https://www.daedo.com/products/ci-15231",
             "detailed_name": "285CM BELT- GREEN/BLUE 285CM BELT- GREEN/BLUE",
             "price": "€4,50",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-15231-1_ae12376b-3475-4393-a4bf-58abd7da274f.jpg?v=1739773185&width=1946"
             ],
@@ -2093,18 +2222,9 @@
             "url": "https://www.daedo.com/products/ci-15223",
             "detailed_name": "310CM BELT- ORANGE 310CM BELT- ORANGE",
             "price": "€5,00",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-15223-1_9672ab85-3e1a-408f-b04a-af08a19f433f.jpg?v=1739773181&width=1946"
-            ],
-            "variants": []
-          },
-          {
-            "name": "285CM BELT- ORANGE/GREEN",
-            "url": "https://www.daedo.com/products/ci-15221",
-            "detailed_name": "285CM BELT- ORANGE/GREEN 285CM BELT- ORANGE/GREEN",
-            "price": "€4,50",
-            "images": [
-              "https://www.daedo.com/cdn/shop/files/ci-15221-1_09f9bbc2-e5de-46b3-b04e-86b139d27815.jpg?v=1739773178&width=1946"
             ],
             "variants": []
           },
@@ -2113,6 +2233,7 @@
             "url": "https://www.daedo.com/products/ci-15211",
             "detailed_name": "285CM BELT- YELLOW/ORANGE 285CM BELT- YELLOW/ORANGE",
             "price": "€4,50",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-15211-1_f75285bb-144e-4850-be0a-bbad1321843d.jpg?v=1739773166&width=1946"
             ],
@@ -2123,6 +2244,7 @@
             "url": "https://www.daedo.com/products/ci-1527",
             "detailed_name": "285CM BELT- BROWN/BLACK 285CM BELT- BROWN/BLACK",
             "price": "€4,50",
+            "description": "Composition: 100% Cotton",
             "images": [
               "https://www.daedo.com/cdn/shop/files/ci-1527-1_d595acb0-e9ac-4434-912e-68d654cd8792.jpg?v=1739773205&width=1946"
             ],
@@ -2144,6 +2266,7 @@
             "url": "https://www.daedo.com/collections/training-equipment/products/pr-2055",
             "detailed_name": "CASCO DAEDO CASCO DAEDO",
             "price": "€37,00",
+            "description": "Compositions: Espuma recubierta de pintura plástica",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-2055-1_fac3cdc7-b5c8-4458-9d3a-fa3c7c0b68d8.png?v=1739775166&width=1946",
               "https://www.daedo.com/cdn/shop/files/pr-2055-2_5b7a3185-4595-45c5-8cb6-c77cf0cbc9a8.png?v=1739775166&width=1946",
@@ -2173,6 +2296,7 @@
             "url": "https://www.daedo.com/collections/training-equipment/products/pe-1651",
             "detailed_name": "CHEST PROTECTOR TAEKWONDO BLUE/RED REVERSIBLE CHEST PROTECTOR TAEKWONDO BLUE/RED REVERSIBLE",
             "price": "€39,00",
+            "description": "Composition: Synthetic leather, hard foam, elastic fabric\nInformation: Reversible chest guard, body protection",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pe-1651-1_f1179361-3f81-4ca0-8cb6-39d028c844b2.png?v=1739775034&width=1946",
               "https://www.daedo.com/cdn/shop/files/pe-1651-2_3adbaf8f-3c74-4b02-ab32-b6a85bc05a4a.png?v=1739775034&width=1946",
@@ -2192,6 +2316,7 @@
             "url": "https://www.daedo.com/collections/training-equipment/products/pr-1573",
             "detailed_name": "COMFORT FOREARM COMFORT FOREARM",
             "price": "€24,50",
+            "description": "Composition: Synthetic leather",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1573-1_5222f7ec-c161-40e0-8ac3-df31bdbe0791.png?v=1739775078&width=1946"
             ],
@@ -2208,6 +2333,7 @@
             "url": "https://www.daedo.com/collections/training-equipment/products/pr-1571",
             "detailed_name": "COMFORT SHIN GUARD COMFORT SHIN GUARD",
             "price": "€24,50",
+            "description": "Composition: Synthetic leather",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1571-1_d82a559b-5c18-438b-9d1b-8b72bdbea5ff.png?v=1739775060&width=1946"
             ],
@@ -2221,9 +2347,10 @@
           },
           {
             "name": "MOUTHGUARD GEL SENIOR",
-            "url": "https://www.daedo.com/collections/training-equipment/products/daedo-mouthguard-gel-senior",
+            "url": "https://www.daedo.com/collections/training-equipment/products/pr-15657",
             "detailed_name": "MOUTHGUARD GEL SENIOR MOUTHGUARD GEL SENIOR",
             "price": "€6,00",
+            "description": "Information: Single gel-fit sports mouthguard for enhanced comfort and custom fit.\nComposition: Gelfit",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-15657-1_83e608ee-5665-432f-8f8b-8f71f3f993c2.png?v=1739773779&width=1946",
               "https://www.daedo.com/cdn/shop/files/pr-15657-2_99dd7334-6955-4f2d-b18d-1407806f754c.png?v=1739773779&width=1946"
@@ -2235,9 +2362,21 @@
             "url": "https://www.daedo.com/collections/training-equipment/products/pr-15656",
             "detailed_name": "MOUTHGUARD GEL JUNIOR MOUTHGUARD GEL JUNIOR",
             "price": "€6,00",
+            "description": "Composition: Gelfit",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-15656-1_78bf352e-3273-44fe-9215-3417df69165e.png?v=1739773775&width=1946",
               "https://www.daedo.com/cdn/shop/files/pr-15656-2_05157ff3-52d7-4da9-bb95-1603c472b37f.png?v=1739773775&width=1946"
+            ],
+            "variants": []
+          },
+          {
+            "name": "MOUTH GUARD SINGLE JUNIOR",
+            "url": "https://www.daedo.com/collections/training-equipment/products/pr-15651",
+            "detailed_name": "MOUTH GUARD SINGLE JUNIOR MOUTH GUARD SINGLE JUNIOR",
+            "price": "€3,50",
+            "description": "Composition: Rubber, silicone",
+            "images": [
+              "https://www.daedo.com/cdn/shop/files/pr-15651-1_8dbc1530-82f5-4a4d-8b3a-36e618af0aea.png?v=1739773770&width=1946"
             ],
             "variants": []
           },
@@ -2246,6 +2385,7 @@
             "url": "https://www.daedo.com/collections/training-equipment/products/pr-1622",
             "detailed_name": "HAND DOUBLE MITT SENIOR HAND DOUBLE MITT SENIOR",
             "price": "€27,50",
+            "description": "Composition: Foam covered with synthetic leather",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1622-1_8ce60843-0776-4103-b132-b1c8488da487.png?v=1739775149&width=1946",
               "https://www.daedo.com/cdn/shop/files/pr-1622-2_ca177e42-f2b0-4923-be94-4412f37080c1.png?v=1739775149&width=1946",
@@ -2257,20 +2397,11 @@
             ]
           },
           {
-            "name": "MOUTH GUARD SINGLE JUNIOR",
-            "url": "https://www.daedo.com/collections/training-equipment/products/pr-15651",
-            "detailed_name": "MOUTH GUARD SINGLE JUNIOR MOUTH GUARD SINGLE JUNIOR",
-            "price": "€3,50",
-            "images": [
-              "https://www.daedo.com/cdn/shop/files/pr-15651-1_8dbc1530-82f5-4a4d-8b3a-36e618af0aea.png?v=1739773770&width=1946"
-            ],
-            "variants": []
-          },
-          {
             "name": "COMPLETE MALE CUP GROIN GUARD",
             "url": "https://www.daedo.com/collections/training-equipment/products/pr-1561",
             "detailed_name": "COMPLETE MALE CUP GROIN GUARD COMPLETE MALE CUP GROIN GUARD",
             "price": "€18,50",
+            "description": "Composition: Polyester, elastane, plastic",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1561-1_cd6d9095-d0e8-4aec-93d9-70334058e287.png?v=1739775045&width=1946",
               "https://www.daedo.com/cdn/shop/files/pr-1561-2_2c071e32-a561-42a4-9922-7ed5e4075a86.png?v=1739775045&width=1946",
@@ -2290,6 +2421,7 @@
             "url": "https://www.daedo.com/collections/training-equipment/products/pr-1570",
             "detailed_name": "FLAT SHIN AND INSTEP GUARD FLAT SHIN AND INSTEP GUARD",
             "price": "€23,00",
+            "description": "Composition: Foam coated with fabric, elastic strap, and Velcro",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1570-1_6ff4a342-e758-425d-bae8-d02627eb1cd1.png?v=1739775057&width=1946"
             ],
@@ -2306,6 +2438,7 @@
             "url": "https://www.daedo.com/collections/training-equipment/products/pr-15652",
             "detailed_name": "SENIOR SINGLE MOUTH GUARD SENIOR SINGLE MOUTH GUARD",
             "price": "€3,50",
+            "description": "Composition: Rubber, silicone",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-15652-1_e1b6d785-5035-4465-8646-db768151283a.png?v=1739773772&width=1946"
             ],
@@ -2316,6 +2449,7 @@
             "url": "https://www.daedo.com/collections/training-equipment/products/pr-1591",
             "detailed_name": "HEAD GEAR WITH TRANSPARENT MASK HEAD GEAR WITH TRANSPARENT MASK",
             "price": "€59,00",
+            "description": "Composition: Foam coated with plastic paint",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1591-1_7f1907b4-b5b1-41cf-920c-11efbbb160aa.jpg?v=1739775096&width=1946"
             ],
@@ -2333,26 +2467,24 @@
             ]
           },
           {
-            "name": "INSTEP GUARD",
-            "url": "https://www.daedo.com/collections/training-equipment/products/pr-15961",
-            "detailed_name": "INSTEP GUARD INSTEP GUARD",
-            "price": "€23,00",
+            "name": "FOREARM MITT",
+            "url": "https://www.daedo.com/collections/training-equipment/products/pr-1720",
+            "detailed_name": "FOREARM MITT FOREARM MITT",
+            "price": "€43,50",
+            "description": "Composition: Synthetic leather, high-density foam",
             "images": [
-              "https://www.daedo.com/cdn/shop/files/pr-15961-1_7afaa38a-101e-46e4-be14-d493e3792115.png?v=1739775112&width=1946"
+              "https://www.daedo.com/cdn/shop/files/pr-1720-1_cc73b7a4-31ef-423a-8184-9d8539434d6d.png?v=1739773820&width=1946",
+              "https://www.daedo.com/cdn/shop/files/pr-1720-2_fd813d4c-2279-449f-b3e1-374f7a617be0.png?v=1739773820&width=1946",
+              "https://www.daedo.com/cdn/shop/files/pr-1720-3_b1488bad-429f-408f-ad5f-0c65dddd595a.png?v=1739773820&width=1946"
             ],
-            "variants": [
-              "BLANCO / XS",
-              "BLANCO / S",
-              "BLANCO / M",
-              "BLANCO / L",
-              "BLANCO / XL"
-            ]
+            "variants": []
           },
           {
             "name": "MALE CUP GROIN GUARD",
             "url": "https://www.daedo.com/collections/training-equipment/products/pr-1549",
             "detailed_name": "MALE CUP GROIN GUARD MALE CUP GROIN GUARD",
             "price": "€18,50",
+            "description": "Composition: Polyester, elastane, plastic",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1549_8dba280c-a849-4938-a6da-941f3c82f636.png?v=1740148707&width=1946"
             ],
@@ -2369,6 +2501,7 @@
             "url": "https://www.daedo.com/collections/training-equipment/products/pr-15718",
             "detailed_name": "KARATE SHIN INSTED GUARD KARATE SHIN INSTED GUARD",
             "price": "€44,50",
+            "description": null,
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-15718-1_38e22441-2faf-4e91-b5cc-bae1234a74f6.png?v=1739775074&width=1946",
               "https://www.daedo.com/cdn/shop/files/pr-15718-2_209522c4-94a9-4467-b342-9eb315056a6e.png?v=1739775074&width=1946",
@@ -2394,10 +2527,28 @@
             ]
           },
           {
+            "name": "INSTEP GUARD",
+            "url": "https://www.daedo.com/collections/training-equipment/products/pr-15961",
+            "detailed_name": "INSTEP GUARD INSTEP GUARD",
+            "price": "€23,00",
+            "description": "Composition: Foam covered in synthetic leather",
+            "images": [
+              "https://www.daedo.com/cdn/shop/files/pr-15961-1_7afaa38a-101e-46e4-be14-d493e3792115.png?v=1739775112&width=1946"
+            ],
+            "variants": [
+              "BLANCO / XS",
+              "BLANCO / S",
+              "BLANCO / M",
+              "BLANCO / L",
+              "BLANCO / XL"
+            ]
+          },
+          {
             "name": "DAEDO TUBE FOREARM GUARD",
             "url": "https://www.daedo.com/collections/training-equipment/products/pr-1575",
             "detailed_name": "DAEDO TUBE FOREARM GUARD DAEDO TUBE FOREARM GUARD",
             "price": "€15,00",
+            "description": "Composition: Foam, elastic fabric",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1575-1_b96dc1b7-d25a-4bca-9c11-efdd067aac50.png?v=1739775081&width=1946"
             ],
@@ -2410,14 +2561,13 @@
             ]
           },
           {
-            "name": "FOREARM MITT",
-            "url": "https://www.daedo.com/collections/training-equipment/products/pr-1720",
-            "detailed_name": "FOREARM MITT FOREARM MITT",
-            "price": "€43,50",
+            "name": "DOUBLE MOUTH GUARD",
+            "url": "https://www.daedo.com/collections/training-equipment/products/pr-1560",
+            "detailed_name": "DOUBLE MOUTH GUARD DOUBLE MOUTH GUARD",
+            "price": "€6,00",
+            "description": "Composition: Rubber and silicone\nInformation: One-piece design for both upper and lower teeth",
             "images": [
-              "https://www.daedo.com/cdn/shop/files/pr-1720-1_cc73b7a4-31ef-423a-8184-9d8539434d6d.png?v=1739773820&width=1946",
-              "https://www.daedo.com/cdn/shop/files/pr-1720-2_fd813d4c-2279-449f-b3e1-374f7a617be0.png?v=1739773820&width=1946",
-              "https://www.daedo.com/cdn/shop/files/pr-1720-3_b1488bad-429f-408f-ad5f-0c65dddd595a.png?v=1739773820&width=1946"
+              "https://www.daedo.com/cdn/shop/files/pr-1560-1_461279bd-3196-45e6-9d53-acf7f3004c61.png?v=1739773768&width=1946"
             ],
             "variants": []
           },
@@ -2426,6 +2576,7 @@
             "url": "https://www.daedo.com/collections/training-equipment/products/pr-1566",
             "detailed_name": "DAEDO TUBE SHIN GUARD DAEDO TUBE SHIN GUARD",
             "price": "€16,50",
+            "description": "Composition: Foam, elastic fabric",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1566-1_1f7bd07d-9731-4584-95d9-4d4322a124b9.png?v=1739775051&width=1946",
               "https://www.daedo.com/cdn/shop/files/pr-1566-2_ce126919-402e-452d-ba9d-ed86035a4ada.png?v=1739775051&width=1946"
@@ -2443,6 +2594,7 @@
             "url": "https://www.daedo.com/collections/training-equipment/products/pr-5012",
             "detailed_name": "E-TRUNK PROTECTOR \"HERO\" E-TRUNK PROTECTOR \"HERO\"",
             "price": "€206,50",
+            "description": "Composition: PU EVA foam, built-in sensor\nInformation: The scoreboard is securely and firmly fixed, yet it is removable, interchangeable, and rechargeable",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-5012-1_9d83fced-ea1e-4c4f-9607-f6cdd68bb6af.png?v=1739775200&width=1946"
             ],
@@ -2460,6 +2612,7 @@
             "url": "https://www.daedo.com/collections/training-equipment/products/pr-1613",
             "detailed_name": "DOUBLE MITT FOR CHILDREN DOUBLE MITT FOR CHILDREN",
             "price": "€22,50",
+            "description": "Composition: Foam coated with a PU outer layer\nInformation: Mitt with two flaps",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1613-1_abecaed3-5f67-466c-a76a-641d2effdfc3.png?v=1739775136&width=1946",
               "https://www.daedo.com/cdn/shop/files/pr-1613-2_918b10aa-666e-446a-87e7-cbe262fb39c2.png?v=1739775136&width=1946",
@@ -2478,6 +2631,7 @@
             "url": "https://www.daedo.com/collections/training-equipment/products/pr-1582",
             "detailed_name": "SHIN AND INSTEP GUARD SHIN AND INSTEP GUARD",
             "price": "€37,50",
+            "description": "Composition: Foam covered with synthetic leather",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1582-2_9a35f941-2121-41d8-b8c4-0ee250168423.png?v=1740733428&width=1946",
               "https://www.daedo.com/cdn/shop/files/pr-1582-3_225dedc1-592a-4af0-ad82-49c5ad0ba2c9.png?v=1740733428&width=1946",
@@ -2501,6 +2655,7 @@
             "url": "https://www.daedo.com/collections/training-equipment/products/pr-1568",
             "detailed_name": "DAEDO TUBE SHIN AND INSTEP GUARD DAEDO TUBE SHIN AND INSTEP GUARD",
             "price": "€17,50",
+            "description": "Composition: Foam, elastic fabric",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-1568-1_05f57039-0e87-4fa0-bc5c-fd5a1d0e26dd.png?v=1739775054&width=1946"
             ],
@@ -2517,28 +2672,12 @@
             "url": "https://www.daedo.com/collections/training-equipment/products/pr-16226",
             "detailed_name": "MITT DOUBLE \"STRONG\" MITT DOUBLE \"STRONG\"",
             "price": "€32,50",
+            "description": "Composition: Foam coated with synthetic leather",
             "images": [
               "https://www.daedo.com/cdn/shop/files/pr-16226-1_c5fd4c87-7394-46a8-a8d8-e4f733273f88.png?v=1739773793&width=1946",
               "https://www.daedo.com/cdn/shop/files/pr-16226-2_4757ae5d-bc18-4748-88c9-840cfaedd013.png?v=1739773793&width=1946"
             ],
             "variants": []
-          },
-          {
-            "name": "E-TRUNK PROTECTOR \"HERO\" BLUE",
-            "url": "https://www.daedo.com/collections/training-equipment/products/pr-5011",
-            "detailed_name": "E-TRUNK PROTECTOR \"HERO\" BLUE E-TRUNK PROTECTOR \"HERO\" BLUE",
-            "price": "€206,50",
-            "images": [
-              "https://www.daedo.com/cdn/shop/files/pr-5011-1_cfe17f2d-a6b2-4fc7-9eef-ee9b48ad71e2.png?v=1739775197&width=1946"
-            ],
-            "variants": [
-              "0",
-              "1",
-              "2",
-              "3",
-              "4",
-              "5"
-            ]
           }
         ]
       }
@@ -2556,6 +2695,7 @@
             "url": "https://www.daedo.com/collections/libros/products/li-1014",
             "detailed_name": "TAEKWONDO PERSONAL DEFENSE TAEKWONDO PERSONAL DEFENSE",
             "price": "€20,50",
+            "description": "Information: Self-defense in Taekwondo and other martial arts, covering techniques and interpersonal relationships between referees, coaches, and athletes.",
             "images": [
               "https://www.daedo.com/cdn/shop/files/li-1014-1_ca249cf7-eed8-4ec0-b9f9-5538232d688c.jpg?v=1739773667&width=1946"
             ],
@@ -2566,6 +2706,7 @@
             "url": "https://www.daedo.com/collections/libros/products/li-1016",
             "detailed_name": "KUKKIWON TKD TEXTBOOK KUKKIWON TKD TEXTBOOK",
             "price": "€55,30",
+            "description": "Information: This textbook is a comprehensive compilation of all the latest available data on Taekwondo, focusing on the scientific analysis of its theories as well as three-dimensional illustrations of key physical movements. It also emphasizes the spiritual enrichment aspect, allowing Taekwondo practitioners to cultivate a noble and well-rounded character. 790 pages. Available in English and Korean.",
             "images": [
               "https://www.daedo.com/cdn/shop/files/li-1016-1_5a472d93-59e1-4b67-b42f-a5e853533f52.jpg?v=1739773669&width=1946"
             ],

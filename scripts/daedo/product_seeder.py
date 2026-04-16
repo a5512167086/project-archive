@@ -311,6 +311,7 @@ def seed_data(bot_uuid_str: str):
             for product_data in sub_category_data.get("products", []):
                 product_name = product_data.get("name")
                 product_url = product_data.get("url")
+                product_desc = product_data.get("description") or ""
 
                 if not product_name:
                     logger.warning(
@@ -355,7 +356,7 @@ def seed_data(bot_uuid_str: str):
                     object_id = ecomm_command.insert_product(
                         product_class_id=sub_category_id,
                         product_name=product_name,
-                        product_description="",
+                        product_description=product_desc,
                         brand_id=brand_id,
                         sku_code=None,
                         price=price,
