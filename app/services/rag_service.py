@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import time
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 from uuid import UUID
 
 from langchain_core.embeddings import Embeddings
@@ -40,17 +40,17 @@ class RAGService:
     def __init__(
         self,
         embeddings: Embeddings,
-        llm_service: Optional[LLMService] = None,
-        prompt_service: Optional[Union[PromptService, DynamicPromptService]] = None,
-        reranker_service: Optional[RerankerService] = None,
-        retrieval_service: Optional[RetrievalService] = None,
-        summary_service: Optional[SummaryService] = None,
-        rewrite_service: Optional[RewriteService] = None,
-        memory: Optional[Any] = None,
+        llm_service: LLMService | None = None,
+        prompt_service: PromptService | DynamicPromptService | None = None,
+        reranker_service: RerankerService | None = None,
+        retrieval_service: RetrievalService | None = None,
+        summary_service: SummaryService | None = None,
+        rewrite_service: RewriteService | None = None,
+        memory: Any | None = None,
     ) -> None:
         self.embeddings = embeddings
         self.llm_service: LLMService = llm_service or LLMService()
-        self.prompt_service: Union[PromptService, DynamicPromptService] = (
+        self.prompt_service: PromptService | DynamicPromptService = (
             prompt_service
             or PromptService(
                 max_contexts_for_prompt=self.DEFAULT_MAX_CONTEXTS_FOR_PROMPT
@@ -67,18 +67,18 @@ class RAGService:
         )
 
     def _build_session_key(self, bot_uuid: UUID, line_id: str) -> str:
-        return f"{str(bot_uuid)}:{line_id}"
+        return f"{bot_uuid!s}:{line_id}"
 
     def search(
         self,
         bot_uuid: UUID,
         query_text: str,
         top_k: int = 3,
-        fetch_k: Optional[int] = None,
-        score_threshold: Optional[float] = DEFAULT_SCORE_THRESHOLD,
+        fetch_k: int | None = None,
+        score_threshold: float | None = DEFAULT_SCORE_THRESHOLD,
         retrieval_mode: str = "hybrid",
         use_rerank: bool = True,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         mode = (retrieval_mode or "hybrid").lower().strip()
         if mode not in {"vector", "lexical", "hybrid"}:
             mode = "hybrid"
@@ -154,18 +154,18 @@ class RAGService:
     def search_history_aware(
         self,
         bot_uuid: UUID,
-        line_id: Optional[str],
+        line_id: str | None,
         query_text: str,
         top_k: int = DEFAULT_TOP_K,
-        fetch_k: Optional[int] = None,
-        score_threshold: Optional[float] = DEFAULT_SCORE_THRESHOLD,
+        fetch_k: int | None = None,
+        score_threshold: float | None = DEFAULT_SCORE_THRESHOLD,
         history_rounds: int = DEFAULT_MAX_HISTORY_ROUNDS,
         rewrite_model: str = "local_model",
         use_rewrite: bool = True,
         use_summary_in_rewrite: bool = True,
         retrieval_mode: str = "hybrid",
         use_rerank: bool = True,
-    ) -> Tuple[str, List[Dict[str, Any]]]:
+    ) -> tuple[str, list[dict[str, Any]]]:
         t0 = time.perf_counter()
 
         if not line_id:
@@ -245,10 +245,10 @@ class RAGService:
     def generate(
         self,
         bot_uuid: UUID,
-        line_id: Optional[str],
+        line_id: str | None,
         original_query: str,
         rewritten_query: str,
-        contexts: List[Dict[str, Any]],
+        contexts: list[dict[str, Any]],
         model_name: str,
         max_history_messages: int = DEFAULT_MAX_HISTORY_MESSAGES,
     ) -> str:
@@ -257,8 +257,8 @@ class RAGService:
         llm = self.llm_service.get_llm(model_name)
         use_memory = bool(line_id)
 
-        history: Optional[List[BaseMessage]] = None
-        session_key: Optional[str] = None
+        history: list[BaseMessage] | None = None
+        session_key: str | None = None
 
         if use_memory and line_id:
             if self.summary_service is None:
@@ -325,12 +325,12 @@ class RAGService:
     def answer(
         self,
         bot_uuid: UUID,
-        line_id: Optional[str],
+        line_id: str | None,
         query_text: str,
         model_name: str,
         top_k: int = DEFAULT_TOP_K,
-        fetch_k: Optional[int] = None,
-        score_threshold: Optional[float] = DEFAULT_SCORE_THRESHOLD,
+        fetch_k: int | None = None,
+        score_threshold: float | None = DEFAULT_SCORE_THRESHOLD,
         history_rounds: int = DEFAULT_MAX_HISTORY_ROUNDS,
         rewrite_model: str = "local_model",
         max_history_messages: int = DEFAULT_MAX_HISTORY_MESSAGES,
@@ -338,7 +338,7 @@ class RAGService:
         use_summary_in_rewrite: bool = True,
         retrieval_mode: str = "hybrid",
         use_rerank: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         rewritten, hits = self.search_history_aware(
             bot_uuid=bot_uuid,
             line_id=line_id,

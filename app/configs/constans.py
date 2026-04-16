@@ -3,6 +3,7 @@ from enum import Enum
 
 class EntityName(str, Enum):
     KNOWLEDGE = "知識"
+    BRAND = "品牌"
 
 
 class ErrorCode(str, Enum):

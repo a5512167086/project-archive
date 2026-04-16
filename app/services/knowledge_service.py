@@ -1,5 +1,4 @@
 import logging
-from typing import List
 from uuid import UUID
 
 from sqlmodel import Session
@@ -42,14 +41,14 @@ class KnowledgeService:
             bot_class_id, entity_id
         )
 
-    def get_all_qa_list(self, bot_uuid: UUID) -> List[KnowledgeListView]:
+    def get_all_qa_list(self, bot_uuid: UUID) -> list[KnowledgeListView]:
         bot = self.validate_line_bot_exists(bot_uuid)
         class_id = self._get_class_id(bot.class_id, EntityName.KNOWLEDGE)
         if not class_id:
             return []
         return self.query.get_all_knowledge_items_by_class_id(class_id)
 
-    def get_all_file_list(self, bot_uuid: UUID) -> List[KnowledgeFileListView]:
+    def get_all_file_list(self, bot_uuid: UUID) -> list[KnowledgeFileListView]:
         bot = self.validate_line_bot_exists(bot_uuid)
         class_id = self._get_class_id(bot.class_id, EntityName.KNOWLEDGE)
         if not class_id:
@@ -64,20 +63,44 @@ class KnowledgeService:
 
         sql_qa_ids = {item.object_id for item in qa_items}
         sql_file_ids = {item.object_id for item in file_items}
-        all_sql_ids = sql_qa_ids.union(sql_file_ids)
 
         logger.info(
             f"Syncing Bot {bot_uuid}: {len(sql_qa_ids)} QAs, {len(sql_file_ids)} Files."
         )
 
-        qdrant_ids = vector_service.get_object_ids_by_bot_uuid(bot_uuid)
-        ids_to_delete = list(qdrant_ids - all_sql_ids)
+        # 1. 獨立取得 Qdrant 內的 QA 與 File IDs (不包含 Product)
+        qdrant_qa_ids = vector_service.get_object_ids_by_bot_uuid(
+            bot_uuid, item_type="qa"
+        )
+        qdrant_file_ids = vector_service.get_object_ids_by_bot_uuid(
+            bot_uuid, item_type="file"
+        )
+
+        # 2. 獨立計算需要刪除的過期資料
+        qa_ids_to_delete = list(qdrant_qa_ids - sql_qa_ids)
+        file_ids_to_delete = list(qdrant_file_ids - sql_file_ids)
 
         deleted_count = 0
-        if ids_to_delete:
-            logger.info(f"Deleting {len(ids_to_delete)} obsolete items from Qdrant.")
-            vector_service.delete_knowledge_items(bot_uuid, ids_to_delete)
-            deleted_count = len(ids_to_delete)
+
+        # 3. 獨立刪除 QA 舊資料，指定 type="qa"
+        if qa_ids_to_delete:
+            logger.info(
+                f"Deleting {len(qa_ids_to_delete)} obsolete QA items from Qdrant."
+            )
+            vector_service.delete_knowledge_items(
+                bot_uuid, qa_ids_to_delete, item_type="qa"
+            )
+            deleted_count += len(qa_ids_to_delete)
+
+        # 4. 獨立刪除 File 舊資料，指定 type="file"
+        if file_ids_to_delete:
+            logger.info(
+                f"Deleting {len(file_ids_to_delete)} obsolete File items from Qdrant."
+            )
+            vector_service.delete_knowledge_items(
+                bot_uuid, file_ids_to_delete, item_type="file"
+            )
+            deleted_count += len(file_ids_to_delete)
 
         upserted_count = 0
 

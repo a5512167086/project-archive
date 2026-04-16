@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import gc
+import io
 import re
 import time
 import uuid
@@ -35,7 +36,6 @@ class VectorService:
         embeddings: OllamaEmbeddings,
         qdrant_url: str,
         collection_name: str,
-        timeout: float = 60.0,
         ensure_collection_and_indexes: bool = True,
     ) -> None:
         self.embeddings = embeddings
@@ -132,6 +132,7 @@ class VectorService:
         self,
         bot_uuid: UUID,
         object_ids: list[int] | None = None,
+        item_type: str | None = None,
     ) -> qmodels.Filter:
         must: list[qmodels.FieldCondition] = [
             qmodels.FieldCondition(
@@ -143,6 +144,14 @@ class VectorService:
                 match=qmodels.MatchValue(value="knowledge"),
             ),
         ]
+
+        if item_type:
+            must.append(
+                qmodels.FieldCondition(
+                    key="metadata.type",
+                    match=qmodels.MatchValue(value=item_type),
+                )
+            )
 
         if object_ids:
             must.append(
@@ -160,11 +169,12 @@ class VectorService:
     def get_object_ids_by_bot_uuid(
         self,
         bot_uuid: UUID,
+        item_type: str | None = None,
         batch_size: int = DEFAULT_BATCH_SIZE,
     ) -> set[int]:
         object_ids: set[int] = set()
         next_offset = None
-        filt = self._build_knowledge_filter(bot_uuid)
+        filt = self._build_knowledge_filter(bot_uuid, item_type=item_type)
 
         while True:
             points, next_offset = self.client.scroll(
@@ -250,6 +260,39 @@ class VectorService:
         docs, metas, ids = self._prepare_qa_docs(bot_uuid, items)
         return self._safe_batch_upsert(docs, metas, ids, batch_size)
 
+    def upsert_product_items(
+        self,
+        bot_uuid: UUID,
+        payloads: list[dict[str, Any]],
+        batch_size: int = DEFAULT_BATCH_SIZE,
+    ) -> int:
+        docs: list[str] = []
+        metas: list[dict[str, Any]] = []
+        ids: list[str] = []
+        bot_str = str(bot_uuid)
+
+        for item in payloads:
+            pid = uuid5(bot_uuid, f"product_{item['object_id']}")
+
+            text = item["content"]
+
+            docs.append(text)
+            ids.append(str(pid))
+
+            meta = {
+                "bot_uuid": bot_str,
+                "object_id": item["object_id"],
+                "source": "knowledge",
+                "type": "product",
+                "id": str(pid),
+                "content": text,
+            }
+            meta.update(item["metadata"])
+
+            metas.append(meta)
+
+        return self._safe_batch_upsert(docs, metas, ids, batch_size)
+
     def _prepare_qa_docs(
         self,
         bot_uuid: UUID,
@@ -313,20 +356,34 @@ class VectorService:
 
         file_object_ids = list({f.object_id for f in files})
         if file_object_ids:
-            self.delete_knowledge_items(bot_uuid, file_object_ids)
+            self.delete_knowledge_items(bot_uuid, file_object_ids, item_type="file")
 
         for file_item in files:
-            file_stream = storage_service.get_file_bytes(file_item.filename)
-            if not file_stream:
+            raw_data = storage_service.get_file_bytes(file_item.filename)
+            if not raw_data:
                 logger.warning(
                     f"[VectorService] File not found in storage: {file_item.filename}"
                 )
                 continue
 
-            file_stream.seek(0)
             raw_text = ""
             try:
-                if file_item.file_type.lower() == "pdf":
+                # 安全轉換：如果是 bytes，使用 io.BytesIO 處理
+                if isinstance(raw_data, bytes):
+                    file_stream = io.BytesIO(raw_data)
+                else:
+                    file_stream = raw_data
+
+                file_stream.seek(0)
+
+                # 寬鬆的 PDF 判斷
+                is_pdf = (
+                    file_item.file_type and "pdf" in file_item.file_type.lower()
+                ) or (
+                    file_item.filename and file_item.filename.lower().endswith(".pdf")
+                )
+
+                if is_pdf:
                     pdf = PdfReader(file_stream)
                     for page in pdf.pages:
                         extracted = page.extract_text()
@@ -334,6 +391,7 @@ class VectorService:
                             raw_text += extracted + "\n\n"
                 else:
                     raw_text = file_stream.getvalue().decode("utf-8", errors="ignore")
+
             except Exception as e:
                 logger.error(
                     f"[VectorService] Failed to parse file {file_item.filename}: {e}"
@@ -378,8 +436,11 @@ class VectorService:
         self,
         bot_uuid: UUID,
         object_ids: list[int] | None = None,
+        item_type: str | None = None,
     ) -> bool:
-        filt = self._build_knowledge_filter(bot_uuid, object_ids=object_ids)
+        filt = self._build_knowledge_filter(
+            bot_uuid, object_ids=object_ids, item_type=item_type
+        )
         self.client.delete(
             collection_name=self.collection,
             points_selector=qmodels.FilterSelector(filter=filt),

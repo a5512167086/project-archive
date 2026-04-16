@@ -4,7 +4,7 @@ import json
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 from uuid import UUID
 
 from dotenv import load_dotenv
@@ -45,24 +45,24 @@ class ExpConfig:
     use_rerank: bool
 
 
-EXPERIMENTS: List[ExpConfig] = [
+EXPERIMENTS: list[ExpConfig] = [
     ExpConfig(name="rerank", use_rerank=True),
 ]
 
-RETRIEVAL_MODES: List[str] = [
+RETRIEVAL_MODES: list[str] = [
     "hybrid",
 ]
 
-PROMPTS_TO_TEST: List[str] = ["v1", "v2", "v3"]
+PROMPTS_TO_TEST: list[str] = ["v1", "v2", "v3"]
 
-DATASET_CONFIG: Dict[str, Dict[str, str]] = {
+DATASET_CONFIG: dict[str, dict[str, str]] = {
     "rag_testset": {
         "path": "./data/testset/rag_testset.json",
         "bot_uuid": "a6e042eb-7889-4bcb-996c-1845d2215fc2",
     },
 }
 
-MODELS_TO_RUN: List[str] = [
+MODELS_TO_RUN: list[str] = [
     "local_model",
 ]
 
@@ -77,7 +77,7 @@ def _score_threshold_for_mode(mode: str) -> float:
     return 0.0
 
 
-def load_test_data(path: str) -> List[Dict[str, str]]:
+def load_test_data(path: str) -> list[dict[str, str]]:
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
@@ -97,16 +97,22 @@ def save_json(results, filename):
         json.dump(results, f, ensure_ascii=False, indent=2)
 
 
-def _preview_hit(h: Dict[str, Any]) -> str:
+def _preview_hit(h: dict[str, Any]) -> str:
     score_str = f"score={h.get('score', 0):.4f}"
     if h.get("rerank_score"):
         score_str += f" | rerank={h['rerank_score']:.4f}"
 
     item_type = h.get("type", "qa")
-    if item_type == "file":
-        source = h.get("display_name") or h.get("filename") or "未知檔案"
+    if item_type in ["file", "product"]:
+        prefix = "檔案" if item_type == "file" else "商品"
+        source = (
+            h.get("display_name")
+            or h.get("filename")
+            or h.get("product_name")
+            or "未知來源"
+        )
         content = str(h.get("content", "")).replace("\n", " ").strip()
-        display_text = f"檔案名稱：{source}\n內容：{content}"
+        display_text = f"{prefix}：{source} | 內容：{content}"
     else:
         q = str(h.get("question", "")).replace("\n", " ").strip()
         a = str(h.get("answer", "")).replace("\n", " ").strip()
@@ -116,16 +122,25 @@ def _preview_hit(h: Dict[str, Any]) -> str:
     return f"- {score_str} | {preview}"
 
 
-def _contexts_for_ragas(hits: List[Dict[str, Any]]) -> List[str]:
+def _contexts_for_ragas(hits: list[dict[str, Any]]) -> list[str]:
     contexts = []
     for h in hits:
         item_type = h.get("type", "qa")
-        if item_type == "file":
-            source = h.get("display_name") or h.get("filename") or "未知檔案"
+
+        # 產品與檔案都統一從 content 欄位抓取完整描述
+        if item_type in ["file", "product"]:
+            prefix = "檔案名稱" if item_type == "file" else "商品名稱"
+            source = (
+                h.get("display_name")
+                or h.get("filename")
+                or h.get("product_name")
+                or "未命名"
+            )
             content = str(h.get("content", "")).strip()
             if content:
-                contexts.append(f"檔案名稱：{source}\n內容：{content}")
+                contexts.append(f"{prefix}：{source}\n內容：{content}")
         else:
+            # FAQ 格式
             q = str(h.get("question", "")).strip()
             a = str(h.get("answer", "")).strip()
             if q or a:
@@ -136,7 +151,7 @@ def _contexts_for_ragas(hits: List[Dict[str, Any]]) -> List[str]:
 # -----------------------------
 # Core Wrapper
 # -----------------------------
-def _rag_answer_with_retry(rag: RAGService, **kwargs) -> Dict[str, Any]:
+def _rag_answer_with_retry(rag: RAGService, **kwargs) -> dict[str, Any]:
     max_attempts = kwargs.pop("max_attempts", 5)
     for attempt in range(1, max_attempts + 1):
         try:

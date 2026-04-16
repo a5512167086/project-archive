@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import threading
 import time
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 from uuid import UUID
 
 from rank_bm25 import BM25Okapi
@@ -19,8 +19,8 @@ class RetrievalService:
     def __init__(
         self,
         vector_service: VectorService,
-        stopwords: Optional[Set[str]] = None,
-        stopwords_path: Optional[str] = None,
+        stopwords: set[str] | None = None,
+        stopwords_path: str | None = None,
         bm25_enabled: bool = True,
         bm25_refresh_ttl_sec: int = 300,
         debug_log_hits: bool = False,
@@ -28,7 +28,7 @@ class RetrievalService:
     ) -> None:
         self.vs = vector_service
 
-        self.stopwords: Set[str] = (
+        self.stopwords: set[str] = (
             load_stopwords(stopwords_path) if stopwords is None else set(stopwords)
         )
         self.bm25_enabled = bool(bm25_enabled)
@@ -37,8 +37,8 @@ class RetrievalService:
         self.debug_log_hits = bool(debug_log_hits)
         self.debug_log_top_n = max(int(debug_log_top_n), 0)
 
-        self._idx_cache: Dict[str, BM25Index] = {}
-        self._locks: Dict[str, threading.Lock] = {}
+        self._idx_cache: dict[str, BM25Index] = {}
+        self._locks: dict[str, threading.Lock] = {}
         self._global_lock = threading.Lock()
 
     def refresh_index(self, bot_uuid: UUID) -> None:
@@ -51,7 +51,7 @@ class RetrievalService:
         self,
         title: str,
         query_text: str,
-        hits: List[Dict[str, Any]],
+        hits: list[dict[str, Any]],
         top_n: int,
         score_key: str,
     ) -> None:
@@ -63,12 +63,18 @@ class RetrievalService:
             score = h.get(score_key, h.get("score"))
             item_type = h.get("type", "qa")
 
-            if item_type == "file":
-                disp = str(h.get("display_name") or h.get("filename") or "").strip()
+            if item_type in ["file", "product"]:
+                prefix = "File" if item_type == "file" else "Product"
+                disp = str(
+                    h.get("product_name")
+                    or h.get("display_name")
+                    or h.get("filename")
+                    or ""
+                ).strip()
                 content = str(h.get("content") or "").replace("\n", " ")[:60]
                 logger.info(
                     f"[RetrievalService] {title} top{i}: "
-                    f"id={obj_id} {score_key}={score} File='{disp}' Content='{content}'"
+                    f"id={obj_id} {score_key}={score} {prefix}='{disp}' Content='{content}'"
                 )
             else:
                 q_snip = (h.get("question") or "").replace("\n", " ")[:60]
@@ -83,14 +89,14 @@ class RetrievalService:
         bot_uuid: UUID,
         query_text: str,
         top_k: int = 5,
-        fetch_k: Optional[int] = None,
-        score_threshold: Optional[float] = None,
+        fetch_k: int | None = None,
+        score_threshold: float | None = None,
         mode: str = "hybrid",
         rrf_k: int = DEFAULT_RRF_K,
         weight_vector: float = 1.0,
         weight_lexical: float = 1.0,
-        lexical_fetch_k: Optional[int] = None,
-    ) -> List[Dict[str, Any]]:
+        lexical_fetch_k: int | None = None,
+    ) -> list[dict[str, Any]]:
         mode = (mode or "hybrid").lower().strip()
         top_k = max(int(top_k), 1)
         fetch_multiplier = 2
@@ -170,9 +176,9 @@ class RetrievalService:
         bot_uuid: UUID,
         query_text: str,
         top_k: int,
-        fetch_k: Optional[int],
-        score_threshold: Optional[float],
-    ) -> List[Dict[str, Any]]:
+        fetch_k: int | None,
+        score_threshold: float | None,
+    ) -> list[dict[str, Any]]:
         k_fetch = int(fetch_k or top_k)
         hits = self.vs.search(
             bot_uuid=bot_uuid,
@@ -192,7 +198,7 @@ class RetrievalService:
         query_text: str,
         top_k: int,
         fetch_k: int,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         if not self.bm25_enabled:
             return []
 
@@ -210,7 +216,7 @@ class RetrievalService:
         scores = idx.bm25.get_scores(q_tokens)
         ranked = sorted(enumerate(scores), key=lambda x: x[1], reverse=True)[:fetch_k]
 
-        out: List[Dict[str, Any]] = []
+        out: list[dict[str, Any]] = []
         for rank, (i, s) in enumerate(ranked, 1):
             d = idx.docs[i]
             lex_score = float(s)
@@ -224,6 +230,7 @@ class RetrievalService:
                 "content": d.get("content", ""),
                 "filename": d.get("filename", ""),
                 "display_name": d.get("display_name", ""),
+                "product_name": d.get("product_name", ""),
                 "lex_score": lex_score,
                 "lex_rank": rank,
                 "score": lex_score,
@@ -251,7 +258,7 @@ class RetrievalService:
             t0 = time.perf_counter()
             docs = self._safe_load_docs(bot_uuid)
             raw_docs_cnt = len(docs)
-            pairs: List[Tuple[Dict[str, Any], List[str]]] = []
+            pairs: list[tuple[dict[str, Any], list[str]]] = []
 
             for d in docs:
                 text = (d.get("text") or "").strip()
@@ -284,7 +291,7 @@ class RetrievalService:
             )
             return idx
 
-    def _safe_load_docs(self, bot_uuid: UUID) -> List[Dict[str, Any]]:
+    def _safe_load_docs(self, bot_uuid: UUID) -> list[dict[str, Any]]:
         docs = []
         try:
             next_offset = None
@@ -294,7 +301,7 @@ class RetrievalService:
                 points, next_offset = self.vs.client.scroll(
                     collection_name=self.vs.collection,
                     scroll_filter=filt,
-                    limit=200,
+                    limit=500,
                     with_payload=True,
                     with_vectors=False,
                 )
@@ -309,7 +316,7 @@ class RetrievalService:
             logger.exception(f"[RetrievalService] Failed to load docs from Qdrant: {e}")
             return []
 
-        out: List[Dict[str, Any]] = []
+        out: list[dict[str, Any]] = []
         for d in docs:
             if not isinstance(d, dict):
                 continue
@@ -318,6 +325,7 @@ class RetrievalService:
             a = str(d.get("answer") or "").strip()
             content = str(d.get("content") or d.get("text") or "").strip()
             filename = d.get("filename", "")
+            product_name = str(d.get("product_name", "")).strip()
 
             item_type = d.get("type")
             if not item_type:
@@ -325,6 +333,10 @@ class RetrievalService:
 
             if item_type == "file" and content:
                 text = f"File: {d.get('display_name', '')} {filename}\n{content}"
+            elif item_type == "product" and content:
+                text = (
+                    f"Product: {product_name}\n{content}" if product_name else content
+                )
             elif content:
                 text = content
             elif q or a:
@@ -342,6 +354,7 @@ class RetrievalService:
                 "content": content,
                 "filename": filename,
                 "display_name": d.get("display_name", ""),
+                "product_name": product_name,
                 "text": text,
                 "type": item_type,
             })
@@ -351,38 +364,38 @@ class RetrievalService:
     def _hybrid_fuse_rrf(
         self,
         query_text: str,
-        vector_hits: List[Dict[str, Any]],
-        lexical_hits: List[Dict[str, Any]],
+        vector_hits: list[dict[str, Any]],
+        lexical_hits: list[dict[str, Any]],
         top_k: int,
         rrf_k: int,
         weight_vector: float,
         weight_lexical: float,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         rrf_k = max(int(rrf_k), 1)
 
-        def _key(h: Dict[str, Any]) -> Any:
+        def _key(h: dict[str, Any]) -> Any:
             item_type = h.get("type")
             obj_id = h.get("object_id")
             chunk_id = h.get("id")
-            if item_type == "file":
+            if item_type in ["file", "product"]:
                 return chunk_id if chunk_id else obj_id
             return obj_id if obj_id is not None else chunk_id
 
-        vec_rank: Dict[Any, int] = {}
+        vec_rank: dict[Any, int] = {}
         for i, h in enumerate(vector_hits, 1):
             k = _key(h)
             if k is not None and k not in vec_rank:
                 vec_rank[k] = i
 
-        lex_rank: Dict[Any, int] = {}
+        lex_rank: dict[Any, int] = {}
         for i, h in enumerate(lexical_hits, 1):
             k = _key(h)
             if k is not None and k not in lex_rank:
                 lex_rank[k] = i
 
-        merged: Dict[Any, Dict[str, Any]] = {}
+        merged: dict[Any, dict[str, Any]] = {}
 
-        def _ensure_base(k: Any, h: Dict[str, Any]) -> Dict[str, Any]:
+        def _ensure_base(k: Any, h: dict[str, Any]) -> dict[str, Any]:
             if k not in merged:
                 merged[k] = {
                     "id": h.get("id") or str(h.get("object_id") or ""),
@@ -392,6 +405,7 @@ class RetrievalService:
                     "content": h.get("content", ""),
                     "filename": h.get("filename", ""),
                     "display_name": h.get("display_name", ""),
+                    "product_name": h.get("product_name", ""),
                     "type": h.get("type", "qa"),
                     "vec_score": None,
                     "lex_score": None,
@@ -406,6 +420,7 @@ class RetrievalService:
                 "content",
                 "filename",
                 "display_name",
+                "product_name",
                 "type",
             ]:
                 if not base.get(field) and h.get(field):
@@ -428,7 +443,7 @@ class RetrievalService:
             b["lex_score"] = float(h.get("lex_score", h.get("score", 0.0)) or 0.0)
             b["lex_rank"] = lex_rank.get(k)
 
-        for _, d in merged.items():
+        for d in merged.values():
             s = 0.0
             vr = d.get("vec_rank")
             lr = d.get("lex_rank")

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 import torch
 from FlagEmbedding import FlagReranker
@@ -23,18 +23,18 @@ class RerankerService:
         logger.info("[RerankerService] Model loaded.")
 
     def rerank(
-        self, query: str, docs: List[Dict[str, Any]], top_k: int = 5
-    ) -> List[Dict[str, Any]]:
+        self, query: str, docs: list[dict[str, Any]], top_k: int = 5
+    ) -> list[dict[str, Any]]:
         if not docs:
             return []
 
         t0 = time.perf_counter()
 
-        pairs: List[List[str]] = []
+        pairs: list[list[str]] = []
         for d in docs:
             item_type = d.get("type", "qa")
 
-            if item_type == "file":
+            if item_type in ["file", "product"]:
                 doc_content = str(d.get("content") or d.get("text") or "").strip()
             else:
                 q_text = str(d.get("question") or "").strip()

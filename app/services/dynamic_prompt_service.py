@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 
@@ -146,16 +146,16 @@ class DynamicPromptService:
         self,
         original_query: str,
         rewritten_query: str,
-        contexts: List[Dict[str, Any]],
-        history: Optional[List[BaseMessage]] = None,
-    ) -> List[BaseMessage]:
+        contexts: list[dict[str, Any]],
+        history: list[BaseMessage] | None = None,
+    ) -> list[BaseMessage]:
 
         # 1. 組裝 Context 區塊
         ctx = contexts[: self.max_contexts_for_prompt]
-        context_lines: List[str] = []
+        context_lines: list[str] = []
         for i, c in enumerate(ctx, 1):
             item_type = c.get("type", "qa")
-            if item_type == "file":
+            if item_type in ["file", "product"]:
                 content = str(c.get("content") or "").strip()
                 if content:
                     context_lines.append(f"━━━ Source {i} ━━━\n{content}")
@@ -195,7 +195,7 @@ class DynamicPromptService:
         )
 
         # 4. 建立 Langchain Messages 陣列
-        msgs: List[BaseMessage] = [SystemMessage(content=system_prompt)]
+        msgs: list[BaseMessage] = [SystemMessage(content=system_prompt)]
 
         if history:
             for m in history:

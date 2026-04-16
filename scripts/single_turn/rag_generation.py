@@ -112,10 +112,16 @@ def _preview_hit(h: dict[str, Any]) -> str:
 
     item_type = h.get("type", "qa")
 
-    if item_type == "file":
-        source = h.get("display_name") or h.get("filename") or "未知檔案"
+    if item_type in ["file", "product"]:
+        prefix = "檔案" if item_type == "file" else "商品"
+        source = (
+            h.get("display_name")
+            or h.get("filename")
+            or h.get("product_name")
+            or "未知來源"
+        )
         content = str(h.get("content", "")).replace("\n", " ").strip()
-        display_text = f"檔案名稱：{source}\n內容：{content}"
+        display_text = f"{prefix}：{source} | 內容：{content}"
     else:
         q = str(h.get("question", "")).replace("\n", " ").strip()
         a = str(h.get("answer", "")).replace("\n", " ").strip()
@@ -129,12 +135,21 @@ def _contexts_for_ragas(hits: list[dict[str, Any]]) -> list[str]:
     contexts = []
     for h in hits:
         item_type = h.get("type", "qa")
-        if item_type == "file":
-            source = h.get("display_name") or h.get("filename") or "未知檔案"
+
+        # 產品與檔案都統一從 content 欄位抓取完整描述
+        if item_type in ["file", "product"]:
+            prefix = "檔案名稱" if item_type == "file" else "商品名稱"
+            source = (
+                h.get("display_name")
+                or h.get("filename")
+                or h.get("product_name")
+                or "未命名"
+            )
             content = str(h.get("content", "")).strip()
             if content:
-                contexts.append(f"檔案名稱：{source}\n內容：{content}")
+                contexts.append(f"{prefix}：{source}\n內容：{content}")
         else:
+            # FAQ 格式
             q = str(h.get("question", "")).strip()
             a = str(h.get("answer", "")).strip()
             if q or a:

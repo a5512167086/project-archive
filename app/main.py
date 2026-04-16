@@ -29,6 +29,7 @@ from app.schemas import (
     QueryRequest,
     QueryResponse,
 )
+from app.services.ecomm_service import EcommService
 from app.services.knowledge_service import KnowledgeService
 from app.services.llm_service import LLMService
 from app.services.prompt_service import PromptService
@@ -56,7 +57,6 @@ def build_vector_service(embeddings: OllamaEmbeddings) -> VectorService:
         embeddings=embeddings,
         qdrant_url=QDRANT_URL,
         collection_name=QDRANT_COLLECTION,
-        timeout=RAGService.DEFAULT_TIMEOUT,
         ensure_collection_and_indexes=True,
     )
 
@@ -158,6 +158,10 @@ def get_knowledge_service(session: SessionDep) -> KnowledgeService:
     return KnowledgeService(session)
 
 
+def get_ecomm_service(session: SessionDep) -> EcommService:
+    return EcommService(session)
+
+
 app = FastAPI(root_path="/easybot-rag-api", lifespan=lifespan)
 add_global_exception_handler(app)
 
@@ -179,6 +183,24 @@ def ingest(
         "bot_uuid": str(req.bot_uuid),
         "upserted": sync_results["upserted"],
         "deleted": sync_results["deleted"],
+        "collection": vector_service.collection,
+    }
+
+
+@app.post("/product-ingest")
+def product_ingest(
+    req: IngestRequest,
+    ecomm_service: Annotated[EcommService, Depends(get_ecomm_service)],
+    vector_service: Annotated[VectorService, Depends(get_vector_service)],
+    retrieval_service: Annotated[RetrievalService, Depends(get_retrieval_service)],
+):
+    sync_results = ecomm_service.sync_product_vectors(req.bot_uuid, vector_service)
+
+    retrieval_service.refresh_index(req.bot_uuid)
+
+    return {
+        "bot_uuid": str(req.bot_uuid),
+        "upserted": sync_results["upserted"],
         "collection": vector_service.collection,
     }
 
@@ -230,8 +252,7 @@ async def query(
     clean_hits = []
     for h in hits:
         item_type = h.get("type", "qa")
-
-        if item_type == "file":
+        if item_type in ["file", "product"]:
             final_content = str(h.get("content") or "").strip()
         else:
             q = str(h.get("question") or "").strip()
