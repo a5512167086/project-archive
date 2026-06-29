@@ -1,4 +1,4 @@
-from typing import Annotated, List
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Request
@@ -6,7 +6,6 @@ from linebot.v3.messaging import Configuration
 
 from modules.bot.bot_model import BotListView
 from modules.bot.bot_schema import (
-    BotBodies,
     BotHeaders,
     BotWithPublicCredential,
     InsertBotRequest,
@@ -43,7 +42,7 @@ def get_module_service(session: SessionDep) -> ModuleService:
 bot_router = APIRouter(prefix="/bots", tags=["bots"])
 
 
-@bot_router.get("", tags=["bots"], response_model=List[BotListView])
+@bot_router.get("", tags=["bots"], response_model=list[BotListView])
 def get_bots(
     current_user: Annotated[dict, Depends(get_current_user)],
     bot_service: Annotated[BotService, Depends(get_bot_service)],
@@ -122,9 +121,9 @@ def update_bot(
 
 
 @bot_router.post("/webhook/{bot_uuid}", tags=["bots"])
-def line_webhook(
+async def line_webhook(
+    request: Request,
     bot_header: Annotated[BotHeaders, Header()],
-    bot_body: BotBodies,
     bot_uuid: str,
     background_tasks: BackgroundTasks,
     bot_service: Annotated[BotService, Depends(get_bot_service)],
@@ -148,11 +147,11 @@ def line_webhook(
 
     configuration = Configuration(access_token=credentials.channel_access_token)
 
-    custom_webhook(
+    await custom_webhook(  # 3. 加上 await
+        request,  # 4. 把 request 傳進去
         credentials.channel_secret,
         bot_uuid,
         configuration,
-        bot_body,
         x_line_signature,
         background_tasks,
     )

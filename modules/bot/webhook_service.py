@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import BackgroundTasks, HTTPException
+from fastapi import BackgroundTasks, HTTPException, Request
 from linebot.v3.exceptions import InvalidSignatureError
 from linebot.v3.messaging import (
     ApiClient,
@@ -13,7 +13,6 @@ from linebot.v3.messaging import (
 from linebot.v3.webhook import WebhookParser
 from linebot.v3.webhooks import MessageEvent, TextMessageContent
 
-from modules.bot.bot_schema import BotBodies
 from shared.utils.api import rag_customer_service
 
 logger = logging.getLogger(__name__)
@@ -65,20 +64,21 @@ def background_handle_text_message(
             logger.error(f"Reply failed: {e}")
 
 
-def custom_webhook(
+async def custom_webhook(
+    request: Request,
     channel_secret: str,
     bot_uuid: str,
     configuration: Configuration,
-    bot_body: BotBodies,
     x_line_signature: str,
     background_tasks: BackgroundTasks,
 ):
     parser = WebhookParser(channel_secret)
 
-    try:
-        body_json = bot_body.model_dump_json()
-        events = parser.parse(body_json, x_line_signature)
+    body_bytes = await request.body()
+    body_json = body_bytes.decode("utf-8")
 
+    try:
+        events = parser.parse(body_json, x_line_signature)
         for event in events:
             if isinstance(event, MessageEvent) and isinstance(
                 event.message, TextMessageContent
@@ -86,11 +86,9 @@ def custom_webhook(
                 background_tasks.add_task(
                     background_handle_text_message, event, configuration, bot_uuid
                 )
-
     except InvalidSignatureError:
         raise HTTPException(status_code=400, detail="Invalid signature")
     except Exception as e:
         logger.error(f"Webhook error: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
-
     return {"status": "OK"}

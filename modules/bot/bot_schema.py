@@ -1,4 +1,3 @@
-from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel, model_validator
@@ -6,11 +5,6 @@ from pydantic import BaseModel, model_validator
 
 class BotHeaders(BaseModel):
     x_line_signature: str
-
-
-class BotBodies(BaseModel):
-    destination: str
-    events: list
 
 
 class Bot(BaseModel):
@@ -56,12 +50,12 @@ class InsertBotResponse(BaseModel):
 
 
 class UpdateBotRequest(BaseModel):
-    bot_name: Optional[str] = None
-    channel_id: Optional[str] = None
-    channel_access_token: Optional[str] = None
-    channel_secret: Optional[str] = None
-    login_channel_id: Optional[str] = None
-    login_channel_secret: Optional[str] = None
+    bot_name: str | None = None
+    channel_id: str | None = None
+    channel_access_token: str | None = None
+    channel_secret: str | None = None
+    login_channel_id: str | None = None
+    login_channel_secret: str | None = None
 
     @model_validator(mode="before")
     def prevent_empty_strings(cls, values):
