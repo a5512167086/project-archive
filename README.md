@@ -3,9 +3,26 @@
 舊練習題與課堂作業集中存放。每個子專案原本是獨立 repo，已用 `git subtree` 併入，commit 歷史保留。
 
 命名規則：全小寫 slug-case，`{project}-{type}`，type 放最後。
+- `-api`：後端 API
 - `-fe`：純前端
 - `-app`：前後端都有
+- `-mobile-{platform}`：手機 App
 - `-py`：Python 腳本
+
+三個資料夾：`homework/` 課堂作業、`web/` 小型練習、`projects/` 完整作品（已停止維護）。
+
+## projects/
+
+| 資料夾 | 內容 | 技術 | 原 repo |
+|---|---|---|---|
+| `cloud-coworker-api` | CloudCoworker 後端 | Node.js + TypeScript + Swagger | CloudCoworker_API |
+| `cloud-coworker-fe` | CloudCoworker 前端 | React + TypeScript + Vite | CloudCoworker_Web |
+| `order-system-api` | 點餐系統後端 | Laravel (PHP) + Docker | OrderSystem_API |
+| `order-system-fe` | 點餐系統前端 | Vue | OrderSystem_Web |
+| `ocr-mobile-react-native` | OCR 手機 Demo | React Native (Expo) | OCR_ReactNativeDemo |
+| `todo-list-dotnet-api` | 待辦清單 API，含 JWT、EF Migration | ASP.NET Core (C#) | DotnetTodoListPractice |
+| `word-web-app` | 文字分析網站 | Flask + scikit-learn | WordWeb |
+| `portfolio-fe` | 2021 個人網站 | HTML/CSS/JS | Portfolio |
 
 ## homework/
 

@@ -1,4 +1,9 @@
 node_modules/
 build/
+dist/
+vendor/
+bin/
+obj/
+__pycache__/
 .env
 .DS_Store
