@@ -28,6 +28,7 @@
 | `weather-station-ble-firmware` | BLE 氣象站，BME280 + BH1750 + SSD1306 | Zephyr RTOS (C), nRF52840 | WeatherStationWithBLE |
 | `web3-ticketing-app` | 區塊鏈票務系統，合約 + 前端 | Hardhat (Solidity) + React (Vite) | Web3TicekingSystem |
 | `othello-alphabeta-py` | 黑白棋 AI，期末競賽 | Python | OthelloAlphaBetaBot |
+| `chives-beacon-app` | 大學專題：台股分析／預測，LSTM | Flask + Python | TKU-CSIE-Project/ChivesBeacon |
 
 ## homework/
 
