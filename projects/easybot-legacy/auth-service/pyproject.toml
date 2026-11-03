@@ -1,0 +1,12 @@
+[project]
+name = "authservice-api"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "bcrypt>=4.2.1",
+    "fastapi[standard]>=0.115.6",
+    "pyjwt>=2.10.1",
+    "requests>=2.32.3",
+]
