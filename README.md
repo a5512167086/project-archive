@@ -1,6 +1,6 @@
-# coding-practice
+# project-archive
 
-舊練習題與課堂作業集中存放。每個子專案原本是獨立 repo，已用 `git subtree` 併入，commit 歷史保留。
+舊作品、練習題與課堂作業集中存放。全部已停止維護。每個子專案原本是獨立 repo，已用 `git subtree` 併入，commit 歷史保留。
 
 命名規則：全小寫 slug-case，`{project}-{type}`，type 放最後。
 - `-api`：後端 API
