@@ -10,7 +10,7 @@
 - `-py`：Python 腳本
 - `-firmware`：嵌入式韌體
 
-資料夾：`homework/` 課堂作業、`web/` 小型練習、`projects/` 完整作品、`projects/transuai-legacy/` 微服務版 TransuAI（一套 8 個 repo）。全部已停止維護。
+資料夾：`homework/` 課堂作業、`web/` 小型練習、`projects/` 完整作品、`projects/transuai-legacy/` 微服務版 TransuAI、`projects/easybot-legacy/` EasyBot（各一套 8 個 repo）。全部已停止維護。
 
 ## projects/
 
@@ -48,6 +48,23 @@ TransuAI 第一代：音訊／影片逐字稿 + AI 分析平台，微服務架�
 | `ai-service` | 摘要、章節、向量、會後處理 agent（Google / Notion） | Python, HF Inference, PostgreSQL |
 | `notification-service` | 消費事件，WebSocket 推播 | Python, RabbitMQ |
 | `frontend` | 使用者介面 | React 19 + Vite + TypeScript + Tailwind v4 + shadcn/ui |
+
+## projects/easybot-legacy/
+
+EasyBot：LINE 聊天機器人建置平台，微服務架構，2024–2025 研究室專案。原本在 EasyBotService 組織下 8 個 repo，各自歷史保留。部署用 Kubernetes + Traefik ingress。
+
+| 資料夾 | 內容 | 技術 | 原 repo |
+|---|---|---|---|
+| `infra` | k8s manifests（dev／prod）、Traefik ingress 與 middleware、Minikube 設定說明 | Kubernetes, Traefik | Kubernetes_ARCH |
+| `auth-service` | JWT 簽發與驗證 | FastAPI | AuthService_API |
+| `user-service` | 使用者、Google／LINE 登入 | FastAPI, PostgreSQL | UserService_API |
+| `bot-service` | LINE Bot webhook 與回覆 | FastAPI, line-bot-sdk, PostgreSQL | BotService_API |
+| `knowledge-service` | 知識庫管理 | FastAPI, PostgreSQL | KnowledgeService_API |
+| `search-service` | 搜尋、圖片辨識、爬蟲 | FastAPI, Azure Computer Vision, jieba, scikit-learn, Selenium | SearchService_API |
+| `command-service` | Bot 指令管理 | FastAPI, PostgreSQL | CommandService_API |
+| `module-service` | 功能模組管理 | FastAPI, PostgreSQL | ModuleService_API |
+
+> `infra` 原本 manifest 內含 JWT secret、Azure key、Google OAuth secret、DB 密碼與 TLS 憑證；併入前已用 git filter-repo 將歷史中所有值替換為 `REDACTED_*`，`secret.yaml` 從歷史移除。
 
 ## homework/
 
