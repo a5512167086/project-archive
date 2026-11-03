@@ -1,0 +1,110 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingressroute
+spec:
+  entryPoints:
+    - web
+  routes:
+    # Traefik Dashboard
+    - match: Host(`dev.local.com`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
+      kind: Rule
+      services:
+        - name: api@internal
+          kind: TraefikService
+          
+    # 平台 Web Service
+    # 根據 Host 配置的服務，主要用於提供平台相關的前端服務
+    - kind: Rule
+      match: Host(`dev.local.com`)
+      services:
+        - name: platform-web-service
+          port: 80
+
+    # LIFF Web Service
+    # 根據 Host 配置的服務，主要用於提供平台相關的前端服務
+    - kind: Rule
+      match: Host(`dev.local.com`) && PathPrefix(`/liff`)
+      middlewares:
+        - name: liff-middleware
+      services:
+        - name: liff-web-service
+          port: 80
+
+    # Auth API
+    # 提供認證相關的 API，如用戶登錄或驗證
+    - kind: Rule
+      match: Host(`dev.local.com`) && PathPrefix(`/authapi`)
+      services:
+        - name: auth-service
+          port: 80
+
+    # User API（需要中介軟體的路由）
+    # 需要進行認證的特定用戶 API 路徑（例如獲取用戶資訊、重設密碼）
+    - kind: Rule
+      match: Host(`dev.local.com`) && (PathPrefix(`/userapi/user/me`) || PathPrefix(`/userapi/user/reset-password`) || PathPrefix(`/userapi/user/change-password`) || PathPrefix(`/userapi/user/change-password`) || PathPrefix(`/userapi/user/oauth-bind`) || PathPrefix(`/userapi/user/change-password`) || PathPrefix(`/userapi/user/oauth-status`))
+      middlewares:
+        - name: cors-middleware
+        - name: auth-middleware
+      services:
+        - name: user-service
+          port: 80
+
+    # User API（不需要中介軟體的路由）
+    # 捕獲其他 `/userapi` 路徑，不需要進行認證
+    - kind: Rule
+      match: Host(`dev.local.com`) && PathPrefix(`/userapi`)
+      services:
+        - name: user-service
+          port: 80
+
+    # Bot API（需要中介軟體的路由）
+    # 提供與 Bot 相關的操作，例如創建、更新 Bot，需要進行認證
+    - kind: Rule
+      match: Host(`dev.local.com`) && (PathPrefix(`/botapi/bot`) || PathPrefix(`/botapi/bots`))
+      middlewares:
+        - name: cors-middleware
+        - name: auth-middleware
+      services:
+        - name: bot-service
+          port: 80
+
+    # Bot API（不需要中介軟體的路由）
+    # 捕獲其他 `/botapi` 路徑，如 `/botapi/webhook`，不需要進行認證
+    - kind: Rule
+      match: Host(`dev.local.com`) && PathPrefix(`/botapi`)
+      services:
+        - name: bot-service
+          port: 80
+
+    # Search API
+    # 提供與搜索相關的 API 服務
+    - kind: Rule
+      match: Host(`dev.local.com`) && PathPrefix(`/searchapi`)
+      services:
+        - name: search-service
+          port: 80
+
+    # Module API
+    # 提供與模組相關的 API 服務
+    - kind: Rule
+      match: Host(`dev.local.com`) && PathPrefix(`/moduleapi`)
+      services:
+        - name: module-service
+          port: 80
+
+    # Command API
+    # 提供與命令相關的 API 服務
+    - kind: Rule
+      match: Host(`dev.local.com`) && PathPrefix(`/commandapi`)
+      services:
+        - name: command-service
+          port: 80
+
+    # Knowledge API
+    # 提供與知識相關的 API 服務
+    - kind: Rule
+      match: Host(`dev.local.com`) && PathPrefix(`/knowledgeapi`)
+      services:
+        - name: knowledge-service
+          port: 80

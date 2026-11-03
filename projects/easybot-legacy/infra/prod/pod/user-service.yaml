@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-deployment
+  namespace: easybot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user
+  template:
+    metadata:
+      labels:
+        app: user
+    spec:
+      containers:
+        - name: user
+          image: a5512167086/easybot-user-service:latest
+          env:
+            - name: DB_HOST
+              value: "10.21.26.74"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "easybot"
+            - name: DB_USER
+              value: "postgres"
+            - name: DB_PASSWORD
+              value: "0000"
+            - name: AUTH_SERVICE_API_URL
+              value: "https://easybot.wke.csie.ncnu.edu.tw/authapi"
+            - name: FRONTEND_URL
+              value: "https://easybot.wke.csie.ncnu.edu.tw"
+            - name: "EMAIL"
+              value: "noreply.wke@gmail.com"
+            - name: "EMAIL_APP_PASSWORD"
+              value: "iryn atxz yglr ueae"
+            - name: "GOOGLE_CLIENT_ID"
+              value: "353361777828-gppn0r0sf13l7g64lg1lo7cv1ptfe1ud.apps.googleusercontent.com"
+            - name: "GOOGLE_CLIENT_SECRET"
+              value: "REDACTED_GOOGLE_CLIENT_SECRET"
+            - name: "GOOGLE_REDIRECT_URI"
+              value: "https://easybot.wke.csie.ncnu.edu.tw/oauth-callback"
+            - name: "LINE_CLIENT_ID"
+              value: "2006727725"
+            - name: "LINE_CLIENT_SECRET"
+              value: "26bb770871343e6947c9bb463f809ecc"
+            - name: "LINE_REDIRECT_URI"
+              value: "https://easybot.wke.csie.ncnu.edu.tw/oauth-callback"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  namespace: easybot
+spec:
+  selector:
+    app: user
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

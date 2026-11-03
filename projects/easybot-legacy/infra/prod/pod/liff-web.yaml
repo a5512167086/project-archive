@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: liff-web-deployment
+  namespace: easybot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: liff-web
+  template:
+    metadata:
+      labels:
+        app: liff-web
+    spec:
+      containers:
+        - name: liff-web
+          image: a5512167086/easybot-liff-web:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: liff-web-service
+  namespace: easybot
+spec:
+  selector:
+    app: liff-web
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080

@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: command-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: command
+  template:
+    metadata:
+      labels:
+        app: command
+    spec:
+      containers:
+        - name: command
+          image: a5512167086/easybot-command-service:latest
+          env:
+            - name: DB_HOST
+              value: "localhost"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "easybot"
+            - name: DB_USER
+              value: "shin"
+            - name: DB_PASSWORD
+              value: "REDACTED_DB_PASSWORD"
+            - name: MODULE_SERVICE_API_URL
+              value: "http://dev.local.com/moduleapi"
+            - name: SEARCH_SERVICE_API_KEY
+              value: "http://dev.local.com/searchapi"
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: command-service
+spec:
+  selector:
+    app: command
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
