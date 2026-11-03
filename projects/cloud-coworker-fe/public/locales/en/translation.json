@@ -1,0 +1,56 @@
+{
+  "header": {
+    "title": "Cloud Coworker",
+    "page_title": {
+      "features": "Features",
+      "about": "About",
+      "manage": "Manage",
+      "chatroom": "Chatroom",
+      "login": "Login",
+      "logout": "Logout"
+    }
+  },
+  "login": {
+    "title": "Sign in",
+    "login_button": "SIGN IN",
+    "google_login_button": "SIGN IN WITH GOOGLE",
+    "forgot_password": "Forgot password?",
+    "without_account_description": "Don't have an account? Sign Up"
+  },
+  "register": {
+    "title": "Sign up",
+    "login_button": "SIGN UP",
+    "with_account_description": "Already have an account? Sign In"
+  },
+  "form": {
+    "email": "Email",
+    "username": "Username",
+    "password": "Password",
+    "empty_error_text": "{{key}} cannot be empty",
+    "email_invalid_text": "Invalid email format",
+    "remember_me": "Remeber me"
+  },
+  "main": {
+    "hero": {
+      "title": "Creating the best cloud collaboration platform for remote work solutions",
+      "description": "Make it easier for you and your team members to work together, stay connected and productive, and work closer together."
+    }
+  },
+  "footer": {
+    "copyRight": "Copyright © ",
+    "developerName": "Shin"
+  },
+  "manage": {
+    "title1": "Create a new organization",
+    "button1": "Submit",
+    "or": "Or ...",
+    "title2": "Join an existing organization",
+    "button2": "Join",
+    "organizationName": "Organization Name",
+    "inviteCode": "Invite Code"
+  },
+  "button": {
+    "delete": "Delete",
+    "leave": "Leave"
+  }
+}
