@@ -8,7 +8,7 @@ export default function Homepage() {
   const [data, setData] = useState(null);
   const [page, setPage] = useState(1);
   const [currentSearch, setCurrentSearch] = useState("");
-  const apiKey = "563492ad6f9170000100000101f4f6d05ae844d0bdba7762ce52dcd1";
+  const apiKey = process.env.REACT_APP_PEXELS_API_KEY;
   const initialUrl = "https://api.pexels.com/v1/curated?page=1&per_page=12";
   const searchUrl = `https://api.pexels.com/v1/search?query=${input}&per_page=12&page=${page}`;
 
