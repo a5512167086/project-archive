@@ -29,6 +29,8 @@
 | `web3-ticketing-app` | 區塊鏈票務系統，合約 + 前端 | Hardhat (Solidity) + React (Vite) | Web3TicekingSystem |
 | `othello-alphabeta-py` | 黑白棋 AI，期末競賽 | Python | OthelloAlphaBetaBot |
 | `chives-beacon-app` | 大學專題：台股分析／預測，LSTM | Flask + Python | TKU-CSIE-Project/ChivesBeacon |
+| `stock-tool-api` | 台股資料抓取與查詢 API | FastAPI + SQLAlchemy + Alembic | StockTool |
+| `ocr-backend-api` | OCR 後端，搭配 ocr-mobile-react-native | FastAPI + Docker | OCR_BackendDemo |
 
 ## homework/
 
@@ -48,6 +50,7 @@
 | `todo-list-fe` | 待辦清單 | Vanilla JS |
 | `pic-search-fe` | 圖片搜尋（Pexels API） | React (CRA) |
 | `post-fun-app` | 貼文平台，含登入 | React + Firebase |
+| `map-demo-fe` | 地圖 Demo（Leaflet） | React (CRA) |
 
 ## 執行
 

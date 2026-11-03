@@ -7,3 +7,4 @@ obj/
 __pycache__/
 .env
 .DS_Store
+_import/
