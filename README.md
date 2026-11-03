@@ -10,7 +10,7 @@
 - `-py`：Python 腳本
 - `-firmware`：嵌入式韌體
 
-三個資料夾：`homework/` 課堂作業、`web/` 小型練習、`projects/` 完整作品（已停止維護）。
+資料夾：`homework/` 課堂作業、`web/` 小型練習、`projects/` 完整作品、`projects/transuai-legacy/` 微服務版 TransuAI（一套 8 個 repo）。全部已停止維護。
 
 ## projects/
 
@@ -31,6 +31,23 @@
 | `chives-beacon-app` | 大學專題：台股分析／預測，LSTM | Flask + Python | TKU-CSIE-Project/ChivesBeacon |
 | `stock-tool-api` | 台股資料抓取與查詢 API | FastAPI + SQLAlchemy + Alembic | StockTool |
 | `ocr-backend-api` | OCR 後端，搭配 ocr-mobile-react-native | FastAPI + Docker | OCR_BackendDemo |
+
+## projects/transuai-legacy/
+
+TransuAI 第一代：音訊／影片逐字稿 + AI 分析平台，微服務架構。2026-10 停止開發，由 [transuai](https://github.com/a5512167086/transuai) 單體版接手。原本在 TransuAI 組織下 8 個 repo，各自歷史保留。架構文件見 `infra/architecture-design.md`。
+
+資料流：前端上傳 → upload-service 存檔、建 Job → MQ → transcription-service（Deepgram 轉錄、講者分離）→ MQ → ai-service（摘要、章節、embedding）→ MQ → notification-service（WebSocket 推播）。對外只有 gateway 提供 REST，服務間走 gRPC。
+
+| 資料夾 | 內容 | 技術 |
+|---|---|---|
+| `infra` | docker-compose、k8s manifests、proto 定義、架構文件 | Kubernetes, Docker, gRPC proto |
+| `gateway` | 唯一對外 REST API，JWT 驗證 | Spring Boot (Java) |
+| `auth-service` | 註冊／登入、簽發 JWT | Spring Boot (Java), gRPC |
+| `upload-service` | presigned URL 上傳、Job 狀態 | Spring Boot (Java), gRPC, MinIO |
+| `transcription-service` | 抽音軌、Deepgram 轉錄、講者分離、切片 | Python, FFmpeg, RabbitMQ |
+| `ai-service` | 摘要、章節、向量、會後處理 agent（Google / Notion） | Python, HF Inference, PostgreSQL |
+| `notification-service` | 消費事件，WebSocket 推播 | Python, RabbitMQ |
+| `frontend` | 使用者介面 | React 19 + Vite + TypeScript + Tailwind v4 + shadcn/ui |
 
 ## homework/
 
