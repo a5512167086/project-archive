@@ -1,0 +1,27 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+.env
+
+data/*.json
+data/ragas_result/*
+data/eval_dataset
+data/eval_dataset_done
+data/eval_result
+data/legacy_dataset
+data/chart/*
+cache
+
+experiments/*
+
+evaluation.log
+multiturn_generation.log
+testset_generation.log
