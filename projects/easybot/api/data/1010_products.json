@@ -1,0 +1,989 @@
+{
+  "crawl_meta": {
+    "source": "https://1010online.com.tw/",
+    "generated_at": "20260213_162208"
+  },
+  "brands": [
+    "(MALIN+GOETZ)",
+    "10/10",
+    "AHRES",
+    "APRIORI",
+    "Absolution",
+    "BAKEL",
+    "BONDI WASH",
+    "BORNTOSTANDOUT",
+    "Christophe Robin",
+    "DR JACKSON’S",
+    "DR. BARBARA STURM",
+    "FRAMA",
+    "L:A BRUKET",
+    "LOEWE",
+    "Miller Harris",
+    "NEOM",
+    "Natura Bissé",
+    "Neal's Yard Remedies",
+    "OSAJI",
+    "Omorovicza",
+    "VERSO",
+    "Wildsmith",
+    "elemental herbology",
+    "rahua",
+    "uka"
+  ],
+  "categories": [
+    {
+      "main_category": "臉部",
+      "group": "產品類型",
+      "sub_categories": [
+        {
+          "name": "潔顏/卸妝",
+          "href": "https://1010online.com.tw/face/face-product-type/cleanser",
+          "products": [
+            {
+              "brand": "DR. BARBARA STURM",
+              "name": "高效淨潤卸妝液",
+              "price": 2500,
+              "url": "https://1010online.com.tw/dr-barbara-make-up-remover",
+              "description": "油水雙層結構超乎想像輕盈！ 睫毛膏、防水彩妝也能輕易卸除 採用輕油+水雙層結構，既保留水感膚觸，同時能幫助卸除彩妝、殘妝。富含微米級膠束分子，能吸附油脂，同時帶走水溶性與油溶性彩妝，使肌膚潔淨清爽。另添加杏仁油、杏桃核油、葵花籽油與玻尿酸，在卸妝同時保護肌膚脂質層，使肌膚柔嫩淨透。 容量: 150ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/d/b/db___.png",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/d/b/db____1.png",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/d/b/db____2.png"
+              ]
+            },
+            {
+              "brand": "L:A BRUKET",
+              "name": "308 水光調理潔顏慕斯",
+              "price": 1400,
+              "url": "https://1010online.com.tw/la-bruket-308-refining-cleansing-foam-150ml-cosnat",
+              "description": "溫和潔淨毛孔，輕鬆帶走髒汙的同時，讓肌膚重新煥亮，並恢復肌膚彈性。97.6% 天然來源成分，為純素配方，並通過皮膚科測試。蘊含 PHA第二代果酸，能溫柔去除老廢角質，讓肌膚摸起來更加平滑透亮；野莓複合精萃撫平肌理，賦予肌膚自然煥新的透亮光澤，使膚況更加緊緻、明亮。配方溫和不刺激，適合所有膚質，敏感肌亦可安心使用。 取得 COSMOS NATURAL 天然認證，配合歐盟規定增修 CosN 標示，請安心選購。 96% 的使用者認為本產品能有效去除肌膚雜質，同時維持肌膚天然保濕屏障。* *經皮膚科醫師監督下之消費者測試，23 位受試者，單次使用產品後結果。 容量：150ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/l/r/lr11655_1.png",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/l/r/lr11655_2.png",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/l/r/lr11655_5.png"
+              ]
+            },
+            {
+              "brand": "Neal's Yard Remedies",
+              "name": "NEAL'S YARD REMEDIES 野玫瑰煥亮禮盒",
+              "price": 980,
+              "url": "https://1010online.com.tw/nyr-all-aglow-wild-rose-duo-xmas-2025",
+              "description": "聖誕限定 野玫瑰煥亮組合 以野玫瑰的珍貴力量呵護肌膚，專為修護、保濕與提亮設計，打造滋潤、光采與活力的冬日肌膚 #野玫瑰亮采萬用霜純素輕盈版 2025全新上市便備受好評的經典升級款 一罐萬用，可做為卸妝霜、保濕霜、按摩霜、晚安面膜、護唇膏。具有純素認證及有機認證。 #野玫瑰護手霜 具高滋潤度的護手乳霜，含野玫瑰果油能夠能高度滋潤並均勻手部膚色，讓您的雙手肌膚柔軟，色澤看起來更明亮。 野玫瑰煥亮禮盒內含 : 野玫瑰亮采萬用霜純素輕盈版15g 野玫瑰護手霜30ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/0/1/01.ny12507_.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/0/2/02.ny12507_.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/0/4/04.ny12507_.jpg"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "去角質",
+          "href": "https://1010online.com.tw/face/face-product-type/exfoliate",
+          "products": [
+            {
+              "brand": "Neal's Yard Remedies",
+              "name": "NEAL'S YARD REMEDIES 野玫瑰亮采萬用霜純素輕盈版 15g",
+              "price": 580,
+              "url": "https://1010online.com.tw/wil-rose-beauty-balm-vegan-15g",
+              "description": "\\ 全新純素認證，配方升級質地更輕盈 / 純素輕盈版採用全新配方與成分設計，並與暢銷經典款具有相同的多功能多用途，且在產品的永續性上更加升級。野玫瑰亮采萬用霜純素輕盈版具有深層潔淨與高度滋養功效，創新純素配方可強化肌膚屏障，讓肌膚光滑透亮、散發自然健康亮采。 ▌關鍵成分: ✧野生玫瑰果油：野玫瑰全系列關鍵成份，協助肌膚煥發健康亮采，深度滋養並提升保濕力，使肌膚明亮與平滑。 ✧南瓜籽油：富含必需脂肪酸，有助於提升肌膚彈性、協助肌膚抵禦外部傷害並修復。 ✧小燭樹蠟：鎖住水分，於肌膚上形成輕盈的保護屏障。 ✧漆樹果蠟：滋潤並柔軟肌膚，使膚質平滑柔嫩。 ✧乳木果脂：極致保濕，深層滋養並舒緩肌膚，針對乾燥不適發揮作用，提升肌膚屏障功能。 ✧荷荷芭籽油：模仿肌膚天然皮脂，幫助平衡油脂分泌。 ▌療癒精油配方: 天竺葵精油、廣藿香精油、乳香精油 ▌臨床實證 89% 的人同意它讓肌膚滋養、柔軟和光滑。 85% 的人同意作為卸妝膏能夠深層潔淨而不破壞肌膚屏障。 **作為卸妝膏在 110 位參與者身上進行為期兩週的使用者試用測試 **作為晚霜/晚安面膜在 113 位參與者身上進行為期兩週的使用者試用測試",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/1/0/10057_vegan_wild_rose_beauty_balm_15g_front_2000px_mock_up.jpg"
+              ]
+            },
+            {
+              "brand": "AHRES",
+              "name": "AHRES植粹臉部磨砂膏",
+              "price": 1380,
+              "url": "https://1010online.com.tw/ahres-face-scrub-brusher-vg",
+              "description": "由植物種子製成的磨砂膏，搭配美容液成分-酒糟萃取物+大豆萃取，可保濕並維護美膚菌，維持屏障健康。改善問題，同時打造光滑、透明的肌膚。 容量：65g",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/h/ahar145-1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/h/ahar145-2.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/f/a/face_scrub_brusher_vg_3.png"
+              ]
+            },
+            {
+              "brand": "Absolution",
+              "name": "absolution 淨白臉部去角質霜",
+              "price": 1200,
+              "url": "https://1010online.com.tw/absolution-la-creme-gommante",
+              "description": "物理性 + 化學性溫和去角質，促進角質更新代謝，提升肌膚柔軟及光澤度。 矽藻土：幫助清潔，吸附去除多餘油脂，同時補充肌膚營養 杏仁：富含蛋白質、維他命與礦物質，滋潤肌膚，增加柔嫩感 莧籽萃取：富含脂質，具有潤澤、調理與舒緩的特性 容量：50ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/b/abso0021_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/b/abso0021_2.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/b/abso0021_5.jpg"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "化妝水",
+          "href": "https://1010online.com.tw/face/face-product-type/toner",
+          "products": [
+            {
+              "brand": "DR JACKSON’S",
+              "name": "05 臉部凝露",
+              "price": 2750,
+              "url": "https://1010online.com.tw/dr-jacksons-05-face-and-eye-essence",
+              "description": "All in One 穩定膚況！ 化妝水&精華二合一水潤凝露質地，可使用在臉部和眼周，亮顏緊緻同時對抗眼部浮腫。 富含維生素Ｃ幫助修復並明亮膚色；添加蘆薈與羅馬洋甘菊，舒緩鎮定、長效保濕，適合夏日曬後鎮定，特殊美容後保養；蘊含臘腸樹果實萃取改善暗沉、斑點，猴麵包樹籽油柔嫩緊緻肌膚。 適合所有膚質，經臨床測試亦適用於敏感與易患濕疹的肌膚。 植物萃取成分 - 臘腸樹果實萃取：鎮靜和舒緩肌膚問題，淡化斑點，均勻膚色，改善暗沉 - 猴麵包樹籽油：富含脂肪酸，幫助肌膚恢復彈性，柔嫩緊緻 - 大馬士革玫瑰：補充水分和恢復細緻膚質 - 蘆薈：舒緩和鎮定曬後不適，清涼舒爽 - 羅馬洋甘菊：保濕舒緩敏感不適，幫助肌膚放鬆 容量：50ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/0/6/06_3_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/d/j/dj_djdrjnp0550_3_2.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/m/i/microsoftteams-image_68_.png"
+              ]
+            },
+            {
+              "brand": "AHRES",
+              "name": "臉部保濕噴霧45ml",
+              "price": 1050,
+              "url": "https://1010online.com.tw/ahres-keep-fine-face-mist-45ml",
+              "description": "✨ 定妝 × 補水 舒適全天候的雙效噴霧 化妝不是一場與時間的拉鋸，而是一整天的安心陪伴。 臉部保濕噴霧，將持妝力與保濕力完美融合。 輕盈細緻的微霧質地，能緊密貼合妝容，避免脫妝，同時即時補充水分，讓肌膚時刻保持清爽健康。 即使是在悶熱潮濕的夏日，也能如初完美，從早到晚，持續舒適無負擔。輕輕一噴，就像為肌膚加上一層隱形保護膜，給你自在呼吸的一整天美好狀態。 香氛調性 依蘭依蘭 × 薰衣草 × 大馬士革玫瑰 —— 花卉精油交織而成的療癒氣息，宛如一場輕柔花香的沉浸式體驗，讓補妝的瞬間，成為專屬於自己的舒緩儀式。",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/h/ahar517-face_mist.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/h/ahar517-face_mist2.jpg"
+              ]
+            },
+            {
+              "brand": "AHRES",
+              "name": "PÅWN 活膚精華露 300ml",
+              "price": 2550,
+              "url": "https://1010online.com.tw/ahres-pawn-300ml",
+              "description": "濃縮 熟成精華，重塑肌膚生命力 PÅWN 活膚精華露，蘊含 AHRES 獨家 「雙重發酵熟成萃取精華™」，將酒粕在超過三年的熟成後再次發酵，釋放出豐富的養膚能量。 這不僅是一瓶化妝水，而是一個能同時解決多重肌膚困擾的全能方案。乾燥、粗糙、暗沉、毛孔粗大——一瓶徹底改善，特別適合隨著季節而變得敏感、或同時有多種膚況問題的人。 ✨ 多重修護功效 Bio-Func™ 配方：促進美膚菌群繁盛，維護肌膚微生態平衡 柿葉萃取：日本國果力量，啟動膠原蛋白與玻尿酸生成，緊緻肌膚結構 橙花蒸餾液：天然鎮定舒緩，帶來細緻緊實與平靜芳香感受 99.3% 天然來源，溫和卻高效，讓肌膚回到原本的健康狀態。 一瓶簡單實踐 AHRES 「土壤美容」理念，為肌膚注入源源不絕的生命力。",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/h/ahar525-2.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/h/ahar525_1.jpg"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "精華液/油",
+          "href": "https://1010online.com.tw/face/face-product-type/serum",
+          "products": [
+            {
+              "brand": "L:A BRUKET",
+              "name": "323 水光緊緻冰晶凝露",
+              "price": 2000,
+              "url": "https://1010online.com.tw/la-bruket-323-plumping-ice-cube",
+              "description": "前所未有的冰感護膚革命，一敷喚醒飽滿水光肌 99.9% 高效天然成分結合清涼緊緻的效果，能使肌膚看起來更加飽滿緊緻。野莓複合精萃搭配膠原蛋白促進胜肽，有助提升肌膚彈性、撫平細紋，打造更加緊緻勻稱、透亮水潤的肌膚，展現健康光澤，敏感肌亦可安心使用。 使用後肌膚看起來更飽滿：立即提升 42%，一個月後提升 54%*。 經臨床證實提升肌膚光澤，並在整日後仍維持 +40% 保濕度**。 *自我評估測試，22 位參與者，為期 28 天。 **儀器測試，22 位參與者，為期 28 天。 容量：10*5ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/l/r/lr11656_1_2.png",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/l/r/lr11656_2_2.png",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/l/r/lr11656_4_2.png"
+              ]
+            },
+            {
+              "brand": "Wildsmith",
+              "name": "亮采淡斑精華",
+              "price": 3850,
+              "url": "https://1010online.com.tw/wildsmith-radiance-light-serum",
+              "description": "高效亮膚配方+天然植萃保濕｜一瓶喚醒水光肌 結合菸鹼醯胺與多重抗氧化成分，有效淡化黑色素、勻亮膚色，同時強化肌膚屏障，提升肌膚穩定性與防禦力。 添加雙重保濕因子，為肌膚深層補水，有效抵禦乾燥，維持水潤光采。 特色成分 菸鹼醯胺：勻亮膚色，淡化黑色素沉澱。 英國桑葚：富含維生素C與維生素B5，有助於補充肌膚水分、提升光澤感，並提供持續的抗氧化保護。 白藜蘆醇：高效抗氧化劑，對抗自由基，保護肌膚免受紫外線及環境污染傷害。 玻尿酸+糖原：為肌膚深層補水，有效對抗乾燥與缺水問題。 容量：30ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/w/s/ws-ws5060484546888-1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/w/s/ws-ws5060484546888-2.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/w/s/ws-ws5060484546888-3.jpg"
+              ]
+            },
+            {
+              "brand": "Omorovicza",
+              "name": "藍鑽超級精華",
+              "price": 15500,
+              "url": "https://1010online.com.tw/omorovicza-blue-diamond-super-serum",
+              "description": "【根除老化因子．喚活肌膚能量】 臨床實驗證實能有效延緩肌膚老化達91%*！ 在專利「礦泉護膚導入科技」成分的底蘊下，另外添加三種創新配方，能全方位幫助肌膚恢復年輕狀態，從根源延緩老化問題，還原青春光采！ ◆ 晶鑽賦活胜肽：從根源保護肌膚，提升肌膚防禦力 ◆ 蜀葵花幹細胞：根除老化因子，預防肌膚老化 ◆ 專利四胜肽：提升肌膚能量，使其綻放飽滿光澤 *經獨立體外測試顯示，1%濃度的藍鑽超級精華可顯著降低紫外線誘導的老化相關因子（ β-半乳糖苷酶）活性。 容量: 30ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/o/m/om432001_om_.png",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/o/m/om432001_om__1.png",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/o/m/om432001_om__2.png"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "乳液/面霜",
+          "href": "https://1010online.com.tw/face/face-product-type/creams",
+          "products": [
+            {
+              "brand": "L:A BRUKET",
+              "name": "324 水光保濕凝膠",
+              "price": 2000,
+              "url": "https://1010online.com.tw/la-bruket-324-glow-moisturising-gel",
+              "description": "天然保濕凝膠，質地清爽不黏膩，能迅速被肌膚吸收，立即補水並長效鎖水，讓肌膚維持全天水潤狀態。 配方添加促進膠原蛋白生成的胜肽成分，幫助提升肌膚彈性與緊緻度，使膚況更加平滑細緻、透亮有光澤。 蘊含野莓複合精萃，溫和提亮膚色、改善暗沉，使肌膚呈現自然健康光采。持續使用可感受肌膚更緊實、柔嫩且富有彈性。適合所有膚質使用，包括敏感肌。 經臨床實證，使用後立即展現透亮光感，肌膚含水量提升 165%*。有效提升肌膚光澤度，並可鎖水長達 24 小時* *19 位受試者，單次使用產品後 30 分鐘後，使用儀器測試結果 容量：50ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/l/r/lr11654_1_1.png",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/l/r/lr11654_2_1.png",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/l/r/lr11654_3_1.png"
+              ]
+            },
+            {
+              "brand": "Neal's Yard Remedies",
+              "name": "NEAL'S YARD REMEDIES 野玫瑰煥亮禮盒",
+              "price": 980,
+              "url": "https://1010online.com.tw/nyr-all-aglow-wild-rose-duo-xmas-2025",
+              "description": "聖誕限定 野玫瑰煥亮組合 以野玫瑰的珍貴力量呵護肌膚，專為修護、保濕與提亮設計，打造滋潤、光采與活力的冬日肌膚 #野玫瑰亮采萬用霜純素輕盈版 2025全新上市便備受好評的經典升級款 一罐萬用，可做為卸妝霜、保濕霜、按摩霜、晚安面膜、護唇膏。具有純素認證及有機認證。 #野玫瑰護手霜 具高滋潤度的護手乳霜，含野玫瑰果油能夠能高度滋潤並均勻手部膚色，讓您的雙手肌膚柔軟，色澤看起來更明亮。 野玫瑰煥亮禮盒內含 : 野玫瑰亮采萬用霜純素輕盈版15g 野玫瑰護手霜30ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/0/1/01.ny12507_.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/0/2/02.ny12507_.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/0/4/04.ny12507_.jpg"
+              ]
+            },
+            {
+              "brand": "VERSO",
+              "name": "N°2 逆齡清透日間乳",
+              "price": 3400,
+              "url": "https://1010online.com.tw/verso-n2-day-balancing-day-cream",
+              "description": "輕盈質地，長效水潤 添加玻尿酸深入肌底補水，與含有多重維他命的酪梨油相輔相成，以一抹即化的輕透質地為肌膚提供長效潤澤! 不只是表面補水，更能深入肌底建立水分儲備庫，讓肌膚從內而外散發水潤光澤。 添加菸鹼醯胺，調節油水平衡 增強肌膚防禦力的同時，幫助改善毛孔與調理油質，讓肌膚清新平滑、不泛油光，並舒緩肌膚乾燥與泛紅。 添加專利8倍A醇 一滴8倍有效 比傳統 A 醇溫和 50%，效果卻高出 8 倍，且可日間使用。能平滑膚質、維持年輕膚況。 適用膚質:痘痘肌、油性肌、混合肌。 容量：50ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/v/r/vr_vr2012029__1_.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/v/r/vr_vr2012029__2_.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/v/r/vr_vr2012029__7_.jpg"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "面膜/頸膜",
+          "href": "https://1010online.com.tw/face/face-product-type/mask",
+          "products": [
+            {
+              "brand": "Neal's Yard Remedies",
+              "name": "NEAL'S YARD REMEDIES 野玫瑰煥亮禮盒",
+              "price": 980,
+              "url": "https://1010online.com.tw/nyr-all-aglow-wild-rose-duo-xmas-2025",
+              "description": "聖誕限定 野玫瑰煥亮組合 以野玫瑰的珍貴力量呵護肌膚，專為修護、保濕與提亮設計，打造滋潤、光采與活力的冬日肌膚 #野玫瑰亮采萬用霜純素輕盈版 2025全新上市便備受好評的經典升級款 一罐萬用，可做為卸妝霜、保濕霜、按摩霜、晚安面膜、護唇膏。具有純素認證及有機認證。 #野玫瑰護手霜 具高滋潤度的護手乳霜，含野玫瑰果油能夠能高度滋潤並均勻手部膚色，讓您的雙手肌膚柔軟，色澤看起來更明亮。 野玫瑰煥亮禮盒內含 : 野玫瑰亮采萬用霜純素輕盈版15g 野玫瑰護手霜30ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/0/1/01.ny12507_.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/0/2/02.ny12507_.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/0/4/04.ny12507_.jpg"
+              ]
+            },
+            {
+              "brand": "Neal's Yard Remedies",
+              "name": "NEAL'S YARD REMEDIES 野玫瑰亮采萬用霜純素輕盈版 15g",
+              "price": 580,
+              "url": "https://1010online.com.tw/wil-rose-beauty-balm-vegan-15g",
+              "description": "\\ 全新純素認證，配方升級質地更輕盈 / 純素輕盈版採用全新配方與成分設計，並與暢銷經典款具有相同的多功能多用途，且在產品的永續性上更加升級。野玫瑰亮采萬用霜純素輕盈版具有深層潔淨與高度滋養功效，創新純素配方可強化肌膚屏障，讓肌膚光滑透亮、散發自然健康亮采。 ▌關鍵成分: ✧野生玫瑰果油：野玫瑰全系列關鍵成份，協助肌膚煥發健康亮采，深度滋養並提升保濕力，使肌膚明亮與平滑。 ✧南瓜籽油：富含必需脂肪酸，有助於提升肌膚彈性、協助肌膚抵禦外部傷害並修復。 ✧小燭樹蠟：鎖住水分，於肌膚上形成輕盈的保護屏障。 ✧漆樹果蠟：滋潤並柔軟肌膚，使膚質平滑柔嫩。 ✧乳木果脂：極致保濕，深層滋養並舒緩肌膚，針對乾燥不適發揮作用，提升肌膚屏障功能。 ✧荷荷芭籽油：模仿肌膚天然皮脂，幫助平衡油脂分泌。 ▌療癒精油配方: 天竺葵精油、廣藿香精油、乳香精油 ▌臨床實證 89% 的人同意它讓肌膚滋養、柔軟和光滑。 85% 的人同意作為卸妝膏能夠深層潔淨而不破壞肌膚屏障。 **作為卸妝膏在 110 位參與者身上進行為期兩週的使用者試用測試 **作為晚霜/晚安面膜在 113 位參與者身上進行為期兩週的使用者試用測試",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/1/0/10057_vegan_wild_rose_beauty_balm_15g_front_2000px_mock_up.jpg"
+              ]
+            },
+            {
+              "brand": "elemental herbology",
+              "name": "Elemental Herbology 活顏新生保濕凍膜",
+              "price": 2450,
+              "url": "https://1010online.com.tw/elemental-herbology-pause-renew-gel-mask",
+              "description": "女性第二青春期－更年期熟齡肌保養聖品，沁涼舒潤、煥采匿齡。 蘊含3大關鍵成分－南非醉茄、紅菽草、菸鹼醯胺，搭配清爽質地、 天然精油香氣，舒緩修護、保濕緊緻，鎖住豐富滋養，敷出新生嫩顏肌。 特色成分 ✔ 南非醉茄－舒緩壓力，強化肌膚防護 ✔ 紅菽草－補水保濕，緊緻彈潤肌膚 ✔ 菸鹼醯胺－勻亮暗沉，調理紋路，提升肌膚光澤 ✔ 薰衣草、天竺葵、乳香精油香氣－助眠舒壓，舒緩身心 容量：50ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/e/h/eh1106r_1__1_.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/e/h/eh1106r_1__2_.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/m/o/model-2.png"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "眼唇保養",
+          "href": "https://1010online.com.tw/face/face-product-type/eye-lip-care",
+          "products": [
+            {
+              "brand": "L:A BRUKET",
+              "name": "冬境之禮_初霜",
+              "price": 1250,
+              "url": "https://1010online.com.tw/la-bruket-winter-kit-first-frost-srl",
+              "description": "LA BRUKET 017 椰香潤澤護唇棒 CosN 14g: 含有蜂蠟，杏仁油和椰子油的天然潤唇棒，可滋養並保護唇部、提供持久舒適潤澤功效。 該款護唇棒取得COSMOS NATURAL天然認證，配合歐盟規定增修CosN標示，請安心選購。 LA BRUKET 092 護手霜_鼠尾草/迷迭香/薰衣草 30ml: 以溫和的乳木果油、椰子油為基底，可抵禦自由基侵害，改善粗糙乾燥的雙手。低敏度成份不刺激手部肌膚。 猶如走進薰衣草田，鎮定舒緩必備。",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/f/i/first_frost_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/f/i/first_frost_2.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/f/i/first_frost_6.jpg"
+              ]
+            },
+            {
+              "brand": "Omorovicza",
+              "name": "完美二重奏禮盒",
+              "price": 1900,
+              "url": "https://1010online.com.tw/omorovicza-perfecting-duo",
+              "description": "一份充滿愛與感謝的完美禮物！ 品牌經典好物一盒即擁有♥︎ ◆ 匈牙利皇后醒膚露 30ml 以匈牙利溫泉水為基底、橙花純露、玫瑰純露與鼠尾草純露，結合專利『礦泉護膚導入科技（Healing Concentrate™)』，讓肌膚日常也可以體會到溫泉饗宴，將礦物質保留在皮膚並滲入肌底，維持肌膚穩定。 ◆ 完美修護潤唇膏 10ml 蘊含玻尿酸微球體、寡胜肽、乳油木果油與尤加利油使雙唇豐潤、柔嫩且光滑。Omega 6 神經醯胺取自初榨紅花油，幫助雙唇重現豐厚、恢復彈性，並加強肌膚防禦能力。",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/o/m/om_2025___.png",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/o/m/om_2025____1.png"
+              ]
+            },
+            {
+              "brand": "Neal's Yard Remedies",
+              "name": "NEAL'S YARD REMEDIES 乳香黃金拉提眼霜",
+              "price": 2700,
+              "url": "https://1010online.com.tw/neal-s-yard-remedies-frankincense-intense-lift-eye-cream-15g-1",
+              "description": "Top1熱銷眼霜，添加頂級阿曼乳香，專注熟齡肌保養與第二階段抗老。 延續一貫乳香黃金拉提系列的療癒氣息，讓保養成為幸福時刻，為肌膚帶來最尊寵的重生饗宴！ 阿曼乳香精油馥郁又安定神經的厚實香氣，讓保養過程同時放鬆疲憊的焦慮情緒，撫平眼周肌膚細紋，擺脫疲憊肌，打造自信眼眸。質地輕盈好吸收，適合缺乏彈性、鬆弛暗沈的眼周肌膚。 ✧添加屢獲殊榮的獨家成分: 乳香活性複合物。採用獨家專利萃取技術製造出乳香活性複合物，使得乳香活性百分之百極致發揮，抵禦讓肌膚老化的環境因素。 ✧獨特賦活配方 :含綠茶咖啡因萃取，有助減少黑眼圈的形成。富含綠咖啡籽油及薑黃，幫助肌膚提升防禦力、散發自然光澤。玻尿酸能幫助眼周深刻紋路保濕豐潤、柔軟平滑。 容量:15g。",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/h/q/hqdefault_1_19_1_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/n/y/ny_ny2415_01_1_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/n/y/ny_ny2415_02_1_1.jpg"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "美容工具",
+          "href": "https://1010online.com.tw/face/face-product-type/beauty-tools",
+          "products": [
+            {
+              "brand": "Absolution",
+              "name": "absolution 玫瑰晶拉提按摩棒",
+              "price": 1100,
+              "url": "https://1010online.com.tw/absolution-le-stylet-precision",
+              "description": "緊緻小臉、改善身體機能、煥發肌膚光彩 定期使用，針對深層經絡穴道按摩，能促進循環代謝、放鬆肌肉，緊緻肌膚； 同時幫助排水、改善浮腫以及黑眼圈與細紋，使臉部輪廓更加精緻，維持肌膚健康、美麗和青春的完美狀態。",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/5/_/5_9.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/b/abso2008_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/b/abso2008_2.jpg"
+              ]
+            },
+            {
+              "brand": "VERSO",
+              "name": "N°7 極致逆齡淨膚精露刮痧組合",
+              "price": 6500,
+              "url": "https://1010online.com.tw/verso-super-elixir-rose-quartz",
+              "description": "(組合原價$6,880) - VERSO N°7 極致逆齡淨膚精露 - 添加創新科技 NEAR 1 加承肌膚防禦力 全方位 A 醇精華，顯著擊退暗沉、改善膚色不均、滑嫩膚質與緊實 紋路，還原肌膚最健康的原始狀態。 高效肌密 NEAR 1 採用特殊重組結構乘載維生素 A 與菸鹼醯胺，並利用雙鍊路轉換，提供肌膚加乘的抗老、美白與提亮功效。 N°7 極致逆齡淨膚精露經臨床實證具低敏性，能夠在不引起刺激的情況下發揮穩定的維生素 A 效果，還原肌膚最健康的光彩。 適用膚質: 一般肌、油性肌、混和肌、乾性肌、敏感肌。 容量: 30ml - 10/10 玫瑰晶按摩刮痧板 - 天然玫瑰晶製成的心型刮痧板，具益於人體的微量元素，能疏通經絡、祛淤止痛，有效舒緩、放鬆緊繃的肌膚。 *小提醒： 本產品為天然玫瑰石英製成，實品之色澤、紋理不盡相同，並可能存在天然冰裂與細小磨痕，不影響使用狀況下，均屬正常品質現象，如介意商品細節，建議可至實體門市選購。",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/2/r/2resize_2_2.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/3/r/3resize_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/_/1/_1__1_1.png"
+              ]
+            },
+            {
+              "brand": "10/10",
+              "name": "玫瑰晶臉部按摩滾輪",
+              "price": 1010,
+              "url": "https://1010online.com.tw/1010-rose-quartz-facial-roller",
+              "description": "\"There is something good in everyday.\" 10/10 獨家商品。 每日用於臉部／頸部按摩，幫助保養品吸收，促進血液循環，為肌膚帶來健康光采。 *小提醒：本產品為天然玫瑰石英製成，實品之色澤、紋理不盡相同，均屬正常現象。*",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/1/0/10_10hproller_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/1/0/10_10hproller_2.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/1/0/10_10hproller_4.jpg"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "main_category": "身體",
+      "group": "產品類型",
+      "sub_categories": [
+        {
+          "name": "香氛皂",
+          "href": "https://1010online.com.tw/body/body-product-type/fragrance-soap",
+          "products": [
+            {
+              "brand": "Miller Harris",
+              "name": "晨曦朝露香氛皂",
+              "price": 980,
+              "url": "https://1010online.com.tw/miller-harris-bergamote-soap",
+              "description": "一場感官盛宴，重新定義你的每日儀式。 明亮佛手柑的清新氣息交織著馥郁迷人的迷迭香與沉穩的岩蘭草，帶來極致振奮的嗅覺享受。 蘊含椰子油、橄欖油、有機乳木果油與甘油的柔滑綿密泡沫，溫和潔淨肌膚並留下柔嫩膚觸。 前調：佛手柑、橙子、橘子、羅勒、艾蒿 中調：薰衣草、迷迭香、天竺葵、皮革 後調：檀木、廣藿香、岩蘭草、苔蘚 FSC認證包裝，可完全回收。 容量：200g",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/b/e/bergamote_soap-01.png",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/b/e/bergamote_soap-02.png",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/b/e/bergamote_soap-04.png"
+              ]
+            },
+            {
+              "brand": "LOEWE",
+              "name": "香氛皂_番茄葉",
+              "price": 2350,
+              "url": "https://1010online.com.tw/loewe-tomato-leaves-solid-soap",
+              "description": "採用居家香氛系列的番茄葉香氛，散發出清新綠意的草本香氣，讓人聯想起蕃茄藤在結出果實之前的青翠氣息。 靈感來自古希臘與羅馬，當時的人們經常用有治癒效果的植物萃取精華來進行沐浴，香氛皂加入了具有去角質功能的紅藻顆粒，數千年以來，人們都使用紅藻來對抗皮膚炎症、肌膚乾燥和皺紋，富含抗氧化成分、維生素與礦物質，而乳木果油是一種深層保濕成分，可以滋潤並舒緩肌膚。 容量: 290g",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/l/w/lw_lw78405_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/l/w/lw_lw78405_2.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/l/w/lw_lw78405_4.jpg"
+              ]
+            },
+            {
+              "brand": "LOEWE",
+              "name": "香氛皂_常春藤",
+              "price": 2350,
+              "url": "https://1010online.com.tw/loewe-ivy-solid-soap",
+              "description": "蘊含 LOEWE 家居香氛系列的常春藤香氛，木質香調令人聯想到繁茂藤本植物清新、翠綠的香氣 。 靈感來自古希臘與羅馬，當時的人們經常用有治癒效果的植物萃取精華來進行沐浴，香氛皂中特別含有滋養皮膚的乳木果油，讓肌膚維持保濕不乾裂。 容量: 290g",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/l/w/lw_lw78412_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/l/w/lw_lw78412_2.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/l/w/lw_lw78412_3.jpg"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "沐浴清潔",
+          "href": "https://1010online.com.tw/body/body-product-type/body-wash",
+          "products": [
+            {
+              "brand": "BAKEL",
+              "name": "私密護理潔膚凝露",
+              "price": 1500,
+              "url": "https://1010online.com.tw/bakel-v-tech-intimate-cleanser",
+              "description": "打造妳的「內在」肌膚屏障力 特色1｜高純度成分 × 益生元平衡配方 富含紅棉花萃取 (益生元) ── 富含多醣，有助維持私密肌膚環境平衡與舒適 添加潔淨防護成分 (葡萄糖酸氯己定) ── 維持長效清新舒適 特色2｜溫和潔淨 × pH智慧調節 胺基酸界面活性劑──溫和潔淨 乳酸──協助維持肌膚酸鹼平衡 pH 3.5 - 5.0 特色3｜植萃舒緩 × 每日防護 德國洋甘菊、茶樹精油──植萃淨味，維持舒適清爽 容量：200ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/v/-/v-tech-cleanser_hd.png",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/v/-/v-tech_cleanser-2b.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/v/-/v-tech_cleanser.jpg"
+              ]
+            },
+            {
+              "brand": "Neal's Yard Remedies",
+              "name": "NEAL'S YARD REMEDIES 甜夢時光禮盒",
+              "price": 800,
+              "url": "https://1010online.com.tw/nyr-sweet-dreams-ritual-xmas-2025",
+              "description": "聖誕限定 居家時光，甜夢好眠組 全方位舒緩身心，隨著沐浴露的天然精油氣息，以及枕頭噴霧打造的安穩氛圍，深層釋壓。 #靜眠枕頭噴霧 揉合純正薰衣草的放鬆紓緩，搭配沉穩古巴香脂以及岩蘭草踏實的泥土香，今晚就用這款深層舒壓的枕頭噴霧互道晚安吧！ #香芬泡泡沐浴露 含有薰衣草、西班牙馬鬱蘭和天竺葵精油等複方精油和滋潤肌膚的草本萃取，香氣幫助你放鬆身心，放慢腳步。 甜夢時光禮盒內含 : 靜眠枕頭噴霧 8ml 香芬泡泡沐浴露 100ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/0/1/01.ny12506_.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/0/2/02.ny12506__1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/0/4/04.ny12506__1.jpg"
+              ]
+            },
+            {
+              "brand": "OSAJI",
+              "name": "森活調理水感潔膚露",
+              "price": 980,
+              "url": "https://1010online.com.tw/osaji-tuning-moisture-soap",
+              "description": "模擬肌膚弱酸環境 溫和清潔同時長效保濕 豐盈綿密的泡沫溫柔洗淨多餘油脂與髒污，同時守住肌膚水分。 弱酸性配方親膚不刺激，全家大小不分膚質皆可安心使用，搭配高效保濕成分，沐浴後肌膚柔嫩水潤。 清新木質花香，為日常沐浴時光帶來放鬆與療癒。 ▍推薦：成分溫和，敏弱肌也可安心使用。 關鍵成分： 胺基酸清潔成分：避免過度洗身帶來緊繃感。 聚季銨鹽-51：高度皮膚相容性，有效保濕。 玻尿酸：保濕鎖水。 容量：300ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/o/s/os_os4589522986024_01.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/o/s/os_os4589522986024_02.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/o/s/os_os4589522986024_03.jpg"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "去角質",
+          "href": "https://1010online.com.tw/body/body-product-type/body-scrubs",
+          "products": [
+            {
+              "brand": "NEOM",
+              "name": "日安美好去角質洗手露",
+              "price": 1300,
+              "url": "https://1010online.com.tw/neom-great-day-hand-wash",
+              "description": "聞起來像裹上了一層維生素C的外衣——充滿活力，讓人瞬間精神一振。 這款香氣靈感來自冰涼的氣泡水，融合清爽的柑橘香氣與微涼的野薄荷精油，帶來一種深呼吸後的清新感。搭配奶油般滑順的質地，喚醒疲憊、清除腦霧，特別適合需要提神、轉換心情的時刻。 ⬥野薄荷-提神醒腦、緩解壓力 ⬥柑橘-情緒愉悅，帶來正面情緒 「像是一杯冰涼的蘇打水，灑上薄荷與柑橘，清新得幾乎讓肌膚都跟著甦醒」——香氛專家 Alice du Parcq 容量：300ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/_/3/_300ml_1__1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/_/3/_300ml_2__1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/_/3/_300ml_3_.jpg"
+              ]
+            },
+            {
+              "brand": "Absolution",
+              "name": "absolution 美體絲滑去角質凝膠",
+              "price": 1100,
+              "url": "https://1010online.com.tw/absolution-le-gommage-corps-eclat-150ml",
+              "description": "以細緻的天然流紋岩顆粒與紅花油，溫和去除肌膚老舊角質，並同時滋潤緊緻，補充肌膚所需養分。 油膏狀凝膠質地，使用更方便，高度的滑溜感，在肌膚留下一層輕盈的保護薄膜 散發苦橙葉與橙花的奢華療癒香氣 容量：150ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/b/abso2036_1_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/b/abso2036_2_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/b/abso2036_3_1.jpg"
+              ]
+            },
+            {
+              "brand": "Absolution",
+              "name": "absolution 美體絲滑去角質霜",
+              "price": 1120,
+              "url": "https://1010online.com.tw/absolution-le-gommage-corps-eclat",
+              "description": "以天然火山岩石粉末與紅花油，溫和去除肌膚老舊角質，並同時滋潤，補充肌膚所需養分。 火山流紋岩：火山岩石的粉末，溫和細緻去角質 繡線菊：含類黃酮及維他命C，嫩白肌膚，呈現透亮光澤 紅花油：含維他命E，滋潤肌膚，增加柔嫩感 容量：208g",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/b/ab_abso0036_1_1_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/b/ab_abso0036_2.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/b/ab_abso0036_3.jpg"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "保養油",
+          "href": "https://1010online.com.tw/body/body-product-type/body-oils",
+          "products": [
+            {
+              "brand": "FRAMA",
+              "name": "FRAMA Herbarium 身體油",
+              "price": 2580,
+              "url": "https://1010online.com.tw/frama-herbarium-body-oil",
+              "description": "採用高度滋養的配方，搭配橘子、杜松子、玫瑰和樟木香氣，可以深度滋潤肌膚，使肌膚柔軟並保持水分，適合所有膚質。 氣味: 草本、花香、木質香 主要香調：橘子、杜松子、玫瑰和樟木 容量：100ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/f/r/fr_fr11615_1_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/f/r/fr_fr11615_2.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/f/r/fr_fr11615_7.jpg"
+              ]
+            },
+            {
+              "brand": "FRAMA",
+              "name": "FRAMA Apothecary 身體油",
+              "price": 2580,
+              "url": "https://1010online.com.tw/frama-apothecary-body-oil",
+              "description": "採用高度滋養的配方，搭配檀香、雪松和依蘭香氣，可以深度滋潤肌膚，使肌膚柔軟並保持水分，適合所有膚質。 氣味: 柑橘、花香、木質香 主要香調： 檀香木、雪松木、依蘭依蘭 容量：100ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/f/r/fr_fr11541_1_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/f/r/fr_fr11541_2.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/f/r/fr_fr11541_6.jpg"
+              ]
+            },
+            {
+              "brand": "uka",
+              "name": "13:00 香氛保養精油 (薄荷/檸檬)",
+              "price": 1180,
+              "url": "https://1010online.com.tw/uka-oil-13-00",
+              "description": "滋潤指緣肌膚，亦可做為按摩油與個人香氛。 利用薄荷及檸檬提神醒腦，並以松樹及山蒼樹的香氣恢復活力，趕走午餐之後的睡意，讓整個下午都精神滿滿、保持愉悅心情； 疲倦或感冒時也很適用。 容量:5ML。",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/u/k/uk4582328100021.jpg"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "乳液/乳霜",
+          "href": "https://1010online.com.tw/body/body-product-type/body-lotions",
+          "products": [
+            {
+              "brand": "BORNTOSTANDOUT",
+              "name": "BORNTOSTANDOUT 甜祕密身體乳 350ml",
+              "price": 1980,
+              "url": "https://1010online.com.tw/borntostandout-sugar-addict-350ml-hand-body-cream",
+              "description": "生活、愛情、甜食。嗜甜如命的人生哲學。 特別設計給熱愛甜食的你，前調以肉桂、糖和可可為主角，帶來甜蜜的感受。中段加入大量的蘭姆酒增加深度，融合咖啡的苦味，成就一款大人的甜點。塗抹上身的瞬間，立刻被高糖效應襲擊，愉快的享受這罪惡的快樂。 調香師：ANNE-SOPHIE BEHAGHEL 香調 – 糖、可可、零陵香豆、香草、肉桂、蘭姆酒、勞丹脂、咖啡、喀什米爾木",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/b/s/bs-sa-body_cream-01.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/b/s/bs-sa-body_cream-02.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/b/s/bs-sa-body_cream-03.jpg"
+              ]
+            },
+            {
+              "brand": "BORNTOSTANDOUT",
+              "name": "BORNTOSTANDOUT 醉後一任身體乳 350ml",
+              "price": 1980,
+              "url": "https://1010online.com.tw/borntostandout-drunk-lovers-350ml-hand-body-cream",
+              "description": "慾望與愛情角力，打翻了擺在原木桌上的白蘭地。希望你不只是醉後那任，也是我今生的最後一任。 特別設計給渴望延續夜晚狂野與熱情的你，熱帶水果的熱情奔放，完美融入浸泡在辛香材的白蘭地中，香氣刷新了過甜的前戲，揭開隱藏在表面下的動物魅力。塗抹上身的瞬間讓原始的野性吞噬你的身體你的靈魂，留下令人陶醉難以預測的勾人香氣。 調香師：HAMID MERATI-KASHANI 前調 - 香茅、佛手柑、檸檬、墨西哥杜松、葡萄柚、紅莓 中調 - 白蘭地、胡椒、生薑、快樂鼠尾草、柏樹 基調 - 琥珀、弗吉尼亞雪松、西印度檀香、香草、蘇門答臘安息香樹脂、廣藿香、香根草、小荳蔻、肉桂皮、麝香",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/b/s/bs-dl-body_cream-01.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/b/s/bs-dl-body_cream-02.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/b/s/bs-dl-body_cream-03.jpg"
+              ]
+            },
+            {
+              "brand": "(MALIN+GOETZ)",
+              "name": "佛手柑護手霜",
+              "price": 600,
+              "url": "https://1010online.com.tw/malin-and-goetz-vitamin-b5-hand-treatment-bergamot-aluminum",
+              "description": "快速吸收不黏膩，揉合維他命B5及可吸收植物脂肪酸，提供雙手、指尖、指緣細緻的修護，有助於改善因日曬、雙手乾燥及其他肌膚問題所導致的敏感。 容量：30ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/m/g/mghm22401_1_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/m/g/mghm22401_2_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/m/g/mghm22401_3_1.jpg"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "體香系列",
+          "href": "https://1010online.com.tw/body/body-product-type/deodorants",
+          "products": [
+            {
+              "brand": "Neal's Yard Remedies",
+              "name": "NEAL'S YARD REMEDIES 薰衣草蘆薈體香噴霧",
+              "price": 500,
+              "url": "https://1010online.com.tw/neal-s-yard-remedies-lavender-aloe-vera-deodorant",
+              "description": "以薰衣草、茶樹與伊蘭融合蘆薈萃取使肌膚感到涼爽而潔淨，防止身體異味! ▍淨化配方精油，遠離尷尬身體異味 ▍不含鋁鹽，不堵塞毛孔 容量:100ml。",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/e/d/ed_0676_lavender_and_aloe_vera_deodorant_back_750px.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/e/d/ed_0676_lavender_and_aloe_vera_deodorant_front_750px.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/n/y/ny_ny0676_01.jpg"
+              ]
+            },
+            {
+              "brand": "Neal's Yard Remedies",
+              "name": "NEAL'S YARD REMEDIES 檸檬芫荽體香噴霧",
+              "price": 500,
+              "url": "https://1010online.com.tw/neal-s-yard-remedies-lemon-coriander-deodorant",
+              "description": "包含檸檬與芫荽的八種精油揉合而成的潔淨香氣，使肌膚感到自信清新，遠離身體異味! ▍淨化配方精油，遠離尷尬身體異味 ▍不含鋁鹽，不堵塞毛孔 容量:100ml。",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/e/d/ed_0677_lemon_and_coriander_deodorant_front_750px.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/n/y/ny_ny0677_01.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/n/y/ny_ny0677_02.jpg"
+              ]
+            },
+            {
+              "brand": "Neal's Yard Remedies",
+              "name": "NEAL'S YARD REMEDIES 玫瑰天竺葵體香滾珠",
+              "price": 500,
+              "url": "https://1010online.com.tw/neal-s-yard-remedies-rose-geranium-roll-on-deodorant",
+              "description": "浪漫玫瑰及天竺葵香氣。 莽草酸中和異味，印度簕竹粉吸附汗水油脂， 無鋁鹽，無合成香料，溫和有效讓你自信芳香迎接每一天。 ▍臨床研究證實，有效防護除臭、散發自然氣息持續 24 小時! ▍英國土壤協會有機認證 容量:50ml。",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/n/y/ny_ny2480_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/n/y/ny_ny2480_2.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/n/y/ny_ny2480_3.jpg"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "身體防護",
+          "href": "https://1010online.com.tw/body/body-product-type/body-protection",
+          "products": [
+            {
+              "brand": "(MALIN+GOETZ)",
+              "name": "高防護水感防曬乳SPF30",
+              "price": 1350,
+              "url": "https://1010online.com.tw/malin-and-goetz-spf-30-mineral-sunscreen-high-protection",
+              "description": "+ 全面防曬保護：100%礦物質配方提供UVA和UVB光譜保護，有效預防曬傷和肌膚老化。 + 保濕防護：乳木果油、甘油和透明質酸鈉組成的保濕屏障，幫助臉部肌膚保持水潤柔滑。 + 高效抗氧化防護：維他命 E、煙酰胺和熊果酸，有助於提亮膚色並防止肌膚氧化。 環境友善 + 多效配方適用於所有性別和皮膚類型。 容量: 50ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/m/g/mg-spf30_mineral-4.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/m/g/mgfm13650_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/m/g/mgfm13650_2.jpg"
+              ]
+            },
+            {
+              "brand": "Natura Bissé",
+              "name": "C+C身體防曬噴霧 SPF50",
+              "price": 3200,
+              "url": "https://1010online.com.tw/natura-bisse-cc-vitamin-spf50-uva-uvb-bi-phase",
+              "description": "超乎想像輕水感！一噴全波段極致防禦 ☑抗UVA ☑抗UVB ☑抗自由基 ☑抗光老化 具有SPF 50至高防曬係數效果，複合防曬濾鏡以高達五種防曬劑，有效阻擋有害的UVA和UVB太陽射線同時減低肌膚因紫外線而造成的自由基及光老化產生。 以維他命C、維他命E協同作用，賦活肌膚並強化抗氧效果。揉入葡萄籽油，含有Omega 6，為艷陽下的乾燥肌膚滋潤保濕；達到外防護、內奢養的全能防禦保養概念。 一噴攜上柑橘清新香調，輕鬆享受陽光，置身度假的氛圍感！！ 容量：200ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/n/b/nb32e301_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/n/b/nb32e301_2.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/n/b/nb32e301_7.jpg"
+              ]
+            },
+            {
+              "brand": "BONDI WASH",
+              "name": "原生檸檬蟲蟲防護噴霧",
+              "price": 550,
+              "url": "https://1010online.com.tw/bondi-wash-stay-away-spray-native-lemon-125ml",
+              "description": "滋養舒緩肌膚，遠離蚊蟲叮咬困擾，留下青檸香氣。交織著檸檬尤加利、檸檬香桃木與檸檬茶樹的主調香氛，調和白千層及藍絲柏等精油，巧妙地喚起生氣勃勃的青檸氣息。 優異的蟲蟲防護效果，安心推薦給所有家庭成員。 不含易造成敏感的驅蚊類精油（如香茅），兒童及蠶豆症患者亦可安心使用。 容量：125ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/b/w/bw_bwsasnl125_01.jpg"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "口腔清潔",
+          "href": "https://1010online.com.tw/body/body-product-type/body-product-type-oralcare",
+          "products": [
+            {
+              "brand": "APRIORI",
+              "name": "APRIORI 牙刷_一般 / 螢光黃",
+              "price": 280,
+              "url": "https://1010online.com.tw/apriori-slim-citrus-bliss",
+              "description": "創新設計和卓越性能而獲得了紅點設計獎的肯定。 「一般硬度款」與牙科專家合作設計，帶來獨特的刷牙體驗。交錯刷毛和非對稱柔軟刷頭，確保了更亮白、更健康的笑容。 所使用的材料符合FDA和ISO認證標準，是您可靠的選擇，適用於口腔護理和過敏性。",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/r/arcitrusblissm-1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/r/arcitrusblissm-2.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/r/arcitrusblissm-4.jpg"
+              ]
+            },
+            {
+              "brand": "APRIORI",
+              "name": "APRIORI 牙刷_一般 / 緋紅",
+              "price": 280,
+              "url": "https://1010online.com.tw/apriori-slim-scarlet-eclipse",
+              "description": "創新設計和卓越性能而獲得了紅點設計獎的肯定。 「一般硬度款」與牙科專家合作設計，帶來獨特的刷牙體驗。交錯刷毛和非對稱柔軟刷頭，確保了更亮白、更健康的笑容。 所使用的材料符合FDA和ISO認證標準，是您可靠的選擇，適用於口腔護理和過敏性。",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/r/arscarleteclipsem-1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/r/arscarleteclipsem-2.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/r/arscarleteclipsem-4.jpg"
+              ]
+            },
+            {
+              "brand": "APRIORI",
+              "name": "APRIORI 牙刷 - 一般 / 土耳其藍&金",
+              "price": 380,
+              "url": "https://1010online.com.tw/apriori-slim-turquoise-blue-gold",
+              "description": "創新設計和卓越性能而獲得了紅點設計獎的肯定。 「一般硬度款」與牙科專家合作設計，帶來獨特的刷牙體驗。交錯刷毛和非對稱柔軟刷頭，確保了更亮白、更健康的笑容。 所使用的材料符合FDA和ISO認證標準，是您可靠的選擇，適用於口腔護理和過敏性。",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/r/arturbluegoldrm-1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/r/arturbluegoldrm-2.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/r/arturbluegoldrm-4.jpg"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "main_category": "髮品",
+      "group": "產品類型",
+      "sub_categories": [
+        {
+          "name": "頭皮保養",
+          "href": "https://1010online.com.tw/hair/hair-product-type/scalp",
+          "products": [
+            {
+              "brand": "Christophe Robin",
+              "name": "刺梨籽油柔亮修護髮膜",
+              "price": 1980,
+              "url": "https://1010online.com.tw/christophe-robin-regenerating-mask-with-prickly-pear-oil",
+              "description": "一分鐘懶人強效護理 萃取珍貴的有機刺梨籽油、刺梨果油及旋覆花精華，能深層滋養，立即修護乾燥分岔及舒緩頭皮乾癢問題，使秀髮恢復柔亮、光澤的健康髮絲。 適合忙碌人士，提供一分鐘快速、深層修護因染燙受損的髮絲，建議於下次染燙髮前密集使用。 容量：250ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/c/r/cr12635435_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/c/r/cr_cr12635435_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/f/i/file_8_7.jpg"
+              ]
+            },
+            {
+              "brand": "uka",
+              "name": "【寶可夢聯名款】舒活頭皮按摩刷_中硬度 (新葉喵)",
+              "price": 880,
+              "url": "https://1010online.com.tw/uka-scalp-brush-kenzan-sprigatito",
+              "description": "【uka × Pokémon 聯名限定 - 新葉喵】 可愛的皮卡丘、伊布、波加曼、新葉喵，化身人氣按摩刷特別設計登場！ 與寶可夢探索頭皮保養樂趣，讓洗沐時光成為日常小確幸 精心設計掌心大小尺寸，完美刷按每個角度頭皮穴位，溫柔貼合頭皮按摩舒緩，無論是洗髮沐浴、睡前保養，還是工作小歇片刻，大人與小孩都適合，隨時紓壓放鬆 ! 適合敏弱及健康頭皮。 *聯名限量商品，每位會員每款限購2個。",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/h/q/hqdefault_26_13_1_1_1_1_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/u/k/uk_uk4582637161942_1.png",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/u/k/uk_uk4582637161942_2.png"
+              ]
+            },
+            {
+              "brand": "uka",
+              "name": "【寶可夢聯名款】舒活頭皮按摩刷_中硬度 (波加曼)",
+              "price": 880,
+              "url": "https://1010online.com.tw/uka-scalp-brush-kenzan-piplup",
+              "description": "【uka × Pokémon 聯名限定 - 波加曼】 可愛的皮卡丘、伊布、波加曼、新葉喵，化身人氣按摩刷特別設計登場！ 與寶可夢探索頭皮保養樂趣，讓洗沐時光成為日常小確幸 精心設計掌心大小尺寸，完美刷按每個角度頭皮穴位，溫柔貼合頭皮按摩舒緩，無論是洗髮沐浴、睡前保養，還是工作小歇片刻，大人與小孩都適合，隨時紓壓放鬆 ! 適合敏弱及健康頭皮。 *聯名限量商品，每位會員每款限購2個。",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/h/q/hqdefault_26_13_1_1_1_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/u/k/uk_uk4582637161935_1.png",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/u/k/uk_uk4582637161935_2.png"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "洗髮乳",
+          "href": "https://1010online.com.tw/hair/hair-product-type/shampoo",
+          "products": [
+            {
+              "brand": "rahua",
+              "name": "保濕舒緩洗髮精",
+              "price": 1250,
+              "url": "https://1010online.com.tw/rahua-hydration-shampoo-275ml",
+              "description": "榮獲美國女性雜誌allure2019年專業美妝評選！ 以Rahua油與印加果油修護脆弱受損髮，並深度保濕；熱帶水果與有機芒果糖為頭皮補足水分，並使頭髮更加強韌、充滿光澤。 適用於一般、乾燥受損、粗硬髮質。 容量：275ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/h/q/hqdefault_26_21.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/r/a/ra_raab0068_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/r/a/ra_raab0068_2_1.jpg"
+              ]
+            },
+            {
+              "brand": "AHRES",
+              "name": "AHRES Don't Move 護色洗髮露 480ml",
+              "price": 1180,
+              "url": "https://1010online.com.tw/ahres-dont-move-color-shampoo-480ml",
+              "description": "【每次洗頭髮，頭髮就會變得色彩豐富】 讓您的髮色保持美麗。徹底修復染髮損傷的頭髮內外，還能照顧嚴重受損的頭髮。 它還可以減少毛躁，讓您的頭髮光澤亮麗，色彩更加美麗。 此外，還特別針對毛躁和受損髮質。添加銀耳多醣成分則專為因紫外線與乾燥而受損的頭皮提供保護，讓頭皮與髮絲同步滋養健康。 ＊香調：以金銀花、依蘭和麝香為基底的花香麝香",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/h/ahar519.jpg"
+              ]
+            },
+            {
+              "brand": "AHRES",
+              "name": "AHRES三層豐盈洗髮露",
+              "price": 1080,
+              "url": "https://1010online.com.tw/ahres-3layers-smooth-shampoo",
+              "description": "創造有彈性、豐盈和滑順的效果 採用專利 「三層柔韌修護科技」的豐盈系列，從內而外溫柔修護，多層次鞏固受損髮絲，有效恢復髮絲韌性。打造從髮芯開始充滿光澤，同時讓髮絲柔軟，創造迷人滑順感。 容量：480ｍl",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/h/ahar122-1.jpg"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "潤髮乳",
+          "href": "https://1010online.com.tw/hair/hair-product-type/conditioner",
+          "products": [
+            {
+              "brand": "AHRES",
+              "name": "AHRES Don't Move 護色洗髮露 480ml",
+              "price": 1180,
+              "url": "https://1010online.com.tw/ahres-dont-move-color-shampoo-480ml",
+              "description": "【每次洗頭髮，頭髮就會變得色彩豐富】 讓您的髮色保持美麗。徹底修復染髮損傷的頭髮內外，還能照顧嚴重受損的頭髮。 它還可以減少毛躁，讓您的頭髮光澤亮麗，色彩更加美麗。 此外，還特別針對毛躁和受損髮質。添加銀耳多醣成分則專為因紫外線與乾燥而受損的頭皮提供保護，讓頭皮與髮絲同步滋養健康。 ＊香調：以金銀花、依蘭和麝香為基底的花香麝香",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/h/ahar519.jpg"
+              ]
+            },
+            {
+              "brand": "AHRES",
+              "name": "AHRES三層豐盈洗髮露",
+              "price": 1080,
+              "url": "https://1010online.com.tw/ahres-3layers-smooth-shampoo",
+              "description": "創造有彈性、豐盈和滑順的效果 採用專利 「三層柔韌修護科技」的豐盈系列，從內而外溫柔修護，多層次鞏固受損髮絲，有效恢復髮絲韌性。打造從髮芯開始充滿光澤，同時讓髮絲柔軟，創造迷人滑順感。 容量：480ｍl",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/h/ahar122-1.jpg"
+              ]
+            },
+            {
+              "brand": "AHRES",
+              "name": "AHRES三層修護洗髮露",
+              "price": 1080,
+              "url": "https://1010online.com.tw/ahres-3layers-repair-shampoo",
+              "description": "創造豐盈的質感和光澤 採用專利「三層柔韌修護科技」配方，從內而外溫柔修護，多層次鞏固受損髮絲，有效恢復髮絲韌性。 有效使髮質柔軟有光澤，打造從髮芯開始充滿光澤的頭髮。 容量：480ｍl",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/3/_/3_layers_repair_shampoo_2.png",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/a/h/ahar118-1.jpg"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "髮膜/護髮",
+          "href": "https://1010online.com.tw/hair/hair-product-type/hair-treatment",
+          "products": [
+            {
+              "brand": "OSAJI",
+              "name": "森活調理舒緩洗髮露",
+              "price": 980,
+              "url": "https://1010online.com.tw/osaji-tuning-smoothing-shampoo",
+              "description": "無矽靈溫和洗淨 滋養頭皮與髮絲 綿密豐潤的泡沫能有效洗淨多餘皮脂與髒污，同時維持頭皮與髮絲的水潤平衡，預防乾燥、洗後柔滑不緊繃。 無矽靈配方適合每日使用，木質花香為日常洗髮時光帶來放鬆與療癒。 ▍推薦：成分溫和，所有膚況皆適用。 關鍵成分： 中國地黃根萃取物：保濕成分，調理頭皮環境。 牡丹根萃取：保濕並促進血液循環。 胺基酸系洗淨成分：溫和洗去多餘皮脂與污垢。 容量：300ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/o/s/os_os4589522985942_01.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/o/s/os_os4589522985942_02.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/o/s/os_os4589522985942_04.jpg"
+              ]
+            },
+            {
+              "brand": "Christophe Robin",
+              "name": "海鹽舒緩頭皮潔淨霜",
+              "price": 1650,
+              "url": "https://1010online.com.tw/christophe-robin-new-cleansing-purifying-scrub-with-sea-salt",
+              "description": "深層淨化 讓頭皮輕盈呼吸 地中海天然海鹽顆粒能溫和潔淨毛囊，補充礦物質，使頭皮更健康；添加植萃保濕因子可為頭皮提供長效保濕，並舒緩頭皮搔癢。 適合中性-油性頭皮、機車族、油性頭皮屑、頭皮敏感、頭皮容易悶熱發癢者。 建議搭配海鹽舒緩潤髮凝露使用。",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/c/r/cr12635437_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/c/r/cr_cr12635437_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/f/i/file_9_1.jpg"
+              ]
+            },
+            {
+              "brand": "uka",
+              "name": "【官網獨家】淨屑止癢頭皮蘊活組",
+              "price": 3633,
+              "url": "https://1010online.com.tw/uka-anti-itch-scalp-care-set",
+              "description": "原價值最高4360，組合享88折優惠，加贈 uka 抽繩網狀旅行袋 淨屑止癢洗髮沐浴露 400ml 90%以上天然來源成分，珍貴大葉釣樟含量高達30%，可舒緩敏感乾癢，迷迭香葉油抑制頭皮屑，北非雪松調理頭皮油水平衡，山茶花萃取及布海苔深層保濕。調合薄荷、迷迭香和雪松的清凉微甜香味。 舒活頭皮按摩刷 任選 輕質矽膠材質，幫助洗髮深層清潔，按摩促進循環，完美刷按每個角度頭皮穴位。 ．頭皮保養 任選一 頭皮賦活精露 50ml 由高達93%天然成分所組成的頭皮賦活精華液，香草豆、射幹根以5分鐘溫感微循環促進頭皮循環；蘋果細胞萃取可預防並減緩頭皮老化問題；甘草酸、玻尿酸補充頭皮水分；靈芝、人蔘補氣養髮；芍藥根可去除頭皮異味，有效調理頭皮健康！ 頭皮舒緩止癢髮膜 200ml 90% 以上天然來源成分，大葉釣樟舒緩敏感乾癢，淨化頭氣，減少頭皮屑；射幹根萃取、當歸及川芎中藥配方，活化頭皮循環，養成強健髮根；金盞花萃取，調理油水平衡。調合薄荷、迷迭香和雪松的清凉微甜香味。",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/u/k/uk4582637162475_uka__2.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/u/k/uk4582637162475_uka__3_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/u/k/uka__1_3.png"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "頭髮造型",
+          "href": "https://1010online.com.tw/hair/hair-product-type/hair-styling",
+          "products": [
+            {
+              "brand": "OSAJI",
+              "name": "森活調理修復潤髮乳",
+              "price": 1080,
+              "url": "https://1010online.com.tw/osaji-tuning-repairing-conditioner",
+              "description": "精選奢華保濕成分 為受損髮絲深層潤澤 添加多種保濕成分，有效修護乾燥受損髮質，改善毛躁分岔，吹乾後依然柔潤滑順、好整理。 無矽靈配方適合每日使用，木質花香為潤髮時光帶來放鬆與療癒。 ▍推薦：髮質乾燥、受損，或日常養護髮絲者皆適用。 關鍵成分： 吸附型玻尿酸 + 銀耳多醣：長效保濕鎖水。 羥乙基尿素、月桂胺酸（植物固醇) : 內外同時修護，提升滑順度。 容量：300g",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/o/s/os_os4589522985980_01.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/o/s/os_os4589522985980_02.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/o/s/os_os4589522985980_04.jpg"
+              ]
+            },
+            {
+              "brand": "uka",
+              "name": "【官網獨家】頭皮清新沁涼組",
+              "price": 950,
+              "url": "https://1010online.com.tw/uka-scalp-refresh-summer-set-2025",
+              "description": "組合享原價86折 uka 森肽賦活沁涼洗髮露 100ml 90% 以上天然來源成分，大葉釣樟調理頭皮健康，山茶花萃取讓秀髮保濕柔亮，大米發酵液及海娜提升豐盈彈力，搭配薄荷消除擾人頭氣，帶來清新純淨感受。 適用所有髮質，特別推薦油性頭皮及細軟髮。 於炎熱天氣，或是運動後使用清爽有感 ! uka 頭皮舒緩止癢髮膜 50ml 專為敏感性頭皮設計，溫和植萃舒緩不適 大葉釣樟含量高達 50%，恢復頭皮健康平衡，淨化頭氣，減少頭皮屑；射幹根萃取、當歸及川芎中藥配方，活化頭皮循環，養成強健髮根；金盞花萃取，調理油水平衡。調合薄荷、迷迭香和雪松的清凉微甜香味。 全頭皮性質適用，尤其舒緩頭皮敏感狀況。 uka 頭皮賦活精露 2ml 高達93%天然成分所組成的頭皮賦活精華液，香草豆、射幹根以5分鐘溫感微循環促進頭皮循環；蘋果細胞萃取可預防並減緩頭皮老化問題；甘草酸、玻尿酸補充頭皮水分；靈芝、人蔘補氣養髮；芍藥根可去除頭皮異味，有效調理頭皮健康！",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/u/k/uk-scalp-refresh-summer-set-2025_uka_.png"
+              ]
+            },
+            {
+              "brand": "uka",
+              "name": "森肽賦活豐盈潤髮乳 補充包",
+              "price": 950,
+              "url": "https://1010online.com.tw/uka-izu-conditioner-for-all-hair-types-300ml",
+              "description": "【uka森肽賦活系列 全新上市】 20種胺基酸 x 伊豆半島植萃能量 修復髮芯強韌結構，維持健康秀髮的生長循環 保濕補水恢復彈力光澤 90%以上天然來源成分，保濕呵護秀髮，山茶花萃取及大米發酵液幫助深層保濕，提升強韌彈力及光澤。木質玫瑰香氣，以表現伊豆的雨水、土壤、森林和海洋。 適用所有髮質，特別推薦油性頭皮及細軟髮。 容量：300ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/u/k/uk_uk4582637160631_uka___300ml.png"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "髮梳/按摩梳",
+          "href": "https://1010online.com.tw/hair/hair-product-type/hair-brushes",
+          "products": [
+            {
+              "brand": "uka",
+              "name": "【寶可夢聯名款】舒活頭皮按摩刷_中硬度 (新葉喵)",
+              "price": 880,
+              "url": "https://1010online.com.tw/uka-scalp-brush-kenzan-sprigatito",
+              "description": "【uka × Pokémon 聯名限定 - 新葉喵】 可愛的皮卡丘、伊布、波加曼、新葉喵，化身人氣按摩刷特別設計登場！ 與寶可夢探索頭皮保養樂趣，讓洗沐時光成為日常小確幸 精心設計掌心大小尺寸，完美刷按每個角度頭皮穴位，溫柔貼合頭皮按摩舒緩，無論是洗髮沐浴、睡前保養，還是工作小歇片刻，大人與小孩都適合，隨時紓壓放鬆 ! 適合敏弱及健康頭皮。 *聯名限量商品，每位會員每款限購2個。",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/h/q/hqdefault_26_13_1_1_1_1_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/u/k/uk_uk4582637161942_1.png",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/u/k/uk_uk4582637161942_2.png"
+              ]
+            },
+            {
+              "brand": "uka",
+              "name": "【寶可夢聯名款】舒活頭皮按摩刷_中硬度 (波加曼)",
+              "price": 880,
+              "url": "https://1010online.com.tw/uka-scalp-brush-kenzan-piplup",
+              "description": "【uka × Pokémon 聯名限定 - 波加曼】 可愛的皮卡丘、伊布、波加曼、新葉喵，化身人氣按摩刷特別設計登場！ 與寶可夢探索頭皮保養樂趣，讓洗沐時光成為日常小確幸 精心設計掌心大小尺寸，完美刷按每個角度頭皮穴位，溫柔貼合頭皮按摩舒緩，無論是洗髮沐浴、睡前保養，還是工作小歇片刻，大人與小孩都適合，隨時紓壓放鬆 ! 適合敏弱及健康頭皮。 *聯名限量商品，每位會員每款限購2個。",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/h/q/hqdefault_26_13_1_1_1_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/u/k/uk_uk4582637161935_1.png",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/u/k/uk_uk4582637161935_2.png"
+              ]
+            },
+            {
+              "brand": "uka",
+              "name": "【寶可夢聯名款】舒活頭皮按摩刷_中硬度 (伊布)",
+              "price": 880,
+              "url": "https://1010online.com.tw/uka-scalp-brush-kenzan-eevee",
+              "description": "【uka × Pokémon 聯名限定 - 伊布】 可愛的皮卡丘、伊布、波加曼、新葉喵，化身人氣按摩刷特別設計登場！ 與寶可夢探索頭皮保養樂趣，讓洗沐時光成為日常小確幸 精心設計掌心大小尺寸，完美刷按每個角度頭皮穴位，溫柔貼合頭皮按摩舒緩，無論是洗髮沐浴、睡前保養，還是工作小歇片刻，大人與小孩都適合，隨時紓壓放鬆 ! 適合敏弱及健康頭皮。 *聯名限量商品，每位會員每款限購2個。",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/h/q/hqdefault_26_13_1_1_1.jpg",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/u/k/uk_uk4582637161928_1.png",
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/u/k/uk_uk4582637161928_2.png"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "補充包",
+          "href": "https://1010online.com.tw/hair/hair-product-type/refill",
+          "products": [
+            {
+              "brand": "uka",
+              "name": "淨屑止癢洗髮沐浴露 補充包",
+              "price": 1250,
+              "url": "https://1010online.com.tw/uka-anti-itch-shampoo-for-scalp-300ml",
+              "description": "明星熱銷配方升級，敏感頭皮必備 【uka森肽賦活系列 全新上市】 20種胺基酸 x 伊豆半島植萃能量 從髮芯強韌結構，維持健康秀髮的生長循環 修復頭皮防禦力，告別搔癢頭屑！ 90%以上天然來源成分，珍貴大葉釣樟含量高達30%，可舒緩敏感乾癢，迷迭香葉油抑制頭皮屑，北非雪松調理頭皮油水平衡，山茶花萃取及布海苔深層保濕。調合薄荷、迷迭香和雪松的清凉微甜香味。 適用所有髮質，特別推薦敏感及乾性頭皮。亦可作為沐浴露，幫助舒緩敏感肌膚。 容量：300ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/u/k/uk_uk4582637161584_uka___300ml.png"
+              ]
+            },
+            {
+              "brand": "uka",
+              "name": "森肽賦活沁涼洗髮露 補充包",
+              "price": 1000,
+              "url": "https://1010online.com.tw/uka-izu-shampoo-for-all-hair-types-peppermint-fresh-300ml",
+              "description": "【uka 森肽賦活系列 全新上市】 20種胺基酸 x 伊豆半島植萃能量 從髮芯強韌結構，維持健康秀髮的生長循環 薄荷清新提振，賦予髮根超強彈力 90% 以上天然來源成分，大葉釣樟調理頭皮健康，山茶花萃取讓秀髮保濕柔亮，大米發酵液及海娜提升豐盈彈力，搭配薄荷消除擾人頭氣，帶來清新純淨感受。 適用所有髮質，特別推薦油性頭皮及細軟髮。 於炎熱天氣，或是運動後使用清爽有感 ! 容量：300ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/u/k/uk_uk4582637161546_uka___300ml.png"
+              ]
+            },
+            {
+              "brand": "uka",
+              "name": "森肽賦活修護潤髮乳 補充包",
+              "price": 1000,
+              "url": "https://1010online.com.tw/uka-izu-conditioner-for-damaged-hair-300ml",
+              "description": "榮獲日本美妝雜誌評選「2024 洗護髮品第一名」！ 【uka森肽賦活系列 全新上市】 20種胺基酸 x 伊豆半島植萃能量 從髮芯強韌結構，維持健康秀髮的生長循環 最高級别修護配方撫平毛鱗片 90%以上天然來源成分，強化滋養秀髮，山茶花萃取及布海苔幫助深層保濕，賦予頭髮柔順及光澤。木質玫瑰香氣，以表現伊豆的雨水、土壤、森林和海洋。 適用受損髮質，特別推薦粗硬髮。 容量：300ml",
+              "images": [
+                "https://1010online.com.tw/media/catalog/product/cache/4a395e50c192f8363a4d636261cdfcff/u/k/uk_uk4582637161386_uka___300ml.png"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

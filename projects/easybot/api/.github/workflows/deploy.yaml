@@ -1,0 +1,173 @@
+name: Deploy to Easybot Cluster
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  # 測試階段
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    # Fake env variable for fix import error
+    env:
+      DB_HOST: "localhost"
+      DB_PORT: "5432"
+      DB_NAME: "test"
+      DB_USER: "user"
+      DB_PASSWORD: "pw"
+      MINIO_ENDPOINT: "localhost:9000"
+      MINIO_ACCESS_KEY: "fake_key"
+      MINIO_SECRET_KEY: "fake_secret"
+      JWT_SECRET: "secret"
+      JWT_REFRESH_SECRET: "secret"
+      JWT_RESET_SECRET: "secret"
+      EMAIL: "test@test.com"
+      EMAIL_APP_PASSWORD: "pw"
+      FRONTEND_URL: "http://localhost"
+      BACKEND_URL: "http://localhost"
+      RAG_BACKEND_URL: "http://localhost"
+      LINE_CLIENT_ID: "id"
+      LINE_CLIENT_SECRET: "secret"
+      GOOGLE_CLIENT_ID: "id"
+      GOOGLE_CLIENT_SECRET: "secret"
+      OAUTH_REDIRECT_URI: "uri"
+      REDIS_HOST: "localhost"
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: "pw"
+      MONGODB_HOST: "localhost"
+      MONGODB_PORT: "27017"
+      MONGODB_USER: "user"
+      MONGODB_PASSWORD: "pw"
+      MONGODB_DB_NAME: "db"
+      ENV: "test"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run Pytest
+        run: uv run pytest
+
+  deploy:
+    name: Deploy to Easybot ${{ matrix.runner }}
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [node1, node2]
+
+    runs-on: [self-hosted, "${{ matrix.runner }}"]
+    environment: prod
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Write .env file
+        run: |
+          echo "DB_HOST=${{ vars.DB_HOST }}" > .env
+          echo "DB_PORT=${{ vars.DB_PORT }}" >> .env
+          echo "DB_NAME=${{ vars.DB_NAME }}" >> .env
+          echo "DB_USER=${{ vars.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          echo "JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}" >> .env
+          echo "JWT_RESET_SECRET=${{ secrets.JWT_RESET_SECRET }}" >> .env
+          echo "EMAIL=${{ vars.EMAIL }}" >> .env
+          echo "EMAIL_APP_PASSWORD=${{ secrets.EMAIL_APP_PASSWORD }}" >> .env
+          echo "FRONTEND_URL=${{ vars.FRONTEND_URL }}" >> .env
+          echo "BACKEND_URL=${{ vars.BACKEND_URL }}" >> .env
+          echo "RAG_BACKEND_URL=${{ vars.RAG_BACKEND_URL }}" >> .env
+          echo "LINE_CLIENT_ID=${{ vars.LINE_CLIENT_ID }}" >> .env
+          echo "LINE_CLIENT_SECRET=${{ secrets.LINE_CLIENT_SECRET }}" >> .env
+          echo "GOOGLE_CLIENT_ID=${{ vars.GOOGLE_CLIENT_ID }}" >> .env
+          echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
+          echo "OAUTH_REDIRECT_URI=${{ vars.OAUTH_REDIRECT_URI }}" >> .env
+          echo "REDIS_HOST=${{ vars.REDIS_HOST }}" >> .env
+          echo "REDIS_PORT=${{ vars.REDIS_PORT }}" >> .env
+          echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
+          echo "MONGODB_HOST=${{ vars.MONGODB_HOST }}" >> .env
+          echo "MONGODB_PORT=${{ vars.MONGODB_PORT }}" >> .env
+          echo "MONGODB_USER=${{ vars.MONGODB_USER }}" >> .env
+          echo "MONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD }}" >> .env
+          echo "MONGODB_DB_NAME=${{ vars.MONGODB_DB_NAME }}" >> .env
+          echo "MINIO_ENDPOINT=${{ vars.MINIO_ENDPOINT }}" >> .env
+          echo "MINIO_ACCESS_KEY=${{ vars.MINIO_ACCESS_KEY }}" >> .env
+          echo "MINIO_SECRET_KEY=${{ secrets.MINIO_SECRET_KEY }}" >> .env
+          echo "ENV=production" >> .env
+
+      - name: Build and Deploy
+        run: |
+          # 1. 備份現有的 Image (如果有的話)
+          # 把目前的 latest 標記為 backup，取代容易出錯的 docker commit
+          if docker image inspect fastapi-app:latest > /dev/null 2>&1; then
+            echo "Backing up current image..."
+            docker tag fastapi-app:latest fastapi-app:backup
+          fi
+
+          # 2. 建置新版 Image
+          echo "Building new image..."
+          docker build -t fastapi-app:latest .
+
+          # 3. 停止並移除舊容器
+          if [ "$(docker ps -q -f name=fastapi-app)" ]; then
+            echo "Stopping old container..."
+            docker stop fastapi-app || true
+            docker rm fastapi-app || true
+          fi
+
+          # 4. 嘗試啟動新容器
+          echo "Starting new container..."
+          if docker run -d \
+            --restart=unless-stopped \
+            --name fastapi-app \
+            --env-file .env \
+            -p 8000:80 \
+            fastapi-app:latest; then
+            
+            echo "New container started. Waiting for health check..."
+            sleep 5 
+            
+            if [ "$(docker ps -q -f name=fastapi-app)" ]; then
+              echo "Deployment Successful! ✅"
+            else
+              echo "Container crashed immediately! ❌"
+              exit 1 
+            fi
+            
+          else
+            echo "Docker run failed! ❌"
+            exit 1
+          fi
+
+      - name: Rollback if Deploy Failed
+        if: failure()
+        run: |
+          echo "⚠️ Deployment failed. Rolling back to backup..."
+          docker stop fastapi-app || true
+          docker rm fastapi-app || true
+
+          if docker image inspect fastapi-app:backup > /dev/null 2>&1; then
+             echo "Restoring backup image..."
+             docker run -d \
+              --restart=unless-stopped \
+              --name fastapi-app \
+              --env-file .env \
+              -p 8000:80 \
+              fastapi-app:backup
+             echo "Rollback successful. Old version is running. 🔄"
+          else
+             echo "No backup found. System might be down. 💀"
+          fi
