@@ -10,7 +10,7 @@
 - `-py`：Python 腳本
 - `-firmware`：嵌入式韌體
 
-資料夾：`homework/` 課堂作業、`web/` 小型練習、`projects/` 完整作品、`projects/transuai-legacy/` 微服務版 TransuAI、`projects/easybot-legacy/` EasyBot（各一套 8 個 repo）。全部已停止維護。
+資料夾：`homework/` 課堂作業、`web/` 小型練習、`projects/` 完整作品、`projects/transuai-legacy/` 微服務版 TransuAI、`projects/easybot-legacy/` EasyBot（各一套 8 個 repo）、`projects/easybot/` 第二代 EasyBot（6 個 repo）。全部已停止維護。
 
 ## projects/
 
@@ -65,6 +65,23 @@ EasyBot：LINE 聊天機器人建置平台，微服務架構，2024–2025 研�
 | `module-service` | 功能模組管理 | FastAPI, PostgreSQL | ModuleService_API |
 
 > `infra` 原本 manifest 內含 JWT secret、Azure key、Google OAuth secret、DB 密碼與 TLS 憑證；併入前已用 git filter-repo 將歷史中所有值替換為 `REDACTED_*`，`secret.yaml` 從歷史移除。
+
+## projects/easybot/
+
+EasyBot 第二代：無程式碼 LINE 聊天機器人平台（電商、預約、RAG 客服），碩士論文作品，2024–2026。接續 `easybot-legacy`，平台 API 合併為單一服務，RAG 獨立部署。原本在 EasyBotService 組織下 6 個 repo，各自歷史保留。口試簡報見 `api/document/口試簡報.pptx`。
+
+2026-11 起由學弟接手當論文，後續開發在原 repo；這裡是交接時的快照，不再同步。
+
+| 資料夾 | 內容 | 技術 | 原 repo |
+|---|---|---|---|
+| `api` | 平台核心 API：Bot、電商、預約、知識庫、使用者 | FastAPI, PostgreSQL, MongoDB, Redis, MinIO | EasyBot_API |
+| `rag-api` | RAG 客服問答、混合搜尋、評估腳本 | FastAPI, LangChain, Qdrant, MongoDB, Ragas | EasyBot_RAG_API |
+| `web` | 商家端後台 | React + TypeScript + Vite + MUI | EasyBot_Web |
+| `liff` | 顧客端 LIFF App | React + TypeScript + Vite + Tailwind, LINE LIFF | EasyBot_LIFF |
+| `database` | PostgreSQL schema、function、procedure、部署腳本 | PL/pgSQL, Python | EasyBot_Database |
+| `testing` | 壓力測試 | k6 + TypeScript | EasyBot_Testing |
+
+> `api`、`web` 併入前已用 git filter-repo 清過歷史：移除內部文件與本機開發憑證、遮蔽截圖中的敏感值，commit hash 因此與原 repo 不同。
 
 ## homework/
 
