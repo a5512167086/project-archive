@@ -68,7 +68,9 @@ EasyBot：LINE 聊天機器人建置平台，微服務架構，2024–2025 研�
 
 ## projects/easybot/
 
-EasyBot 第二代：無程式碼 LINE 聊天機器人平台（電商、預約、RAG 客服），碩士論文作品，2024–2026。接續 `easybot-legacy`，平台 API 合併為單一服務，RAG 獨立部署。原本在 EasyBotService 組織下 6 個 repo，各自歷史保留。口試簡報見 `api/document/口試簡報.pptx`。
+EasyBot 第二代：無程式碼 LINE 聊天機器人平台（電商、預約、RAG 客服），碩士論文作品，2024–2026。接續 `easybot-legacy`，平台 API 合併為單一服務，RAG 獨立部署。原本在 EasyBotService 組織下 6 個 repo，各自歷史保留。
+
+論文：[整合檢索增強生成與混合搜尋之無程式碼聊天機器人平台](https://doi.org/10.6837/ncnu202600127)。口試簡報見 `api/document/口試簡報.pptx`。
 
 2026-11 起由學弟接手當論文，後續開發在原 repo；這裡是交接時的快照，不再同步。
 
